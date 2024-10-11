@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@strapi/design-system": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.11",
     "lodash": "^4.17.21",
     "next": "14.2.15",
     "react": "^18",
