@@ -1,10 +1,20 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --color-neutral100: #f6f6f9;
+  --color-neutral150: #eaeaef;
+  --color-neutral600: #666687;
+  --color-neutral800: #32324d;
+  --color-neutral1000: #181826;
+  --color-primary100: #f0f0ff;
+  --color-primary200: #d9d8ff;
+  --color-primary600: #4945ff;
+  --color-success100: #eafbe7;
+  --color-success200: #c6f0c2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,8 +25,8 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #212134;
+  background: linear-gradient(45deg, #ffffff, #f2f4fa);
   font-family: Arial, Helvetica, sans-serif;
 }
 
