@@ -1,0 +1,4 @@
+.greenBg {
+  background-color: var(--color-success100);
+  border: 1px solid var(--color-success200);
+}

@@ -10,7 +10,7 @@ import {
   lightTheme,
 } from '@strapi/design-system';
 
-import { ShapesArray } from './headerShapes';
+import { ShapesArray } from './components/headerShapes';
 
 import LayoutStyle from '@/app/css/layout.module.css';
 
