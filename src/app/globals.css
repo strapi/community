@@ -1,4 +1,3 @@
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -6,6 +5,7 @@
   --color-neutral150: #eaeaef;
   --color-neutral600: #666687;
   --color-neutral800: #32324d;
+  --color-neutral900: #212134;
   --color-neutral1000: #181826;
   --color-primary100: #f0f0ff;
   --color-primary200: #d9d8ff;

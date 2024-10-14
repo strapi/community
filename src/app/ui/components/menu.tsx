@@ -1,12 +1,14 @@
-'use client';
-
 import Link from 'next/link';
 import styles from '@/app/css/layout.module.css';
 
 import { Checkbox, Grid, Flex, Typography } from '@strapi/design-system';
 import { ActionCard } from '@/app/ui/components/actionCard';
 
-export function Menu() {
+import { fetchStatistics } from '@/app/lib/data';
+
+export async function Menu() {
+  const { plugins, providers } = await fetchStatistics();
+
   return (
     <>
       <Grid.Item col={3} direction={'column'} alignItems={'flex-start'}>
@@ -16,8 +18,8 @@ export function Menu() {
           alignItems={'flex-start'}
           gap={'8px'}
         >
-          <Checkbox>Plugins (x,xxx)</Checkbox>
-          <Checkbox>Providers (yyy)</Checkbox>
+          <Checkbox>Plugins ({plugins.toLocaleString()})</Checkbox>
+          <Checkbox>Providers ({providers.toLocaleString()})</Checkbox>
         </Flex>
         <Flex
           className={styles.categories}
