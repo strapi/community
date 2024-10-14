@@ -1,4 +1,3 @@
-'use client';
 import styles from '@/app/css/layout.module.css';
 import Link from 'next/link';
 import { ExternalLink } from '@strapi/icons';

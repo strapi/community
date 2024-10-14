@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "packages",
+  "info": {
+    "singularName": "package",
+    "pluralName": "packages",
+    "displayName": "Packages",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "content": {
+      "type": "blocks",
+      "required": true
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "screenshots": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "stars": {
+      "type": "integer"
+    },
+    "downloads": {
+      "type": "biginteger"
+    },
+    "npm_package": {
+      "type": "string"
+    },
+    "git_repository": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    }
+  }
+}

@@ -6,7 +6,7 @@ import { ActionCard } from '@/app/ui/components/actionCard';
 
 import { fetchStatistics } from '@/app/lib/data';
 
-export async function Menu() {
+export default async function Menu() {
   const { plugins, providers } = await fetchStatistics();
 
   return (

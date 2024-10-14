@@ -1,3 +1,5 @@
+'use client';
+
 import { Plugin } from '@/app/definitions';
 
 import { useState } from 'react';
@@ -19,7 +21,7 @@ import {
 
 import styles from '@/app/css/homepage.module.css';
 
-export function PluginList({ plugins }: { plugins: Array<Plugin> }) {
+export default function PluginList({ plugins }: { plugins: Array<Plugin> }) {
   const [value, setValue] = useState('alphabetical');
 
   return (

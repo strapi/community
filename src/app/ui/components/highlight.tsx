@@ -1,10 +1,10 @@
-import { HighlightCard } from './highlightCard';
+import HighlightCard from './highlightCard';
 
 import { Flex } from '@strapi/design-system';
 
 import styles from '@/app/css/homepage.module.css';
 
-export function Highlight({ plugins }: { plugins: Array<Plugin> }) {
+export default function Highlight({ plugins }: { plugins: Array<Plugin> }) {
   return (
     <div>
       <h2 className={styles.title}>Highlighted plugins</h2>

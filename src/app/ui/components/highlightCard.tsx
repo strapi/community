@@ -9,7 +9,7 @@ import styles from '@/app/css/homepage.module.css';
 
 import SealCheck from './seal-check';
 
-export function HighlightCard({
+export default function HighlightCard({
   name = 'App Version',
   description = 'Simple plugin for Strapi 4 to show the app version from package.json in the Settings page',
   stars = 1993,
