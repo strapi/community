@@ -58,6 +58,24 @@
     },
     "version": {
       "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "plugin",
+        "provider"
+      ],
+      "required": true,
+      "default": "plugin"
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "packages"
+    },
+    "verified": {
+      "type": "boolean"
     }
   }
 }

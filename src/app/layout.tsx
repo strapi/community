@@ -8,8 +8,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning={true}>
-      <body className={`antialiased`}>
+    <html lang='en'>
+      <body className={`antialiased`} suppressHydrationWarning>
         <Layout>{children}</Layout>
       </body>
     </html>

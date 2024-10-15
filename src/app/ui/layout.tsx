@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import {
   DesignSystemProvider,
@@ -8,7 +10,7 @@ import {
   lightTheme,
 } from '@strapi/design-system';
 
-import { ShapesArray } from './components/headerShapes';
+import { ShapesArray } from '@/app/ui/layout/headerShapes';
 
 import LayoutStyle from '@/app/css/layout.module.css';
 

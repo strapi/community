@@ -7,7 +7,7 @@ import { Flex } from '@strapi/design-system';
 import { Star, Download } from '@strapi/icons';
 import styles from '@/app/css/homepage.module.css';
 
-import SealCheck from './seal-check';
+import SealCheck from '../shared/seal-check';
 
 export default function HighlightCard({
   name = 'App Version',
@@ -15,6 +15,36 @@ export default function HighlightCard({
   stars = 1993,
   downloads = 10,
 }: Plugin) {
+  // Downloads
+  let displayedDownloads: string = downloads.toString();
+  let displayShortcutLetterDownloads: string = '';
+
+  if (downloads >= 1000000) {
+    displayedDownloads = Math.round(downloads / 1000000).toString();
+    displayShortcutLetterDownloads = 'M';
+  } else if (downloads >= 1000) {
+    const modulo = downloads % 1000;
+    const toFixed = modulo ? 1 : 0;
+
+    displayedDownloads = Number.parseFloat(downloads / 1000)
+      .toFixed(toFixed)
+      .toString();
+    displayShortcutLetterDownloads = 'k';
+  }
+
+  // Stars
+  let displayedStars: string = stars.toString();
+  let displayShortcutLetterStars: string = '';
+
+  if (stars >= 1000) {
+    const modulo = stars % 1000;
+    const toFixed = modulo ? 1 : 0;
+    displayedStars = Number.parseFloat(stars / 1000)
+      .toFixed(toFixed)
+      .toString();
+    displayShortcutLetterStars = 'k';
+  }
+
   return (
     <Link href={'http://google.com'} className={`${styles.highlightCard}`}>
       <Flex direction={'column'} alignItems={'flex-start'} gap={'8px'}>
@@ -24,7 +54,12 @@ export default function HighlightCard({
           alignItems={'flex-start'}
           width={'100%'}
         >
-          <Image src='/logo-plugin.png' width={60} height={60} alt='Logo' />
+          <Image
+            src='/logo-plugin.png'
+            width={60}
+            height={60}
+            alt='Logo Plugin'
+          />
           <Flex
             direction={'row'}
             className={styles.highlightCardInfo}
@@ -32,15 +67,22 @@ export default function HighlightCard({
           >
             <span>
               <Flex direction={'row'} alignItems={'center'} gap={'4px'}>
-                <Image src='/logo-github.svg' width={12} height={12} />
+                <Image
+                  src='/logo-github.svg'
+                  width={12}
+                  height={12}
+                  alt='Logo GitHub'
+                />
                 <Star width={12} height={12} color={'#E4A33F'} />
-                {stars}
+                {displayedStars}
+                {displayShortcutLetterStars}
               </Flex>
             </span>
             <span>
               <Flex direction={'row'} alignItems={'center'} gap={'4px'}>
                 <Download width={12} height={12} color={'#666687'} />
-                {downloads}
+                {displayedDownloads}
+                {displayShortcutLetterDownloads}
               </Flex>
             </span>
           </Flex>

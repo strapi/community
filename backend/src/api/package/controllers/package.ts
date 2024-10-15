@@ -11,10 +11,13 @@ export default factories.createCoreController(
       try {
         const countPackages = await strapi
           .documents('api::package.package')
-          .count({ status: 'published' });
+          .count(ctx.query);
 
-        console.log(countPackages);
-        ctx.body = countPackages;
+        ctx.body = {
+          data: {
+            count: countPackages,
+          },
+        };
       } catch (e) {
         ctx.body = e;
       }

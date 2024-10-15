@@ -70,12 +70,12 @@ export function ShapesArray() {
   }
 
   return [
-    ...arrayShapes.map((shape) => {
+    ...arrayShapes.map((shape, index) => {
       const randomOpacity = opacity[Math.floor(Math.random() * opacity.length)];
       const randomRotate = rotate[Math.floor(Math.random() * rotate.length)];
 
       return (
-        <Shape shape={shape} opacity={randomOpacity} rotate={randomRotate} />
+        <Shape key={`shape${index}`} shape={shape} opacity={randomOpacity} rotate={randomRotate} />
       );
     }),
   ];

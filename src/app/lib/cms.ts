@@ -1,7 +1,7 @@
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL;
 const BEARER_TOKEN = process.env.NEXT_PUBLIC_BEARER_TOKEN;
 
-const jsonToLHS = (obj: JSON, parentKey: string = ''): string => {
+const jsonToLHS = (obj: Object, parentKey: string = ''): string => {
   let result = [];
 
   for (let key in obj) {
@@ -22,7 +22,11 @@ const jsonToLHS = (obj: JSON, parentKey: string = ''): string => {
   return result.join('&');
 };
 
-const query = (path: string, filters?: JSON, authenticated: boolean = true) => {
+const query = (
+  path: string,
+  filters?: Object,
+  authenticated: boolean = true
+) => {
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
 
@@ -38,6 +42,7 @@ const query = (path: string, filters?: JSON, authenticated: boolean = true) => {
     headers,
   })
     .then((response) => response.json())
+    .then((response) => response.data)
     .catch((error) => new Error(error));
 };
 
@@ -56,10 +61,10 @@ const query = (path: string, filters?: JSON, authenticated: boolean = true) => {
 // 	}
 // };
 
-export function fetchMany(type: string, filters: JSON) {
+export function fetchMany(type: string, filters?: Object) {
   return query(`${CMS_URL}/api/${type}`, filters);
 }
 
-export function countMany(type: string, filters?: JSON) {
+export function countMany(type: string, filters?: Object) {
   return query(`${CMS_URL}/api/${type}/count`, filters);
 }
