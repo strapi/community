@@ -12,6 +12,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/strapi-client": "workspace:*",
     "@strapi/blocks-react-renderer": "^1.0.1",
     "@strapi/client": "^1.6.0",
     "@strapi/design-system": "^2.0.0",
