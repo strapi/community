@@ -11,6 +11,11 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
   "attributes": {
     "username": {
       "type": "string",
@@ -70,10 +75,6 @@
       "relation": "oneToMany",
       "target": "api::package.package",
       "mappedBy": "author"
-    },
-    "slug": {
-      "type": "uid",
-      "targetField": "username"
     },
     "trusted_partner": {
       "type": "boolean"

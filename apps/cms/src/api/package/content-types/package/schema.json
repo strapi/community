@@ -10,7 +10,11 @@
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
   "attributes": {
     "name": {
       "type": "string",
@@ -75,11 +79,6 @@
     },
     "verified": {
       "type": "boolean"
-    },
-    "slug": {
-      "type": "uid",
-      "targetField": "name",
-      "required": false
     },
     "author": {
       "type": "relation",

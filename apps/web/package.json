@@ -7,11 +7,13 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
+    "typegen": "next typegen",
     "lint": "biome check --fix .",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@strapi/blocks-react-renderer": "^1.0.1",
+    "@strapi/client": "^1.6.0",
     "@strapi/design-system": "^2.0.0",
     "@strapi/icons": "^2.0.0",
     "@types/lodash": "^4.17.21",

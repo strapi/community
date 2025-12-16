@@ -196,7 +196,7 @@ export default function Plugin(data: Package) {
           >
             <p>Last update</p>
             <p className={styles.valueItem}>
-              <TimeAgo date={pkg.updatedAt} formatter='iso8601' />
+              <TimeAgo date={pkg.updatedAt} />
             </p>
           </Flex>
           <Flex

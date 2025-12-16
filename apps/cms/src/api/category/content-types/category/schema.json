@@ -10,14 +10,14 @@
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
   "attributes": {
     "name": {
       "type": "string"
-    },
-    "slug": {
-      "type": "uid",
-      "targetField": "name"
     }
   }
 }

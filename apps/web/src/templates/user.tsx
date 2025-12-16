@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { User } from '@/app/definitions';
-import { fetchUser } from '@/lib/data';
 
 import SealCheck from '@/ui/shared/seal-check';
 import { ActionCard } from '@/components/ActionCard/actionCard';
@@ -25,19 +24,14 @@ import 'swiper/css/pagination';
 import TableList from '@/components/List/tableList';
 import TrustedCard from '@/components/TrustedCard/trustedCard';
 
-export default function Page({
-  params,
+export default function Author({
+  data,
 }: {
-  params: {
-    slug: string;
-  };
+  data: User
 }) {
   const router = useRouter();
-  const { data = [], isLoading }: { data: User[]; isLoading: boolean } =
-    fetchUser('users', params.slug);
 
-  const user = data[0] || {};
-  const packages = (user?.packages || []).filter(
+  const packages = (data?.packages || []).filter(
     (pkg) => pkg.publishedAt != null
   );
 
@@ -50,10 +44,6 @@ export default function Page({
       ? current
       : latest;
   }, packages[0]);
-
-  if (isLoading) {
-    return <p>Loading user...</p>;
-  }
 
   return (
     <>
@@ -89,8 +79,8 @@ export default function Page({
             />
             <Flex width={'100%'} direction={'column'} alignItems={'flex-start'}>
               <h1 className={styles.pluginTitle}>
-                {user.username}{' '}
-                {user.trusted_partner ? (
+                {data.username}{' '}
+                {data.trusted_partner ? (
                   <SealCheck
                     className={styles.sealcheck}
                     fill={'#4945FF'}
@@ -107,13 +97,13 @@ export default function Page({
                 )}
               </h1>
               <p className={styles.plugingShortDescription}>
-                {user.description}
+                {data.description}
               </p>
             </Flex>
           </Flex>
         </Flex>
         <Flex width={'100%'}>
-          {user.trusted_partner ? <TrustedCard /> : ''}
+          {data.trusted_partner ? <TrustedCard /> : ''}
         </Flex>
         <Flex width={'100%'} className={stylesPluginList.pluginListElement}>
           <TableList items={packages} />
