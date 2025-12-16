@@ -1,4 +1,4 @@
-import Homepage from '@/app/ui/homepage';
+import Homepage from '@/ui/homepage';
 
 export default async function Page({
   params,

@@ -2,15 +2,15 @@
 
 import { Suspense } from 'react';
 
-import { MenuSkeleton } from '@/app/ui/skeletons';
+import { MenuSkeleton } from '@/ui/skeletons';
 
-import Menu from '@/app/components/Menu/menu';
-import Highlight from '@/app/components/HighLight/highlight';
-import PluginList from '@/app/components/List/pluginList';
+import Menu from '@/components/Menu/menu';
+import Highlight from '@/components/HighLight/highlight';
+import PluginList from '@/components/List/pluginList';
 
 import { Grid, Flex } from '@strapi/design-system';
 
-import BackLink from '@/app/components/BackLink/backLink';
+import BackLink from '@/components/BackLink/backLink';
 
 export default function Homepage({
   type,

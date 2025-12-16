@@ -9,21 +9,21 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { User } from '@/app/definitions';
-import { fetchUser } from '@/app/lib/data';
+import { fetchUser } from '@/lib/data';
 
-import SealCheck from '@/app/ui/shared/seal-check';
-import { ActionCard } from '@/app/components/ActionCard/actionCard';
-import BackLink from '@/app/components/BackLink/backLink';
+import SealCheck from '@/ui/shared/seal-check';
+import { ActionCard } from '@/components/ActionCard/actionCard';
+import BackLink from '@/components/BackLink/backLink';
 
-import styles from '@/app/css/plugin.module.css';
-import stylesPluginList from '@/app/components/List/styles.module.css';
+import styles from '@/css/plugin.module.css';
+import stylesPluginList from '@/components/List/styles.module.css';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import TableList from '@/app/components/List/tableList';
-import TrustedCard from '@/app/components/TrustedCard/trustedCard';
+import TableList from '@/components/List/tableList';
+import TrustedCard from '@/components/TrustedCard/trustedCard';
 
 export default function Page({
   params,

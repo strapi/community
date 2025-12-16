@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import styles from '@/app/css/layout.module.css';
+import styles from '@/css/layout.module.css';
 
 import qs from 'qs';
 import { Checkbox, Grid, Flex } from '@strapi/design-system';
-import { ActionCard } from '@/app/components/ActionCard/actionCard';
+import { ActionCard } from '@/components/ActionCard/actionCard';
 
-import { fetchCategories, countPackages } from '@/app/lib/data';
+import { fetchCategories, countPackages } from '@/lib/data';
 import { useEffect, useState } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { Category } from '@/app/definitions';

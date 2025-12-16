@@ -11,9 +11,9 @@ import {
 } from '@strapi/design-system';
 import { Upload } from '@strapi/icons';
 
-import { ShapesArray } from '@/app/components/Shapes/headerShapes';
+import { ShapesArray } from '@/components/Shapes/headerShapes';
 
-import LayoutStyle from '@/app/css/layout.module.css';
+import LayoutStyle from '@/css/layout.module.css';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';

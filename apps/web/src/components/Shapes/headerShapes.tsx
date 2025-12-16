@@ -2,7 +2,7 @@
 
 import { shuffle } from 'lodash';
 import { useEffect, useState } from 'react';
-import styles from '@/app/css/layout.module.css';
+import styles from '@/css/layout.module.css';
 
 const Shape = ({
   shape,

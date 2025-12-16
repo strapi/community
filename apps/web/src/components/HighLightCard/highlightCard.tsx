@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import { Package } from '@/app/definitions';
 
-import { formatDownloads, formatStars } from '@/app/ui/utils/numbers';
+import { formatDownloads, formatStars } from '@/ui/utils/numbers';
 
 import { Flex } from '@strapi/design-system';
 import { Star, Download } from '@strapi/icons';

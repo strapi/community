@@ -1,11 +1,11 @@
 import { Package } from '@/app/definitions';
 
-import HighlightCard from '@/app/components/HighLightCard/highlightCard';
+import HighlightCard from '@/components/HighLightCard/highlightCard';
 
 import { Flex } from '@strapi/design-system';
 
 import styles from './styles.module.css';
-import { fetchPackagesHighlighted } from '@/app/lib/data';
+import { fetchPackagesHighlighted } from '@/lib/data';
 
 export default function Highlight() {
   const {

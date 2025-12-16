@@ -12,13 +12,13 @@ import { ExternalLink, Download, Star, ArrowLeft } from '@strapi/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import SealCheck from '@/app/ui/shared/seal-check';
-import { ActionCard } from '@/app/components/ActionCard/actionCard';
-import BackLink from '@/app/components/BackLink/backLink';
+import SealCheck from '@/ui/shared/seal-check';
+import { ActionCard } from '@/components/ActionCard/actionCard';
+import BackLink from '@/components/BackLink/backLink';
 
-import Carousel from '@/app/components/Carousel/carousel';
+import Carousel from '@/components/Carousel/carousel';
 
-import styles from '@/app/css/plugin.module.css';
+import styles from '@/css/plugin.module.css';
 import { Package } from '@/app/definitions';
 
 export default function Plugin(data: Package) {

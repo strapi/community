@@ -1,6 +1,6 @@
 import './globals.css';
 
-import Layout from './ui/layout';
+import Layout from '../ui/layout';
 
 export default function RootLayout({
   children,

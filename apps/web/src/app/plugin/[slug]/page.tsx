@@ -1,9 +1,9 @@
 import { Package } from '@/app/definitions';
-import { fetchPackage } from '@/app/lib/data';
+import { fetchPackage } from '@/lib/data';
 
-import Plugin from '@/app/ui/plugin';
+import Plugin from '@/ui/plugin';
 
-import { fetcher } from '@/app/lib/cms';
+import { fetcher } from '@/lib/cms';
 
 export async function generateStaticParams() {
   const packages = await fetcher('/api/packages');

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-import { formatDownloads, formatStars } from '@/app/ui/utils/numbers';
+import { formatDownloads, formatStars } from '@/ui/utils/numbers';
 
 import { Button, Table, Tbody, Tr, Td, Flex } from '@strapi/design-system';
 import { Star, Download } from '@strapi/icons';

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { fetchPackages, countPackages } from '@/app/lib/data';
+import { fetchPackages, countPackages } from '@/lib/data';
 
 import TableList from './tableList';
 

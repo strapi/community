@@ -1,6 +1,6 @@
 import styles from './styles.module.css';
 
-import SealCheck from '@/app/ui/shared/seal-check';
+import SealCheck from '@/ui/shared/seal-check';
 
 export default function TrustedCard() {
   return (
