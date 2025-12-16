@@ -1,0 +1,105 @@
+.pluginListRow {
+  font-size: 14px;
+  transition: all ease-in 0.25s;
+
+  &:hover {
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-primary200);
+    background-color: var(--color-primary100);
+  }
+
+  & .pluginListRowMain {
+    white-space: nowrap; /* Prevents text from wrapping to a new line */
+    overflow: hidden; /* Hides overflow text */
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  & .pluginListRowTitle {
+    display: inline;
+    font-weight: 600;
+  }
+
+  & .pluginListRowIcon {
+    max-width: none;
+  }
+}
+
+.pluginListElement {
+  width: 100%;
+
+  & > div:first-of-type {
+    width: 100%;
+    border: 0px;
+    box-shadow: 0 1px 4px var(--color-neutral150);
+
+    & > div:first-of-type {
+      & > div:first-of-type {
+        padding: 0;
+      }
+    }
+
+    & .pluginListElementFirstItem {
+      width: 50px;
+      padding: 15px 0px 15px 15px;
+    }
+
+    & .pluginListElementLastItem {
+      padding: 15px 15px 15px 0;
+      text-align: end;
+      width: 100px;
+    }
+
+    & .pluginListElementStats {
+      padding: 0;
+      text-align: end;
+      width: 105px;
+      font-size: 10px;
+    }
+  }
+
+  & .pluginListTable {
+    width: 100%;
+    table-layout: fixed;
+  }
+}
+
+.searchBar {
+  width: 100%;
+}
+
+.searchForm {
+  width: 100%;
+}
+
+.searchFormElement {
+  & > div:first-of-type {
+    width: 100%;
+    box-shadow: 0 1px 4px var(--color-neutral150);
+
+    & > div:first-of-type {
+      & > div:first-of-type {
+        width: 100%;
+        border: 0px;
+        outline: none;
+        outline-offset: 0px;
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.filterFormElement {
+  width: 100%;
+  & > div:first-of-type {
+    width: 100%;
+    border: 0px;
+    outline: none;
+    outline-offset: 0px;
+    box-shadow: 0 1px 4px var(--color-neutral150);
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

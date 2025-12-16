@@ -1,0 +1,87 @@
+.backLink {
+  margin: 24px 0 0 0;
+  color: var(--color-primary600);
+  font-size: 14px;
+  vertical-align: middle;
+  text-decoration: none;
+
+  & .backLinkIcon {
+    margin-right: 8px;
+    vertical-align: sub;
+  }
+}
+
+.pluginTitle {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.plugingShortDescription {
+  font-size: 14px;
+  color: var(--color-neutral600);
+}
+
+.detailsTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.leftSection {
+  margin-top: 30px;
+}
+
+.rightSection {
+  margin: 30px 0 20px;
+}
+
+.paragraph {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-neutral600);
+}
+
+.listItem {
+  height: 40px;
+  font-size: 14px;
+  padding: 0 4px;
+  color: var(--color-neutral600);
+  border-bottom: 1px solid var(--color-neutral150);
+
+  & .authorName {
+    color: var(--color-primary600);
+    font-weight: 600;
+    text-decoration: none;
+  }
+}
+
+.linkDetail {
+  text-decoration: none;
+  color: var(--color-primary600);
+
+  & .actionCardIcon {
+    margin-bottom: 0px;
+    vertical-align: text-bottom;
+  }
+}
+
+.valueItem {
+  color: var(--color-neutral800);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.backLink {
+  color: var(--color-primary600);
+  font-size: 14px;
+  vertical-align: middle;
+  text-decoration: none;
+
+  & .backLinkIcon {
+    margin-right: 8px;
+    vertical-align: sub;
+  }
+}
+
+.actionCard {
+  margin-top: 32px;
+}

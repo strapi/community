@@ -8,7 +8,8 @@ The Marketplace project consists of:
 
 - A Next.js web application
 - A Strapi application for content management
-- A n8n application for automation
+- An n8n application for automation
+- A Meilisearch instance for searching
 
 ## Getting Started
 
@@ -16,6 +17,7 @@ The Marketplace project consists of:
 
 - Node.js >=22
 - pnpm 10.12.1 or later
+- Docker Desktop
 
 ### Installation
 
@@ -38,9 +40,6 @@ pnpm test
 
 # Lint all code
 pnpm lint
-
-# Format all code
-pnpm format
 
 # Type checking
 pnpm check-types
