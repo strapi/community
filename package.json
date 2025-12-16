@@ -1,20 +1,23 @@
 {
-  "name": "marketplace-2.0",
+  "name": "strapi-marketplace",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "check-types": "turbo check-types",
+    "update-dependencies": "pnpm --recursive --interactive --latest update",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
+    "@biomejs/biome": "2.2.4",
+    "husky": "9.1.7",
     "turbo": "^2.6.3",
     "typescript": "5.9.2"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.18.1",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

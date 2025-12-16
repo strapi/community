@@ -1,135 +1,140 @@
-# Turborepo starter
+# Strapi Marketplace
 
-This Turborepo starter is maintained by the Turborepo core team.
+This monorepo contains all the code for Strapi's online Marketplace. It's structured as a pnpm workspace with multiple applications and shared packages.
 
-## Using this example
+## Project Overview
 
-Run the following command:
+The Marketplace project consists of:
 
-```sh
-npx create-turbo@latest
+- A Next.js web application
+- A Strapi application for content management
+- A n8n application for automation
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >=22
+- pnpm 10.12.1 or later
+
+### Installation
+
+```bash
+# Install all dependencies
+pnpm install
 ```
 
-## What's inside?
+### Development
 
-This Turborepo includes the following packages/apps:
+```bash
+# Start all applications in development mode
+pnpm dev
 
-### Apps and Packages
+# Build all applications
+pnpm build
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+# Run all tests
+pnpm test
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+# Lint all code
+pnpm lint
 
-### Utilities
+# Format all code
+pnpm format
 
-This Turborepo has some additional tools already setup for you:
+# Type checking
+pnpm check-types
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Update dependencies interactively
+pnpm update-dependencies
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## Monorepo Structure
+
+The monorepo is organized into two main directories:
+
+### Apps
+
+The `apps/` directory contains standalone applications:
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+apps/
+├── cms/               # Strapi 5 application
+├── web/               # Next.js 15 web application
+├── search/            # Meilisearch instance
+├── automation/               # n8n instance
 ```
 
-### Develop
+### Packages
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+The `packages/` directory contains shared libraries and configuration:
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+packages/
+└── typescript-config/ # Shared TypeScript configurations
 ```
 
-### Remote Caching
+## Applications
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### Web App (`apps/web`)
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+The main Next.js 15 application using the App Router pattern. This is the primary customer-facing application.
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+See [Web App README](./apps/web/README.md) for more details.
 
-```
-cd my-turborepo
+### CMS (`apps/cms`)
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+A Strapi 5 application used to provide content for the Next.js application.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+See [CMS README](./apps/cms/README.md) for more details.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### Search (`apps/search`)
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+A Meilisearch instance that is consumes content from Strapi and serves as a search index for the front-end.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+See [CMS README](./apps/search/README.md) for more details.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+### Automation (`apps/automation`)
 
-## Useful Links
+A n8n instance that is used for automation of plugin publication, reviews etc.
 
-Learn more about the power of Turborepo:
+See [CMS README](./apps/automation/README.md) for more details.
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## Packages
+
+### TypeScript Config (`packages/typescript-config`)
+
+Shared TypeScript configurations for various project types (Next.js, Strapi, etc.).
+
+## Technology Stack
+
+- **Package Management**: pnpm workspaces
+- **Build System**: Turborepo
+- **Front-end Framework**: React 19 with Next.js 15
+- **CMS**: Strapi 5
+- **Search Index**: Meilisearch
+- **Styling**: Strapi Design System
+- **Testing**: Vitest for unit tests, Playwright for end-to-end tests
+- **Linting/formatting**: Biome for consistent code style
+- **Components**: Custom components based on shadcn/ui pattern
+- **State Management**: Tanstack Query for server state
+- **Type Checking**: TypeScript for static type checking
+- **Dependency Management**: pnpm for package management and workspace management
+- **Version Control**: Git for source code management
+- **CI/CD**: Github Actions for continuous integration and deployment
+
+### Project Conventions
+
+- Use TypeScript for all code
+- Follow the existing folder structure
+- Add tests for all new functionality 
+
+## Workspace Commands
+
+The monorepo uses Turborepo to manage the build pipeline:
+
+- `pnpm dev`: Start all applications in development mode
+- `pnpm build`: Build all applications
+- `pnpm lint`: Run linting on all projects
+- `pnpm test`: Run tests for all projects
+- `pnpm check-types`: Check TypeScript types across the workspace
