@@ -1,8 +1,8 @@
 export default ({ env }) => ({
-  'webtools': {
+  webtools: {
     enabled: true,
     config: {
-      website_url: env('WEBSITE_URL', 'http://localhost:3000'),
-    }
+      website_url: env("WEBSITE_URL", "http://localhost:3000"),
+    },
   },
 });

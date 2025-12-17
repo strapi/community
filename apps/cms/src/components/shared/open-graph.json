@@ -17,9 +17,7 @@
       "required": true
     },
     "ogImage": {
-      "allowedTypes": [
-        "images"
-      ],
+      "allowedTypes": ["images"],
       "type": "media",
       "multiple": false
     },

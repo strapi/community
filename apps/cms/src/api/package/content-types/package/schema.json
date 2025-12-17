@@ -32,21 +32,13 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
+      "allowedTypes": ["images", "files", "videos", "audios"]
     },
     "screenshots": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images",
-        "files"
-      ]
+      "allowedTypes": ["images", "files"]
     },
     "stars": {
       "type": "integer"
@@ -67,10 +59,7 @@
       "type": "enumeration",
       "required": true,
       "default": "plugin",
-      "enum": [
-        "plugin",
-        "provider"
-      ]
+      "enum": ["plugin", "provider"]
     },
     "categories": {
       "type": "relation",
