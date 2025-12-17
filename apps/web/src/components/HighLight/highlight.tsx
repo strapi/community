@@ -1,24 +1,11 @@
-import { Package } from '@/app/definitions';
-
 import HighlightCard from '@/components/HighLightCard/highlightCard';
 
 import { Flex } from '@strapi/design-system';
 
 import styles from './styles.module.css';
-import { fetchPackagesHighlighted } from '@/lib/data';
 
 export default function Highlight() {
-  const {
-    data: packagesData,
-    isLoading: isLoadingPackages,
-  }: { data: { data?: Package[] }; isLoading: boolean } =
-    fetchPackagesHighlighted(4);
-
-  const packages = packagesData?.data || [];
-
-  if (isLoadingPackages) {
-    return <p></p>;
-  }
+  const packages = [{}];
 
   return (
     <div>

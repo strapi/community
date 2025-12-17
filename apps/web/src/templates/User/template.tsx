@@ -8,7 +8,6 @@ import { Download } from '@strapi/icons';
 
 import Image from 'next/image';
 
-import SealCheck from '@/ui/shared/seal-check';
 import { ActionCard } from '@/components/ActionCard/actionCard';
 import BackLink from '@/components/BackLink/backLink';
 
@@ -77,18 +76,6 @@ const UserTemplate = ({ document }: Props) => {
             <Flex width={'100%'} direction={'column'} alignItems={'flex-start'}>
               <h1 className={styles.pluginTitle}>
                 {document.username}{' '}
-                {document.trusted_partner && (
-                  <SealCheck
-                    fill={'#4945FF'}
-                    width={18}
-                    height={18}
-                    style={{
-                      verticalAlign: 'middle',
-                      marginLeft: '4px',
-                      marginBottom: '5px',
-                    }}
-                  />
-                )}
               </h1>
               <p className={styles.plugingShortDescription}>
                 {document.description}

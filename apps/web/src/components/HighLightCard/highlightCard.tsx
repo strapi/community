@@ -3,13 +3,12 @@ import Image from 'next/image';
 
 import { Package } from '@/app/definitions';
 
-import { formatDownloads, formatStars } from '@/ui/utils/numbers';
+import { formatDownloads, formatStars } from '@/utils/numbers';
 
 import { Flex } from '@strapi/design-system';
 import { Star, Download } from '@strapi/icons';
 import styles from './styles.module.css';
 
-import SealCheck from '../../ui/shared/seal-check';
 
 export default function HighlightCard({
   name = 'App Version',
@@ -60,17 +59,6 @@ export default function HighlightCard({
         </Flex>
         <h3 className={styles.highlightCardTitle}>
           {name}
-          <SealCheck
-            className={styles.sealcheck}
-            fill={'#4945FF'}
-            width={14}
-            height={14}
-            style={{
-              verticalAlign: 'middle',
-              marginLeft: '4px',
-              marginBottom: '2px',
-            }}
-          />
         </h3>
         <p className={styles.highlightCardText}>{description}</p>
       </Flex>

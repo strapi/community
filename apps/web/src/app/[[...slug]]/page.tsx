@@ -1,4 +1,6 @@
 import { findUrlAliases, findPage } from '@/lib/webtools';
+import { homeMetadata } from '@/templates/Home/metadata';
+import HomePage from '@/templates/Home/page';
 import { packageMetadata } from '@/templates/Package/metadata';
 import PackagePage from '@/templates/Package/page';
 import { userMetadata } from '@/templates/User/metadata';
@@ -24,6 +26,9 @@ const Router: NextPage<PageProps<'/[[...slug]]'>> = async ({ params }) => {
     }
     case 'plugin::users-permissions.user': {
       return <UserPage id={page.id} />
+    }
+    case 'api::home.home': {
+      return <HomePage />
     }
     default: {
       return `No template for content type ${page.contentType}`;
@@ -70,6 +75,9 @@ export const generateMetadata = async ({ params }: PageProps<'/[[...slug]]'>): P
     }
     case 'plugin::users-permissions.user': {
       return userMetadata(page.id);
+    }
+    case 'api::home.home': {
+      return homeMetadata();
     }
     default: {
       return {};

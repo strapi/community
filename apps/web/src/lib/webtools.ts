@@ -1,4 +1,4 @@
-import type { Modules } from "@strapi/types";
+import type { Modules, UID } from "@strapi/types";
 import qs from "qs";
 import { notFound } from "next/navigation";
 import { client } from "@/lib/strapi";
@@ -17,7 +17,7 @@ type QueryParams = API.BaseQueryParams & {
   path: string;
 };
 
-export const findPage = async (query: QueryParams): Promise<Modules.Documents.AnyDocument & { contentType: string }> => {
+export const findPage = async (query: QueryParams): Promise<Modules.Documents.AnyDocument & { contentType: UID.ContentType }> => {
   const params = qs.stringify(query);
   return await client.fetch(`/webtools/router?${params}`)
     .then((response) => response.json())

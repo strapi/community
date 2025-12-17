@@ -5,10 +5,8 @@ import qs from 'qs';
 import { Checkbox, Grid, Flex } from '@strapi/design-system';
 import { ActionCard } from '@/components/ActionCard/actionCard';
 
-import { fetchCategories, countPackages } from '@/lib/data';
 import { useEffect, useState } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { Category } from '@/app/definitions';
 
 export default function Menu({
   activeCategory = '',
@@ -19,23 +17,6 @@ export default function Menu({
     plugin: true,
     provider: true,
   });
-
-  const { data: categoriesData, isLoading: isLoadingCategories } =
-    fetchCategories();
-
-  const { data: pluginCountData, isLoading: isLoadingCountPlugins } =
-    countPackages({
-      type: 'plugin',
-    });
-
-  const { data: providerCountData, isLoading: isLoadingCountProviders } =
-    countPackages({
-      type: 'provider',
-    });
-
-  const categories = categoriesData?.data || [];
-  const countPlugins = pluginCountData?.data?.count || 0;
-  const countProviders = providerCountData?.data?.count || 0;
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -93,8 +74,7 @@ export default function Menu({
             }
             checked={checkedType.plugin}
           >
-            Plugins ({isLoadingCountPlugins ? 0 : countPlugins.toLocaleString()}
-            )
+            Plugins (0)
           </Checkbox>
           <Checkbox
             onCheckedChange={(checked) =>
@@ -102,8 +82,7 @@ export default function Menu({
             }
             checked={checkedType.provider}
           >
-            Providers (
-            {isLoadingCountProviders ? 0 : countProviders.toLocaleString()})
+            Providers (0)
           </Checkbox>
         </Flex>
         <Flex
@@ -112,27 +91,7 @@ export default function Menu({
           alignItems={'flex-start'}
           gap={'4px'}
         >
-          {isLoadingCategories ? (
-            <p>Loading category</p>
-          ) : (
-            categories.map((category: Category) => {
-              const isActive = category.slug === activeCategory;
-
-              return (
-                <Link
-                  key={`cat_${category.slug}`}
-                  className={
-                    isActive
-                      ? styles.category + ' ' + styles.activeCategory
-                      : styles.category
-                  }
-                  href={`/category/${category.slug}?${qs.stringify({ type: searchParams.getAll('type') }, { arrayFormat: 'repeat' })}`}
-                >
-                  {category.name}
-                </Link>
-              );
-            })
-          )}
+          
         </Flex>
         <Flex
           className={styles.actionCards}

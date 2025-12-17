@@ -10,7 +10,6 @@ import { ExternalLink, Download, Star } from '@strapi/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import SealCheck from '@/ui/shared/seal-check';
 import { ActionCard } from '@/components/ActionCard/actionCard';
 import BackLink from '@/components/BackLink/backLink';
 
@@ -62,16 +61,6 @@ const PackageTemplate = ({ document }: Props) => {
             <Flex width={'100%'} direction={'column'} alignItems={'flex-start'}>
               <h1 className={styles.pluginTitle}>
                 {document.name}{' '}
-                <SealCheck
-                  fill={'#4945FF'}
-                  width={18}
-                  height={18}
-                  style={{
-                    verticalAlign: 'middle',
-                    marginLeft: '4px',
-                    marginBottom: '5px',
-                  }}
-                />
               </h1>
               <p className={styles.plugingShortDescription}>
                 {document.description}

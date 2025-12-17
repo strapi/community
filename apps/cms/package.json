@@ -18,6 +18,7 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
+    "@strapi-community/plugin-seo": "^2.1.1",
     "@strapi/plugin-cloud": "5.32.0",
     "@strapi/plugin-users-permissions": "5.32.0",
     "@strapi/strapi": "5.32.0",
