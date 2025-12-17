@@ -1,5 +1,7 @@
 import { findUrlAliases, findPage } from '@/lib/webtools';
+import { packageMetadata } from '@/templates/Package/metadata';
 import PackagePage from '@/templates/Package/page';
+import { userMetadata } from '@/templates/User/metadata';
 import UserPage from '@/templates/User/page';
 import type { Metadata, NextPage } from 'next';
 
@@ -56,19 +58,22 @@ export const generateMetadata = async ({ params }: PageProps<'/[[...slug]]'>): P
     path,
     status: 'published',
     fields: ['documentId'],
-    populate: {
-      seo: true,
-    }
   });
 
   if (!page) {
     return {};
   }
 
-  return {
-    title: page.seo?.metaTitle,
-    description: page.seo?.metaDescription,
-    keywords: page.seo?.keywords,
+  switch (page.contentType) {
+    case 'api::package.package': {
+      return packageMetadata(page.documentId);
+    }
+    case 'plugin::users-permissions.user': {
+      return userMetadata(page.id);
+    }
+    default: {
+      return {};
+    }
   }
 }
 
