@@ -1,8 +1,15 @@
+const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL;
+const IsDEV = CMS_URL.startsWith("http://localhost");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    dangerouslyAllowLocalIP: IsDEV,
     remotePatterns: [
-      new URL('http://localhost:1337/**'),
+      {
+        protocol: IsDEV ? "http" : "https",
+        hostname: new URL(CMS_URL).hostname,
+      },
     ],
   },
 };

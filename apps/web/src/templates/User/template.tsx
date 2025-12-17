@@ -1,14 +1,12 @@
 'use client';
 
+import * as React from 'react';
 import TimeAgo from 'react-timeago';
 
 import { Grid, Flex } from '@strapi/design-system';
 import { Download } from '@strapi/icons';
 
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-import { User } from '@/app/definitions';
 
 import SealCheck from '@/ui/shared/seal-check';
 import { ActionCard } from '@/components/ActionCard/actionCard';
@@ -23,24 +21,23 @@ import 'swiper/css/pagination';
 
 import TableList from '@/components/List/tableList';
 import TrustedCard from '@/components/TrustedCard/trustedCard';
+import type { UserPageData } from '@/templates/User/page';
 
-export default function Author({
-  data,
-}: {
-  data: User
-}) {
-  const router = useRouter();
+type Props = {
+  document: UserPageData;
+}
 
-  const packages = (data?.packages || []).filter(
+const UserTemplate = ({ document }: Props) => {
+  const packages = (document.packages || []).filter(
     (pkg) => pkg.publishedAt != null
   );
 
   const aggregatedDownloads = packages
     .map((pkg) => pkg.downloads)
-    .reduce((sum, downloads) => sum + parseInt(downloads), 0);
+    .reduce((sum, downloads) => sum + parseInt(String(downloads)), 0);
 
   const mostRecentItem = packages.reduce((latest, current) => {
-    return new Date(current.updatedAt) > new Date(latest.updatedAt)
+    return new Date(current.updatedAt!) > new Date(latest?.updatedAt!)
       ? current
       : latest;
   }, packages[0]);
@@ -79,10 +76,9 @@ export default function Author({
             />
             <Flex width={'100%'} direction={'column'} alignItems={'flex-start'}>
               <h1 className={styles.pluginTitle}>
-                {data.username}{' '}
-                {data.trusted_partner ? (
+                {document.username}{' '}
+                {document.trusted_partner && (
                   <SealCheck
-                    className={styles.sealcheck}
                     fill={'#4945FF'}
                     width={18}
                     height={18}
@@ -92,18 +88,16 @@ export default function Author({
                       marginBottom: '5px',
                     }}
                   />
-                ) : (
-                  ''
                 )}
               </h1>
               <p className={styles.plugingShortDescription}>
-                {data.description}
+                {document.description}
               </p>
             </Flex>
           </Flex>
         </Flex>
         <Flex width={'100%'}>
-          {data.trusted_partner ? <TrustedCard /> : ''}
+          {document.trusted_partner ? <TrustedCard /> : ''}
         </Flex>
         <Flex width={'100%'} className={stylesPluginList.pluginListElement}>
           <TableList items={packages} />
@@ -129,7 +123,7 @@ export default function Author({
             <Flex direction={'row'} gap={'4px'}>
               <Download width={12} height={12} color={'#666687'} />
               <p className={styles.valueItem}>
-                {parseInt(aggregatedDownloads).toLocaleString()}
+                {aggregatedDownloads.toLocaleString()}
               </p>
             </Flex>
           </Flex>
@@ -151,14 +145,13 @@ export default function Author({
             <p>Last update</p>
             <p className={styles.valueItem}>
               <TimeAgo
-                date={mostRecentItem.updatedAt}
-                formatter='iso8601'
+                date={mostRecentItem?.updatedAt!}
               />
             </p>
           </Flex>
 
           <ActionCard
-            className={styles.actionCard}
+            className={styles.actionCard!}
             title='Contribute'
             color='green'
             type='plugin'
@@ -170,3 +163,5 @@ export default function Author({
     </>
   );
 }
+
+export default UserTemplate;

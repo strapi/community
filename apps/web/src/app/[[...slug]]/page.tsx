@@ -1,11 +1,16 @@
-import { findOnePage, findPages } from '@/lib/cms';
-import Plugin from '@/templates/package';
-import Author from '@/templates/user';
+import { findUrlAliases, findPage } from '@/lib/webtools';
+import PackagePage from '@/templates/Package/page';
+import UserPage from '@/templates/User/page';
 import type { Metadata, NextPage } from 'next';
 
 const Router: NextPage<PageProps<'/[[...slug]]'>> = async ({ params }) => {
   const { slug } = await params;
-  const page = await findOnePage(`/${slug?.join('/') || ''}`);
+  const path = `/${slug?.join('/') || ''}`;
+  const page = await findPage({
+    path,
+    status: 'published',
+    fields: ['documentId'],
+  });
 
   if (!page) {
     return null;
@@ -13,10 +18,10 @@ const Router: NextPage<PageProps<'/[[...slug]]'>> = async ({ params }) => {
 
   switch (page.contentType) {
     case 'api::package.package': {
-      return <Plugin data={page} />
+      return <PackagePage documentId={page.documentId} />
     }
     case 'plugin::users-permissions.user': {
-      return <Author data={page} />
+      return <UserPage id={page.id} />
     }
     default: {
       return `No template for content type ${page.contentType}`;
@@ -25,16 +30,16 @@ const Router: NextPage<PageProps<'/[[...slug]]'>> = async ({ params }) => {
 };
 
 export async function generateStaticParams() {
-  const pages = await findPages();
-  const removeEmptyElements = (array: any) => array.filter((a: any) => a);
+  const pages = await findUrlAliases();
+  const removeEmptyElements = (array: string[]) => array.filter((a) => a);
 
   if (!pages) {
     return [];
   }
 
   return pages
-    .map((page: any) => {
-      if (!page?.url_path) {
+    .map((page) => {
+      if (!page.url_path) {
         return null;
       }
       return {
@@ -46,7 +51,15 @@ export async function generateStaticParams() {
 
 export const generateMetadata = async ({ params }: PageProps<'/[[...slug]]'>): Promise<Metadata> => {
   const { slug } = await params;
-  const page = await findOnePage(`/${slug?.join('/') || ''}`);
+  const path = `/${slug?.join('/') || ''}`;
+  const page = await findPage({
+    path,
+    status: 'published',
+    fields: ['documentId'],
+    populate: {
+      seo: true,
+    }
+  });
 
   if (!page) {
     return {};

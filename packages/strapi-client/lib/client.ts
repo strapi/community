@@ -36,7 +36,7 @@ type CollectionOptions = {
 type SingleCollectionOptions = CollectionOptions;
 type ClientCollectionOptions = CollectionOptions;
 
-type GetQueryParams<TContentTypeUID extends UID.ContentType = UID.ContentType> = Modules.Documents.Params.Pick<
+export type GetQueryParams<TContentTypeUID extends UID.ContentType = UID.ContentType> = Modules.Documents.Params.Pick<
   TContentTypeUID,
   keyof API.BaseQueryParams
 >;
@@ -76,16 +76,28 @@ export const createTypedStrapiClient = (config: Config) => {
 
       return {
         find: <const TParams extends GetQueryParams<TContentTypeUID>>(queryParams?: TParams) => {
-          return clientCollection.find(queryParams as API.BaseQueryParams) as Promise<DocumentResponseCollection<Modules.Documents.Result<TContentTypeUID, TParams>>>;
+          return clientCollection.find(queryParams as API.BaseQueryParams) as
+            TContentTypeUID extends 'plugin::users-permissions.user' ?
+              Promise<Modules.Documents.Result<TContentTypeUID, TParams>[]> :
+              Promise<DocumentResponseCollection<Modules.Documents.Result<TContentTypeUID, TParams>>>;
         },
         findOne: <const TParams extends GetQueryParams<TContentTypeUID>>(documentID: string, queryParams?: TParams) => {
-          return clientCollection.findOne(documentID, queryParams as API.BaseQueryParams) as Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
+          return clientCollection.findOne(documentID, queryParams as API.BaseQueryParams) as
+            TContentTypeUID extends 'plugin::users-permissions.user' ?
+              Promise<Modules.Documents.Result<TContentTypeUID, TParams>> :
+              Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
         },
         create: <const TParams extends GetQueryParams<TContentTypeUID>>(document: Partial<GetAttributes<TContentTypeUID>>, queryParams?: TParams) => {
-          return clientCollection.create(document, queryParams as API.BaseQueryParams) as Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
+          return clientCollection.create(document, queryParams as API.BaseQueryParams) as
+            TContentTypeUID extends 'plugin::users-permissions.user' ?
+              Promise<Modules.Documents.Result<TContentTypeUID, TParams>> :
+              Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
         },
         update: <const TParams extends GetQueryParams<TContentTypeUID>>(documentID: string, document: Partial<GetAttributes<TContentTypeUID>>, queryParams?: TParams) => {
-          return clientCollection.update(documentID, document, queryParams as API.BaseQueryParams) as Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
+          return clientCollection.update(documentID, document, queryParams as API.BaseQueryParams) as
+            TContentTypeUID extends 'plugin::users-permissions.user' ?
+              Promise<Modules.Documents.Result<TContentTypeUID, TParams>> :
+              Promise<DocumentResponse<Modules.Documents.Result<TContentTypeUID, TParams>>>;
         },
         delete: <const TParams extends GetQueryParams<TContentTypeUID>>(documentID: string, queryParams?: TParams): Promise<void> => {
           return clientCollection.delete(documentID, queryParams as API.BaseQueryParams)
