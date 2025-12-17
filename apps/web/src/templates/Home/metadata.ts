@@ -1,17 +1,17 @@
-import { client } from "@/lib/strapi";
 import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
+import { client } from "@/lib/strapi";
 
 export const homeMetadata = async (): Promise<Metadata> => {
-  const document = await client.single('api::home.home').find({
-    fields: ['documentId'],
+  const document = await client.single("api::home.home").find({
+    fields: ["documentId"],
     populate: {
       seo: {
         populate: {
           openGraph: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   const { seo: metadata } = document.data;
@@ -30,17 +30,21 @@ export const homeMetadata = async (): Promise<Metadata> => {
     alternates: {
       canonical: metadata.canonicalURL,
     },
-    openGraph: metadata.openGraph ? {
-      title: metadata.openGraph.ogTitle || '',
-      description: metadata.openGraph.ogDescription || '',
-      url: metadata.openGraph.ogUrl || '',
-      type: metadata.openGraph.ogType as OpenGraphType || 'website',
-      images: metadata.openGraph.ogImage ? [
-        {
-          url: metadata.openGraph.ogImage.url,
-          alt: metadata.openGraph.ogImage.alternativeText,
+    openGraph: metadata.openGraph
+      ? {
+          title: metadata.openGraph.ogTitle || "",
+          description: metadata.openGraph.ogDescription || "",
+          url: metadata.openGraph.ogUrl || "",
+          type: (metadata.openGraph.ogType as OpenGraphType) || "website",
+          images: metadata.openGraph.ogImage
+            ? [
+                {
+                  url: metadata.openGraph.ogImage.url,
+                  alt: metadata.openGraph.ogImage.alternativeText,
+                },
+              ]
+            : undefined,
         }
-      ] : undefined,
-    } : {}
-  }
+      : {},
+  };
 };

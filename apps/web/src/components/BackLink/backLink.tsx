@@ -1,8 +1,7 @@
-import Link from 'next/link';
+import { ArrowLeft } from "@strapi/icons";
+import Link from "next/link";
 
-import { ArrowLeft } from '@strapi/icons';
-
-import styles from './styles.module.css';
+import styles from "./styles.module.css";
 
 export default function BackLink({ to }: { to: string }) {
   return (

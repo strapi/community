@@ -27,7 +27,6 @@
 .highlightCardText {
   font-size: 14px;
   color: var(--color-neutral600);
-  overflow: hidden; /* Hide overflow text */
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;

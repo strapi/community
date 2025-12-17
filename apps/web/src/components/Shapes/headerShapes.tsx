@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { shuffle } from 'lodash';
-import { useEffect, useState } from 'react';
-import styles from '@/css/layout.module.css';
+import { shuffle } from "lodash";
+import { useEffect, useState } from "react";
+import styles from "./shapes.module.css";
 
 const Shape = ({
   shape,
@@ -13,11 +13,11 @@ const Shape = ({
   opacity?: number;
   rotate?: number;
 }) => {
-  if (shape === 'lShape') {
+  if (shape === "lShape") {
     return (
       <span
-        className={`${styles[shape]} ${styles['opacity' + opacity]} ${
-          styles['rotate' + rotate]
+        className={`${styles[shape]} ${styles[`opacity${opacity}`]} ${
+          styles[`rotate${rotate}`]
         }`}
       >
         <span></span>
@@ -28,8 +28,8 @@ const Shape = ({
 
   return (
     <span
-      className={`${styles[shape]} ${styles['opacity' + opacity]} ${
-        styles['rotate' + rotate]
+      className={`${styles[shape]} ${styles[`opacity${opacity}`]} ${
+        styles[`rotate${rotate}`]
       }`}
     ></span>
   );
@@ -37,7 +37,7 @@ const Shape = ({
 
 export function ShapesArray() {
   const [windowInnerWidth, setWindowInnerWidth] = useState(0);
-  const shapes = shuffle(['circle', 'triangle', 'lShape', 'semiCircle']);
+  const shapes = shuffle(["circle", "triangle", "lShape", "semiCircle"]);
   const opacity = [5, 10, 20, 30];
   const rotate = [0, 90, 180, 270];
 
@@ -56,7 +56,7 @@ export function ShapesArray() {
     const pickShape = (
       arrayShapes: Array<string>,
       prevIndex: number,
-      shape?: string
+      shape?: string,
     ): string => {
       if (!shape || arrayShapes[prevIndex] === shape) {
         const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -71,14 +71,14 @@ export function ShapesArray() {
     }
 
     return [
-      ...arrayShapes.map((shape, index) => {
+      ...arrayShapes.map((shape, key) => {
         const randomOpacity =
           opacity[Math.floor(Math.random() * opacity.length)];
         const randomRotate = rotate[Math.floor(Math.random() * rotate.length)];
 
         return (
           <Shape
-            key={`shape${index}`}
+            key={`${key}_${shape}`}
             shape={shape}
             opacity={randomOpacity}
             rotate={randomRotate}

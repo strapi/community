@@ -1,47 +1,51 @@
-import styles from './styles.module.css';
-import Link from 'next/link';
-import { ExternalLink } from '@strapi/icons';
-import { Button } from '@strapi/design-system';
+import { Button } from "@strapi/design-system";
+import { ExternalLink } from "@strapi/icons";
+import Link from "next/link";
+import styles from "./styles.module.css";
 
-export function ActionCard({
-  children,
-  type = 'plugin',
-  title,
-  color,
-  link,
-  className,
-}: Readonly<{
-  children: React.ReactNode;
-  className: string;
-  type: string;
+type BaseProps = {
+  type: "neutral" | "success" | "danger";
   title: string;
-  color: string;
-  link?: string;
-}>) {
-  if (type === 'missing') {
+  text: string;
+  className?: string;
+};
+
+type LinkProps = BaseProps & {
+  link: string;
+};
+
+type ButtonProps = BaseProps & {
+  button: {
+    link: string;
+    text: string;
+  };
+};
+
+type Props = LinkProps | ButtonProps;
+
+export function ActionCard({ title, text, className, type, ...props }: Props) {
+  if ("link" in props) {
     return (
       <Link
-        href={link}
-        className={`${styles.actionCard} ${styles[color + 'Bg']} ${className}`}
+        href={props.link}
+        className={`${styles.actionCard} ${styles[type]} ${className}`}
       >
         <ExternalLink className={styles.actionCardIcon} />
         <h3 className={styles.actionCardTitle}>{title}</h3>
-        <p className={styles.actionCardText}>{children}</p>
+        <p className={styles.actionCardText}>{text}</p>
       </Link>
     );
   }
 
   return (
-    <div
-      className={`${styles.actionCard} ${styles[color + 'Bg']} ${className}`}
-    >
+    <div className={`${styles.actionCard} ${styles[type]} ${className}`}>
       <h3 className={styles.actionCardTitle}>{title}</h3>
-      <p className={styles.actionCardText}>{children}</p>
+      <p className={styles.actionCardText}>{text}</p>
       <Button
         className={styles.actionCardButton}
-        variant={type === 'plugin' ? 'success-light' : 'danger-light'}
+        onClick={() => window.open(props.button.link, "_blank")}
       >
-        {type === 'plugin' ? 'Submit a plugin' : 'Report an issue'}
+        {props.button.text}
       </Button>
     </div>
   );

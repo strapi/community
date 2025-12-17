@@ -57,49 +57,4 @@
       font-size: 10px;
     }
   }
-
-  & .pluginListTable {
-    width: 100%;
-    table-layout: fixed;
-  }
-}
-
-.searchBar {
-  width: 100%;
-}
-
-.searchForm {
-  width: 100%;
-}
-
-.searchFormElement {
-  & > div:first-of-type {
-    width: 100%;
-    box-shadow: 0 1px 4px var(--color-neutral150);
-
-    & > div:first-of-type {
-      & > div:first-of-type {
-        width: 100%;
-        border: 0px;
-        outline: none;
-        outline-offset: 0px;
-        box-shadow: none;
-      }
-    }
-  }
-}
-
-.filterFormElement {
-  width: 100%;
-  & > div:first-of-type {
-    width: 100%;
-    border: 0px;
-    outline: none;
-    outline-offset: 0px;
-    box-shadow: 0 1px 4px var(--color-neutral150);
-
-    &:hover {
-      cursor: pointer;
-    }
-  }
 }
