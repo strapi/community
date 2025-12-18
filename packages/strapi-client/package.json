@@ -6,6 +6,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "lint": "biome check --fix .",
+    "check-types": "tsc --noEmit"
+  },
   "main": "lib/client.ts",
   "dependencies": {
     "@strapi/client": "^1.6.0",

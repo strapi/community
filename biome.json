@@ -18,7 +18,10 @@
       "next": "recommended"
     },
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "useJsxKeyInIterable": "error"
+      }
     }
   },
   "javascript": {

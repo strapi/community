@@ -1,15 +1,15 @@
 import type { Metadata, NextPage } from "next";
-import { findPage, findUrlAliases } from "@/lib/webtools";
-import { categoryMetadata } from "@/templates/Category/metadata";
-import CategoryPage from "@/templates/Category/page";
-import { homeMetadata } from "@/templates/Home/metadata";
-import HomePage from "@/templates/Home/page";
-import { packageMetadata } from "@/templates/Package/metadata";
-import PackagePage from "@/templates/Package/page";
-import { templateMetadata } from "@/templates/Template/metadata";
-import TemplatePage from "@/templates/Template/page";
-import { userMetadata } from "@/templates/User/metadata";
-import UserPage from "@/templates/User/page";
+import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
+import { categoryMetadata } from "@/features/cms/pages/Category/metadata";
+import CategoryPage from "@/features/cms/pages/Category/page";
+import { homeMetadata } from "@/features/cms/pages/Home/metadata";
+import HomePage from "@/features/cms/pages/Home/page";
+import { packageMetadata } from "@/features/cms/pages/Package/metadata";
+import PackagePage from "@/features/cms/pages/Package/page";
+import { templateMetadata } from "@/features/cms/pages/Template/metadata";
+import TemplatePage from "@/features/cms/pages/Template/page";
+import { userMetadata } from "@/features/cms/pages/User/metadata";
+import UserPage from "@/features/cms/pages/User/page";
 
 const Router: NextPage<PageProps<"/[[...slug]]">> = async ({ params }) => {
   const { slug } = await params;
