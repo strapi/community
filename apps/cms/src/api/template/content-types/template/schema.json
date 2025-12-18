@@ -1,11 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "packages",
+  "collectionName": "templates",
   "info": {
-    "singularName": "package",
-    "pluralName": "packages",
-    "displayName": "Packages",
-    "description": ""
+    "singularName": "template",
+    "pluralName": "templates",
+    "displayName": "Templates"
   },
   "options": {
     "draftAndPublish": true
@@ -27,34 +26,18 @@
       "required": true
     },
     "description": {
-      "type": "text",
-      "required": true
-    },
-    "icon": {
-      "type": "media",
-      "multiple": false,
-      "required": false,
-      "allowedTypes": ["images", "files", "videos", "audios"]
+      "type": "text"
     },
     "git_repository": {
       "type": "string"
     },
-    "package_location": {
+    "preview_link": {
       "type": "string"
-    },
-    "type": {
-      "type": "enumeration",
-      "required": true,
-      "default": "plugin",
-      "enum": ["plugin", "provider", "sdk", "tool"]
     },
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::category.category"
-    },
-    "readme": {
-      "type": "richtext"
     },
     "owner": {
       "type": "relation",
@@ -65,22 +48,16 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "plugin::users-permissions.user",
-      "mappedBy": "packages"
+      "mappedBy": "templates"
+    },
+    "readme": {
+      "type": "richtext"
     },
     "labels": {
       "type": "component",
       "component": "shared.labels",
       "repeatable": false,
       "required": true
-    },
-    "install_command": {
-      "type": "string"
-    },
-    "github_stars": {
-      "type": "string"
-    },
-    "npm_downloads": {
-      "type": "string"
     }
   }
 }

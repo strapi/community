@@ -6,7 +6,7 @@
     "description": "",
     "singularName": "user",
     "pluralName": "users",
-    "displayName": "Partner"
+    "displayName": "Users"
   },
   "options": {
     "draftAndPublish": false
@@ -70,17 +70,32 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "packages": {
+    "url_alias": {
       "type": "relation",
       "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile",
+      "mappedBy": "owner"
+    },
+    "templates": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::template.template",
+      "inversedBy": "maintainers"
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "manyToMany",
       "target": "api::package.package",
-      "mappedBy": "author"
+      "inversedBy": "maintainers"
     },
-    "trusted_partner": {
+    "trusted": {
       "type": "boolean"
-    },
-    "description": {
-      "type": "text"
     }
   }
 }

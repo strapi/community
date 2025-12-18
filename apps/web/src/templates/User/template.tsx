@@ -23,12 +23,14 @@ type Props = {
 };
 
 const UserTemplate = ({ document }: Props) => {
+  const { profile } = document;
+
   const packages = (document.packages || []).filter(
     (pkg) => pkg.publishedAt != null,
   );
 
   const aggregatedDownloads = packages
-    .map((pkg) => pkg.downloads)
+    .map((pkg) => pkg.npm_downloads)
     .reduce((sum, downloads) => sum + parseInt(String(downloads), 10), 0);
 
   const mostRecentItem = packages.reduce((latest, current) => {
@@ -70,16 +72,14 @@ const UserTemplate = ({ document }: Props) => {
               alt="Logo plugin"
             />
             <Flex width={"100%"} direction={"column"} alignItems={"flex-start"}>
-              <h1 className={styles.pluginTitle}>{document.username} </h1>
+              <h1 className={styles.pluginTitle}>{profile?.full_name} </h1>
               <p className={styles.plugingShortDescription}>
-                {document.description}
+                {profile?.headline}
               </p>
             </Flex>
           </Flex>
         </Flex>
-        <Flex width={"100%"}>
-          {document.trusted_partner ? <TrustedCard /> : ""}
-        </Flex>
+        <Flex width={"100%"}>{document.trusted ? <TrustedCard /> : ""}</Flex>
         <Flex width={"100%"} className={stylesPluginList.pluginListElement}>
           <Table colCount={3} rowCount={10} className={styles.pluginListTable}>
             <Tbody>
@@ -88,9 +88,9 @@ const UserTemplate = ({ document }: Props) => {
                   key={pkg.id}
                   name={pkg.name || ""}
                   description={pkg.description || ""}
-                  downloads={Number(pkg.downloads) || 0}
+                  downloads={Number(pkg.npm_downloads) || 0}
                   link={pkg.url_alias?.[0]?.url_path || ""}
-                  stars={pkg.stars || 0}
+                  stars={Number(pkg.github_stars) || 0}
                   icon={{
                     url: pkg.icon?.url || "/default-plugin-icon.png",
                     alternativeText: pkg.icon?.alternativeText || "icon",

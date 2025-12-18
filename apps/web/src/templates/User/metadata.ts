@@ -5,11 +5,13 @@ export const userMetadata = async (id: number): Promise<Metadata> => {
   const document = await client
     .collection("plugin::users-permissions.user")
     .findOne(String(id), {
-      fields: ["description", "username"],
+      populate: {
+        profile: true,
+      }
     });
 
   return {
-    title: document.username,
-    description: document.description,
+    title: document.profile?.full_name,
+    description: document.profile?.bio,
   };
 };

@@ -1,9 +1,13 @@
 import type { Metadata, NextPage } from "next";
 import { findPage, findUrlAliases } from "@/lib/webtools";
+import { categoryMetadata } from "@/templates/Category/metadata";
+import CategoryPage from "@/templates/Category/page";
 import { homeMetadata } from "@/templates/Home/metadata";
 import HomePage from "@/templates/Home/page";
 import { packageMetadata } from "@/templates/Package/metadata";
 import PackagePage from "@/templates/Package/page";
+import { templateMetadata } from "@/templates/Template/metadata";
+import TemplatePage from "@/templates/Template/page";
 import { userMetadata } from "@/templates/User/metadata";
 import UserPage from "@/templates/User/page";
 
@@ -26,6 +30,12 @@ const Router: NextPage<PageProps<"/[[...slug]]">> = async ({ params }) => {
     }
     case "plugin::users-permissions.user": {
       return <UserPage id={page.id} />;
+    }
+    case "api::template.template": {
+      return <TemplatePage documentId={page.documentId} />;
+    }
+    case "api::category.category": {
+      return <CategoryPage documentId={page.documentId} />;
     }
     case "api::home.home": {
       return <HomePage />;
@@ -77,6 +87,12 @@ export const generateMetadata = async ({
     }
     case "plugin::users-permissions.user": {
       return userMetadata(page.id);
+    }
+    case "api::template.template": {
+      return templateMetadata(page.documentId);
+    }
+    case "api::category.category": {
+      return categoryMetadata(page.documentId);
     }
     case "api::home.home": {
       return homeMetadata();

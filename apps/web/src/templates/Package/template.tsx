@@ -1,11 +1,11 @@
 "use client";
 
-import { BlocksRenderer } from "@strapi/blocks-react-renderer";
 import { Flex, Grid } from "@strapi/design-system";
 import { Download, ExternalLink, Star } from "@strapi/icons";
 import Image from "next/image";
 
 import Link from "next/link";
+import Markdown from "react-markdown";
 import TimeAgo from "react-timeago";
 import { ActionCard } from "@/components/ActionCard/actionCard";
 import BackLink from "@/components/BackLink/backLink";
@@ -17,7 +17,7 @@ type Props = {
 };
 
 const PackageTemplate = ({ document }: Props) => {
-  const { author } = document;
+  const { owner } = document;
 
   return (
     <>
@@ -57,17 +57,9 @@ const PackageTemplate = ({ document }: Props) => {
               </p>
             </Flex>
           </Flex>
-          {document.content && (
+          {document.readme && (
             <Flex width={"100%"} direction={"row"}>
-              <BlocksRenderer
-                content={document.content}
-                blocks={{
-                  // You can use the default components to set class names...
-                  paragraph: ({ children }) => (
-                    <p className={styles.paragraph}>{children}</p>
-                  ),
-                }}
-              />
+              <Markdown>{document.readme}</Markdown>
             </Flex>
           )}
         </Flex>
@@ -92,7 +84,7 @@ const PackageTemplate = ({ document }: Props) => {
             <Flex direction={"row"} gap={"4px"}>
               <Download width={12} height={12} color={"#666687"} />
               <p className={styles.valueItem}>
-                {document.downloads?.toLocaleString()}
+                {document.npm_downloads?.toLocaleString()}
               </p>
             </Flex>
           </Flex>
@@ -112,7 +104,7 @@ const PackageTemplate = ({ document }: Props) => {
               />
               <Star width={12} height={12} color={"#E4A33F"} />
               <p className={styles.valueItem}>
-                {document.stars?.toLocaleString()}
+                {document.github_stars?.toLocaleString()}
               </p>
             </Flex>
           </Flex>
@@ -123,27 +115,18 @@ const PackageTemplate = ({ document }: Props) => {
             justifyContent={"space-between"}
           >
             <p>Author</p>
-            {author?.username && author.url_alias?.[0]?.url_path ? (
+            {owner?.username && owner.url_alias?.[0]?.url_path ? (
               <Link
-                href={author.url_alias?.[0]?.url_path}
+                href={owner.url_alias?.[0]?.url_path}
                 className={`${styles.valueItem} ${styles.authorName}`}
               >
-                {author.username}
+                {owner.username}
               </Link>
             ) : (
               <p className={`${styles.valueItem} ${styles.authorName}`}>
                 Unknown
               </p>
             )}
-          </Flex>
-          <Flex
-            className={styles.listItem}
-            width={"100%"}
-            direction={"row"}
-            justifyContent={"space-between"}
-          >
-            <p>Compatible version</p>
-            <p className={styles.valueItem}>{document.version || "Unknown"}</p>
           </Flex>
           {document.updatedAt && (
             <Flex
@@ -158,16 +141,19 @@ const PackageTemplate = ({ document }: Props) => {
               </p>
             </Flex>
           )}
-          {document.npm_package && (
+          {document.package_location && (
             <Flex
               className={styles.listItem}
               width={"100%"}
               direction={"row"}
               justifyContent={"space-between"}
             >
-              <p>npm package</p>
+              <p>Package location</p>
               <p className={styles.valueItem}>
-                <Link className={styles.linkDetail} href={document.npm_package}>
+                <Link
+                  className={styles.linkDetail}
+                  href={document.package_location}
+                >
                   See{" "}
                   <ExternalLink
                     className={styles.actionCardIcon}

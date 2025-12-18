@@ -7,6 +7,7 @@ const contentType = "plugin::users-permissions.user";
 
 const query = {
   populate: {
+    profile: true,
     packages: {
       populate: {
         url_alias: true,

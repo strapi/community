@@ -7,7 +7,7 @@ const contentType = "api::package.package";
 
 const query = {
   populate: {
-    author: {
+    owner: {
       populate: {
         url_alias: true,
       },
@@ -28,6 +28,8 @@ const PackagePage = async ({ documentId }: Props) => {
   const document = await client
     .collection(contentType)
     .findOne(documentId, query);
+
+  console.log(document);
 
   return <PackageTemplate document={document.data} />;
 };
