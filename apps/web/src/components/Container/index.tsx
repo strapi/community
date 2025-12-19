@@ -2,11 +2,16 @@ import { Box } from "@strapi/design-system";
 
 type Props = {
   children: React.ReactNode;
-};
+} & React.ComponentProps<typeof Box>;
 
-const Container = ({ children }: Props) => {
+const Container = ({ children, ...props }: Props) => {
   return (
-    <Box marginLeft={"100px"} marginRight={"100px"}>
+    <Box
+      style={{ margin: "0 auto" }}
+      paddingLeft={"20px"}
+      paddingRight={"20px"}
+      {...props}
+    >
       {children}
     </Box>
   );

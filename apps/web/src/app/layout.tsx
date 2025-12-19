@@ -24,7 +24,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`} suppressHydrationWarning>
-        <DesignSystemProvider locale="en-GB" theme={lightTheme}>
+        <DesignSystemProvider
+          locale="en-GB"
+          theme={{
+            ...lightTheme,
+            fontSizes: [
+              `1.2rem`,
+              `1.4rem`,
+              `1.6rem`,
+              "1.6rem",
+              `1.8rem`,
+              `3.2rem`,
+            ],
+            lineHeights: [1.14, 1.22, 1.25, 1.33, 1.43, 1.45, 1.5],
+          }}
+        >
           <nav>
             <Container>
               <Grid.Item col={6}>

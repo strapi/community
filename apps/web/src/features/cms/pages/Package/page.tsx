@@ -7,6 +7,7 @@ const contentType = "api::package.package";
 
 const query = {
   populate: {
+    icon: true,
     owner: {
       populate: {
         url_alias: true,
