@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    environment:
+      MEILI_MASTER_KEY: "E8H-DDQUGhZhFWhTq263Ohd80UErhFmLIFnlQK81oeQ"
+    volumes:
+      - ./data.ms:/data.ms
+    ports:
+      - "7700:7700"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

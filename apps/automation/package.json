@@ -1,0 +1,10 @@
+{
+  "name": "automation",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local n8n instance for workflow automation",
+  "scripts": {
+    "dev": "docker-compose up",
+    "start": "docker-compose up"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "templates",
+  "info": {
+    "singularName": "template",
+    "pluralName": "templates",
+    "displayName": "Templates"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "git_repository": {
+      "type": "string"
+    },
+    "preview_link": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::category.category"
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "maintainers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "templates"
+    },
+    "readme": {
+      "type": "richtext"
+    },
+    "labels": {
+      "type": "component",
+      "component": "shared.labels",
+      "repeatable": false,
+      "required": true
+    }
+  }
+}

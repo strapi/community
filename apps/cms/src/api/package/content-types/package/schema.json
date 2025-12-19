@@ -1,0 +1,86 @@
+{
+  "kind": "collectionType",
+  "collectionName": "packages",
+  "info": {
+    "singularName": "package",
+    "pluralName": "packages",
+    "displayName": "Packages",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    },
+    "git_repository": {
+      "type": "string"
+    },
+    "package_location": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "required": true,
+      "default": "plugin",
+      "enum": ["plugin", "provider", "sdk", "tool"]
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::category.category"
+    },
+    "readme": {
+      "type": "richtext"
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "maintainers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "packages"
+    },
+    "labels": {
+      "type": "component",
+      "component": "shared.labels",
+      "repeatable": false,
+      "required": true
+    },
+    "install_command": {
+      "type": "string"
+    },
+    "github_stars": {
+      "type": "string"
+    },
+    "npm_downloads": {
+      "type": "string"
+    }
+  }
+}

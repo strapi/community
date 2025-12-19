@@ -1,0 +1,20 @@
+.trustedCard {
+  position: relative;
+  padding: 12px 24px;
+  font-size: 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  background-color: var(--color-primary100);
+  border: 1px solid var(--color-primary200);
+
+  > .trustedCardTitle {
+    color: var(--color-primary600);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  > .trustedCardText {
+    color: var(--color-neutral800);
+  }
+}

@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Strapi Marketplace
+
+This monorepo contains all the code for Strapi's online Marketplace. It's structured as a pnpm workspace with multiple applications and shared packages.
+
+## Project Overview
+
+The Marketplace project consists of:
+
+- A Next.js web application
+- A Strapi application for content management
+- An n8n application for automation
+- A Meilisearch instance for searching
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js >=22
+- pnpm 10.12.1 or later
+- Docker Desktop
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install all dependencies
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Start all applications in development mode
+pnpm dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Build all applications
+pnpm build
 
-## Learn More
+# Run all tests
+pnpm test
 
-To learn more about Next.js, take a look at the following resources:
+# Lint all code
+pnpm lint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Type checking
+pnpm check-types
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Update dependencies interactively
+pnpm update-dependencies
+```
 
-## Deploy on Vercel
+## Monorepo Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The monorepo is organized into two main directories:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Apps
+
+The `apps/` directory contains standalone applications:
+
+```
+apps/
+├── cms/               # Strapi 5 application
+├── web/               # Next.js 15 web application
+├── search/            # Meilisearch instance
+├── automation/               # n8n instance
+```
+
+### Packages
+
+The `packages/` directory contains shared libraries and configuration:
+
+```
+packages/
+└── typescript-config/ # Shared TypeScript configurations
+```
+
+## Applications
+
+### Web App (`apps/web`)
+
+The main Next.js 15 application using the App Router pattern. This is the primary customer-facing application.
+
+See [Web App README](./apps/web/README.md) for more details.
+
+### CMS (`apps/cms`)
+
+A Strapi 5 application used to provide content for the Next.js application.
+
+See [CMS README](./apps/cms/README.md) for more details.
+
+### Search (`apps/search`)
+
+A Meilisearch instance that is consumes content from Strapi and serves as a search index for the front-end.
+
+See [CMS README](./apps/search/README.md) for more details.
+
+### Automation (`apps/automation`)
+
+A n8n instance that is used for automation of plugin publication, reviews etc.
+
+See [CMS README](./apps/automation/README.md) for more details.
+
+## Packages
+
+### TypeScript Config (`packages/typescript-config`)
+
+Shared TypeScript configurations for various project types (Next.js, Strapi, etc.).
+
+## Technology Stack
+
+- **Package Management**: pnpm workspaces
+- **Build System**: Turborepo
+- **Front-end Framework**: React 19 with Next.js 15
+- **CMS**: Strapi 5
+- **Search Index**: Meilisearch
+- **Styling**: Strapi Design System
+- **Testing**: Vitest for unit tests, Playwright for end-to-end tests
+- **Linting/formatting**: Biome for consistent code style
+- **Components**: Custom components based on shadcn/ui pattern
+- **State Management**: Tanstack Query for server state
+- **Type Checking**: TypeScript for static type checking
+- **Dependency Management**: pnpm for package management and workspace management
+- **Version Control**: Git for source code management
+- **CI/CD**: Github Actions for continuous integration and deployment
+
+### Project Conventions
+
+- Use TypeScript for all code
+- Follow the existing folder structure
+- Add tests for all new functionality 
+
+## Workspace Commands
+
+The monorepo uses Turborepo to manage the build pipeline:
+
+- `pnpm dev`: Start all applications in development mode
+- `pnpm build`: Build all applications
+- `pnpm lint`: Run linting on all projects
+- `pnpm test`: Run tests for all projects
+- `pnpm check-types`: Check TypeScript types across the workspace

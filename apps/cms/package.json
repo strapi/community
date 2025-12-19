@@ -1,0 +1,47 @@
+{
+  "name": "cms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "postinstall": "strapi ts:generate-types",
+    "build": "strapi build",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "lint": "biome check --fix .",
+    "check-types": "tsc --noEmit",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "dependencies": {
+    "@strapi-community/plugin-seo": "^2.1.1",
+    "@strapi/plugin-cloud": "5.32.0",
+    "@strapi/plugin-users-permissions": "5.32.0",
+    "@strapi/strapi": "5.32.0",
+    "better-sqlite3": "12.4.1",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "strapi-plugin-meilisearch": "^0.13.4",
+    "strapi-plugin-webtools": "^1.7.3",
+    "styled-components": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "23af2388-24b4-4e7f-974d-cb0aaa908364",
+    "installId": "f97a3defdf2dc3e878fdb73ecef6aa3ea552cb09ea6fb6c115a771e257d2f4ae"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "singleType",
+  "collectionName": "homes",
+  "info": {
+    "singularName": "home",
+    "pluralName": "homes",
+    "displayName": "Home"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "seo": {
+      "type": "component",
+      "component": "shared.seo",
+      "repeatable": false,
+      "required": true
+    }
+  }
+}
