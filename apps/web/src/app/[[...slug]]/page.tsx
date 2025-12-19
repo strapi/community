@@ -11,7 +11,11 @@ import TemplatePage from "@/features/cms/pages/Template/page";
 import { userMetadata } from "@/features/cms/pages/User/metadata";
 import UserPage from "@/features/cms/pages/User/page";
 
-const Router: NextPage<PageProps<"/[[...slug]]">> = async ({ params }) => {
+type PageProps = {
+  params: Promise<{ slug?: string[] }>;
+};
+
+const Router: NextPage<PageProps> = async ({ params }) => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
   const page = await findPage({
@@ -68,7 +72,7 @@ export async function generateStaticParams() {
 
 export const generateMetadata = async ({
   params,
-}: PageProps<"/[[...slug]]">): Promise<Metadata> => {
+}: PageProps): Promise<Metadata> => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
   const page = await findPage({
