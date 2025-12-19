@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Box,
   Breadcrumbs,
   Crumb,
   CrumbLink,
