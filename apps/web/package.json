@@ -30,6 +30,7 @@
     "react-instantsearch": "^7.21.0",
     "react-markdown": "^10.1.0",
     "react-timeago": "^8.3.0",
+    "rehype-raw": "^7.0.0",
     "swiper": "^11.1.14",
     "swr": "^2.2.5",
     "use-debounce": "^10.0.4"
