@@ -19,8 +19,8 @@
   "dependencies": {
     "@strapi-community/plugin-better-auth": "^1.0.0-alpha.2",
     "@strapi-community/plugin-seo": "^2.1.1",
-    "@strapi/plugin-cloud": "5.33.2",
-    "@strapi/strapi": "5.33.2",
+    "@strapi/plugin-cloud": "5.33.3",
+    "@strapi/strapi": "5.33.3",
     "better-auth": "^1.4.10",
     "better-sqlite3": "12.4.1",
     "react": "^18.0.0",

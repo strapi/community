@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@strapi/types": "^5.32.0",
+    "@strapi/types": "5.33.3",
     "@types/pluralize": "^0.0.33"
   }
 }
