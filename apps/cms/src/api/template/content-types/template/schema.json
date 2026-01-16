@@ -42,12 +42,12 @@
     "owner": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugin::users-permissions.user"
+      "target": "plugin::better-auth.user"
     },
     "maintainers": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "plugin::users-permissions.user",
+      "target": "plugin::better-auth.user",
       "mappedBy": "templates"
     },
     "readme": {

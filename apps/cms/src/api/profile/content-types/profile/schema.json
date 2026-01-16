@@ -32,7 +32,7 @@
     "owner": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugin::users-permissions.user",
+      "target": "plugin::better-auth.user",
       "inversedBy": "profile"
     }
   }

@@ -1,0 +1,85 @@
+{
+  "kind": "collectionType",
+  "collectionName": "better_auth_users",
+  "info": {
+    "singularName": "user",
+    "pluralName": "users",
+    "displayName": "User",
+    "description": "Better Auth user"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    },
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "emailVerified": {
+      "type": "boolean",
+      "default": false
+    },
+    "image": {
+      "type": "string"
+    },
+    "twoFactorEnabled": {
+      "type": "boolean"
+    },
+    "isAnonymous": {
+      "type": "boolean"
+    },
+    "username": {
+      "type": "string",
+      "unique": true
+    },
+    "displayUsername": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string",
+      "unique": true
+    },
+    "phoneNumberVerified": {
+      "type": "boolean"
+    },
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile",
+      "mappedBy": "owner"
+    },
+    "templates": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::template.template",
+      "inversedBy": "maintainers"
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::package.package",
+      "inversedBy": "maintainers"
+    }
+  }
+}

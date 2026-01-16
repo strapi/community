@@ -1,3 +1,5 @@
+import { twoFactor } from 'better-auth/plugins'
+
 export default ({ env }) => ({
   webtools: {
     enabled: true,
@@ -33,4 +35,17 @@ export default ({ env }) => ({
       },
     },
   },
+  'better-auth': {
+    enabled: true,
+    config: {
+      debug: true,
+      betterAuthOptions: {
+        trustedOrigins: [env("WEBSITE_URL")],
+        emailAndPassword: {
+          enabled: true,
+        },
+        plugins: [twoFactor()]
+      }
+    }
+  }
 });
