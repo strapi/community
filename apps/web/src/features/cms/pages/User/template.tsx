@@ -15,7 +15,6 @@ import "swiper/css/pagination";
 import { ActionCard } from "@/components/ActionCard";
 import BackLink from "@/components/BackLink";
 import TableListItem from "@/components/List";
-import TrustedCard from "@/components/TrustedCard";
 import type { UserPageData } from "@/features/cms/pages/User/page";
 
 type Props = {
@@ -79,7 +78,6 @@ const UserTemplate = ({ document }: Props) => {
             </Flex>
           </Flex>
         </Flex>
-        <Flex width={"100%"}>{document.trusted ? <TrustedCard /> : ""}</Flex>
         <Flex width={"100%"} className={stylesPluginList.pluginListElement}>
           <Table colCount={3} rowCount={10} className={styles.pluginListTable}>
             <Tbody>

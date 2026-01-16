@@ -4,7 +4,7 @@ import Image from "next/image";
 
 type Props = {
   maintainers: Modules.Documents.Result<
-    "plugin::users-permissions.user",
+    "plugin::better-auth.user",
     { populate: ["profile.avatar"] }
   >[];
 };

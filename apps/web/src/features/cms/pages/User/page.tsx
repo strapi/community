@@ -3,7 +3,7 @@ import type { Modules } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
 import UserTemplate from "@/features/cms/pages/User/template";
 
-const contentType = "plugin::users-permissions.user";
+const contentType = "plugin::better-auth.user";
 
 const query = {
   populate: {
@@ -31,7 +31,7 @@ const UserPage = async ({ id }: Props) => {
     .collection(contentType)
     .findOne(String(id), query);
 
-  return <UserTemplate document={document} />;
+  return <UserTemplate document={document.data} />;
 };
 
 export default UserPage;
