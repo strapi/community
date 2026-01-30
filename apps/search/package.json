@@ -1,0 +1,9 @@
+{
+  "name": "search",
+  "version": "0.0.0",
+  "description": "Meilisearch service for marketplace",
+  "scripts": {
+    "dev": "docker-compose up",
+    "start": "docker-compose up"
+  }
+}

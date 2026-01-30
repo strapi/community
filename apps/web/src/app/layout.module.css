@@ -1,0 +1,57 @@
+@keyframes colorFade {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.filters {
+  width: 100%;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--color-neutral150);
+}
+
+.categories {
+  width: 100%;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--color-neutral150);
+}
+
+.category {
+  display: block;
+  width: 100%;
+  height: 32px;
+  line-height: 32px;
+  color: var(--color-neutral800);
+  font-size: 14px;
+  text-decoration: none;
+  transition:
+    padding 0.3s,
+    background 0.2s ease-in;
+
+  &:hover {
+    color: var(--color-primary600);
+    font-weight: 600;
+    padding: 0 12px;
+    border-radius: 4px;
+    background-color: var(--color-neutral100);
+  }
+}
+
+.activeCategory {
+  color: var(--color-primary600);
+  font-weight: 600;
+  padding: 0 12px;
+  border-radius: 4px;
+  background-color: var(--color-neutral100);
+}
+
+.actionCards {
+  width: 100%;
+  padding: 24px 0;
+}

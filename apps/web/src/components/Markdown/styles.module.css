@@ -1,0 +1,33 @@
+.markdown {
+  font-size: 150%;
+
+  * {
+    margin: revert;
+  }
+
+  img,
+  picture,
+  video,
+  canvas {
+    display: revert;
+    max-width: revert;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: revert;
+    font: revert;
+  }
+
+  ol,
+  ul {
+    list-style: revert;
+    padding: revert;
+    margin: revert;
+  }
+}

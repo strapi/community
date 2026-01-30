@@ -1,0 +1,36 @@
+{
+  "collectionName": "components_shared_labels",
+  "info": {
+    "displayName": "labels",
+    "icon": "check"
+  },
+  "options": {},
+  "attributes": {
+    "official": {
+      "type": "boolean",
+      "default": false
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "paid": {
+      "type": "boolean",
+      "default": false
+    },
+    "buy_link": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "paid"
+            },
+            true
+          ]
+        }
+      }
+    }
+  },
+  "config": {}
+}

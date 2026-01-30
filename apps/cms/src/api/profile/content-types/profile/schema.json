@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "profiles",
+  "info": {
+    "singularName": "profile",
+    "pluralName": "profiles",
+    "displayName": "Profiles"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "headline": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "text"
+    },
+    "website": {
+      "type": "string"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::better-auth.user",
+      "inversedBy": "profile"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+.backLink {
+  margin: 24px 0 0 0;
+  color: var(--color-primary600);
+  font-size: 14px;
+  vertical-align: middle;
+  text-decoration: none;
+
+  & .backLinkIcon {
+    margin-right: 8px;
+    vertical-align: sub;
+  }
+}
