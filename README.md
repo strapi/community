@@ -26,6 +26,20 @@ The Marketplace project consists of:
 pnpm install
 ```
 
+### Setup
+
+#### ENV variables
+
+Both the `web` and `cms` applications need a `.env` file to properly function. Go in to both applications and copy the `.env.example` in to a new `.env` file. 
+
+#### API token
+
+Go to the 'Full Access' API tokens section in Strapi and copy the API token. Afterwards you can paste the API token in to the `.env` of the `web` application as `CMS_BEARER_TOKEN`.
+
+_The Full Access token is only used for local development. For any sort of production like environment we should use a custom access token._
+
+_See [Full Access API token page](http://localhost:1337/admin/settings/api-tokens/2) in Strapi_
+
 ### Development
 
 ```bash
@@ -61,7 +75,7 @@ apps/
 ├── cms/               # Strapi 5 application
 ├── web/               # Next.js 15 web application
 ├── search/            # Meilisearch instance
-├── automation/               # n8n instance
+└── automation/               # n8n instance
 ```
 
 ### Packages
@@ -70,6 +84,8 @@ The `packages/` directory contains shared libraries and configuration:
 
 ```
 packages/
+├── strapi-client/ # A type-safe wrapper for `@strapi/client`
+├── strapi-instantsearch/ # Instantsearch UI components using `@strapi/design-system`
 └── typescript-config/ # Shared TypeScript configurations
 ```
 
@@ -100,6 +116,18 @@ A n8n instance that is used for automation of plugin publication, reviews etc.
 See [CMS README](./apps/automation/README.md) for more details.
 
 ## Packages
+
+### Strapi Client (`packages/strapi-client`)
+
+A wrapper for the `@strapi/client` that add's type safety based on the types from the `cms` app.
+
+See [Strapi Client README](./packages/strapi-client/README.md) for more details.
+
+### Strapi Instantsearch (`packages/strapi-instantsearch`)
+
+React Instantsearch UI components based on `@strapi/design-system` for branded search pages.
+
+See [Strapi Instantsearch README](./packages/strapi-instantsearch/README.md) for more details.
 
 ### TypeScript Config (`packages/typescript-config`)
 
