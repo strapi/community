@@ -1,9 +1,9 @@
 import type { GetQueryParams } from "@repo/strapi-client";
-import type { Modules } from "@strapi/types";
+import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
 import UserTemplate from "@/features/cms/pages/User/template";
 
-const contentType = "plugin::better-auth.user";
+const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
 
 const query = {
   populate: {

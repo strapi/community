@@ -1,12 +1,12 @@
 import type { GetQueryParams } from "@repo/strapi-client";
-import type { Modules } from "@strapi/types";
+import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
 import CategoryTemplate from "@/features/cms/pages/Category/template";
 
-const contentType = "api::category.category";
+const contentType = "api::category.category" satisfies UID.ContentType;
 
 const query = {
-  populate: ['children']
+  populate: ["children"],
 } satisfies GetQueryParams<typeof contentType>;
 
 export type CategoryPageData = Modules.Documents.Result<

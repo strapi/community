@@ -1,5 +1,117 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface SectionsCardGrid extends Struct.ComponentSchema {
+  collectionName: 'components_sections_card_grids';
+  info: {
+    displayName: 'Card Grid';
+  };
+  attributes: {
+    items: Schema.Attribute.Component<'sections.card-grid-item', true> &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 6;
+          min: 2;
+        },
+        number
+      >;
+  };
+}
+
+export interface SectionsCardGridItem extends Struct.ComponentSchema {
+  collectionName: 'components_sections_card_grid_items';
+  info: {
+    displayName: 'Card Grid Item';
+  };
+  attributes: {
+    button: Schema.Attribute.Component<'shared.button', false> &
+      Schema.Attribute.Required;
+    content: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SectionsCta extends Struct.ComponentSchema {
+  collectionName: 'components_sections_ctas';
+  info: {
+    displayName: 'CTA';
+  };
+  attributes: {
+    cta: Schema.Attribute.Relation<'oneToOne', 'api::cta.cta'>;
+  };
+}
+
+export interface SectionsHighlights extends Struct.ComponentSchema {
+  collectionName: 'components_sections_highlights';
+  info: {
+    displayName: 'Highlights';
+  };
+  attributes: {
+    amount: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 6;
+          min: 2;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<2>;
+    button: Schema.Attribute.Component<'shared.button', false>;
+    grid: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 4;
+          min: 2;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<2>;
+    query: Schema.Attribute.Enumeration<
+      [
+        'packages_highlighted',
+        'packages_newest',
+        'templates_highlighted',
+        'templates_newest',
+        'recipes_highlighted',
+        'recipes_newest',
+        'showcases_highlighted',
+        'showcases_newest',
+        'community_stars',
+        'community_newest',
+      ]
+    > &
+      Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SectionsSearch extends Struct.ComponentSchema {
+  collectionName: 'components_sections_searches';
+  info: {
+    displayName: 'Search';
+  };
+  attributes: {
+    index_name: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedButton extends Struct.ComponentSchema {
+  collectionName: 'components_shared_buttons';
+  info: {
+    displayName: 'Button';
+  };
+  attributes: {
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    link: Schema.Attribute.String & Schema.Attribute.Required;
+    type: Schema.Attribute.Enumeration<['primary', 'secondary']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'primary'>;
+  };
+}
+
 export interface SharedLabels extends Struct.ComponentSchema {
   collectionName: 'components_shared_labels';
   info: {
@@ -68,6 +180,12 @@ export interface SharedSeo extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'sections.card-grid': SectionsCardGrid;
+      'sections.card-grid-item': SectionsCardGridItem;
+      'sections.cta': SectionsCta;
+      'sections.highlights': SectionsHighlights;
+      'sections.search': SectionsSearch;
+      'shared.button': SharedButton;
       'shared.labels': SharedLabels;
       'shared.open-graph': SharedOpenGraph;
       'shared.seo': SharedSeo;

@@ -1,9 +1,9 @@
 import type { GetQueryParams } from "@repo/strapi-client";
-import type { Modules } from "@strapi/types";
+import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
 import TemplateTemplate from "@/features/cms/pages/Template/template";
 
-const contentType = "api::template.template";
+const contentType = "api::template.template" satisfies UID.ContentType;
 
 const query = {} satisfies GetQueryParams<typeof contentType>;
 

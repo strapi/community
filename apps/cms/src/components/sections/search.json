@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_sections_searches",
+  "info": {
+    "displayName": "Search"
+  },
+  "options": {},
+  "attributes": {
+    "index_name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "config": {}
+}
