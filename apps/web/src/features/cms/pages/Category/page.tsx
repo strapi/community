@@ -5,7 +5,9 @@ import CategoryTemplate from "@/features/cms/pages/Category/template";
 
 const contentType = "api::category.category";
 
-const query = {} satisfies GetQueryParams<typeof contentType>;
+const query = {
+  populate: ['children']
+} satisfies GetQueryParams<typeof contentType>;
 
 export type CategoryPageData = Modules.Documents.Result<
   typeof contentType,
