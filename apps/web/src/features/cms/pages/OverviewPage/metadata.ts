@@ -3,16 +3,18 @@ import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types
 import { client } from "@/features/cms/lib/strapi";
 
 export const overviewPageMetadata = async (): Promise<Metadata> => {
-  const document = await client.single("api::overview-page.overview-page").find({
-    fields: ["documentId"],
-    populate: {
-      seo: {
-        populate: {
-          openGraph: true,
+  const document = await client
+    .single("api::overview-page.overview-page")
+    .find({
+      fields: ["documentId"],
+      populate: {
+        seo: {
+          populate: {
+            openGraph: true,
+          },
         },
       },
-    },
-  });
+    });
 
   const { seo: metadata } = document.data;
 

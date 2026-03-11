@@ -2,8 +2,8 @@ import { Grid } from "@strapi/design-system";
 import type { Data } from "@strapi/types";
 
 type Props = {
-  section: Data.Component<'sections.card-grid'>;
-}
+  section: Data.Component<"sections.card-grid">;
+};
 
 const CardGridSection = ({ section }: Props) => {
   return (
@@ -16,6 +16,6 @@ const CardGridSection = ({ section }: Props) => {
       ))}
     </Grid.Root>
   );
-}
- 
+};
+
 export default CardGridSection;

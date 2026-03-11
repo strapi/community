@@ -17,10 +17,7 @@
       "type": "enumeration",
       "required": true,
       "default": "primary",
-      "enum": [
-        "primary",
-        "secondary"
-      ]
+      "enum": ["primary", "secondary"]
     }
   },
   "config": {}

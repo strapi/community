@@ -1,8 +1,8 @@
 import type { Data } from "@strapi/types";
 
 type Props = {
-  section: Data.Component<'sections.cta'>;
-}
+  section: Data.Component<"sections.cta">;
+};
 
 const CTASection = ({ section }: Props) => {
   const { cta } = section;
@@ -12,6 +12,6 @@ const CTASection = ({ section }: Props) => {
       {cta?.content}
     </div>
   );
-}
- 
+};
+
 export default CTASection;

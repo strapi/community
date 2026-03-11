@@ -4,14 +4,14 @@ import { categoryMetadata } from "@/features/cms/pages/Category/metadata";
 import CategoryPage from "@/features/cms/pages/Category/page";
 import { homeMetadata } from "@/features/cms/pages/Home/metadata";
 import HomePage from "@/features/cms/pages/Home/page";
+import { overviewPageMetadata } from "@/features/cms/pages/OverviewPage/metadata";
+import OverviewPage from "@/features/cms/pages/OverviewPage/page";
 import { packageMetadata } from "@/features/cms/pages/Package/metadata";
 import PackagePage from "@/features/cms/pages/Package/page";
 import { templateMetadata } from "@/features/cms/pages/Template/metadata";
 import TemplatePage from "@/features/cms/pages/Template/page";
 import { userMetadata } from "@/features/cms/pages/User/metadata";
 import UserPage from "@/features/cms/pages/User/page";
-import { overviewPageMetadata } from "@/features/cms/pages/OverviewPage/metadata";
-import OverviewPage from "@/features/cms/pages/OverviewPage/page";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
