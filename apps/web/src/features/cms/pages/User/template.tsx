@@ -85,7 +85,9 @@ const UserTemplate = ({ document }: Props) => {
           Details
         </h3>
         <div className="flex w-full flex-col">
-          <div className={`${styles.listItem} flex w-full items-center justify-between`}>
+          <div
+            className={`${styles.listItem} flex w-full items-center justify-between`}
+          >
             <p>Cumulated downloads</p>
             <span className="flex items-center gap-1">
               {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
@@ -94,12 +96,16 @@ const UserTemplate = ({ document }: Props) => {
               </p>
             </span>
           </div>
-          <div className={`${styles.listItem} flex w-full items-center justify-between`}>
+          <div
+            className={`${styles.listItem} flex w-full items-center justify-between`}
+          >
             <p>Published packages</p>
             <p className={styles.valueItem}>{packages.length}</p>
           </div>
           {mostRecentItem?.updatedAt && (
-            <div className={`${styles.listItem} flex w-full items-center justify-between`}>
+            <div
+              className={`${styles.listItem} flex w-full items-center justify-between`}
+            >
               <p>Last update</p>
               <p className={styles.valueItem}>
                 <TimeAgo date={mostRecentItem?.updatedAt} />

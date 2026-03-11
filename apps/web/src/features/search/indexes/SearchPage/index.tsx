@@ -25,22 +25,30 @@ const SearchPage = () => (
   >
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       <aside className="lg:col-span-3">
-        <h2 className="mb-4 text-2xl font-semibold text-(--color-neutral900)">Filters</h2>
+        <h2 className="mb-4 text-2xl font-semibold text-(--color-neutral900)">
+          Filters
+        </h2>
         <div className="flex w-full flex-col items-start gap-6">
           <div className="flex w-full flex-col items-start gap-4">
-            <h3 className="text-base font-semibold text-(--color-neutral800)">Type</h3>
+            <h3 className="text-base font-semibold text-(--color-neutral800)">
+              Type
+            </h3>
             <div className="flex w-full flex-col items-start gap-2">
               <RefinementList attribute="type" />
             </div>
           </div>
           <div className="flex w-full flex-col items-start gap-4">
-            <h3 className="text-base font-semibold text-(--color-neutral800)">Categories</h3>
+            <h3 className="text-base font-semibold text-(--color-neutral800)">
+              Categories
+            </h3>
             <div className="flex w-full flex-col items-start gap-2">
               <RefinementList attribute="categories.name" />
             </div>
           </div>
           <div className="flex w-full flex-col items-start gap-4">
-            <h3 className="text-base font-semibold text-(--color-neutral800)">Labels</h3>
+            <h3 className="text-base font-semibold text-(--color-neutral800)">
+              Labels
+            </h3>
             <div className="flex w-full flex-col items-start gap-2">
               <ToggleRefinement attribute="labels.featured" label="Featured" />
               <ToggleRefinement attribute="labels.official" label="Official" />

@@ -19,9 +19,13 @@ const Header = ({ title, description }: Props) => {
       <Container>
         <div className="flex min-h-[200px] w-full items-end justify-between gap-8 py-10">
           <div className="max-w-3xl">
-            <p className="mb-4 text-sm text-(--color-primary500)">Strapi Marketplace &gt; Submit</p>
+            <p className="mb-4 text-sm text-(--color-primary500)">
+              Strapi Marketplace &gt; Submit
+            </p>
             <h1 className="text-5xl font-semibold tracking-tight">{title}</h1>
-            <p className="mt-4 max-w-2xl text-base text-(--color-hero-muted)">{description}</p>
+            <p className="mt-4 max-w-2xl text-base text-(--color-hero-muted)">
+              {description}
+            </p>
           </div>
           <Link
             href="/submit"

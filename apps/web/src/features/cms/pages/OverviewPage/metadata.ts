@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
 import { client } from "@/features/cms/lib/strapi";
 
-export const overviewPageMetadata = async (documentId: string,): Promise<Metadata> => {
+export const overviewPageMetadata = async (
+  documentId: string,
+): Promise<Metadata> => {
   const document = await client
     .collection("api::overview-page.overview-page")
     .findOne(documentId, {

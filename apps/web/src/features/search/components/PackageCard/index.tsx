@@ -40,7 +40,9 @@ const PackageCard = ({ hit }: Props) => {
               <p className="max-w-full truncate text-base font-bold text-(--color-neutral900)">
                 {hit.name}
               </p>
-              <p className="text-sm text-(--color-neutral600)">{hit.description}</p>
+              <p className="text-sm text-(--color-neutral600)">
+                {hit.description}
+              </p>
               {hit.maintainers && (
                 <div className="mt-4 w-full">
                   <MaintainersListSmall maintainers={hit.maintainers} />
