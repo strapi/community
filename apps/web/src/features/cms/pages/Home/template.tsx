@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@strapi/design-system";
 import Container from "@/components/Container";
 import Header from "@/components/Header";
 import type { HomePageData } from "@/features/cms/pages/Home/page";
@@ -12,7 +11,7 @@ type Props = {
 
 export default function Homepage({ document }: Props) {
   return (
-    <Box>
+    <div>
       <Header
         title={document.title as string}
         description={document.description as string}
@@ -20,6 +19,6 @@ export default function Homepage({ document }: Props) {
       <Container>
         <SearchPage />
       </Container>
-    </Box>
+    </div>
   );
 }

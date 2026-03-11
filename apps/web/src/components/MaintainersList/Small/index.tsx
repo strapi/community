@@ -1,4 +1,3 @@
-import { Flex, Typography } from "@strapi/design-system";
 import type { Modules } from "@strapi/types";
 import Image from "next/image";
 
@@ -12,7 +11,7 @@ type Props = {
 const MaintainersListSmall = ({ maintainers }: Props) => {
   if (maintainers.length === 1) {
     return (
-      <Flex>
+      <div className="flex items-center">
         <Image
           style={{ borderRadius: "50%" }}
           src={`${process.env.NEXT_PUBLIC_CMS_URL}${maintainers?.[0]?.profile?.avatar.url}`}
@@ -20,15 +19,15 @@ const MaintainersListSmall = ({ maintainers }: Props) => {
           height={32}
           alt={maintainers?.[0]?.profile?.avatar.alternativeText}
         />
-        <Typography variant="omega" marginLeft="12px">
+        <span className="ml-3 text-sm font-medium text-(--color-neutral800)">
           {maintainers?.[0]?.profile?.full_name}
-        </Typography>
-      </Flex>
+        </span>
+      </div>
     );
   }
 
   return (
-    <Flex>
+    <div className="flex">
       {maintainers.map((maintainer, index) => (
         <Image
           key={maintainer.id}
@@ -43,7 +42,7 @@ const MaintainersListSmall = ({ maintainers }: Props) => {
           alt={maintainer?.profile?.avatar.alternativeText || ""}
         />
       ))}
-    </Flex>
+    </div>
   );
 };
 

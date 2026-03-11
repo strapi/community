@@ -1,5 +1,3 @@
-import { Button, Flex, Td, Tr } from "@strapi/design-system";
-import { Download, Star } from "@strapi/icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { formatDownloads, formatStars } from "@/utils/numbers";
@@ -22,12 +20,12 @@ export default function TableListItem(props: Props) {
   const router = useRouter();
 
   return (
-    <Tr
+    <tr
       key={`pluginList_${props.link}`}
       className={styles.pluginListRow}
       onClick={() => router.push(`${props.link}`)}
     >
-      <Td className={styles.pluginListElementFirstItem}>
+      <td className={styles.pluginListElementFirstItem}>
         <Image
           className={styles.pluginListRowIcon}
           src={process.env.NEXT_PUBLIC_CMS_URL + props.icon.url}
@@ -35,57 +33,42 @@ export default function TableListItem(props: Props) {
           height={30}
           alt={props.icon.alternativeText || "icon"}
         />
-      </Td>
-      <Td className={styles.pluginListRowMain}>
+      </td>
+      <td className={styles.pluginListRowMain}>
         <h4 className={styles.pluginListRowTitle}>{props.name}</h4> —{" "}
         {props.description}
-      </Td>
-      <Td className={styles.pluginListElementStats}>
-        <Flex
-          direction={"row"}
-          className={styles.highlightCardInfo}
-          gap={"8px"}
-          justifyContent={"end"}
-        >
+      </td>
+      <td className={styles.pluginListElementStats}>
+        <div className={`${styles.highlightCardInfo} flex justify-end gap-2`}>
           <span>
-            <Flex
-              direction={"row"}
-              alignItems={"center"}
-              gap={"4px"}
-              justifyContent={"end"}
-            >
+            <span className="flex items-center justify-end gap-1">
               <Image
                 src="/logo-github.svg"
                 width={12}
                 height={12}
                 alt="Logo GitHub"
               />
-              <Star width={12} height={12} color={"#E4A33F"} />
+              {/* <Star width={12} height={12} color={"var(--color-warning500)"} /> */}
               {formatStars(props.stars)}
-            </Flex>
+            </span>
           </span>
           <span>
-            <Flex
-              direction={"row"}
-              alignItems={"center"}
-              gap={"4px"}
-              justifyContent={"end"}
-            >
-              <Download width={12} height={12} color={"#666687"} />
+            <span className="flex items-center justify-end gap-1">
+              {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
               {formatDownloads(props.downloads)}
-            </Flex>
+            </span>
           </span>
-        </Flex>
-      </Td>
-      <Td className={styles.pluginListElementLastItem}>
-        <Button
-          variant={"tertiary"}
-          size={"S"}
+        </div>
+      </td>
+      <td className={styles.pluginListElementLastItem}>
+        <button
+          type="button"
+          className="rounded border border-(--color-primary200) px-3 py-1 text-xs font-semibold text-(--color-primary700) hover:bg-(--color-primary100)"
           onClick={() => router.push(`${props.link}`)}
         >
           More
-        </Button>
-      </Td>
-    </Tr>
+        </button>
+      </td>
+    </tr>
   );
 }

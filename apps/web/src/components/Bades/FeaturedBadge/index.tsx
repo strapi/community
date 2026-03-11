@@ -1,10 +1,8 @@
-import { Badge } from "@strapi/design-system";
-
 const FeaturedBadge = () => {
   return (
-    <Badge backgroundColor="warning100" textColor="warning700">
+    <span className="inline-flex rounded-md bg-(--color-warning100) px-2 py-1 text-xs font-semibold text-(--color-warning700)">
       Featured
-    </Badge>
+    </span>
   );
 };
 

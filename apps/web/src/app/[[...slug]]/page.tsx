@@ -104,7 +104,7 @@ export const generateMetadata = async ({
       return categoryMetadata(page.documentId);
     }
     case "api::overview-page.overview-page": {
-      return overviewPageMetadata();
+      return overviewPageMetadata(page.documentId);
     }
     case "api::home.home": {
       return homeMetadata();

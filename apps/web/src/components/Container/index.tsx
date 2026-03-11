@@ -1,19 +1,25 @@
-import { Box } from "@strapi/design-system";
-
 type Props = {
   children: React.ReactNode;
-} & React.ComponentProps<typeof Box>;
+  maxWidth?: string;
+  className?: string;
+  style?: React.CSSProperties;
+} & React.ComponentProps<"div">;
 
-const Container = ({ children, ...props }: Props) => {
+const Container = ({
+  children,
+  maxWidth,
+  className,
+  style,
+  ...props
+}: Props) => {
   return (
-    <Box
-      style={{ margin: "0 auto" }}
-      paddingLeft={"20px"}
-      paddingRight={"20px"}
+    <div
+      className={`mx-auto w-full px-5 ${className || ""}`.trim()}
+      style={{ maxWidth, ...style }}
       {...props}
     >
       {children}
-    </Box>
+    </div>
   );
 };
 

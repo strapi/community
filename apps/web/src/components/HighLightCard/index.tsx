@@ -1,5 +1,3 @@
-import { Flex } from "@strapi/design-system";
-import { Download, Star } from "@strapi/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { formatDownloads, formatStars } from "@/utils/numbers";
@@ -22,47 +20,38 @@ export default function HighlightCard({
 }: Props) {
   return (
     <Link href={`/plugin/${slug}`} className={`${styles.highlightCard}`}>
-      <Flex direction={"column"} alignItems={"flex-start"} gap={"8px"}>
-        <Flex
-          direction={"row"}
-          justifyContent={"space-between"}
-          alignItems={"flex-start"}
-          width={"100%"}
-        >
+      <div className="flex flex-col items-start gap-2">
+        <div className="flex w-full items-start justify-between">
           <Image
             src="/logo-plugin.png"
             width={60}
             height={60}
             alt="Logo Plugin"
           />
-          <Flex
-            direction={"row"}
-            className={styles.highlightCardInfo}
-            gap={"8px"}
-          >
+          <div className={`${styles.highlightCardInfo} flex gap-2`}>
             <span>
-              <Flex direction={"row"} alignItems={"center"} gap={"4px"}>
+              <span className="flex items-center gap-1">
                 <Image
                   src="/logo-github.svg"
                   width={12}
                   height={12}
                   alt="Logo GitHub"
                 />
-                <Star width={12} height={12} color={"#E4A33F"} />
+                {/* <Star width={12} height={12} color={"var(--color-warning500)"} /> */}
                 {formatStars(stars)}
-              </Flex>
+              </span>
             </span>
             <span>
-              <Flex direction={"row"} alignItems={"center"} gap={"4px"}>
-                <Download width={12} height={12} color={"#666687"} />
+              <span className="flex items-center gap-1">
+                {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
                 {formatDownloads(downloads)}
-              </Flex>
+              </span>
             </span>
-          </Flex>
-        </Flex>
+          </div>
+        </div>
         <h3 className={styles.highlightCardTitle}>{name}</h3>
         <p className={styles.highlightCardText}>{description}</p>
-      </Flex>
+      </div>
     </Link>
   );
 }

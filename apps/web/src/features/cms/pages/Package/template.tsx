@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Breadcrumbs,
-  Crumb,
-  CrumbLink,
-  Flex,
-  Grid,
-} from "@strapi/design-system";
-import { Download, ExternalLink, Star } from "@strapi/icons";
 import Image from "next/image";
 import Link from "next/link";
 import TimeAgo from "react-timeago";
@@ -26,37 +18,23 @@ const PackageTemplate = ({ document }: Props) => {
 
   return (
     <Container maxWidth="1120px">
-      <Flex width={"100%"}>
-        <Breadcrumbs>
-          <CrumbLink fontSize="24px" href="/">
+      <div className="w-full">
+        <nav className="flex items-center gap-2 py-6 text-base">
+          <Link className="text-(--color-primary700)" href="/">
             Marketplace
-          </CrumbLink>
-          <CrumbLink fontSize="24px" href="/plugins">
+          </Link>
+          <span className="text-(--color-divider-muted)">/</span>
+          <Link className="text-(--color-primary700)" href="/plugins">
             Tools & Plugins
-          </CrumbLink>
-          <Crumb isCurrent>{document.name}</Crumb>
-        </Breadcrumbs>
-      </Flex>
-      <Grid.Root gridCols={12} gap={6}>
-        <Grid.Item
-          col={8}
-          direction={"column"}
-          alignItems={"flex-start"}
-          justifyContent={"flex-start"}
-        >
-          <Flex
-            width={"100%"}
-            gap={"32px"}
-            direction={"column"}
-            className={styles.leftSection}
-          >
-            <Flex
-              width={"100%"}
-              gap={"24px"}
-              direction={"row"}
-              alignItems={"flex-start"}
-              justifyContent={"flex-start"}
-            >
+          </Link>
+          <span className="text-(--color-divider-muted)">/</span>
+          <span className="text-(--color-neutral800)">{document.name}</span>
+        </nav>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <section className="lg:col-span-8">
+          <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
+            <div className="flex w-full items-start justify-start gap-6">
               <Image
                 src={
                   document.icon
@@ -67,71 +45,53 @@ const PackageTemplate = ({ document }: Props) => {
                 height={100}
                 alt={document.name || ""}
               />
-              <Flex
-                width={"100%"}
-                direction={"column"}
-                alignItems={"flex-start"}
-              >
+              <div className="flex w-full flex-col items-start">
                 <h1 className={styles.pluginTitle}>{document.name} </h1>
                 <p className={styles.plugingShortDescription}>
                   {document.description}
                 </p>
-              </Flex>
-            </Flex>
+              </div>
+            </div>
             <div className="markdown">
               {document.readme && <Markdown markdown={document.readme} />}
             </div>
-          </Flex>
-        </Grid.Item>
-        <Grid.Item
-          col={4}
-          direction={"column"}
-          alignItems={"flex-start"}
-          justifyContent={"flex-start"}
-        >
+          </div>
+        </section>
+        <aside className="lg:col-span-4">
           <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
             Details
           </h3>
-          <Flex width={"100%"} direction={"column"}>
-            <Flex
-              className={styles.listItem}
-              width={"100%"}
-              direction={"row"}
-              justifyContent={"space-between"}
+          <div className="flex w-full flex-col">
+            <div
+              className={`${styles.listItem} flex w-full items-center justify-between`}
             >
               <p>Downloads</p>
-              <Flex direction={"row"} gap={"4px"}>
-                <Download width={12} height={12} color={"#666687"} />
+              <span className="flex items-center gap-1">
+                {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
                 <p className={styles.valueItem}>
                   {document.npm_downloads?.toLocaleString()}
                 </p>
-              </Flex>
-            </Flex>
-            <Flex
-              className={styles.listItem}
-              width={"100%"}
-              direction={"row"}
-              justifyContent={"space-between"}
+              </span>
+            </div>
+            <div
+              className={`${styles.listItem} flex w-full items-center justify-between`}
             >
               <p>GitHub stars</p>
-              <Flex direction={"row"} gap={"4px"}>
+              <span className="flex items-center gap-1">
                 <Image
                   src="/logo-github.svg"
                   width={12}
                   height={12}
                   alt="Logo GitHub"
                 />
-                <Star width={12} height={12} color={"#E4A33F"} />
+                {/* <Star width={12} height={12} color={"var(--color-warning500)"} /> */}
                 <p className={styles.valueItem}>
                   {document.github_stars?.toLocaleString()}
                 </p>
-              </Flex>
-            </Flex>
-            <Flex
-              className={styles.listItem}
-              width={"100%"}
-              direction={"row"}
-              justifyContent={"space-between"}
+              </span>
+            </div>
+            <div
+              className={`${styles.listItem} flex w-full items-center justify-between`}
             >
               <p>Author</p>
               {owner?.username && owner.url_alias?.[0]?.url_path ? (
@@ -146,26 +106,20 @@ const PackageTemplate = ({ document }: Props) => {
                   Unknown
                 </p>
               )}
-            </Flex>
+            </div>
             {document.updatedAt && (
-              <Flex
-                className={styles.listItem}
-                width={"100%"}
-                direction={"row"}
-                justifyContent={"space-between"}
+              <div
+                className={`${styles.listItem} flex w-full items-center justify-between`}
               >
                 <p>Last update</p>
                 <p className={styles.valueItem}>
                   <TimeAgo date={document.updatedAt} />
                 </p>
-              </Flex>
+              </div>
             )}
             {document.package_location && (
-              <Flex
-                className={styles.listItem}
-                width={"100%"}
-                direction={"row"}
-                justifyContent={"space-between"}
+              <div
+                className={`${styles.listItem} flex w-full items-center justify-between`}
               >
                 <p>Package location</p>
                 <p className={styles.valueItem}>
@@ -174,21 +128,18 @@ const PackageTemplate = ({ document }: Props) => {
                     href={document.package_location}
                   >
                     See{" "}
-                    <ExternalLink
+                    {/* <ExternalLink
                       className={styles.actionCardIcon}
                       width={"12px"}
                       height={"12px"}
-                    />
+                    /> */}
                   </Link>
                 </p>
-              </Flex>
+              </div>
             )}
             {document.git_repository && (
-              <Flex
-                className={styles.listItem}
-                width={"100%"}
-                direction={"row"}
-                justifyContent={"space-between"}
+              <div
+                className={`${styles.listItem} flex w-full items-center justify-between`}
               >
                 <p>Repository</p>
                 <p className={styles.valueItem}>
@@ -197,14 +148,14 @@ const PackageTemplate = ({ document }: Props) => {
                     href={document.git_repository}
                   >
                     See{" "}
-                    <ExternalLink
+                    {/* <ExternalLink
                       className={styles.actionCardIcon}
                       width={"12px"}
                       height={"12px"}
-                    />
+                    /> */}
                   </Link>
                 </p>
-              </Flex>
+              </div>
             )}
             <ActionCard
               className={styles.actionCard}
@@ -213,9 +164,9 @@ const PackageTemplate = ({ document }: Props) => {
               link="https://example.com"
               type="danger"
             />
-          </Flex>
-        </Grid.Item>
-      </Grid.Root>
+          </div>
+        </aside>
+      </div>
     </Container>
   );
 };

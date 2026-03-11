@@ -1,11 +1,3 @@
-import {
-  Box,
-  Card,
-  CardBody,
-  CardContent,
-  Flex,
-  Typography,
-} from "@strapi/design-system";
 import type { Modules } from "@strapi/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,17 +13,12 @@ type Props = {
 const PackageCard = ({ hit }: Props) => {
   return (
     <Link
-      style={{
-        color: "black",
-        textDecoration: "none",
-        width: "100%",
-        height: "100%",
-      }}
+      className="block h-full w-full text-black no-underline"
       href={hit.url_alias?.[0]?.url_path as string}
     >
-      <Card width="100%" padding="16px" height="100%">
-        <CardBody direction="column">
-          <Flex width="100%" alignItems="start">
+      <div className="h-full rounded-md border border-transparent bg-white p-4 shadow-[0_1px_4px_var(--color-neutral150)] transition-colors hover:border-(--color-primary200) hover:bg-(--color-primary100)">
+        <div className="flex flex-col">
+          <div className="flex w-full items-start">
             <Image
               src={
                 hit.icon
@@ -42,27 +29,27 @@ const PackageCard = ({ hit }: Props) => {
               height={100}
               alt={hit.name || ""}
             />
-            <Flex gap={2} marginLeft="auto" direction="column" alignItems="end">
+            <div className="ml-auto flex flex-col items-end gap-2">
               {hit.labels?.featured && <FeaturedBadge />}
               {hit.labels?.paid && <PaidBadge />}
               {hit.labels?.official && <OfficialBadge />}
-            </Flex>
-          </Flex>
-          <CardContent marginTop="24px">
-            <Flex direction="column" alignItems="start">
-              <Typography variant="delta" fontWeight="bold" ellipsis={true}>
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="flex flex-col items-start">
+              <p className="max-w-full truncate text-base font-bold text-(--color-neutral900)">
                 {hit.name}
-              </Typography>
-              <Typography>{hit.description}</Typography>
+              </p>
+              <p className="text-sm text-(--color-neutral600)">{hit.description}</p>
               {hit.maintainers && (
-                <Box marginTop="16px" width="100%">
+                <div className="mt-4 w-full">
                   <MaintainersListSmall maintainers={hit.maintainers} />
-                </Box>
+                </div>
               )}
-            </Flex>
-          </CardContent>
-        </CardBody>
-      </Card>
+            </div>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 };

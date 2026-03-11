@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -16,6 +18,22 @@
   --color-success200: #c6f0c2;
   --color-danger100: #fcecea;
   --color-danger200: #f5c0b8;
+  --color-warning100: #fff4d8;
+  --color-warning500: #e4a33f;
+  --color-warning700: #b36b00;
+  --color-success700: #2f7a2f;
+  --color-hero-bg: #060a1a;
+  --color-hero-border: #202445;
+  --color-hero-muted: #a5afcc;
+  --color-hero-button-border: #3a416d;
+  --color-hero-button-hover: #111633;
+  --color-cta-from: #0b1025;
+  --color-cta-to: #2f2f86;
+  --color-cta-border: #2f2f5f;
+  --color-cta-muted: #c7c8dd;
+  --color-cta-button-hover: #3f3bd9;
+  --color-divider-muted: #8e8ea9;
+  --color-card-grid-title: #2a2a5f;
 }
 
 @media (prefers-color-scheme: dark) {

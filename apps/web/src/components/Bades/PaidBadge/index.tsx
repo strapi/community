@@ -1,10 +1,8 @@
-import { Badge } from "@strapi/design-system";
-
 const PaidBadge = () => {
   return (
-    <Badge backgroundColor="success100" textColor="success700">
+    <span className="inline-flex rounded-md bg-(--color-success100) px-2 py-1 text-xs font-semibold text-(--color-success700)">
       Paid
-    </Badge>
+    </span>
   );
 };
 

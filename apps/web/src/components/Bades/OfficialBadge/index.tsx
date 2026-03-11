@@ -1,10 +1,8 @@
-import { Badge } from "@strapi/design-system";
-
 const OfficialBadge = () => {
   return (
-    <Badge backgroundColor="primary100" textColor="primary700">
+    <span className="inline-flex rounded-md bg-(--color-primary100) px-2 py-1 text-xs font-semibold text-(--color-primary700)">
       Official
-    </Badge>
+    </span>
   );
 };
 

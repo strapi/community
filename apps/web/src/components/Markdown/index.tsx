@@ -1,4 +1,3 @@
-import { Box } from "@strapi/design-system";
 import MarkdownRender from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -11,7 +10,7 @@ type Props = {
 
 const Markdown = (props: Props) => {
   return (
-    <Box className={styles.markdown}>
+    <div className={styles.markdown}>
       <MarkdownRender
         rehypePlugins={[rehypeRaw, remarkGfm]}
         components={{
@@ -36,7 +35,7 @@ const Markdown = (props: Props) => {
       >
         {props.markdown}
       </MarkdownRender>
-    </Box>
+    </div>
   );
 };
 

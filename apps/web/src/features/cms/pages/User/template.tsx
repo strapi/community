@@ -1,7 +1,5 @@
 "use client";
 
-import { Flex, Grid, Table, Tbody } from "@strapi/design-system";
-import { Download } from "@strapi/icons";
 import Image from "next/image";
 import TimeAgo from "react-timeago";
 
@@ -39,48 +37,31 @@ const UserTemplate = ({ document }: Props) => {
   }, packages[0]);
 
   return (
-    <>
-      <Grid.Item
-        col={9}
-        gap={"32px"}
-        direction={"column"}
-        alignItems={"flex-start"}
-        justifyContent={"flex-start"}
-      >
-        <Flex
-          width={"100%"}
-          gap={"32px"}
-          direction={"column"}
-          className={styles.leftSection}
-        >
-          <Flex width={"100%"}>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <section className="lg:col-span-9">
+        <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
+          <div className="w-full">
             <BackLink to={"/"} />
-          </Flex>
+          </div>
 
-          <Flex
-            width={"100%"}
-            gap={"24px"}
-            direction={"row"}
-            alignItems={"flex-start"}
-            justifyContent={"flex-start"}
-          >
+          <div className="flex w-full items-start justify-start gap-6">
             <Image
               src="/logo-plugin.png"
               width={60}
               height={60}
               alt="Logo plugin"
             />
-            <Flex width={"100%"} direction={"column"} alignItems={"flex-start"}>
+            <div className="flex w-full flex-col items-start">
               <h1 className={styles.pluginTitle}>{profile?.full_name} </h1>
               <p className={styles.plugingShortDescription}>
                 {profile?.headline}
               </p>
-            </Flex>
-          </Flex>
-        </Flex>
-        <Flex width={"100%"} className={stylesPluginList.pluginListElement}>
-          <Table colCount={3} rowCount={10} className={styles.pluginListTable}>
-            <Tbody>
+            </div>
+          </div>
+        </div>
+        <div className={`${stylesPluginList.pluginListElement} w-full`}>
+          <table className={`${styles.pluginListTable} w-full`}>
+            <tbody>
               {packages.map((pkg) => (
                 <TableListItem
                   key={pkg.id}
@@ -95,55 +76,35 @@ const UserTemplate = ({ document }: Props) => {
                   }}
                 />
               ))}
-            </Tbody>
-          </Table>
-        </Flex>
-      </Grid.Item>
-      <Grid.Item
-        col={3}
-        direction={"column"}
-        alignItems={"flex-start"}
-        justifyContent={"flex-start"}
-      >
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <aside className="lg:col-span-3">
         <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
           Details
         </h3>
-        <Flex width={"100%"} direction={"column"}>
-          <Flex
-            className={styles.listItem}
-            width={"100%"}
-            direction={"row"}
-            justifyContent={"space-between"}
-          >
+        <div className="flex w-full flex-col">
+          <div className={`${styles.listItem} flex w-full items-center justify-between`}>
             <p>Cumulated downloads</p>
-            <Flex direction={"row"} gap={"4px"}>
-              <Download width={12} height={12} color={"#666687"} />
+            <span className="flex items-center gap-1">
+              {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
               <p className={styles.valueItem}>
                 {aggregatedDownloads.toLocaleString()}
               </p>
-            </Flex>
-          </Flex>
-          <Flex
-            className={styles.listItem}
-            width={"100%"}
-            direction={"row"}
-            justifyContent={"space-between"}
-          >
+            </span>
+          </div>
+          <div className={`${styles.listItem} flex w-full items-center justify-between`}>
             <p>Published packages</p>
             <p className={styles.valueItem}>{packages.length}</p>
-          </Flex>
+          </div>
           {mostRecentItem?.updatedAt && (
-            <Flex
-              className={styles.listItem}
-              width={"100%"}
-              direction={"row"}
-              justifyContent={"space-between"}
-            >
+            <div className={`${styles.listItem} flex w-full items-center justify-between`}>
               <p>Last update</p>
               <p className={styles.valueItem}>
                 <TimeAgo date={mostRecentItem?.updatedAt} />
               </p>
-            </Flex>
+            </div>
           )}
 
           <ActionCard
@@ -153,9 +114,9 @@ const UserTemplate = ({ document }: Props) => {
             type="success"
             link="https://example.com"
           />
-        </Flex>
-      </Grid.Item>
-    </>
+        </div>
+      </aside>
+    </div>
   );
 };
 

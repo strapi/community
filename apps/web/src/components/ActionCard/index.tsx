@@ -1,5 +1,3 @@
-import { Button } from "@strapi/design-system";
-import { ExternalLink } from "@strapi/icons";
 import Link from "next/link";
 import styles from "./styles.module.css";
 
@@ -30,7 +28,7 @@ export function ActionCard({ title, text, className, type, ...props }: Props) {
         href={props.link}
         className={`${styles.actionCard} ${styles[type]} ${className}`}
       >
-        <ExternalLink className={styles.actionCardIcon} />
+        {/* <ExternalLink className={styles.actionCardIcon} /> */}
         <h3 className={styles.actionCardTitle}>{title}</h3>
         <p className={styles.actionCardText}>{text}</p>
       </Link>
@@ -41,12 +39,13 @@ export function ActionCard({ title, text, className, type, ...props }: Props) {
     <div className={`${styles.actionCard} ${styles[type]} ${className}`}>
       <h3 className={styles.actionCardTitle}>{title}</h3>
       <p className={styles.actionCardText}>{text}</p>
-      <Button
+      <button
+        type="button"
         className={styles.actionCardButton}
         onClick={() => window.open(props.button.link, "_blank")}
       >
         {props.button.text}
-      </Button>
+      </button>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Box, Button, Flex, Grid } from "@strapi/design-system";
 import type { BaseHit } from "instantsearch.js";
 import {
   type UseInfiniteHitsProps,
@@ -17,22 +16,26 @@ const GridHits = <T extends BaseHit>(props: Props<T>) => {
   const { items, isLastPage, showMore } = useInfiniteHits(restProps);
 
   return (
-    <Box width="100%">
-      <Grid.Root gridCols={12} gap={4} width="100%">
+    <div className="w-full">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((hit, key) => (
-          <Grid.Item col={4} key={`${key}-${hit.objectID}`}>
+          <div key={`${key}-${hit.objectID}`}>
             <Hit hit={hit} />
-          </Grid.Item>
+          </div>
         ))}
-      </Grid.Root>
-      <Flex justifyContent="center" marginTop="24px">
+      </div>
+      <div className="mt-6 flex justify-center">
         {!isLastPage && (
-          <Button onClick={showMore} size="L" variant="secondary">
+          <button
+            type="button"
+            onClick={showMore}
+            className="rounded-md border border-(--color-primary200) px-4 py-2 text-sm font-semibold text-(--color-primary700) hover:bg-(--color-primary100)"
+          >
             Load more
-          </Button>
+          </button>
         )}
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 };
 
