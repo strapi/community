@@ -6,8 +6,9 @@
   "options": {},
   "attributes": {
     "index_name": {
-      "type": "string",
-      "required": true
+      "type": "enumeration",
+      "required": true,
+      "enum": ["generic_search"]
     }
   },
   "config": {}

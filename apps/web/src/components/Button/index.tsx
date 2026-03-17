@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import styles from "./styles.module.css";
+import { Button as UIButton } from "@/components/ui/button";
 
 type Variant = "primary" | "secondary";
 type Size = "small" | "medium" | "large";
@@ -30,19 +30,17 @@ export function Button({
   className = "",
   ...props
 }: ButtonProps) {
-  const classNames = `${styles.button} ${styles[variant]} ${styles[size]} ${className}`;
-
   if ("href" in props && props.href) {
     return (
-      <Link href={props.href} className={classNames}>
-        {children}
-      </Link>
+      <UIButton asChild variant={variant} size={size} className={className}>
+        <Link href={props.href}>{children}</Link>
+      </UIButton>
     );
   }
 
   return (
-    <button className={classNames} {...props}>
+    <UIButton variant={variant} size={size} className={className} {...props}>
       {children}
-    </button>
+    </UIButton>
   );
 }
