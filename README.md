@@ -1,4 +1,4 @@
-# Strapi Community
+# Strapi Marketplace
 
 This monorepo contains all the code for Strapi's online Marketplace. It's structured as a pnpm workspace with multiple applications and shared packages.
 
