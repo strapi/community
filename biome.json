@@ -20,9 +20,6 @@
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
-    "domains": {
-      "next": "recommended"
-    },
     "enabled": true,
     "rules": {
       "recommended": true,
