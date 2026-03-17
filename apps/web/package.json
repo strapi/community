@@ -36,6 +36,7 @@
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.4",
     "@repo/typescript-config": "workspace:*",
     "@strapi/types": "5.33.3",
     "@tailwindcss/postcss": "^4.1.13",

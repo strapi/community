@@ -16,8 +16,10 @@
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.4",
     "@repo/typescript-config": "workspace:*",
     "@strapi/types": "5.33.3",
-    "@types/pluralize": "^0.0.33"
+    "@types/pluralize": "^0.0.33",
+    "typescript": "5.9.2"
   }
 }
