@@ -12,11 +12,32 @@ export default ({ env }) => ({
       host: env("MEILISEARCH_HOST"),
       apiKey: env("MEILISEARCH_API_KEY"),
       package: {
-        indexName: "search_page",
+        indexName: "generic_search",
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
             "icon",
+            "labels",
+            "url_alias",
+            "categories",
+          ],
+        },
+        settings: {
+          sortableAttributes: ["npm_downloads", "github_stars", "createdAt"],
+          filterableAttributes: [
+            "type",
+            "categories",
+            "labels.featured",
+            "labels.official",
+            "labels.paid",
+          ],
+        },
+      },
+      template: {
+        indexName: "generic_search",
+        entriesQuery: {
+          populate: [
+            "maintainers.profile.avatar",
             "labels",
             "url_alias",
             "categories",

@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_sections_searches",
+  "info": {
+    "displayName": "Search"
+  },
+  "options": {},
+  "attributes": {
+    "index_name": {
+      "type": "enumeration",
+      "required": true,
+      "enum": ["generic_search"]
+    }
+  },
+  "config": {}
+}

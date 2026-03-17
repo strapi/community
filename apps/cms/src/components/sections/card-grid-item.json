@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_sections_card_grid_items",
+  "info": {
+    "displayName": "Card Grid Item"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "button": {
+      "type": "component",
+      "component": "shared.button",
+      "repeatable": false,
+      "required": true
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "overview_pages",
+  "info": {
+    "singularName": "overview-page",
+    "pluralName": "overview-pages",
+    "displayName": "Overview pages"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "seo": {
+      "type": "component",
+      "component": "shared.seo",
+      "repeatable": false
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "sections.card-grid",
+        "sections.search",
+        "sections.highlights",
+        "sections.cta"
+      ]
+    }
+  }
+}

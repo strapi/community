@@ -1,0 +1,49 @@
+{
+  "collectionName": "components_sections_highlights",
+  "info": {
+    "displayName": "Highlights"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "button": {
+      "type": "component",
+      "component": "shared.button",
+      "repeatable": false
+    },
+    "query": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "packages_highlighted",
+        "packages_newest",
+        "templates_highlighted",
+        "templates_newest",
+        "recipes_highlighted",
+        "recipes_newest",
+        "showcases_highlighted",
+        "showcases_newest",
+        "community_stars",
+        "community_newest"
+      ]
+    },
+    "amount": {
+      "type": "integer",
+      "required": true,
+      "default": 2,
+      "min": 2,
+      "max": 6
+    },
+    "grid": {
+      "type": "integer",
+      "required": true,
+      "default": 2,
+      "min": 2,
+      "max": 4
+    }
+  },
+  "config": {}
+}
