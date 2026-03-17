@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/Button";
 import Container from "@/components/Container";
 
 const MainNavigation = () => {
@@ -62,25 +63,38 @@ const MainNavigation = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-md border border-(--color-hero-button-border) text-base text-white transition-colors hover:bg-(--color-hero-button-hover)"
+          <Button
+            variant="secondary"
+            size="small"
             aria-label="Search"
+            className="h-10 w-10 rounded-md border-(--color-hero-button-border) bg-(--color-hero-button-hover) p-0 text-white hover:border-(--color-hero-button-border) hover:bg-(--color-hero-button-hover) hover:text-white"
           >
-            ⌕
-          </button>
-          <Link
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+          </Button>
+          <Button
             href="/login"
-            className="rounded-md border border-(--color-hero-button-border) px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-(--color-hero-button-hover)"
+            variant="secondary"
+            className="h-10 rounded-md border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-6 text-sm font-semibold text-white hover:border-(--color-hero-button-border) hover:bg-(--color-hero-button-hover) hover:text-white"
           >
             Login
-          </Link>
-          <Link
+          </Button>
+          <Button
             href="/signup"
-            className="rounded-md bg-(--color-primary600) px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-(--color-cta-button-hover)"
+            variant="primary"
+            className="h-10 rounded-md bg-(--color-primary600) px-6 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
           >
             Signup
-          </Link>
+          </Button>
         </div>
       </Container>
     </nav>

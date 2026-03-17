@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/Button";
 import styles from "./styles.module.css";
 
 type BaseProps = {
@@ -39,13 +40,14 @@ export function ActionCard({ title, text, className, type, ...props }: Props) {
     <div className={`${styles.actionCard} ${styles[type]} ${className}`}>
       <h3 className={styles.actionCardTitle}>{title}</h3>
       <p className={styles.actionCardText}>{text}</p>
-      <button
-        type="button"
-        className={styles.actionCardButton}
+      <Button
+        variant="secondary"
+        size="medium"
         onClick={() => window.open(props.button.link, "_blank")}
+        className={styles.actionCardButton}
       >
         {props.button.text}
-      </button>
+      </Button>
     </div>
   );
 }

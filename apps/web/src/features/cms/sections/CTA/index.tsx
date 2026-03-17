@@ -1,6 +1,6 @@
 import type { Data } from "@strapi/types";
 import Image from "next/image";
-import Link from "next/link";
+import { Button } from "@/components/Button";
 
 type Props = {
   section: Data.Component<"sections.cta">;
@@ -25,12 +25,13 @@ const CTASection = ({ section }: Props) => {
             {cta?.content}
           </p>
           {cta?.button?.link && (
-            <Link
+            <Button
               href={cta.button.link}
-              className="mt-6 inline-flex rounded-md bg-(--color-primary600) px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-(--color-cta-button-hover)"
+              variant="primary"
+              className="mt-6 bg-(--color-primary600) text-white hover:bg-(--color-cta-button-hover)"
             >
               {cta.button.label}
-            </Link>
+            </Button>
           )}
         </div>
         {cta?.image?.url && (

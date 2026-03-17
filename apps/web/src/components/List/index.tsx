@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/Button";
 import { formatDownloads, formatStars } from "@/utils/numbers";
 
 import styles from "./styles.module.css";
@@ -61,13 +62,13 @@ export default function TableListItem(props: Props) {
         </div>
       </td>
       <td className={styles.pluginListElementLastItem}>
-        <button
-          type="button"
-          className="rounded border border-(--color-primary200) px-3 py-1 text-xs font-semibold text-(--color-primary700) hover:bg-(--color-primary100)"
+        <Button
+          variant="secondary"
+          size="small"
           onClick={() => router.push(`${props.link}`)}
         >
           More
-        </button>
+        </Button>
       </td>
     </tr>
   );

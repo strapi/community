@@ -1,6 +1,6 @@
 import type { Data } from "@strapi/types";
 import Image from "next/image";
-import Link from "next/link";
+import { Button } from "@/components/Button";
 
 type Props = {
   section: Data.Component<"sections.card-grid">;
@@ -23,12 +23,13 @@ const CardGridSection = ({ section }: Props) => {
               <p className="mt-3 text-sm leading-6 text-(--color-neutral700)">
                 {item.content}
               </p>
-              <Link
+              <Button
                 href={item.button?.link || "#"}
-                className="mt-6 inline-flex rounded-md border border-(--color-neutral150) bg-white px-4 py-2 text-sm font-semibold text-(--color-primary700) shadow-[0_1px_1px_rgba(0,0,0,0.06)] transition-colors hover:bg-(--color-primary100)"
+                variant="secondary"
+                className="mt-6 border-(--color-neutral150) bg-white text-(--color-primary700) shadow-[0_1px_1px_rgba(0,0,0,0.06)] hover:bg-(--color-primary100)"
               >
                 {item.button?.label || "Submit"}
-              </Link>
+              </Button>
             </div>
             {item.image?.url && (
               <Image

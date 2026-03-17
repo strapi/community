@@ -3,6 +3,7 @@ import {
   type UseInfiniteHitsProps,
   useInfiniteHits,
 } from "react-instantsearch";
+import { Button } from "@/components/Button";
 
 type Props<T extends BaseHit> = UseInfiniteHitsProps<T> & {
   hitComponent: React.ComponentType<{ hit: T }>;
@@ -26,13 +27,9 @@ const GridHits = <T extends BaseHit>(props: Props<T>) => {
       </div>
       <div className="mt-6 flex justify-center">
         {!isLastPage && (
-          <button
-            type="button"
-            onClick={showMore}
-            className="rounded-md border border-(--color-primary200) px-4 py-2 text-sm font-semibold text-(--color-primary700) hover:bg-(--color-primary100)"
-          >
+          <Button variant="secondary" onClick={showMore}>
             Load more
-          </button>
+          </Button>
         )}
       </div>
     </div>
