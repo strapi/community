@@ -25,7 +25,7 @@ export const findPage = async (
 ): Promise<
   Modules.Documents.AnyDocument & { contentType: UID.ContentType }
 > => {
-  const params = qs.stringify(query);
+  const params = qs.stringify(query, { encode: false });
   return await client
     .fetch(`/webtools/router?${params}`)
     .then((response) => response.json())
