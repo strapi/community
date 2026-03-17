@@ -3,10 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import TimeAgo from "react-timeago";
-import { ActionCard } from "@/components/ActionCard";
-import Container from "@/components/Container";
-import Markdown from "@/components/Markdown";
-import type { PackagePageData } from "@/features/cms/pages/Package/page";
+import { Markdown } from "@/components/content/markdown";
+import { Container } from "@/components/layout/container";
+import type { PackagePageData } from "@/features/cms/pages/package";
 import styles from "./page.module.css";
 
 type Props = {
@@ -157,13 +156,6 @@ const PackageTemplate = ({ document }: Props) => {
                 </p>
               </div>
             )}
-            <ActionCard
-              className={styles.actionCard}
-              title="Found an issue?"
-              text="Something is wrong or doesn’t work as expected? Report the issue to the author."
-              link="https://example.com"
-              type="danger"
-            />
           </div>
         </aside>
       </div>
@@ -171,4 +163,4 @@ const PackageTemplate = ({ document }: Props) => {
   );
 };
 
-export default PackageTemplate;
+export { PackageTemplate };

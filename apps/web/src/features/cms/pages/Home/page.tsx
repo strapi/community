@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
-import HomeTemplate from "@/features/cms/pages/Home/template";
+import { HomeTemplate } from "@/features/cms/pages/home";
 
 const contentType = "api::home.home" satisfies UID.ContentType;
 
@@ -18,4 +18,4 @@ const HomePage = async () => {
   return <HomeTemplate document={document.data} />;
 };
 
-export default HomePage;
+export { HomePage };

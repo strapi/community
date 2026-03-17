@@ -1,8 +1,7 @@
 "use client";
 
+import { Navigation } from "@/components/layout/navigation";
 import "./globals.css";
-
-import MainNavigation from "@/components/MainNavigation";
 
 export default function RootLayout({
   children,
@@ -12,7 +11,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`} suppressHydrationWarning>
-        <MainNavigation />
+        <Navigation />
 
         {children}
       </body>

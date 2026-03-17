@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
-import TemplateTemplate from "@/features/cms/pages/Template/template";
+import { TemplateTemplate } from "@/features/cms/pages/template";
 
 const contentType = "api::template.template" satisfies UID.ContentType;
 
@@ -24,4 +24,4 @@ const TemplatePage = async ({ documentId }: Props) => {
   return <TemplateTemplate document={document.data} />;
 };
 
-export default TemplatePage;
+export { TemplatePage };

@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
-import PackageTemplate from "@/features/cms/pages/Package/template";
+import { PackageTemplate } from "@/features/cms/pages/package";
 
 const contentType = "api::package.package" satisfies UID.ContentType;
 
@@ -33,4 +33,4 @@ const PackagePage = async ({ documentId }: Props) => {
   return <PackageTemplate document={document.data} />;
 };
 
-export default PackagePage;
+export { PackagePage };

@@ -1,8 +1,8 @@
 import type { Data, UID } from "@strapi/types";
-import CardGridSection from "@/features/cms/sections/CardGrid";
-import CTASection from "@/features/cms/sections/CTA";
-import HighlightsSection from "@/features/cms/sections/Highlights";
-import SearchSection from "@/features/cms/sections/Search";
+import { CardGridSection } from "@/features/cms/sections/card-grid";
+import { CTASection } from "@/features/cms/sections/cta";
+import { HighlightsSection } from "@/features/cms/sections/highlights";
+import { SearchSection } from "@/features/cms/sections/search";
 
 type Props = {
   section: Data.Component;
@@ -27,4 +27,4 @@ const SectionsMapper = ({ section, id }: Props) => {
   }
 };
 
-export default SectionsMapper;
+export { SectionsMapper };

@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
-import CategoryTemplate from "@/features/cms/pages/Category/template";
+import { CategoryTemplate } from "@/features/cms/pages/category";
 
 const contentType = "api::category.category" satisfies UID.ContentType;
 
@@ -26,4 +26,4 @@ const CategoryPage = async ({ documentId }: Props) => {
   return <CategoryTemplate document={document.data} />;
 };
 
-export default CategoryPage;
+export { CategoryPage };

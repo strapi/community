@@ -1,7 +1,7 @@
 "use client";
 
-import Container from "@/components/Container";
-import type { CategoryPageData } from "@/features/cms/pages/Category/page";
+import { Container } from "@/components/layout/container";
+import type { CategoryPageData } from "@/features/cms/pages/category";
 
 type Props = {
   document: CategoryPageData;
@@ -19,4 +19,4 @@ const CategoryTemplate = ({ document }: Props) => {
   );
 };
 
-export default CategoryTemplate;
+export { CategoryTemplate };

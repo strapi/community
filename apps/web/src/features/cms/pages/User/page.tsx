@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
-import UserTemplate from "@/features/cms/pages/User/template";
+import { UserTemplate } from "@/features/cms/pages/user";
 
 const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
 
@@ -34,4 +34,4 @@ const UserPage = async ({ id }: Props) => {
   return <UserTemplate document={document.data} />;
 };
 
-export default UserPage;
+export { UserPage };

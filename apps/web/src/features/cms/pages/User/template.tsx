@@ -10,10 +10,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import { ActionCard } from "@/components/ActionCard";
-import BackLink from "@/components/BackLink";
-import TableListItem from "@/components/List";
-import type { UserPageData } from "@/features/cms/pages/User/page";
+import type { UserPageData } from "@/features/cms/pages/user";
 
 type Props = {
   document: UserPageData;
@@ -40,10 +37,6 @@ const UserTemplate = ({ document }: Props) => {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <section className="lg:col-span-9">
         <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
-          <div className="w-full">
-            <BackLink to={"/"} />
-          </div>
-
           <div className="flex w-full items-start justify-start gap-6">
             <Image
               src="/logo-plugin.png"
@@ -60,24 +53,7 @@ const UserTemplate = ({ document }: Props) => {
           </div>
         </div>
         <div className={`${stylesPluginList.pluginListElement} w-full`}>
-          <table className={`${styles.pluginListTable} w-full`}>
-            <tbody>
-              {packages.map((pkg) => (
-                <TableListItem
-                  key={pkg.id}
-                  name={pkg.name || ""}
-                  description={pkg.description || ""}
-                  downloads={Number(pkg.npm_downloads) || 0}
-                  link={pkg.url_alias?.[0]?.url_path || ""}
-                  stars={Number(pkg.github_stars) || 0}
-                  icon={{
-                    url: pkg.icon?.url || "/default-plugin-icon.png",
-                    alternativeText: pkg.icon?.alternativeText || "icon",
-                  }}
-                />
-              ))}
-            </tbody>
-          </table>
+          content
         </div>
       </section>
       <aside className="lg:col-span-3">
@@ -112,18 +88,10 @@ const UserTemplate = ({ document }: Props) => {
               </p>
             </div>
           )}
-
-          <ActionCard
-            className={styles.actionCard}
-            title="Contribute"
-            text="Develop your own plugin and submit it to the marketplace!"
-            type="success"
-            link="https://example.com"
-          />
         </div>
       </aside>
     </div>
   );
 };
 
-export default UserTemplate;
+export { UserTemplate };
