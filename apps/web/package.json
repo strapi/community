@@ -14,7 +14,6 @@
   "dependencies": {
     "@meilisearch/instant-meilisearch": "^0.29.0",
     "@repo/strapi-client": "workspace:*",
-    "@repo/strapi-instantsearch": "workspace:*",
     "@strapi/blocks-react-renderer": "^1.0.1",
     "@strapi/client": "^1.6.0",
     "@types/lodash": "^4.17.21",

@@ -1,11 +1,12 @@
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import {
+  Configure,
+  InstantSearch,
   RefinementList,
   SearchBox,
   SortBy,
   ToggleRefinement,
-} from "@repo/strapi-instantsearch";
-import { Configure, InstantSearch } from "react-instantsearch";
+} from "react-instantsearch";
 import GridHits from "@/features/search/components/GridHits";
 import PackageCard from "@/features/search/components/PackageCard";
 import Stats from "@/features/search/components/Stats";

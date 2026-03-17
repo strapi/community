@@ -1,4 +1,0 @@
-{
-  "*.{.ts,tsx,d.ts,cts,d.cts,mts,d.mts,js,cjs,mjs,jsx,json,jsonc}": ["pnpm run lint"],
-  "*.{.ts,tsx,d.ts,cts,d.cts,mts,d.mts}": ["bash -c 'pnpm run check-types'"]
-}

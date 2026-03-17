@@ -85,7 +85,6 @@ The `packages/` directory contains shared libraries and configuration:
 ```
 packages/
 ├── strapi-client/ # A type-safe wrapper for `@strapi/client`
-├── strapi-instantsearch/ # Instantsearch UI components using `@strapi/design-system`
 └── typescript-config/ # Shared TypeScript configurations
 ```
 
@@ -123,12 +122,6 @@ A wrapper for the `@strapi/client` that add's type safety based on the types fro
 
 See [Strapi Client README](./packages/strapi-client/README.md) for more details.
 
-### Strapi Instantsearch (`packages/strapi-instantsearch`)
-
-React Instantsearch UI components based on `@strapi/design-system` for branded search pages.
-
-See [Strapi Instantsearch README](./packages/strapi-instantsearch/README.md) for more details.
-
 ### TypeScript Config (`packages/typescript-config`)
 
 Shared TypeScript configurations for various project types (Next.js, Strapi, etc.).
@@ -140,7 +133,7 @@ Shared TypeScript configurations for various project types (Next.js, Strapi, etc
 - **Front-end Framework**: React 19 with Next.js 15
 - **CMS**: Strapi 5
 - **Search Index**: Meilisearch
-- **Styling**: Strapi Design System
+- **Styling**: Tailwind and shadcn/ui
 - **Testing**: Vitest for unit tests, Playwright for end-to-end tests
 - **Linting/formatting**: Biome for consistent code style
 - **Components**: Custom components based on shadcn/ui pattern
