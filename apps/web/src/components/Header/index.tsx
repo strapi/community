@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Container from "@/components/Container";
 
 type Props = {
@@ -9,31 +8,25 @@ type Props = {
 const Header = ({ title, description }: Props) => {
   return (
     <header
-      className="mb-12 border-b border-(--color-hero-border) bg-(--color-hero-bg) text-white"
+      className="border-b border-(--color-hero-border) bg-(--color-hero-bg) text-white"
       style={{
-        backgroundImage:
-          "radial-gradient(circle at center, rgba(53,65,123,0.35) 1px, transparent 1px)",
-        backgroundSize: "8px 8px",
+        backgroundImage: "var(--bg-dotted-pattern-image)",
+        backgroundSize: "var(--bg-dotted-pattern-size)",
       }}
     >
-      <Container>
-        <div className="flex min-h-[200px] w-full items-end justify-between gap-8 py-10">
-          <div className="max-w-3xl">
-            <p className="mb-4 text-sm text-(--color-primary500)">
+      <Container className="border-x border-(--color-hero-border)">
+        <div className="w-full py-14 md:py-18">
+          <div className="max-w-2xl">
+            <p className="mb-5 text-sm text-(--color-primary500)">
               Strapi Marketplace &gt; Submit
             </p>
-            <h1 className="text-5xl font-semibold tracking-tight">{title}</h1>
-            <p className="mt-4 max-w-2xl text-base text-(--color-hero-muted)">
+            <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-(--color-hero-muted)">
               {description}
             </p>
           </div>
-          <Link
-            href="/submit"
-            className="hidden min-w-fit items-center gap-2 rounded-md border border-(--color-hero-button-border) px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-(--color-hero-button-hover) lg:flex"
-          >
-            {/* <Upload width={14} height={14} /> */}
-            Submit a plugin or provider
-          </Link>
         </div>
       </Container>
     </header>

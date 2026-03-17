@@ -14,7 +14,7 @@ const Container = ({
 }: Props) => {
   return (
     <div
-      className={`mx-auto w-full px-5 ${className || ""}`.trim()}
+      className={`mx-auto w-full max-w-312 px-5 ${className || ""}`.trim()}
       style={{ maxWidth, ...style }}
       {...props}
     >

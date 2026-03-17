@@ -8,23 +8,24 @@ type Props = {
 
 const CardGridSection = ({ section }: Props) => {
   return (
-    <section className="mb-16">
+    <section>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {section.items?.map((item) => (
+        {section.items?.map((item, index) => (
           <article
             key={item.id}
-            className="relative overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6 shadow-sm"
+            className="relative min-h-62 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6"
           >
-            <div className="relative z-10 max-w-[65%]">
-              <h3 className="text-[32px] font-semibold leading-tight text-(--color-card-grid-title)">
+            <div className="relative z-10 max-w-[56%]">
+              <h3 className="flex items-center gap-2 text-[29px] font-semibold leading-9 text-(--color-card-grid-title)">
+                <span className="text-base text-(--color-primary600)">⌁</span>
                 {item.title}
               </h3>
-              <p className="mt-3 text-sm leading-6 text-(--color-neutral600)">
+              <p className="mt-3 text-sm leading-6 text-(--color-neutral700)">
                 {item.content}
               </p>
               <Link
                 href={item.button?.link || "#"}
-                className="mt-6 inline-flex rounded-md border border-(--color-primary200) bg-white px-4 py-2 text-sm font-semibold text-(--color-primary700) transition-colors hover:bg-(--color-primary100)"
+                className="mt-6 inline-flex rounded-md border border-(--color-neutral150) bg-white px-4 py-2 text-sm font-semibold text-(--color-primary700) shadow-[0_1px_1px_rgba(0,0,0,0.06)] transition-colors hover:bg-(--color-primary100)"
               >
                 {item.button?.label || "Submit"}
               </Link>
@@ -33,9 +34,11 @@ const CardGridSection = ({ section }: Props) => {
               <Image
                 src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image.url}`}
                 alt={item.image.alternativeText || item.title || "Card image"}
-                width={260}
-                height={160}
-                className="pointer-events-none absolute -bottom-2 right-0 z-0 h-auto w-[45%] rotate-[-10deg] object-contain"
+                width={290}
+                height={180}
+                className={`pointer-events-none absolute -right-4 -bottom-6 z-0 h-auto w-[48%] object-contain ${
+                  index % 2 === 0 ? "rotate-[-11deg]" : "rotate-10"
+                }`}
               />
             )}
           </article>

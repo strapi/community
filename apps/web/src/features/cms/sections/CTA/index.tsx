@@ -10,10 +10,17 @@ const CTASection = ({ section }: Props) => {
   const { cta } = section;
 
   return (
-    <section className="mb-12">
-      <div className="relative overflow-hidden rounded-lg border border-(--color-cta-border) bg-linear-to-r from-(--color-cta-from) to-(--color-cta-to) px-8 py-10 text-white">
-        <div className="relative z-10 max-w-xl">
-          <h3 className="text-3xl font-semibold leading-tight">{cta?.title}</h3>
+    <section>
+      <div
+        className="relative overflow-hidden rounded-lg border border-(--color-cta-border) bg-linear-to-r from-(--color-cta-from) to-(--color-cta-to) px-8 py-8 text-white"
+        style={{
+          backgroundImage:
+            "var(--bg-dotted-pattern-image), linear-gradient(90deg, var(--color-cta-from), var(--color-cta-to))",
+          backgroundSize: "var(--bg-dotted-pattern-size), auto",
+        }}
+      >
+        <div className="relative z-10 max-w-lg">
+          <h3 className="text-4xl font-semibold leading-tight">{cta?.title}</h3>
           <p className="mt-3 text-sm leading-6 text-(--color-cta-muted)">
             {cta?.content}
           </p>
@@ -32,7 +39,7 @@ const CTASection = ({ section }: Props) => {
             alt={cta.image.alternativeText || cta.title || "CTA image"}
             width={420}
             height={220}
-            className="pointer-events-none absolute -right-8 bottom-0 hidden h-auto w-[46%] object-contain md:block"
+            className="pointer-events-none absolute -right-3 bottom-0 hidden h-auto w-[48%] object-contain md:block"
           />
         )}
       </div>

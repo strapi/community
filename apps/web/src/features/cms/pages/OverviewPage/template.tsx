@@ -16,15 +16,37 @@ export default function OverviewPage({ document }: Props) {
         title={document.title as string}
         description={document.description as string}
       />
-      <Container>
-        {document.sections?.map((section) => (
-          <SectionsMapper
-            key={section.id}
-            section={section}
-            id={section.__component}
-          />
-        ))}
-      </Container>
+
+      {document.sections?.map((section) => {
+        if (section.__component === "sections.card-grid") {
+          return (
+            <section
+              key={section.id}
+              className="border-y border-(--color-neutral150) bg-(--color-neutral100) py-10 md:py-12"
+            >
+              <Container>
+                <SectionsMapper section={section} id={section.__component} />
+              </Container>
+            </section>
+          );
+        }
+
+        if (section.__component === "sections.cta") {
+          return (
+            <section key={section.id} className="py-10 md:py-12">
+              <Container>
+                <SectionsMapper section={section} id={section.__component} />
+              </Container>
+            </section>
+          );
+        }
+
+        return (
+          <Container key={section.id}>
+            <SectionsMapper section={section} id={section.__component} />
+          </Container>
+        );
+      })}
     </div>
   );
 }

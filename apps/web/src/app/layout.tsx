@@ -2,9 +2,7 @@
 
 import "./globals.css";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Container from "@/components/Container";
 
 export default function RootLayout({
@@ -12,29 +10,88 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const router = useRouter();
-
   return (
     <html lang="en">
       <body className={`antialiased`} suppressHydrationWarning>
         <nav className="border-b border-(--color-hero-border) bg-(--color-hero-bg)">
-          <Container className="flex h-16 items-center justify-between">
-            <Link href="/">
-              <Image
-                src="/logo.svg"
-                width={211}
-                height={34}
-                alt="Strapi Market logo"
-                priority={true}
-              />
-            </Link>
-            <button
-              type="button"
-              onClick={() => router.push("https://strapi.io")}
-              className="rounded-md border border-(--color-hero-button-border) px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-(--color-hero-button-hover)"
-            >
-              Go back to the website
-            </button>
+          <Container className="flex h-18 items-center justify-between gap-8">
+            <div className="flex items-center gap-8">
+              <Link
+                href="/"
+                className="rounded-sm bg-(--color-primary600) px-2 py-1 text-[10px] font-semibold tracking-[0.08em] text-white uppercase"
+              >
+                Marketplace
+              </Link>
+              <ul className="hidden items-center gap-6 text-sm text-(--color-hero-nav-muted) lg:flex">
+                <li>
+                  <Link href="/" className="transition-colors hover:text-white">
+                    Packages
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/templates"
+                    className="transition-colors hover:text-white"
+                  >
+                    Templates
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/showcases"
+                    className="transition-colors hover:text-white"
+                  >
+                    Showcases
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/recipes"
+                    className="transition-colors hover:text-white"
+                  >
+                    Recipes
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/community"
+                    className="transition-colors hover:text-white"
+                  >
+                    Community
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/help"
+                    className="font-semibold text-white transition-colors"
+                  >
+                    Help
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="flex size-9 items-center justify-center rounded-md border border-(--color-hero-button-border) text-base text-white transition-colors hover:bg-(--color-hero-button-hover)"
+                aria-label="Search"
+              >
+                ⌕
+              </button>
+              <Link
+                href="/login"
+                className="rounded-md border border-(--color-hero-button-border) px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-(--color-hero-button-hover)"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-md bg-(--color-primary600) px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-(--color-cta-button-hover)"
+              >
+                Signup
+              </Link>
+            </div>
           </Container>
         </nav>
 
