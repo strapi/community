@@ -3,7 +3,6 @@
 import Image from "next/image";
 import TimeAgo from "react-timeago";
 
-import stylesPluginList from "@/components/List/styles.module.css";
 import styles from "./page.module.css";
 
 import "swiper/css";
@@ -52,9 +51,7 @@ const UserTemplate = ({ document }: Props) => {
             </div>
           </div>
         </div>
-        <div className={`${stylesPluginList.pluginListElement} w-full`}>
-          content
-        </div>
+        <div>content</div>
       </section>
       <aside className="lg:col-span-3">
         <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>

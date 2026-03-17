@@ -1,1 +1,1 @@
-export * from './maintainers-list';
+export * from "./maintainers-list";

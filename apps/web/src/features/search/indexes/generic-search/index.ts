@@ -1,1 +1,1 @@
-export * from './generic-search';
+export * from "./generic-search";

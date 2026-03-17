@@ -2,7 +2,7 @@ import MarkdownRender from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/content/code-block";
-import styles from "./styles.module.css";
+import styles from "./markdown.module.css";
 
 type Props = {
   markdown: string;

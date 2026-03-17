@@ -1,1 +1,1 @@
-export * from './grid-hits';
+export * from "./grid-hits";
