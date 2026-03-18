@@ -1,5 +1,3 @@
-"use client";
-
 import { Container } from "@/components/layout/container";
 import type { CategoryPageData } from "@/features/cms/pages/category";
 

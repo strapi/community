@@ -1,5 +1,3 @@
-"use client";
-
 import { Header } from "@/components/layout/header";
 import type { OverviewPageData } from "@/features/cms/pages/overview-page";
 import { SectionsMapper } from "@/features/cms/sections/mapper";

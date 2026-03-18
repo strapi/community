@@ -1,5 +1,3 @@
-"use client";
-
 import type { TemplatePageData } from "@/features/cms/pages/template";
 
 type Props = {

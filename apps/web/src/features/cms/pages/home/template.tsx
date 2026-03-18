@@ -1,5 +1,3 @@
-"use client";
-
 import { Container } from "@/components/layout/container";
 import { Header } from "@/components/layout/header";
 import type { HomePageData } from "@/features/cms/pages/home";
