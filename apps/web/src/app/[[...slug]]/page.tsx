@@ -10,6 +10,9 @@ import { PackagePage, packageMetadata } from "@/features/cms/pages/package";
 import { TemplatePage, templateMetadata } from "@/features/cms/pages/template";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
+// Regenerate static pages periodically.
+export const revalidate = 60;
+
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
