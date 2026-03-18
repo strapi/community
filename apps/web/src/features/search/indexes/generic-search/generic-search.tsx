@@ -1,5 +1,8 @@
+"use client";
+
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
-import { Configure, InstantSearch } from "react-instantsearch";
+import { Configure } from "react-instantsearch";
+import { InstantSearchNext } from "react-instantsearch-nextjs";
 import { GridHits } from "@/features/search/components/grid-hits";
 import { PackageCard } from "@/features/search/components/package-card";
 import { RefinementList } from "@/features/search/components/refinement-list";
@@ -17,7 +20,7 @@ const { searchClient } = instantMeiliSearch(
 );
 
 const GenericSearch = () => (
-  <InstantSearch
+  <InstantSearchNext
     indexName="generic_search:npm_downloads:asc"
     searchClient={searchClient}
   >
@@ -84,7 +87,7 @@ const GenericSearch = () => (
         <Configure hitsPerPage={24} />
       </section>
     </div>
-  </InstantSearch>
+  </InstantSearchNext>
 );
 
 export { GenericSearch };
