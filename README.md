@@ -1,10 +1,10 @@
-# Strapi Marketplace
+# Strapi Community Hub
 
-This monorepo contains all the code for Strapi's online Marketplace. It's structured as a pnpm workspace with multiple applications and shared packages.
+This monorepo contains all the code for Strapi's online Community Hub. It's structured as a pnpm workspace with multiple applications and shared packages.
 
 ## Project Overview
 
-The Marketplace project consists of:
+The Community Hub project consists of:
 
 - A Next.js web application
 - A Strapi application for content management
