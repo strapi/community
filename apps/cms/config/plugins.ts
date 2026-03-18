@@ -12,7 +12,7 @@ export default ({ env }) => ({
       host: env("MEILISEARCH_HOST"),
       apiKey: env("MEILISEARCH_API_KEY"),
       package: {
-        indexName: "generic_search",
+        indexName: env("MEILISEARCH_GENERIC_INDEX_NAME"),
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
@@ -34,7 +34,7 @@ export default ({ env }) => ({
         },
       },
       template: {
-        indexName: "generic_search",
+        indexName: env("MEILISEARCH_GENERIC_INDEX_NAME"),
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
