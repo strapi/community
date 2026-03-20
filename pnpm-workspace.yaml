@@ -2,5 +2,13 @@ packages:
   - apps/*
   - packages/*
 
+catalogs:
+  better-auth:
+    "better-auth": 1.5.5
+  strapi:
+    "@strapi/strapi": 0.0.0-experimental.f768670d38e0477718b8b96efd79a9d87687cc6c
+    "@strapi/types": 0.0.0-experimental.f768670d38e0477718b8b96efd79a9d87687cc6c
+    "@strapi/plugin-cloud": 0.0.0-experimental.f768670d38e0477718b8b96efd79a9d87687cc6c
+
 onlyBuiltDependencies:
   - better-sqlite3
