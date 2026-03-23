@@ -982,10 +982,13 @@ export interface PluginBetterAuthOrganization
   };
   pluginOptions: {
     'content-manager': {
-      visible: false;
+      visible: true;
     };
     'content-type-builder': {
-      visible: false;
+      visible: true;
+    };
+    webtools: {
+      enabled: false;
     };
   };
   attributes: {
