@@ -4,7 +4,7 @@
   "info": {
     "singularName": "user",
     "pluralName": "users",
-    "displayName": "User",
+    "displayName": "Users",
     "description": "Better Auth user"
   },
   "options": {
@@ -22,46 +22,52 @@
     }
   },
   "attributes": {
-    "name": {
-      "type": "string"
-    },
-    "email": {
-      "type": "email",
-      "required": true,
-      "unique": true
-    },
-    "emailVerified": {
-      "type": "boolean",
-      "default": false
-    },
-    "image": {
-      "type": "string"
-    },
-    "twoFactorEnabled": {
-      "type": "boolean"
-    },
-    "isAnonymous": {
-      "type": "boolean"
-    },
-    "username": {
-      "type": "string",
-      "unique": true
-    },
-    "displayUsername": {
-      "type": "string"
-    },
-    "phoneNumber": {
-      "type": "string",
-      "unique": true
-    },
-    "phoneNumberVerified": {
-      "type": "boolean"
-    },
     "url_alias": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "plugin::webtools.url-alias",
       "configurable": false
+    },
+    "name": {
+      "type": "string",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true,
+      "unique": true
+    },
+    "emailVerified": {
+      "type": "boolean",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true,
+      "default": false
+    },
+    "image": {
+      "type": "string",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
     },
     "profile": {
       "type": "relation",
