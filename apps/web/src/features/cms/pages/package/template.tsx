@@ -93,12 +93,12 @@ const PackageTemplate = ({ document }: Props) => {
               className={`${styles.listItem} flex w-full items-center justify-between`}
             >
               <p>Author</p>
-              {owner?.username && owner.url_alias?.[0]?.url_path ? (
+              {owner?.name && owner.url_alias?.[0]?.url_path ? (
                 <Link
                   href={owner.url_alias?.[0]?.url_path}
                   className={`${styles.valueItem} ${styles.authorName}`}
                 >
-                  {owner.username}
+                  {owner.name}
                 </Link>
               ) : (
                 <p className={`${styles.valueItem} ${styles.authorName}`}>
