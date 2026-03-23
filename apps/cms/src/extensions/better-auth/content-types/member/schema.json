@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "better_auth_members",
+  "info": {
+    "singularName": "member",
+    "pluralName": "members",
+    "displayName": "Members"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "organizationId": {
+      "type": "integer",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true
+    },
+    "userId": {
+      "type": "integer",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true
+    },
+    "role": {
+      "type": "string",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true,
+      "default": "member"
+    }
+  }
+}
