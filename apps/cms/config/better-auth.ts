@@ -6,6 +6,7 @@ import { organization } from "better-auth/plugins";
 const auth = () =>
   betterAuth({
     trustedOrigins: [process.env.WEBSITE_URL],
+    secret: process.env.BETTER_AUTH_SECRET,
     plugins: [organization()],
     emailAndPassword: {
       enabled: true,
