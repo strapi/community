@@ -631,7 +631,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     npm_downloads: Schema.Attribute.String;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
@@ -650,14 +650,22 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
-  collectionName: 'profiles';
+  collectionName: 'user_profiles';
   info: {
-    displayName: 'Profiles';
+    displayName: 'User Profile';
     pluralName: 'profiles';
     singularName: 'profile';
   };
   options: {
     draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: true;
+    };
   };
   attributes: {
     avatar: Schema.Attribute.Media<'images'>;
@@ -665,15 +673,14 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    full_name: Schema.Attribute.String & Schema.Attribute.Required;
-    headline: Schema.Attribute.String;
+    email: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::profile.profile'
     > &
       Schema.Attribute.Private;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -720,7 +727,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
@@ -988,7 +995,7 @@ export interface PluginBetterAuthOrganization
       visible: true;
     };
     webtools: {
-      enabled: false;
+      enabled: true;
     };
   };
   attributes: {
@@ -1020,6 +1027,7 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -1032,6 +1040,11 @@ export interface PluginBetterAuthOrganization
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
   };
 }
 
@@ -1172,13 +1185,8 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
-    packages: Schema.Attribute.Relation<'manyToMany', 'api::package.package'>;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
-    templates: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::template.template'
-    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

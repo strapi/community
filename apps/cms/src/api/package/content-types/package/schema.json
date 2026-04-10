@@ -58,8 +58,8 @@
     },
     "owner": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user"
+      "relation": "morphToMany",
+      "required": true
     },
     "maintainers": {
       "type": "relation",

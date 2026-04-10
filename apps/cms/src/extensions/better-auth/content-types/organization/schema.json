@@ -17,7 +17,7 @@
       "visible": true
     },
     "webtools": {
-      "enabled": false
+      "enabled": true
     }
   },
   "attributes": {
@@ -59,6 +59,12 @@
           "managed": true
         }
       }
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile",
+      "mappedBy": "owner"
     }
   }
 }

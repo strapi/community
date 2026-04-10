@@ -73,19 +73,7 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::profile.profile",
-      "mappedBy": "owner"
-    },
-    "templates": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::template.template",
-      "inversedBy": "maintainers"
-    },
-    "packages": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::package.package",
-      "inversedBy": "maintainers"
+      "inversedBy": "owner"
     }
   }
 }

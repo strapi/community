@@ -9,19 +9,22 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
   "attributes": {
-    "full_name": {
-      "type": "string",
-      "required": true
-    },
-    "headline": {
-      "type": "string"
-    },
     "bio": {
       "type": "text"
     },
     "website": {
+      "type": "string"
+    },
+    "email": {
       "type": "string"
     },
     "avatar": {
@@ -31,9 +34,9 @@
     },
     "owner": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user",
-      "inversedBy": "profile"
+      "relation": "morphToMany",
+      "required": true,
+      "mappedBy": "profile"
     }
   }
 }
