@@ -6,6 +6,7 @@ import TimeAgo from "react-timeago";
 import { Markdown } from "@/components/content/markdown";
 import { Container } from "@/components/layout/container";
 import type { PackagePageData } from "@/features/cms/pages/package";
+import type { Owner } from "@/utils/types";
 import styles from "./page.module.css";
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
 };
 
 const PackageTemplate = ({ document }: Props) => {
-  const { owner } = document;
+  const owner = document.owner as unknown as Owner;
 
   return (
     <Container maxWidth="1120px">

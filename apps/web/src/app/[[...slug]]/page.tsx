@@ -35,7 +35,7 @@ const Router: NextPage<PageProps> = async ({ params }) => {
       return <PackagePage documentId={page.documentId} />;
     }
     case "plugin::better-auth.user": {
-      return <UserPage id={page.id} />;
+      return <UserPage documentId={page.documentId} />;
     }
     case "api::template.template": {
       return <TemplatePage documentId={page.documentId} />;
@@ -95,7 +95,7 @@ export const generateMetadata = async ({
       return packageMetadata(page.documentId);
     }
     case "plugin::better-auth.user": {
-      return userMetadata(page.id);
+      return userMetadata(page.documentId);
     }
     case "api::template.template": {
       return templateMetadata(page.documentId);
