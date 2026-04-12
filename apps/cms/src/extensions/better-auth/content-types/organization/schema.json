@@ -64,7 +64,7 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::profile.profile",
-      "mappedBy": "owner"
+      "inversedBy": "owner"
     }
   }
 }

@@ -26,6 +26,12 @@ export default {
         handler: "organization.relatedContent",
         config: { policies: [], middlewares: [], prefix: "" },
       },
+      {
+        method: "GET",
+        path: "/organizations/:id/members",
+        handler: "organization.members",
+        config: { policies: [], middlewares: [], prefix: "" },
+      },
     ],
   },
 };

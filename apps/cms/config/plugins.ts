@@ -1,4 +1,8 @@
 export default ({ env }) => ({
+  "owner-selector": {
+    enabled: true,
+    resolve: "./src/plugins/owner-selector",
+  },
   webtools: {
     enabled: true,
     config: {
@@ -36,6 +40,7 @@ export default ({ env }) => ({
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
+            "preview_image",
             "labels",
             "url_alias",
             "categories",

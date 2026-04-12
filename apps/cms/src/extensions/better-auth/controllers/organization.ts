@@ -28,5 +28,17 @@ export default factories.createCoreController(
 
       ctx.body = { packages, templates };
     },
+    async members(ctx) {
+      const { id } = ctx.params;
+
+      const service = getPluginService("organization");
+
+      const members = await service.getMembers({
+        organizationId: id,
+        query: ctx.query,
+      });
+
+      ctx.body = members;
+    },
   }),
 );

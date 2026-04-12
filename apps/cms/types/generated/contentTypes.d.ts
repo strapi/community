@@ -626,7 +626,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
@@ -650,9 +650,9 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
-  collectionName: 'user_profiles';
+  collectionName: 'profiles';
   info: {
-    displayName: 'User Profile';
+    displayName: 'Profiles';
     pluralName: 'profiles';
     singularName: 'profile';
   };
@@ -661,7 +661,7 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   };
   pluginOptions: {
     'content-manager': {
-      visible: false;
+      visible: true;
     };
     'content-type-builder': {
       visible: true;
@@ -674,14 +674,18 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.String;
+    github: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::profile.profile'
     > &
       Schema.Attribute.Private;
+    location: Schema.Attribute.String;
     owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    readme: Schema.Attribute.RichText;
+    subtitle: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -723,11 +727,12 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
+    owner: Schema.Attribute.Relation<'morphToMany'>;
+    preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
