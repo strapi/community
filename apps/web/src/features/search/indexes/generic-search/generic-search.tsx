@@ -4,7 +4,7 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import { Configure } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 import { GridHits } from "@/features/search/components/grid-hits";
-import { PackageCard } from "@/features/search/components/package-card";
+import { Hit } from "@/features/search/components/hit";
 import { RefinementList } from "@/features/search/components/refinement-list";
 import { SearchBox } from "@/features/search/components/search-box";
 import { SortBy } from "@/features/search/components/sort-by";
@@ -83,7 +83,7 @@ const GenericSearch = () => (
             />
           </div>
         </div>
-        <GridHits hitComponent={PackageCard} />
+        <GridHits hitComponent={Hit} />
         <Configure hitsPerPage={24} />
       </section>
     </div>
