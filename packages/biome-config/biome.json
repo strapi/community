@@ -1,6 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
-  "root": true,
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -9,10 +8,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!**/types/generated"
-    ]
+    "includes": ["**", "!**/types/generated"]
   },
   "formatter": {
     "enabled": true,
@@ -23,6 +19,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "style": {
+        "noNonNullAssertion": "off"
+      },
       "correctness": {
         "useJsxKeyInIterable": "error"
       }

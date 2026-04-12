@@ -1,13 +1,18 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
-  "extends": "//",
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+  "root": true,
+  "extends": ["@repo/biome-config"],
   "linter": {
     "domains": {
       "next": "recommended"
     },
     "rules": {
       "style": {
-        "noDefaultExport": "error"
+        "noDefaultExport": "error",
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noNonNullAssertedOptionalChain": "off"
       }
     }
   },
