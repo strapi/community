@@ -3,6 +3,10 @@ import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
 import { CategoryPage, categoryMetadata } from "@/features/cms/pages/category";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
 import {
+  OrganizationPage,
+  organizationMetadata,
+} from "@/features/cms/pages/organization";
+import {
   OverviewPage,
   overviewPageMetadata,
 } from "@/features/cms/pages/overview-page";
@@ -31,6 +35,9 @@ const Router: NextPage<PageProps> = async ({ params }) => {
   }
 
   switch (page.contentType) {
+    case "plugin::better-auth.organization": {
+      return <OrganizationPage documentId={page.documentId} />;
+    }
     case "api::package.package": {
       return <PackagePage documentId={page.documentId} />;
     }
@@ -91,6 +98,9 @@ export const generateMetadata = async ({
   }
 
   switch (page.contentType) {
+    case "plugin::better-auth.organization": {
+      return organizationMetadata(page.documentId);
+    }
     case "api::package.package": {
       return packageMetadata(page.documentId);
     }

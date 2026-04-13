@@ -23,7 +23,7 @@ const Hero = ({ children }: PropsWithChildren) => {
 
       <Container className="relative z-10">
         {/* Black content card */}
-        <div className="border-x-2 border-white/10 bg-(--color-hero-bg) backdrop-blur-sm">
+        <div className="border-x border-(--color-grey700) bg-(--color-hero-bg) backdrop-blur-sm">
           {children}
         </div>
       </Container>
@@ -31,4 +31,14 @@ const Hero = ({ children }: PropsWithChildren) => {
   );
 };
 
-export { Hero };
+const HeroSection = ({ children }: PropsWithChildren) => {
+  return (
+    <div className="p-2.5">
+      <div className="rounded-xl border border-(--color-grey700)">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export { Hero, HeroSection };
