@@ -19,17 +19,37 @@
       "type": "text",
       "required": true
     },
+    "size": {
+      "type": "enumeration",
+      "required": true,
+      "default": "L",
+      "enum": [
+        "L",
+        "S"
+      ]
+    },
     "image": {
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "button": {
       "type": "component",
       "component": "shared.button",
       "repeatable": false,
       "required": true
+    },
+    "illustration": {
+      "type": "enumeration",
+      "required": true,
+      "default": "image",
+      "enum": [
+        "image",
+        "community_members"
+      ]
     }
   }
 }

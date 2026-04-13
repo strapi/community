@@ -489,11 +489,17 @@ export interface ApiCtaCta extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    illustration: Schema.Attribute.Enumeration<['image', 'community_members']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'image'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::cta.cta'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    size: Schema.Attribute.Enumeration<['L', 'S']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'L'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
