@@ -1,5 +1,6 @@
 "use client";
 
+import type { Data } from "@strapi/types";
 import {
   AppWindow,
   CalendarDays,
@@ -12,15 +13,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Hero, HeroSection } from "@/components/layout/hero";
-import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
-import type { RelatedContentItems } from "@/utils/types";
-import type { Data } from "@strapi/types";
 import { ContentCard } from "@/components/content/card";
 import { Container } from "@/components/layout/container";
+import { Hero, HeroSection } from "@/components/layout/hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type Tab = "content" | "about" | "people";
+import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
+import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: OrganizationPageData;
@@ -54,7 +52,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                 )}
               </div>
               <div>
-                <h1 className="text-4xl mt-2 sm:mt-0 font-bold text-white">{document.name}</h1>
+                <h1 className="text-4xl mt-2 sm:mt-0 font-bold text-white">
+                  {document.name}
+                </h1>
                 {document.profile?.subtitle && (
                   <p className="mt-1 text-lg text-(--color-hero-muted)">
                     {document.profile.subtitle}
@@ -133,7 +133,10 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
       <Container>
         <Tabs defaultValue="content">
           <TabsList className="border-(--color-neutral300) border-l border-r border-b px-16 py-10">
-            <TabsTrigger value="content" icon={<LayoutGrid className="h-4 w-4" />}>
+            <TabsTrigger
+              value="content"
+              icon={<LayoutGrid className="h-4 w-4" />}
+            >
               Published Content
             </TabsTrigger>
             <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
@@ -155,7 +158,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                     <ContentCard
                       key={template.documentId}
                       image={{
-                        src: `${process.env.NEXT_PUBLIC_CMS_URL}${template.preview_image?.url}`,
+                        src: template.preview_image
+                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${template.preview_image.url}`
+                          : "/template-fallback-preview.png",
                         alt: template.preview_image?.alternativeText ?? "",
                         size: "L",
                       }}
@@ -181,7 +186,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                     <ContentCard
                       key={pkg.documentId}
                       image={{
-                        src: `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon?.url}`,
+                        src: pkg.icon
+                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
+                          : "/package-fallback-icon.png",
                         alt: pkg.icon?.alternativeText ?? "",
                         size: "S",
                       }}
@@ -198,7 +205,10 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
             )}
           </TabsContent>
 
-          <TabsContent value="about" className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
+          <TabsContent
+            value="about"
+            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18"
+          >
             <h2 className="mb-4 text-xl font-bold text-(--color-neutral900)">
               About {document.name}
             </h2>
@@ -207,12 +217,19 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                 {document.profile.readme}
               </p>
             ) : (
-              <p className="text-md text-(--color-neutral600)">No description provided.</p>
+              <p className="text-md text-(--color-neutral600)">
+                No description provided.
+              </p>
             )}
           </TabsContent>
 
-          <TabsContent value="people" className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
-            <h2 className="mb-6 text-xl font-bold text-(--color-neutral900)">People</h2>
+          <TabsContent
+            value="people"
+            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18"
+          >
+            <h2 className="mb-6 text-xl font-bold text-(--color-neutral900)">
+              People
+            </h2>
             {members.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {members.map((member) => {
@@ -248,7 +265,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                 })}
               </div>
             ) : (
-              <p className="text-md text-(--color-neutral600)">No members listed.</p>
+              <p className="text-md text-(--color-neutral600)">
+                No members listed.
+              </p>
             )}
           </TabsContent>
         </Tabs>

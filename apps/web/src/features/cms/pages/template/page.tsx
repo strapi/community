@@ -1,6 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { TemplateTemplate } from "@/features/cms/pages/template";
 
 const contentType = "api::template.template" satisfies UID.ContentType;
@@ -17,7 +17,7 @@ type Props = {
 };
 
 const TemplatePage = async ({ documentId }: Props) => {
-  const document = await client
+  const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
 

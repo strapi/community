@@ -5,7 +5,6 @@ import type { BaseHit } from "instantsearch.js";
 import {
   BookOpen,
   Code2,
-  GalleryHorizontal,
   LayoutTemplate,
   Monitor,
   Package,

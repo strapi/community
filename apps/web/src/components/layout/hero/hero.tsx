@@ -39,6 +39,6 @@ const HeroSection = ({ children }: PropsWithChildren) => {
       </div>
     </div>
   );
-}
+};
 
 export { Hero, HeroSection };

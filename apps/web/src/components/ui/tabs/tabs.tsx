@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { cn } from "@/lib/utils";
 
 // ─── Context ────────────────────────────────────────────────────────────────
@@ -14,7 +14,8 @@ const TabsContext = createContext<TabsContextValue | null>(null);
 
 const useTabsContext = () => {
   const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error("Tabs compound components must be used inside <Tabs>");
+  if (!ctx)
+    throw new Error("Tabs compound components must be used inside <Tabs>");
   return ctx;
 };
 
@@ -28,7 +29,13 @@ type TabsProps = {
   className?: string;
 };
 
-const Tabs = ({ defaultValue, value, onValueChange, children, className }: TabsProps) => {
+const Tabs = ({
+  defaultValue,
+  value,
+  onValueChange,
+  children,
+  className,
+}: TabsProps) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
 
   const activeTab = value ?? internalValue;
@@ -64,7 +71,12 @@ type TabsTriggerProps = {
   className?: string;
 };
 
-const TabsTrigger = ({ value, icon, children, className }: TabsTriggerProps) => {
+const TabsTrigger = ({
+  value,
+  icon,
+  children,
+  className,
+}: TabsTriggerProps) => {
   const { activeTab, setActiveTab } = useTabsContext();
   const isActive = activeTab === value;
 
@@ -102,4 +114,4 @@ const TabsContent = ({ value, children, className }: TabsContentProps) => {
   return <div className={cn(className)}>{children}</div>;
 };
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

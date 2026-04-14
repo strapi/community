@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const categoryMetadata = async (
   documentId: string,
 ): Promise<Metadata> => {
-  const document = await client
+  const document = await cmsClient
     .collection("api::category.category")
     .findOne(documentId, {
       fields: ["name", "description"],

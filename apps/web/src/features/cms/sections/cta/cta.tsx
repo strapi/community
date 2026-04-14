@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {
   section: Data.Component<"sections.cta">;
@@ -65,7 +65,7 @@ const CTASection = async ({ section }: Props) => {
   const isCommunity = cta?.illustration === "community_members";
 
   const users = isCommunity
-    ? await client.collection("plugin::better-auth.user").find({
+    ? await cmsClient.collection("plugin::better-auth.user").find({
         limit: 5,
         populate: {
           profile: {
@@ -79,88 +79,102 @@ const CTASection = async ({ section }: Props) => {
 
   if (cta?.size === "S") {
     return (
-      <Container>
-        <section>
-          <div
-            className="relative rounded-lg border border-(--color-cta-border) px-8 py-10 text-white"
-            style={sharedWrapperStyle}
-          >
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="lg:w-[40%]">
-                <h3 className="text-2xl font-bold leading-tight">{cta.title}</h3>
-                <p className="mt-2 text-md leading-5 text-(--color-cta-muted)">{cta.content}</p>
-                {cta.button?.link && (
-                  <Button
-                    href={cta.button.link}
-                    variant="primary"
-                    className="mt-5 bg-(--color-primary600) text-white hover:bg-(--color-cta-button-hover)"
-                  >
-                    {cta.button.label}
-                  </Button>
-                )}
-              </div>
+      <div className="py-16 border-y border-(--color-neutral300)">
+        <Container>
+          <section>
+            <div
+              className="relative rounded-lg border border-(--color-cta-border) px-8 py-10 text-white"
+              style={sharedWrapperStyle}
+            >
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="lg:w-[40%]">
+                  <h3 className="text-2xl font-bold leading-tight">
+                    {cta.title}
+                  </h3>
+                  <p className="mt-2 text-md leading-5 text-(--color-cta-muted)">
+                    {cta.content}
+                  </p>
+                  {cta.button?.link && (
+                    <Button
+                      href={cta.button.link}
+                      variant="primary"
+                      className="mt-5 bg-(--color-primary600) text-white hover:bg-(--color-cta-button-hover)"
+                    >
+                      {cta.button.label}
+                    </Button>
+                  )}
+                </div>
 
-              <div className="w-full lg:w-[55%] flex justify-start lg:justify-end align-center">
-                {isCommunity && users?.data && users.data.length > 0 ? (
-                  <CommunityPile users={users.data} />
-                ) : (
-                  cta.image?.url && (
-                    <Image
-                      src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
-                      alt={cta.image.alternativeText || cta.title || "CTA image"}
-                      width={260}
-                      height={160}
-                      className="pointer-events-none h-auto object-contain"
-                    />
-                  )
-                )}
+                <div className="w-full lg:w-[55%] flex justify-start lg:justify-end align-center">
+                  {isCommunity && users?.data && users.data.length > 0 ? (
+                    <CommunityPile users={users.data} />
+                  ) : (
+                    cta.image?.url && (
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
+                        alt={
+                          cta.image.alternativeText || cta.title || "CTA image"
+                        }
+                        width={260}
+                        height={160}
+                        className="pointer-events-none h-auto object-contain"
+                      />
+                    )
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </Container>
+          </section>
+        </Container>
+      </div>
     );
   }
 
   return (
-    <Container>
-      <section>
-        <div
-          className="relative overflow-hidden rounded-lg border border-(--color-cta-border) px-6 py-8 sm:px-12 sm:py-16 lg:px-20 lg:py-29 text-white flex flex-col items-center md:flex-row md:items-center"
-          style={sharedWrapperStyle}
-        >
-          <div className="relative z-10 w-full md:w-[55%]">
-            <h3 className="text-5xl font-semibold leading-tight">{cta?.title}</h3>
-            <p className="mt-3 text-xl leading-6 text-(--color-cta-muted)">{cta?.content}</p>
-            {cta?.button?.link && (
-              <Button
-                href={cta.button.link}
-                variant="primary"
-                className="mt-6 bg-(--color-primary600) text-white hover:bg-(--color-cta-button-hover)"
-              >
-                {cta.button.label}
-              </Button>
+    <div className="py-16 border-y border-(--color-neutral300)">
+      <Container>
+        <section>
+          <div
+            className="relative overflow-hidden rounded-lg border border-(--color-cta-border) px-6 py-8 sm:px-12 sm:py-16 lg:px-20 lg:py-29 text-white flex flex-col items-center md:flex-row md:items-center"
+            style={sharedWrapperStyle}
+          >
+            <div className="relative z-10 w-full md:w-[55%]">
+              <h3 className="text-5xl font-semibold leading-tight">
+                {cta?.title}
+              </h3>
+              <p className="mt-3 text-xl leading-6 text-(--color-cta-muted)">
+                {cta?.content}
+              </p>
+              {cta?.button?.link && (
+                <Button
+                  href={cta.button.link}
+                  variant="primary"
+                  className="mt-6 bg-(--color-primary600) text-white hover:bg-(--color-cta-button-hover)"
+                >
+                  {cta.button.label}
+                </Button>
+              )}
+            </div>
+
+            {isCommunity && users?.data && users.data.length > 0 ? (
+              <div className="mt-6 md:mt-0 md:absolute md:right-8 md:top-1/2 md:-translate-y-1/2 md:w-[360px]">
+                <CommunityPile users={users.data} />
+              </div>
+            ) : (
+              cta?.image?.url && (
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
+                  alt={cta.image.alternativeText || cta?.title || "CTA image"}
+                  width={420}
+                  height={220}
+                  className="pointer-events-none h-auto w-[70%] md:w-[40%] object-contain mt-6 md:mt-0 md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2"
+                />
+              )
             )}
           </div>
-
-          {isCommunity && users?.data && users.data.length > 0 ? (
-            <div className="mt-6 md:mt-0 md:absolute md:right-8 md:top-1/2 md:-translate-y-1/2 md:w-[360px]">
-              <CommunityPile users={users.data} />
-            </div>
-          ) : (
-            cta?.image?.url && (
-              <Image
-                src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
-                alt={cta.image.alternativeText || cta?.title || "CTA image"}
-                width={420}
-                height={220}
-                className="pointer-events-none h-auto w-[70%] md:w-[40%] object-contain mt-6 md:mt-0 md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2"
-              />
-            )
-          )}
-        </div>
-      </section>
-    </Container>
+        </section>
+      </Container>
+    </div>
   );
 };
 

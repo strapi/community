@@ -1,6 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Data, Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { OrganizationTemplate } from "@/features/cms/pages/organization";
 import type { RelatedContentItems } from "@/utils/types";
 
@@ -25,22 +25,29 @@ type Props = {
 };
 
 const OrganizationPage = async ({ documentId }: Props) => {
-  const document = await client.collection(contentType).findOne(documentId, query);
+  const document = await cmsClient
+    .collection(contentType)
+    .findOne(documentId, query);
 
-  const content: RelatedContentItems = await client
+  const content: RelatedContentItems = await cmsClient
     .fetch(`/organizations/${document.data.id}/related-content?populate=*`, {
       method: "GET",
     })
     .then((res) => res.json());
 
-  const members: Data.ContentType<"plugin::better-auth.user">[] = await client
-    .fetch(`/organizations/${document.data.id}/members?populate=*`, {
-      method: "GET",
-    })
-    .then((res) => res.json());
+  const members: Data.ContentType<"plugin::better-auth.user">[] =
+    await cmsClient
+      .fetch(`/organizations/${document.data.id}/members?populate=*`, {
+        method: "GET",
+      })
+      .then((res) => res.json());
 
   return (
-    <OrganizationTemplate document={document.data} relatedContent={content} members={members} />
+    <OrganizationTemplate
+      document={document.data}
+      relatedContent={content}
+      members={members}
+    />
   );
 };
 

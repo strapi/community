@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const userMetadata = async (id: string): Promise<Metadata> => {
-  const document = await client
+  const document = await cmsClient
     .collection("plugin::better-auth.user")
     .findOne(id, {
       populate: {

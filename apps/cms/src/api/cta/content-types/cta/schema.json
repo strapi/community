@@ -23,18 +23,13 @@
       "type": "enumeration",
       "required": true,
       "default": "L",
-      "enum": [
-        "L",
-        "S"
-      ]
+      "enum": ["L", "S"]
     },
     "image": {
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "button": {
       "type": "component",
@@ -46,10 +41,7 @@
       "type": "enumeration",
       "required": true,
       "default": "image",
-      "enum": [
-        "image",
-        "community_members"
-      ]
+      "enum": ["image", "community_members"]
     }
   }
 }

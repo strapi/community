@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const homeMetadata = async (): Promise<Metadata> => {
-  const document = await client.single("api::home.home").find({
+  const document = await cmsClient.single("api::home.home").find({
     fields: ["documentId"],
     populate: {
       seo: {

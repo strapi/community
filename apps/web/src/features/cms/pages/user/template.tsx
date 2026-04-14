@@ -18,8 +18,6 @@ type Props = {
 };
 
 const UserTemplate = ({ document, relatedContent }: Props) => {
-  const { profile } = document;
-
   const packages = (relatedContent.packages || []).filter(
     (pkg) => pkg.publishedAt != null,
   );
