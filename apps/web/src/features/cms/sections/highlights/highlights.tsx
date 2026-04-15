@@ -114,16 +114,8 @@ const HighlightsSection = async ({ section }: Props) => {
                     badge="Package"
                     name={pkg.name!}
                     description={pkg.description ?? ""}
-                    githubStars={
-                      pkg.github_stars
-                        ? parseInt(pkg.github_stars, 10)
-                        : undefined
-                    }
-                    npmDownloads={
-                      pkg.npm_downloads
-                        ? parseInt(pkg.npm_downloads, 10)
-                        : undefined
-                    }
+                    githubStars={pkg.stars || undefined}
+                    npmDownloads={pkg.monthly_downloads || undefined}
                     maintainers={pkg.maintainers!}
                     labels={pkg.labels!}
                   />

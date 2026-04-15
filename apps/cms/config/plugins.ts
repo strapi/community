@@ -3,6 +3,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/owner-selector",
   },
+  "package-info": {
+    enabled: true,
+    resolve: "./src/plugins/package-info",
+  },
   webtools: {
     enabled: true,
     config: {

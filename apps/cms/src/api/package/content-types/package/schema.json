@@ -72,14 +72,16 @@
       "repeatable": false,
       "required": true
     },
-    "install_command": {
-      "type": "string"
+    "stars": {
+      "type": "integer"
     },
-    "github_stars": {
-      "type": "string"
+    "monthly_downloads": {
+      "type": "integer"
     },
-    "npm_downloads": {
-      "type": "string"
+    "version_info": {
+      "type": "component",
+      "component": "shared.version-info",
+      "repeatable": false
     }
   }
 }

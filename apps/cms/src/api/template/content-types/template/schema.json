@@ -61,6 +61,9 @@
       "type": "media",
       "multiple": false,
       "allowedTypes": ["images"]
+    },
+    "stars": {
+      "type": "integer"
     }
   }
 }

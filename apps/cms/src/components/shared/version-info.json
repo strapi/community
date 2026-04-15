@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_shared_version_info",
+  "info": {
+    "displayName": "Version Info",
+    "icon": "information"
+  },
+  "options": {},
+  "attributes": {
+    "version": {
+      "type": "string"
+    },
+    "published_at": {
+      "type": "datetime"
+    },
+    "install_command": {
+      "type": "string"
+    }
+  }
+}
