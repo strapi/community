@@ -22,12 +22,15 @@
       "type": "string",
       "conditions": {
         "visible": {
-          "==": [
-            {
-              "var": "paid"
-            },
-            true
-          ]
+          "==": [{ "var": "paid" }, true]
+        }
+      }
+    },
+    "price": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "paid" }, true]
         }
       }
     }

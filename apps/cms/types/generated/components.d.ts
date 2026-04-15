@@ -124,6 +124,7 @@ export interface SharedLabels extends Struct.ComponentSchema {
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     official: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     paid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    price: Schema.Attribute.String;
   };
 }
 
@@ -178,6 +179,20 @@ export interface SharedSeo extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedVersionInfo extends Struct.ComponentSchema {
+  collectionName: 'components_shared_version_info';
+  info: {
+    displayName: 'Version Info';
+    icon: 'information';
+  };
+  attributes: {
+    install_command: Schema.Attribute.String;
+    published_at: Schema.Attribute.DateTime;
+    strapi_peer_dependency: Schema.Attribute.String;
+    version: Schema.Attribute.String;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
@@ -190,6 +205,7 @@ declare module '@strapi/strapi' {
       'shared.labels': SharedLabels;
       'shared.open-graph': SharedOpenGraph;
       'shared.seo': SharedSeo;
+      'shared.version-info': SharedVersionInfo;
     }
   }
 }

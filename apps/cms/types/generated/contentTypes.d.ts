@@ -614,9 +614,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
     git_repository: Schema.Attribute.String;
-    github_stars: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    install_command: Schema.Attribute.String;
     labels: Schema.Attribute.Component<'shared.labels', false> &
       Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -629,12 +627,13 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'manyToMany',
       'plugin::better-auth.user'
     >;
+    monthly_downloads: Schema.Attribute.Integer;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    npm_downloads: Schema.Attribute.String;
     owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    stars: Schema.Attribute.Integer;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -646,6 +645,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
+    version_info: Schema.Attribute.Component<'shared.version-info', false>;
   };
 }
 
@@ -731,6 +731,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    stars: Schema.Attribute.Integer;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

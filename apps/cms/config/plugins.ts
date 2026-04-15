@@ -1,4 +1,8 @@
 export default ({ env }) => ({
+  "package-info": {
+    enabled: true,
+    resolve: "./src/plugins/package-info",
+  },
   webtools: {
     enabled: true,
     config: {
