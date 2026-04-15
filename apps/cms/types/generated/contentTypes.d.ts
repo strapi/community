@@ -650,9 +650,9 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
 }
 
 export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
-  collectionName: 'user_profiles';
+  collectionName: 'profiles';
   info: {
-    displayName: 'User Profile';
+    displayName: 'Profiles';
     pluralName: 'profiles';
     singularName: 'profile';
   };
@@ -728,6 +728,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
+    preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;

@@ -1,3 +1,6 @@
+const { syncStats } = require("./cron/sync-stats");
+const { syncVersionInfo } = require("./cron/sync-version-info");
+
 const bootstrap = () => {
   /**
    * Daily cron — sync stars and downloads for all packages + stars for all templates.

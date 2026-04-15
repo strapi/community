@@ -1,6 +1,8 @@
+const { getPackageInfo } = require("../services/get-package-info");
+
 const syncVersionInfo = async () => {
   const packages = await strapi.documents("api::package.package").findMany({
-    filters: { publishedAt: { $notNull: true } },
+    status: "published",
     fields: ["documentId", "package_location"],
     pagination: { pageSize: 500 },
   });
@@ -17,6 +19,7 @@ const syncVersionInfo = async () => {
       if (!info) continue;
 
       await strapi.documents("api::package.package").update({
+        status: "published",
         documentId: pkg.documentId,
         data: {
           version_info: {
