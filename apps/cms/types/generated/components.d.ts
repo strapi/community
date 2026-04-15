@@ -188,7 +188,6 @@ export interface SharedVersionInfo extends Struct.ComponentSchema {
   attributes: {
     install_command: Schema.Attribute.String;
     published_at: Schema.Attribute.DateTime;
-    strapi_peer_dependency: Schema.Attribute.String;
     version: Schema.Attribute.String;
   };
 }

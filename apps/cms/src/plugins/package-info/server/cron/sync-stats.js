@@ -1,12 +1,15 @@
+const { getPackageInfo } = require("../services/get-package-info");
+const { getGitStars } = require("../services/get-git-stars");
+
 const syncStats = async () => {
   const [packages, templates] = await Promise.all([
     strapi.documents("api::package.package").findMany({
-      filters: { publishedAt: { $notNull: true } },
+      status: "published",
       fields: ["documentId", "package_location", "git_repository"],
       pagination: { pageSize: 500 },
     }),
     strapi.documents("api::template.template").findMany({
-      filters: { publishedAt: { $notNull: true } },
+      status: "published",
       fields: ["documentId", "git_repository"],
       pagination: { pageSize: 500 },
     }),
@@ -36,6 +39,7 @@ const syncStats = async () => {
       if (Object.keys(patch).length === 0) continue;
 
       await strapi.documents("api::package.package").update({
+        status: "published",
         documentId: pkg.documentId,
         data: patch,
       });
