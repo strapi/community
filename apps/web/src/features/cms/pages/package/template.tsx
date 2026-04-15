@@ -69,7 +69,7 @@ const PackageTemplate = ({ document }: Props) => {
               <span className="flex items-center gap-1">
                 {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
                 <p className={styles.valueItem}>
-                  {document.npm_downloads?.toLocaleString()}
+                  {document.monthly_downloads?.toLocaleString()}
                 </p>
               </span>
             </div>
@@ -86,7 +86,7 @@ const PackageTemplate = ({ document }: Props) => {
                 />
                 {/* <Star width={12} height={12} color={"var(--color-warning500)"} /> */}
                 <p className={styles.valueItem}>
-                  {document.github_stars?.toLocaleString()}
+                  {document.stars?.toLocaleString()}
                 </p>
               </span>
             </div>

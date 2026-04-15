@@ -25,7 +25,7 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
   );
 
   const aggregatedDownloads = packages
-    .map((pkg) => pkg.npm_downloads)
+    .map((pkg) => pkg.monthly_downloads || 0)
     .reduce((sum, downloads) => sum + parseInt(String(downloads), 10), 0);
 
   const mostRecentItem = packages.reduce((latest, current) => {

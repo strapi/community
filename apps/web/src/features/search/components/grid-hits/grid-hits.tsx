@@ -19,8 +19,8 @@ const GridHits = <T extends BaseHit>(props: Props<T>) => {
   return (
     <div className="w-full">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((hit, key) => (
-          <div key={`${key}-${hit.objectID}`}>
+        {items.map((hit) => (
+          <div key={hit.objectID}>
             <Hit hit={hit} />
           </div>
         ))}
