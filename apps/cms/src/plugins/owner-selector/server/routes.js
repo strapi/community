@@ -28,4 +28,15 @@ module.exports = {
       },
     ],
   },
+  "content-api": {
+    type: "content-api",
+    routes: [
+      {
+        method: "GET",
+        path: "/owner",
+        handler: "controller.getOwner",
+        config: { policies: [], prefix: "" },
+      },
+    ],
+  },
 };

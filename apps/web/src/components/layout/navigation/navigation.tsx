@@ -6,20 +6,26 @@ import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/features/search/components/search-dialog";
 
-const Navigation = () => {
+type Props = {
+  theme: "light" | "dark";
+};
+
+const Navigation = ({ theme }: Props) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
     <>
       <nav
-        className="border-b border-(--color-hero-border) bg-(--color-hero-bg)"
+        className={`border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"}`}
         style={{
-          backgroundImage: "var(--bg-dotted-pattern-image)",
+          backgroundImage: `${theme === "light" ? "var(--bg-dotted-pattern-image-light)" : "var(--bg-dotted-pattern-image)"}`,
           backgroundSize: "var(--bg-dotted-pattern-size)",
         }}
       >
-        <Container className="bg-(--color-hero-bg)">
-          <div className="flex h-18 items-center justify-between gap-8 border-x-2 border-white/10 px-4">
+        <Container>
+          <div
+            className={`${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"} flex h-18 items-center justify-between gap-8 border-x ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} px-4`}
+          >
             <div className="flex items-center gap-8">
               <Link
                 href="/"
@@ -27,7 +33,9 @@ const Navigation = () => {
               >
                 Marketplace
               </Link>
-              <ul className="hidden items-center gap-6 text-sm text-(--color-hero-nav-muted) lg:flex">
+              <ul
+                className={`hidden items-center gap-6 font-normal text-sm ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-nav-muted)"} lg:flex`}
+              >
                 <li>
                   <Link href="/" className="transition-colors hover:text-white">
                     Packages

@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/layout/navigation";
 import type { OverviewPageData } from "@/features/cms/pages/overview-page";
 import { SectionsMapper } from "@/features/cms/sections/mapper";
 
@@ -8,6 +9,7 @@ type Props = {
 const OverviewPageTemplate = ({ document }: Props) => {
   return (
     <div>
+      <Navigation theme="dark" />
       {document.sections?.map((section) => {
         return (
           <SectionsMapper

@@ -22,7 +22,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async getOwner(ctx) {
-    const { contentType, documentId } = ctx.query;
+    const { contentType, documentId, populate } = ctx.query;
 
     if (!SUPPORTED.includes(contentType)) {
       return ctx.badRequest("Unsupported content type");
@@ -30,7 +30,13 @@ module.exports = ({ strapi }) => ({
 
     const entry = await strapi.documents(contentType).findOne({
       documentId,
-      populate: { owner: true },
+      populate: {
+        owner: populate
+          ? {
+              populate,
+            }
+          : true,
+      },
     });
 
     ctx.body = { data: entry?.owner ?? [] };

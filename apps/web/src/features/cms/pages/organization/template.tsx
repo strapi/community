@@ -16,6 +16,7 @@ import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
 import { Container } from "@/components/layout/container";
 import { Hero, HeroSection } from "@/components/layout/hero";
+import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
 import type { RelatedContentItems } from "@/utils/types";
@@ -31,6 +32,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
   return (
     <>
+      <Navigation theme="dark" />
       <Hero>
         <HeroSection>
           <div className="px-14 py-26">
@@ -52,7 +54,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                 )}
               </div>
               <div>
-                <h1 className="text-4xl mt-2 sm:mt-0 font-bold text-white">
+                <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
                   {document.name}
                 </h1>
                 {document.profile?.subtitle && (

@@ -68,7 +68,7 @@ const HomeHero = (props: Props) => {
             <p className="mb-5 text-sm font-semibold text-(--color-primary500)">
               {subtitle}
             </p>
-            <h1 className="max-w-lg text-5xl font-bold leading-[1.1] tracking-tight text-white">
+            <h1 className="text-[48px] max-w-lg text-5xl font-semibold leading-[1.1] tracking-tight text-white!">
               {title}
             </h1>
             <div className="relative mt-10 max-w-lg">
@@ -87,10 +87,10 @@ const HomeHero = (props: Props) => {
 
           {/* Right: Join Community CTA */}
           <div className="flex w-[42%] flex-col items-center justify-center px-12 py-14">
-            <h2 className="text-xl font-semibold text-(--color-hero-nav-muted)">
+            <h2 className="text-xl font-semibold text-(--color-cta-muted)!">
               {ctaTitle}
             </h2>
-            <p className="mt-3 max-w-xs text-center text-sm leading-6 text-(--color-hero-muted)">
+            <p className="mt-3 max-w-xs text-center text-sm leading-6 text-(--color-cta-muted)">
               {ctaText}
             </p>
             <div className="mt-7 flex items-center gap-3">
@@ -152,7 +152,9 @@ const HomeHero = (props: Props) => {
                       className="rounded-lg border border-(--color-neutral150)"
                     />
                   </div>
-                  <h3 className="text-base font-bold text-white">{pkg.name}</h3>
+                  <h3 className="text-base font-bold text-white!">
+                    {pkg.name}
+                  </h3>
                   <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-(--color-hero-muted)">
                     {pkg.description}
                   </p>
@@ -184,7 +186,7 @@ const HomeHero = (props: Props) => {
                       className="rounded-lg border border-(--color-grey700)"
                     />
                   </div>
-                  <h3 className="text-base font-bold text-white">
+                  <h3 className="text-base font-bold text-white!">
                     {template.name}
                   </h3>
                   <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-(--color-hero-muted)">

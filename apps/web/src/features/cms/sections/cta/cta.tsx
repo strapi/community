@@ -83,15 +83,15 @@ const CTASection = async ({ section }: Props) => {
         <Container>
           <section>
             <div
-              className="relative rounded-lg border border-(--color-cta-border) px-8 py-10 text-white"
+              className="relative rounded-lg border border-(--color-cta-border) px-8 py-10 text-white!"
               style={sharedWrapperStyle}
             >
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="lg:w-[40%]">
-                  <h3 className="text-2xl font-bold leading-tight">
+                  <h3 className="text-[43px] font-bold leading-tight text-white">
                     {cta.title}
                   </h3>
-                  <p className="mt-2 text-md leading-5 text-(--color-cta-muted)">
+                  <p className="mt-2 text-[16px] leading-5 text-(--color-cta-muted)">
                     {cta.content}
                   </p>
                   {cta.button?.link && (
@@ -139,10 +139,10 @@ const CTASection = async ({ section }: Props) => {
             style={sharedWrapperStyle}
           >
             <div className="relative z-10 w-full md:w-[55%]">
-              <h3 className="text-5xl font-semibold leading-tight">
+              <h3 className="text-[43px] font-bold leading-tight text-white!">
                 {cta?.title}
               </h3>
-              <p className="mt-3 text-xl leading-6 text-(--color-cta-muted)">
+              <p className="mt-3 text-[16px] leading-6 text-(--color-cta-muted)">
                 {cta?.content}
               </p>
               {cta?.button?.link && (

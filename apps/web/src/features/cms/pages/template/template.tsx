@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/layout/navigation";
 import type { TemplatePageData } from "@/features/cms/pages/template";
 
 type Props = {
@@ -5,7 +6,12 @@ type Props = {
 };
 
 const TemplateTemplate = ({ document }: Props) => {
-  return <div>Template {document.name}</div>;
+  return (
+    <div>
+      <Navigation theme="dark" />
+      Template {document.name}
+    </div>
+  );
 };
 
 export { TemplateTemplate };
