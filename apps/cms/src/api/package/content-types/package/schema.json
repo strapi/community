@@ -63,9 +63,8 @@
     },
     "maintainers": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "plugin::better-auth.user",
-      "mappedBy": "packages"
+      "relation": "oneToMany",
+      "target": "plugin::better-auth.user"
     },
     "labels": {
       "type": "component",

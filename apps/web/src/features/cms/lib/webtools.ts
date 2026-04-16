@@ -2,12 +2,12 @@ import type { API } from "@strapi/client";
 import type { Modules, UID } from "@strapi/types";
 import { notFound } from "next/navigation";
 import qs from "qs";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const findUrlAliases = async (): Promise<
   Modules.Documents.Result<"plugin::webtools.url-alias">[]
 > => {
-  return await client
+  return await cmsClient
     .fetch("/webtools/url-alias")
     .then((response) => response.json())
     .then((response) => response.data)
@@ -26,7 +26,7 @@ export const findPage = async (
   Modules.Documents.AnyDocument & { contentType: UID.ContentType }
 > => {
   const params = qs.stringify(query, { encode: false });
-  return await client
+  return await cmsClient
     .fetch(`/webtools/router?${params}`)
     .then((response) => response.json())
     .then((response) => response.data)

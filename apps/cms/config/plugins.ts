@@ -1,4 +1,8 @@
 export default ({ env }) => ({
+  "owner-selector": {
+    enabled: true,
+    resolve: "./src/plugins/owner-selector",
+  },
   "package-info": {
     enabled: true,
     resolve: "./src/plugins/package-info",
@@ -40,6 +44,7 @@ export default ({ env }) => ({
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
+            "preview_image",
             "labels",
             "url_alias",
             "categories",

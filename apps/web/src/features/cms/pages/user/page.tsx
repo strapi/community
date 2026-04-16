@@ -1,6 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { UserTemplate } from "@/features/cms/pages/user";
 import type { RelatedContentItems } from "@/utils/types";
 
@@ -22,11 +22,11 @@ type Props = {
 };
 
 const UserPage = async ({ documentId }: Props) => {
-  const document = await client
+  const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
 
-  const content: RelatedContentItems = await client
+  const content: RelatedContentItems = await cmsClient
     .fetch(`/users/${document.data.id}/related-content`)
     .then((res) => res.json());
 

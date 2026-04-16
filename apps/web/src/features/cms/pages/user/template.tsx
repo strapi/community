@@ -9,6 +9,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
+import { Navigation } from "@/components/layout/navigation";
 import type { UserPageData } from "@/features/cms/pages/user";
 import type { RelatedContentItems } from "@/utils/types";
 
@@ -18,8 +19,6 @@ type Props = {
 };
 
 const UserTemplate = ({ document, relatedContent }: Props) => {
-  const { profile } = document;
-
   const packages = (relatedContent.packages || []).filter(
     (pkg) => pkg.publishedAt != null,
   );
@@ -35,58 +34,61 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
   }, packages[0]);
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      <section className="lg:col-span-9">
-        <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
-          <div className="flex w-full items-start justify-start gap-6">
-            <Image
-              src="/logo-plugin.png"
-              width={60}
-              height={60}
-              alt="Logo plugin"
-            />
-            <div className="flex w-full flex-col items-start">
-              <h1 className={styles.pluginTitle}>{document.name} </h1>
+    <>
+      <Navigation theme="dark" />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <section className="lg:col-span-9">
+          <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
+            <div className="flex w-full items-start justify-start gap-6">
+              <Image
+                src="/logo-plugin.png"
+                width={60}
+                height={60}
+                alt="Logo plugin"
+              />
+              <div className="flex w-full flex-col items-start">
+                <h1 className={styles.pluginTitle}>{document.name} </h1>
+              </div>
             </div>
           </div>
-        </div>
-        <div>content</div>
-      </section>
-      <aside className="lg:col-span-3">
-        <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
-          Details
-        </h3>
-        <div className="flex w-full flex-col">
-          <div
-            className={`${styles.listItem} flex w-full items-center justify-between`}
-          >
-            <p>Cumulated downloads</p>
-            <span className="flex items-center gap-1">
-              {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
-              <p className={styles.valueItem}>
-                {aggregatedDownloads.toLocaleString()}
-              </p>
-            </span>
-          </div>
-          <div
-            className={`${styles.listItem} flex w-full items-center justify-between`}
-          >
-            <p>Published packages</p>
-            <p className={styles.valueItem}>{packages.length}</p>
-          </div>
-          {mostRecentItem?.updatedAt && (
+          <div>content</div>
+        </section>
+        <aside className="lg:col-span-3">
+          <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
+            Details
+          </h3>
+          <div className="flex w-full flex-col">
             <div
               className={`${styles.listItem} flex w-full items-center justify-between`}
             >
-              <p>Last update</p>
-              <p className={styles.valueItem}>
-                <TimeAgo date={mostRecentItem?.updatedAt} />
-              </p>
+              <p>Cumulated downloads</p>
+              <span className="flex items-center gap-1">
+                {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
+                <p className={styles.valueItem}>
+                  {aggregatedDownloads.toLocaleString()}
+                </p>
+              </span>
             </div>
-          )}
-        </div>
-      </aside>
-    </div>
+            <div
+              className={`${styles.listItem} flex w-full items-center justify-between`}
+            >
+              <p>Published packages</p>
+              <p className={styles.valueItem}>{packages.length}</p>
+            </div>
+            {mostRecentItem?.updatedAt && (
+              <div
+                className={`${styles.listItem} flex w-full items-center justify-between`}
+              >
+                <p>Last update</p>
+                <p className={styles.valueItem}>
+                  <TimeAgo date={mostRecentItem?.updatedAt} />
+                </p>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+    </>
   );
 };
 

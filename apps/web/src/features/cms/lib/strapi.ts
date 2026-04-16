@@ -1,6 +1,6 @@
 import { createTypedStrapiClient } from "@repo/strapi-client";
 
-export const client: ReturnType<typeof createTypedStrapiClient> =
+export const cmsClient: ReturnType<typeof createTypedStrapiClient> =
   createTypedStrapiClient({
     baseURL:
       `${process.env.NEXT_PUBLIC_CMS_URL}/api` || "http://localhost:1337/api",

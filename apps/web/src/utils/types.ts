@@ -5,6 +5,12 @@ export type Owner = Modules.Documents.Document<
 >;
 
 export type RelatedContentItems = {
-  packages: Modules.Documents.Result<"api::package.package">[];
-  templates: Modules.Documents.Result<"api::template.template">[];
+  packages: Modules.Documents.Result<
+    "api::package.package",
+    { populate: "*" }
+  >[];
+  templates: Modules.Documents.Result<
+    "api::template.template",
+    { populate: "*" }
+  >[];
 };

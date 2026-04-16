@@ -489,11 +489,17 @@ export interface ApiCtaCta extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    illustration: Schema.Attribute.Enumeration<['image', 'community_members']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'image'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::cta.cta'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    size: Schema.Attribute.Enumeration<['L', 'S']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'L'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -520,13 +526,19 @@ export interface ApiHomeHome extends Struct.SingleTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    cta_buttons: Schema.Attribute.Component<'shared.button', true>;
+    cta_text: Schema.Attribute.Text;
+    cta_title: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::home.home'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<
+      ['sections.highlights', 'sections.cta']
+    >;
     seo: Schema.Attribute.Component<'shared.seo', false> &
       Schema.Attribute.Required;
+    subtitle: Schema.Attribute.String & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -624,7 +636,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
     monthly_downloads: Schema.Attribute.Integer;
@@ -661,7 +673,7 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   };
   pluginOptions: {
     'content-manager': {
-      visible: false;
+      visible: true;
     };
     'content-type-builder': {
       visible: true;
@@ -674,14 +686,18 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.String;
+    github: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::profile.profile'
     > &
       Schema.Attribute.Private;
+    location: Schema.Attribute.String;
     owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    readme: Schema.Attribute.RichText;
+    subtitle: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -723,11 +739,11 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
+    owner: Schema.Attribute.Relation<'morphToMany'>;
     preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;

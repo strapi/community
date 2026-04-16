@@ -42,6 +42,8 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
       filters: {
         ...query?.filters,
         maintainers: {
+          // biome-ignore lint/suspicious/noTsIgnore: Weird situation where it only errors in the Strapi compiler.
+          // @ts-ignore
           id: {
             $eq: organizationId,
           },

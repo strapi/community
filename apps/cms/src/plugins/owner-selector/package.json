@@ -1,0 +1,19 @@
+{
+  "name": "owner-selector",
+  "version": "0.0.0",
+  "strapi": {
+    "name": "owner-selector",
+    "displayName": "Owner Selector",
+    "description": "Select and assign an owner (user or organization) for package and template entries",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "./strapi-server.js"
+    },
+    "./strapi-admin": {
+      "source": "./admin/src/index.tsx",
+      "import": "./admin/src/index.tsx"
+    }
+  }
+}

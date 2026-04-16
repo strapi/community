@@ -11,7 +11,7 @@
   },
   "pluginOptions": {
     "content-manager": {
-      "visible": false
+      "visible": true
     },
     "content-type-builder": {
       "visible": true
@@ -21,11 +21,23 @@
     "bio": {
       "type": "text"
     },
+    "subtitle": {
+      "type": "string"
+    },
     "website": {
+      "type": "string"
+    },
+    "github": {
+      "type": "string"
+    },
+    "location": {
       "type": "string"
     },
     "email": {
       "type": "string"
+    },
+    "readme": {
+      "type": "richtext"
     },
     "avatar": {
       "type": "media",

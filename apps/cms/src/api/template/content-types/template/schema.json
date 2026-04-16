@@ -41,14 +41,12 @@
     },
     "owner": {
       "type": "relation",
-      "relation": "morphToMany",
-      "required": true
+      "relation": "morphToMany"
     },
     "maintainers": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "plugin::better-auth.user",
-      "mappedBy": "templates"
+      "relation": "oneToMany",
+      "target": "plugin::better-auth.user"
     },
     "readme": {
       "type": "richtext"
