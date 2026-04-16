@@ -4,12 +4,13 @@ packages:
 
 catalogs:
   better-auth:
-    "better-auth": 1.5.5
+    better-auth: 1.5.5
   strapi:
-    "@strapi/strapi": 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
-    "@strapi/types": 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
-    "@strapi/plugin-cloud": 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
-    "@strapi-community/plugin-better-auth": 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi-community/plugin-better-auth': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi/plugin-cloud': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi/strapi': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi/types': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi/admin': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
 
 onlyBuiltDependencies:
   - better-sqlite3

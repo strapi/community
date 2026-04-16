@@ -10,20 +10,22 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 import type { UserPageData } from "@/features/cms/pages/user";
+import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: UserPageData;
+  relatedContent: RelatedContentItems;
 };
 
-const UserTemplate = ({ document }: Props) => {
+const UserTemplate = ({ document, relatedContent }: Props) => {
   const { profile } = document;
 
-  const packages = (document.packages || []).filter(
+  const packages = (relatedContent.packages || []).filter(
     (pkg) => pkg.publishedAt != null,
   );
 
   const aggregatedDownloads = packages
-    .map((pkg) => pkg.npm_downloads)
+    .map((pkg) => pkg.monthly_downloads || 0)
     .reduce((sum, downloads) => sum + parseInt(String(downloads), 10), 0);
 
   const mostRecentItem = packages.reduce((latest, current) => {
@@ -44,10 +46,7 @@ const UserTemplate = ({ document }: Props) => {
               alt="Logo plugin"
             />
             <div className="flex w-full flex-col items-start">
-              <h1 className={styles.pluginTitle}>{profile?.full_name} </h1>
-              <p className={styles.plugingShortDescription}>
-                {profile?.headline}
-              </p>
+              <h1 className={styles.pluginTitle}>{document.name} </h1>
             </div>
           </div>
         </div>

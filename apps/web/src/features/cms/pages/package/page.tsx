@@ -2,6 +2,7 @@ import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { client } from "@/features/cms/lib/strapi";
 import { PackageTemplate } from "@/features/cms/pages/package";
+import type { Owner } from "@/utils/types";
 
 const contentType = "api::package.package" satisfies UID.ContentType;
 
@@ -9,9 +10,7 @@ const query = {
   populate: {
     icon: true,
     owner: {
-      populate: {
-        url_alias: true,
-      },
+      populate: "*",
     },
   },
 } satisfies GetQueryParams<typeof contentType>;

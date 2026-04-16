@@ -41,8 +41,8 @@
     },
     "owner": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user"
+      "relation": "morphToMany",
+      "required": true
     },
     "maintainers": {
       "type": "relation",
@@ -58,6 +58,14 @@
       "component": "shared.labels",
       "repeatable": false,
       "required": true
+    },
+    "preview_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "stars": {
+      "type": "integer"
     }
   }
 }

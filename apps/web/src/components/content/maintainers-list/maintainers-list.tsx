@@ -20,7 +20,7 @@ const MaintainersList = ({ maintainers }: Props) => {
           alt={maintainers?.[0]?.profile?.avatar.alternativeText}
         />
         <span className="ml-3 text-sm font-medium text-(--color-neutral800)">
-          {maintainers?.[0]?.profile?.full_name}
+          {maintainers?.[0]?.name}
         </span>
       </div>
     );
