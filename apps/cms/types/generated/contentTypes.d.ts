@@ -507,6 +507,41 @@ export interface ApiCtaCta extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiEmailTemplateEmailTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'email_templates';
+  info: {
+    description: 'Templates rendered by n8n automation workflows (submission received, approved, declined, changes requested).';
+    displayName: 'Email Templates';
+    pluralName: 'email-templates';
+    singularName: 'email-template';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    body: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    from_name: Schema.Attribute.String;
+    key: Schema.Attribute.UID & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::email-template.email-template'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    reply_to: Schema.Attribute.Email;
+    subject: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHomeHome extends Struct.SingleTypeSchema {
   collectionName: 'homes';
   info: {
@@ -1727,6 +1762,7 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::category.category': ApiCategoryCategory;
       'api::cta.cta': ApiCtaCta;
+      'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
       'api::home.home': ApiHomeHome;
       'api::overview-page.overview-page': ApiOverviewPageOverviewPage;
       'api::package.package': ApiPackagePackage;

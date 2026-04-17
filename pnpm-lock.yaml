@@ -19,6 +19,9 @@ catalogs:
     '@strapi/plugin-cloud':
       specifier: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
       version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    '@strapi/provider-email-sendgrid':
+      specifier: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+      version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
     '@strapi/strapi':
       specifier: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
       version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
@@ -65,6 +68,9 @@ importers:
       '@strapi/plugin-cloud':
         specifier: catalog:strapi
         version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66(9f183953f40f53b6c1153cf78f106b59)
+      '@strapi/provider-email-sendgrid':
+        specifier: catalog:strapi
+        version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
       '@strapi/strapi':
         specifier: catalog:strapi
         version: 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@emotion/is-prop-valid@1.2.2)(@swc/helpers@0.5.18)(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(esbuild@0.25.12)(koa@2.16.4)(lightningcss@1.31.1)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.44.1)(type-fest@4.41.0)
@@ -2874,6 +2880,18 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
+  '@sendgrid/client@8.1.6':
+    resolution: {integrity: sha512-/BHu0hqwXNHr2aLhcXU7RmmlVqrdfrbY9KpaNj00KZHlVOVoRxRVrpOCabIB+91ISXJ6+mLM9vpaVUhK6TwBWA==}
+    engines: {node: '>=12.*'}
+
+  '@sendgrid/helpers@8.0.0':
+    resolution: {integrity: sha512-Ze7WuW2Xzy5GT5WRx+yEv89fsg/pgy3T1E3FS0QEx0/VvRmigMZ5qyVGhJz4SxomegDkzXv/i0aFPpHKN8qdAA==}
+    engines: {node: '>= 12.0.0'}
+
+  '@sendgrid/mail@8.1.3':
+    resolution: {integrity: sha512-Wg5iKSUOER83/cfY6rbPa+o3ChnYzWwv1OcsR8gCV8SKi+sUPIMroildimlnb72DBkQxcbylxng1W7f0RIX7MQ==}
+    engines: {node: '>=12.*'}
+
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
@@ -3054,6 +3072,10 @@ packages:
       react-dom: ^17.0.0 || ^18.0.0
       react-router-dom: ^6.30.3
       styled-components: ^6.0.0
+
+  '@strapi/provider-email-sendgrid@0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66':
+    resolution: {integrity: sha512-rAzqNyU6MLWyNFEJ4wdY0Idifr+pCgg+fR+O0kGbBvMAnv+2rirrx0lR031mBpHwzpoZvoco9qtcRbt9lHU4KQ==}
+    engines: {node: '>=20.0.0 <=24.x.x', npm: '>=6.0.0'}
 
   '@strapi/provider-email-sendmail@0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66':
     resolution: {integrity: sha512-8W3K9UxlVyguXAFZgjZPPxHCgE3lvX5lHDDrWjrAFGys3s4ikgY+ROi83xjzuEGc0LrGHG8G/LqxlPW9jguQNQ==}
@@ -11075,6 +11097,24 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
+  '@sendgrid/client@8.1.6':
+    dependencies:
+      '@sendgrid/helpers': 8.0.0
+      axios: 1.12.2(debug@4.3.4)
+    transitivePeerDependencies:
+      - debug
+
+  '@sendgrid/helpers@8.0.0':
+    dependencies:
+      deepmerge: 4.3.1
+
+  '@sendgrid/mail@8.1.3':
+    dependencies:
+      '@sendgrid/client': 8.1.6
+      '@sendgrid/helpers': 8.0.0
+    transitivePeerDependencies:
+      - debug
+
   '@sindresorhus/is@4.6.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
@@ -11936,6 +11976,13 @@ snapshots:
       - '@types/react-dom'
       - codemirror
       - typescript
+
+  '@strapi/provider-email-sendgrid@0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66':
+    dependencies:
+      '@sendgrid/mail': 8.1.3
+      '@strapi/utils': 0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66
+    transitivePeerDependencies:
+      - debug
 
   '@strapi/provider-email-sendmail@0.0.0-experimental.593681493255d3a39231f63454a967a71fdd7d66':
     dependencies:

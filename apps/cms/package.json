@@ -23,6 +23,7 @@
     "@strapi/icons": "^2.0.0",
     "@strapi/typescript-utils": "catalog:strapi",
     "@strapi/plugin-cloud": "catalog:strapi",
+    "@strapi/provider-email-sendgrid": "catalog:strapi",
     "@strapi/admin": "catalog:strapi",
     "@strapi/strapi": "catalog:strapi",
     "better-auth": "catalog:better-auth",
