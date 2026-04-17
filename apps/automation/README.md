@@ -104,6 +104,74 @@ Several skills under `.claude/skills/` wrap this stack:
 - `n8n-export`, `n8n-import` — workflow sync
 - `n8n-workflow-builder` — domain-expertise prompt for building workflows via n8n-mcp tools
 
+### Connecting Claude Code to the local n8n-mcp
+
+Once `n8n-mcp` is running (the `mcp` profile is up), Claude Code can connect to it at:
+
+- **URL:** `http://localhost:3000/mcp`
+- **Auth:** `Authorization: Bearer <MCP_AUTH_TOKEN>` (the same value in `apps/automation/.env`)
+
+You only need to register the server **once** per scope. Pick one of the two approaches below.
+
+#### Option A — Register at the project scope (committed `.mcp.json`)
+
+Run this from the repo root:
+
+```bash
+claude mcp add --scope project --transport http n8n-mcp \
+  http://localhost:3000/mcp \
+  --header "Authorization: Bearer \${MCP_AUTH_TOKEN}"
+```
+
+This writes a `.mcp.json` file at the repo root that the whole team can share:
+
+```json
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MCP_AUTH_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+The `${MCP_AUTH_TOKEN}` placeholder is resolved from your shell environment at launch time, so no secret is committed. **Before starting Claude Code**, export the token:
+
+```bash
+export MCP_AUTH_TOKEN="$(grep '^MCP_AUTH_TOKEN=' apps/automation/.env | cut -d= -f2-)"
+claude
+```
+
+Gotchas:
+
+- If `MCP_AUTH_TOKEN` is unset when Claude Code parses `.mcp.json`, the config fails — there's no fallback. Export it (or use direnv / a shell alias) before launching `claude`.
+- Project-scoped servers require workspace-trust approval on first use; Claude Code will prompt.
+
+#### Option B — Register at the user scope (not in the repo)
+
+If you'd rather not commit `.mcp.json`, register the server for your user account only:
+
+```bash
+claude mcp add --transport http n8n-mcp \
+  http://localhost:3000/mcp \
+  --header "Authorization: Bearer $(grep '^MCP_AUTH_TOKEN=' apps/automation/.env | cut -d= -f2-)"
+```
+
+This stores the server (including the literal token) in your user config, available across all projects. Nothing is written to the repo.
+
+#### Verify the connection
+
+From inside Claude Code, the `n8n-mcp` server should appear in `/mcp` status. You can also probe the endpoint directly:
+
+```bash
+curl -sf -H "Authorization: Bearer $MCP_AUTH_TOKEN" http://localhost:3000/health
+# → HTTP 200
+```
+
 ## Troubleshooting
 
 - **Port 5678 or 3000 already in use** — another container or process is bound. Stop it or edit the port mapping in `docker-compose.yml`.

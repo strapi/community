@@ -46,3 +46,10 @@ Starts the n8n container(s) defined in `apps/automation/docker-compose.yml` via 
 7. **Report URLs to the user:**
    - n8n UI: <http://localhost:5678>
    - n8n-mcp endpoint (if started): <http://localhost:3000/mcp>
+
+8. **If the `mcp` profile was started**, also remind the user that Claude Code must be registered against the MCP server to actually use it. Point them at the "Connecting Claude Code to the local n8n-mcp" section of `apps/automation/README.md`. The one-line summary:
+
+   - Project-scoped: `claude mcp add --scope project --transport http n8n-mcp http://localhost:3000/mcp --header "Authorization: Bearer \${MCP_AUTH_TOKEN}"` (writes `.mcp.json`; export `MCP_AUTH_TOKEN` before launching `claude`).
+   - User-scoped: same command without `--scope project` and with the literal token inlined.
+
+   Skip this reminder if the user has clearly registered it already (e.g. they're invoking an `n8n-*` tool and it's responding).
