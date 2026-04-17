@@ -30,7 +30,7 @@ services:
       n8n:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "3100:3000"
     environment:
       N8N_MODE: "true"
       MCP_MODE: http

@@ -22,7 +22,7 @@ Prints container status plus health probes for n8n and (if running) n8n-mcp.
 
 3. **Probe n8n-mcp health (only if its container is running):**
    ```bash
-   curl -sf -o /dev/null -w '%{http_code}\n' http://localhost:3000/health || echo 'unreachable'
+   curl -sf -o /dev/null -w '%{http_code}\n' http://localhost:3100/health || echo 'unreachable'
    ```
 
 4. **Summarize** per service in one line each:
