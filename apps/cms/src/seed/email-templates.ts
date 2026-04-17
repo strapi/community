@@ -61,14 +61,59 @@ If you'd like to discuss the decision or address the points raised, reply to thi
     key: "plugin-changes-requested",
     subject: "Changes requested for {{ package_name }}",
     description:
-      "Sent by n8n when business review state becomes 'changes_requested'. Variables: package_name, author_name, reviewer_feedback, dashboard_link.",
+      "Sent by n8n when business review state becomes 'changes_requested'. Variables: package_name, author_name, reviewer_feedback. Note: the dashboard_link variable is internal (Strapi admin) and must never appear in this developer-facing email body.",
     body: `Hi {{ author_name }},
 
 Thanks for submitting **{{ package_name }}**. Before we can publish it, the reviewer has asked for a few changes:
 
 > {{ reviewer_feedback }}
 
-Once you've addressed the feedback, update the repository and we'll re-review. You can track status here: {{ dashboard_link }}
+Once you've addressed the feedback, update the repository and reply to this email — we'll re-review.
+
+— The Strapi Community team`,
+  },
+  {
+    key: "template-submission-received",
+    subject: "We've received your template: {{ package_name }}",
+    description:
+      "Sent by n8n when a template is submitted. Variables: package_name, author_name, git_repository.",
+    body: `Hi {{ author_name }},
+
+Thanks for submitting **{{ package_name }}** to the Strapi community templates.
+
+We've received your submission ({{ git_repository }}) and it's now queued for review. You'll hear from us once a moderator has approved or requested changes.
+
+— The Strapi Community team`,
+  },
+  {
+    key: "template-approved",
+    subject: "Your template is live: {{ package_name }}",
+    description:
+      "Sent by n8n when a template submission is approved. Variables: package_name, author_name, marketplace_link (falls back to the repository URL when no marketplace link is available).",
+    body: `Hi {{ author_name }},
+
+Good news — **{{ package_name }}** has been approved and is now live on the Strapi community templates.
+
+View it: {{ marketplace_link }}
+
+Thanks for contributing to the ecosystem.
+
+— The Strapi Community team`,
+  },
+  {
+    key: "template-declined",
+    subject: "Update on your template submission: {{ package_name }}",
+    description:
+      "Sent by n8n when a template submission is declined. Variables: package_name, author_name, decline_reason.",
+    body: `Hi {{ author_name }},
+
+Thanks again for submitting **{{ package_name }}** to the Strapi community templates.
+
+After review we've decided not to list this template at this time. Here's the specific feedback from the reviewer:
+
+> {{ decline_reason }}
+
+If you'd like to discuss the decision or address the points raised, reply to this email and we'll be in touch.
 
 — The Strapi Community team`,
   },

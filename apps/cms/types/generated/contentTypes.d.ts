@@ -2051,7 +2051,6 @@ export interface PluginModerationPluginSubmission
       Schema.Attribute.Private;
     logo_url: Schema.Attribute.String;
     maintainers_list: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
-    npm_package_name: Schema.Attribute.String;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     > &
@@ -2059,6 +2058,7 @@ export interface PluginModerationPluginSubmission
       Schema.Attribute.DefaultTo<'submitted'>;
     owner_email: Schema.Attribute.String & Schema.Attribute.Required;
     owner_name: Schema.Attribute.String & Schema.Attribute.Required;
+    package_location: Schema.Attribute.String;
     package_type: Schema.Attribute.Enumeration<
       ['plugin', 'provider', 'sdk', 'tool']
     > &
@@ -2080,6 +2080,15 @@ export interface PluginModerationPluginSubmission
     > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pending'>;
+    security_scan_ai_analysis: Schema.Attribute.JSON;
+    security_scan_dependencies: Schema.Attribute.JSON;
+    security_scan_run_at: Schema.Attribute.DateTime;
+    security_scan_started_at: Schema.Attribute.DateTime;
+    security_scan_status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    security_scan_summary: Schema.Attribute.JSON;
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.Required &
@@ -2137,6 +2146,15 @@ export interface PluginModerationTemplateSubmission
     repository_url: Schema.Attribute.String & Schema.Attribute.Required;
     reviewer_feedback: Schema.Attribute.Text;
     reviewer_notes: Schema.Attribute.Text;
+    security_scan_ai_analysis: Schema.Attribute.JSON;
+    security_scan_dependencies: Schema.Attribute.JSON;
+    security_scan_run_at: Schema.Attribute.DateTime;
+    security_scan_started_at: Schema.Attribute.DateTime;
+    security_scan_status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    security_scan_summary: Schema.Attribute.JSON;
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.Required &

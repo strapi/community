@@ -56,6 +56,26 @@
     "submitter_ip": {
       "type": "string"
     },
+    "security_scan_status": {
+      "type": "enumeration",
+      "enum": ["pending", "running", "completed", "failed"],
+      "default": "pending"
+    },
+    "security_scan_started_at": {
+      "type": "datetime"
+    },
+    "security_scan_run_at": {
+      "type": "datetime"
+    },
+    "security_scan_dependencies": {
+      "type": "json"
+    },
+    "security_scan_ai_analysis": {
+      "type": "json"
+    },
+    "security_scan_summary": {
+      "type": "json"
+    },
     "overall_status": {
       "type": "enumeration",
       "enum": ["submitted", "approved", "rejected"],

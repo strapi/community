@@ -5,6 +5,10 @@
  * all check functions dispatch to the right API internally.
  *
  * Results are stored as JSON on the submission record in automated_check_results.
+ *
+ * `package_location` is a URL to the published package (npm / packagist / etc.).
+ * Registry fallback lookups (for license / peer-dep checks) are npm-only for now;
+ * when the URL is not an npm URL the fallback is skipped and the repo check stands alone.
  */
 
 // ---------------------------------------------------------------------------
@@ -259,6 +263,28 @@ async function fetchPackageJson(info) {
 }
 
 // ---------------------------------------------------------------------------
+// package_location URL → npm name (used for registry fallback lookups below).
+// Returns null for non-npm URLs; caller falls back to repo-only checks.
+// ---------------------------------------------------------------------------
+
+function extractNpmNameFromLocation(packageLocation) {
+  if (!packageLocation) return null;
+  let href = packageLocation.toString().trim();
+  if (!/^https?:\/\//i.test(href)) href = `https://${href}`;
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return null;
+  }
+  if (url.hostname.replace(/^www\./i, "").toLowerCase() !== "npmjs.com") {
+    return null;
+  }
+  const match = url.pathname.match(/^\/package\/(@[^/]+\/[^/]+|[^/]+)/);
+  return match?.[1] ?? null;
+}
+
+// ---------------------------------------------------------------------------
 // Check: MIT license
 // ---------------------------------------------------------------------------
 
@@ -345,13 +371,14 @@ async function checkStrapiPeerDep(gitRepository, npmPackageName) {
 // Main entry point
 // ---------------------------------------------------------------------------
 
-async function runAutomatedChecks({ repository_url, npm_package_name }) {
+async function runAutomatedChecks({ repository_url, package_location }) {
+  const npmPackageName = extractNpmNameFromLocation(package_location);
   const [repoPublic, readmeExists, mitLicense, strapiPeerDep] =
     await Promise.allSettled([
       checkRepoPublic(repository_url),
       checkReadmeExists(repository_url),
-      checkMitLicense(repository_url, npm_package_name),
-      checkStrapiPeerDep(repository_url, npm_package_name),
+      checkMitLicense(repository_url, npmPackageName),
+      checkStrapiPeerDep(repository_url, npmPackageName),
     ]);
 
   const resolve = (settled) =>

@@ -28,7 +28,7 @@ interface AutomatedChecks {
 interface PluginSubmissionDetail {
   documentId: string;
   plugin_name: string;
-  npm_package_name: string | null;
+  package_location: string | null;
   description: string;
   repository_url: string;
   logo_url: string | null;
@@ -413,8 +413,8 @@ export const SubmissionDetail = () => {
                     />
                     <Divider />
                     <InfoRow
-                      label="NPM Package"
-                      value={submission.npm_package_name ?? "—"}
+                      label="Registry URL"
+                      value={submission.package_location ?? "—"}
                     />
                     <Divider />
                     <InfoRow

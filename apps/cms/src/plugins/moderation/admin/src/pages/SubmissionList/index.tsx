@@ -26,7 +26,7 @@ export type SubmissionStatus =
 export interface PluginSubmission {
   documentId: string;
   plugin_name: string;
-  npm_package_name: string | null;
+  package_location: string | null;
   repository_url: string;
   owner_name: string;
   owner_email: string;
@@ -237,9 +237,9 @@ export const SubmissionList = () => {
                       <Typography fontWeight="semiBold">
                         {s.plugin_name}
                       </Typography>
-                      {s.npm_package_name && (
+                      {s.package_location && (
                         <Typography variant="pi" textColor="neutral600">
-                          {s.npm_package_name}
+                          {s.package_location}
                         </Typography>
                       )}
                     </Flex>

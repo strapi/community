@@ -13,6 +13,23 @@ module.exports = {
           policies: [],
         },
       },
+      {
+        method: "POST",
+        path: "/template-submissions/:documentId/security-scan-result",
+        handler: "template-submission.updateSecurityScan",
+        config: {
+          // Called by n8n over the public API using a Strapi API token.
+          policies: [],
+        },
+      },
+      {
+        method: "GET",
+        path: "/template-submissions/stale-scans",
+        handler: "template-submission.listStaleScans",
+        config: {
+          policies: [],
+        },
+      },
     ],
   },
   admin: {
@@ -40,6 +57,12 @@ module.exports = {
         method: "POST",
         path: "/template-submissions/:documentId/decide",
         handler: "template-submission.decide",
+        config: { policies: [] },
+      },
+      {
+        method: "POST",
+        path: "/template-submissions/:documentId/run-security-scan",
+        handler: "template-submission.runSecurityScan",
         config: { policies: [] },
       },
     ],

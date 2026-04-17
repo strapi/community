@@ -7,7 +7,29 @@
  * Feedback to the submitter is delivered via n8n workflows (see TODO comments).
  */
 
+const { triggerN8nWebhook } = require("./n8n-webhook");
+
 const CONTENT_TYPE = "plugin::moderation.template-submission";
+
+const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
+
+function buildLifecyclePayload(submission, extras = {}) {
+  const adminBase = (
+    process.env.CLOUD_APP_URL || "http://localhost:1337"
+  ).replace(/\/$/, "");
+  const adminPath = `/admin/plugins/moderation/template-submissions/${submission.documentId}`;
+  return {
+    submissionId: submission.documentId,
+    submission_kind: "template",
+    template_name: submission.template_name,
+    repository_url: submission.repository_url,
+    demo_url: submission.demo_url || null,
+    owner_name: submission.owner_name,
+    owner_email: submission.owner_email,
+    dashboard_link: `${adminBase}${adminPath}`,
+    ...extras,
+  };
+}
 
 module.exports = ({ strapi }) => ({
   /**
@@ -32,12 +54,11 @@ module.exports = ({ strapi }) => ({
       },
     });
 
-    // TODO: Trigger n8n "template submission received" workflow here.
-    // Example: await triggerN8nWorkflow('template-submission-received', {
-    //   submissionId: submission.documentId,
-    //   ownerEmail: data.owner_email,
-    //   templateName: data.template_name,
-    // });
+    triggerN8nWebhook(
+      "template-submission-received",
+      buildLifecyclePayload(submission),
+      { strapi },
+    );
 
     return submission;
   },
@@ -91,22 +112,15 @@ module.exports = ({ strapi }) => ({
       },
     });
 
-    if (status === "approved") {
-      // TODO: Trigger n8n "template approved" workflow.
-      // Example: await triggerN8nWorkflow('template-submission-approved', {
-      //   submissionId: documentId,
-      //   ownerEmail: updated.owner_email,
-      //   templateName: updated.template_name,
-      // });
-    } else {
-      // TODO: Trigger n8n "template rejected" workflow.
-      // Example: await triggerN8nWorkflow('template-submission-rejected', {
-      //   submissionId: documentId,
-      //   ownerEmail: updated.owner_email,
-      //   reason,
-      //   feedback,
-      // });
-    }
+    triggerN8nWebhook(
+      status === "approved" ? "template-approved" : "template-declined",
+      buildLifecyclePayload(updated, {
+        reason: reason || null,
+        feedback: feedback || null,
+        notes: notes || null,
+      }),
+      { strapi },
+    );
 
     return updated;
   },
@@ -124,9 +138,105 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
+   * List submissions whose security scan is stuck in 'running' past a cutoff.
+   * Consumed by the n8n scan-timeout-sweeper workflow.
+   */
+  async listStaleScans({ cutoff }) {
+    if (!cutoff) return [];
+    return strapi.documents(CONTENT_TYPE).findMany({
+      filters: {
+        security_scan_status: { $eq: "running" },
+        security_scan_started_at: { $lt: cutoff },
+      },
+      fields: ["documentId", "template_name", "security_scan_started_at"],
+      pagination: { page: 1, pageSize: 50 },
+    });
+  },
+
+  /**
    * Fetch a single template submission by documentId.
    */
   async getSubmission(documentId) {
     return strapi.documents(CONTENT_TYPE).findOne({ documentId });
+  },
+
+  /**
+   * Trigger the n8n security-scan workflow for a template submission.
+   * Templates are repo-only (no published artifact); `package_info` is always null
+   * in the webhook payload, and the workflow falls back to repo + AI-only analysis.
+   */
+  async triggerSecurityScan(documentId) {
+    const submission = await strapi.documents(CONTENT_TYPE).findOne({
+      documentId,
+    });
+    if (!submission) throw new Error("Submission not found.");
+
+    if (submission.security_scan_status === "running") {
+      throw new Error(
+        "A security scan is already running for this submission.",
+      );
+    }
+
+    await strapi.documents(CONTENT_TYPE).update({
+      documentId,
+      data: {
+        security_scan_status: "running",
+        security_scan_started_at: new Date().toISOString(),
+      },
+    });
+
+    const payload = {
+      ...buildLifecyclePayload(submission),
+      plugin_name: submission.template_name,
+      package_location: null,
+      readme: submission.description,
+      package_info: null,
+    };
+
+    const result = await triggerN8nWebhook("security-scan", payload, {
+      strapi,
+    });
+    if (!result.ok) {
+      await strapi.documents(CONTENT_TYPE).update({
+        documentId,
+        data: { security_scan_status: "failed" },
+      });
+      throw new Error(result.error || "Failed to trigger n8n security scan.");
+    }
+
+    return { documentId, status: "running" };
+  },
+
+  /**
+   * Write back a single security-scan stage result from n8n.
+   * Stages: dependencies, ai_analysis, summary.
+   * Also accepts status transitions: 'completed' or 'failed' (with no stage result).
+   *
+   * Templates do not have a separate npm_advisories stage (no registry artifact).
+   */
+  async updateSecurityScanResult(documentId, { stage, result, status }) {
+    if (stage && !VALID_SCAN_STAGES.includes(stage)) {
+      throw new Error(
+        `Invalid scan stage '${stage}'. Expected one of: ${VALID_SCAN_STAGES.join(", ")}.`,
+      );
+    }
+
+    const data = {};
+    if (stage === "dependencies")
+      data.security_scan_dependencies = result ?? null;
+    if (stage === "ai_analysis")
+      data.security_scan_ai_analysis = result ?? null;
+    if (stage === "summary") data.security_scan_summary = result ?? null;
+
+    if (status === "completed" || status === "failed") {
+      data.security_scan_status = status;
+      data.security_scan_run_at = new Date().toISOString();
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new Error("No stage result or status transition provided.");
+    }
+
+    return strapi.documents(CONTENT_TYPE).update({ documentId, data });
   },
 });

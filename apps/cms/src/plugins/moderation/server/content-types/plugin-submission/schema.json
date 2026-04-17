@@ -19,8 +19,9 @@
       "type": "string",
       "required": true
     },
-    "npm_package_name": {
-      "type": "string"
+    "package_location": {
+      "type": "string",
+      "description": "URL to the published package (npm / packagist / pypi / rubygems / nuget). Registry is inferred from the hostname at scan time. Optional — plugins without a published artifact are scanned from their source repo only."
     },
     "description": {
       "type": "text",
@@ -106,6 +107,26 @@
       "type": "text"
     },
     "automated_check_results": {
+      "type": "json"
+    },
+    "security_scan_status": {
+      "type": "enumeration",
+      "enum": ["pending", "running", "completed", "failed"],
+      "default": "pending"
+    },
+    "security_scan_started_at": {
+      "type": "datetime"
+    },
+    "security_scan_run_at": {
+      "type": "datetime"
+    },
+    "security_scan_dependencies": {
+      "type": "json"
+    },
+    "security_scan_ai_analysis": {
+      "type": "json"
+    },
+    "security_scan_summary": {
       "type": "json"
     },
     "promoted_package": {

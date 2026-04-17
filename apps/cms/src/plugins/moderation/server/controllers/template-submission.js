@@ -115,4 +115,54 @@ module.exports = ({ strapi }) => ({
       ctx.badRequest(err.message);
     }
   },
+
+  /**
+   * POST /moderation/template-submissions/:documentId/run-security-scan
+   * Manually trigger the n8n security-scan workflow for a template submission (admin only).
+   */
+  async runSecurityScan(ctx) {
+    const { documentId } = ctx.params;
+    try {
+      const result = await service(strapi).triggerSecurityScan(documentId);
+      ctx.body = { data: result };
+    } catch (err) {
+      ctx.badRequest(err.message);
+    }
+  },
+
+  /**
+   * GET /api/moderation/template-submissions/stale-scans?cutoff=<ISO timestamp>
+   * Content-api + API-token: returns template submissions whose scan has been
+   * 'running' since before `cutoff`. Consumed by the n8n scan-timeout-sweeper.
+   */
+  async listStaleScans(ctx) {
+    const { cutoff } = ctx.query;
+    if (!cutoff) return ctx.badRequest("cutoff query param is required");
+    try {
+      const results = await service(strapi).listStaleScans({ cutoff });
+      ctx.body = { data: results };
+    } catch (err) {
+      ctx.internalServerError(err.message);
+    }
+  },
+
+  /**
+   * POST /api/moderation/template-submissions/:documentId/security-scan-result
+   * Called by n8n (with a Strapi API token) to write back per-stage scan results.
+   */
+  async updateSecurityScan(ctx) {
+    const { documentId } = ctx.params;
+    const body = ctx.request.body?.data || ctx.request.body;
+    const { stage, result, status } = body || {};
+
+    try {
+      const updated = await service(strapi).updateSecurityScanResult(
+        documentId,
+        { stage, result, status },
+      );
+      ctx.body = { data: updated };
+    } catch (err) {
+      ctx.badRequest(err.message);
+    }
+  },
 });
