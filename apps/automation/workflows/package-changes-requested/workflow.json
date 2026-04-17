@@ -1,0 +1,200 @@
+{
+  "name": "package-changes-requested",
+  "description": null,
+  "nodes": [
+    {
+      "id": "webhook-1",
+      "name": "Webhook: Changes Requested",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "strapi/package-changes-requested",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "Fires when business_review_state transitions to 'changes_requested'. Expects body.entry { id, name, author { email, name }, business_review_feedback }.",
+      "webhookId": "2f6e1cec-6e97-4e6d-b9f6-8b3fbda1e310"
+    },
+    {
+      "id": "extract-1",
+      "name": "Extract Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "package_id",
+              "type": "string",
+              "value": "={{ $json.body.entry.id }}"
+            },
+            {
+              "id": "a2",
+              "name": "package_name",
+              "type": "string",
+              "value": "={{ $json.body.entry.name }}"
+            },
+            {
+              "id": "a3",
+              "name": "author_email",
+              "type": "string",
+              "value": "={{ $json.body.entry.author.email }}"
+            },
+            {
+              "id": "a4",
+              "name": "author_name",
+              "type": "string",
+              "value": "={{ $json.body.entry.author.name }}"
+            },
+            {
+              "id": "a5",
+              "name": "reviewer_feedback",
+              "type": "string",
+              "value": "={{ $json.body.entry.business_review_feedback }}"
+            },
+            {
+              "id": "a6",
+              "name": "dashboard_link",
+              "type": "string",
+              "value": "=https://strapi.io/community/admin/content-manager/collectionType/api::package.package/{{ $json.body.entry.id }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "build-email-1",
+      "name": "Build Email Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "template_key",
+              "type": "string",
+              "value": "plugin-changes-requested"
+            },
+            {
+              "id": "b2",
+              "name": "to_email",
+              "type": "string",
+              "value": "={{ $json.author_email }}"
+            },
+            {
+              "id": "b3",
+              "name": "to_name",
+              "type": "string",
+              "value": "={{ $json.author_name }}"
+            },
+            {
+              "id": "b4",
+              "name": "variables",
+              "type": "object",
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, reviewer_feedback: $json.reviewer_feedback, dashboard_link: $json.dashboard_link } }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "send-email-1",
+      "name": "Send Developer Email",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1MgLRIjI37T2Kd5W"
+        },
+        "mode": "once",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    }
+  ],
+  "connections": {
+    "Webhook: Changes Requested": {
+      "main": [
+        [
+          {
+            "node": "Extract Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payload": {
+      "main": [
+        [
+          {
+            "node": "Build Email Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Payload": {
+      "main": [
+        [
+          {
+            "node": "Send Developer Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}
