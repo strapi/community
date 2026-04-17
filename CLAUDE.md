@@ -36,6 +36,14 @@ See [`apps/automation/README.md`](apps/automation/README.md) for full setup.
 | `n8n-import` | Push every `workflows/<slug>/workflow.json` back into the local n8n instance. |
 | `n8n-workflow-builder` | Domain-expertise prompt for designing, building, and validating n8n workflows via `n8n-mcp` tools. Invoke whenever the user asks to build or modify a workflow. |
 
+### Connecting to n8n-mcp
+
+The `n8n-workflow-builder` skill assumes Claude Code is already connected to the local `n8n-mcp` server. If its tools are unavailable:
+
+1. Ensure the `mcp` profile is running: `pnpm --filter automation n8n:ps` should show `n8n-mcp` healthy.
+2. Register the MCP server with Claude Code. See **"Connecting Claude Code to the local n8n-mcp"** in [`apps/automation/README.md`](apps/automation/README.md) for the exact `claude mcp add` command and `.mcp.json` shape.
+3. Remember to `export MCP_AUTH_TOKEN=...` (from `apps/automation/.env`) in the shell that launches `claude`.
+
 ## Conventions
 
 - **`tmp/`** is gitignored local scratch (specs, plans, ad-hoc notes). Do not commit any content placed under `tmp/`.
