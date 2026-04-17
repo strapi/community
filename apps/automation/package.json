@@ -4,7 +4,7 @@
   "private": true,
   "description": "Local n8n instance and workflow version control for the Strapi community hub. Engine-agnostic (Docker or Podman).",
   "scripts": {
-    "dev": "./scripts/compose.sh up",
+    "dev": "./scripts/compose.sh up -d",
     "start": "./scripts/compose.sh up -d",
     "n8n:up": "./scripts/compose.sh up -d",
     "n8n:up:mcp": "./scripts/compose.sh --profile mcp up -d",

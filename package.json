@@ -2,11 +2,16 @@
   "name": "strapi-marketplace",
   "private": true,
   "scripts": {
+    "bootstrap": "./scripts/setup.sh",
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "test": "turbo test",
     "check-types": "turbo check-types",
+    "n8n:start": "pnpm --filter automation start",
+    "n8n:stop": "pnpm --filter automation n8n:down",
+    "search:start": "pnpm --filter search start",
+    "search:stop": "pnpm --filter search stop",
     "update-dependencies": "pnpm --recursive --interactive --latest update",
     "prepare": "husky"
   },
