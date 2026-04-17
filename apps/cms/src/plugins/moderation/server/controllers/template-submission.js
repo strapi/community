@@ -1,5 +1,5 @@
 /**
- * Plugin submission controller.
+ * Template submission controller.
  *
  * Exposes two sets of endpoints:
  *  - content-api: public-facing submission endpoint (called through Next.js proxy)
@@ -7,19 +7,19 @@
  */
 
 const service = (strapi) =>
-  strapi.plugin("moderation").service("plugin-submission");
+  strapi.plugin("moderation").service("template-submission");
 
 module.exports = ({ strapi }) => ({
   /**
-   * POST /api/moderation/plugin-submissions
-   * Accepts a new plugin submission from the public.
+   * POST /api/moderation/template-submissions
+   * Accepts a new template submission from the public.
    * Called by the Next.js proxy, never directly from the browser.
    */
   async create(ctx) {
     const body = ctx.request.body?.data || ctx.request.body;
 
     const required = [
-      "plugin_name",
+      "template_name",
       "description",
       "repository_url",
       "owner_name",
@@ -46,14 +46,16 @@ module.exports = ({ strapi }) => ({
       );
       ctx.created({ data: { documentId: submission.documentId } });
     } catch (err) {
-      strapi.log.error(`[moderation] Submission create error: ${err.message}`);
+      strapi.log.error(
+        `[moderation] Template submission create error: ${err.message}`,
+      );
       ctx.internalServerError("Failed to create submission.");
     }
   },
 
   /**
-   * GET /moderation/submissions
-   * List all plugin submissions (admin only).
+   * GET /moderation/template-submissions
+   * List all template submissions (admin only).
    */
   async find(ctx) {
     const { status, page, pageSize } = ctx.query;
@@ -66,8 +68,8 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * GET /moderation/submissions/:documentId
-   * Fetch a single submission (admin only).
+   * GET /moderation/template-submissions/:documentId
+   * Fetch a single template submission (admin only).
    */
   async findOne(ctx) {
     const { documentId } = ctx.params;
@@ -77,8 +79,8 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * PUT /moderation/submissions/:documentId/review
-   * Update review status fields on a submission (admin only).
+   * PUT /moderation/template-submissions/:documentId/review
+   * Save draft review fields (admin only).
    */
   async updateReview(ctx) {
     const { documentId } = ctx.params;
@@ -93,34 +95,20 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * POST /moderation/submissions/:documentId/promote
-   * Promote an approved submission to a real package entry (admin only).
-   */
-  async promote(ctx) {
-    const { documentId } = ctx.params;
-
-    try {
-      const pkg = await service(strapi).promoteToPackage(documentId);
-      ctx.body = { data: pkg };
-    } catch (err) {
-      ctx.badRequest(err.message);
-    }
-  },
-
-  /**
-   * POST /moderation/submissions/:documentId/decide
-   * Reject a submission or request changes (admin only).
+   * POST /moderation/template-submissions/:documentId/decide
+   * Approve or reject a template submission (admin only).
    */
   async decide(ctx) {
     const { documentId } = ctx.params;
     const body = ctx.request.body?.data || ctx.request.body;
-    const { status, reason, feedback } = body;
+    const { status, feedback, notes, reason } = body;
 
     try {
-      const updated = await service(strapi).rejectOrRequestChanges(documentId, {
+      const updated = await service(strapi).decide(documentId, {
         status,
-        reason,
         feedback,
+        notes,
+        reason,
       });
       ctx.body = { data: updated };
     } catch (err) {

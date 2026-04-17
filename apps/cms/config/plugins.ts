@@ -19,6 +19,13 @@ export default ({ env }) => ({
             },
           },
   },
+  upload: {
+    config: {
+      security: {
+        strictSsrf: true,
+      },
+    },
+  },
   "owner-selector": {
     enabled: true,
     resolve: "./src/plugins/owner-selector",

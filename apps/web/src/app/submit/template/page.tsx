@@ -1,7 +1,5 @@
 "use client";
 
-// TODO: Set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env (v3 site key from https://www.google.com/recaptcha/admin)
-
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -15,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
-    // reCAPTCHA Enterprise exposes grecaptcha.enterprise, not grecaptcha directly
     grecaptcha: {
       enterprise: {
         ready: (cb: () => void) => void;
@@ -149,7 +146,6 @@ function LogoUpload({
         onChange={(e) => handleFiles(e.target.files)}
       />
 
-      {/* Drop zone */}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -191,15 +187,14 @@ function LogoUpload({
           </div>
         ) : (
           <>
-            {/* Upload icon */}
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
               className="h-8 w-8 text-(--color-neutral400)"
+              aria-hidden="true"
             >
-              <title>Upload a File</title>
               <path
                 d="M12 16V8m0 0-3 3m3-3 3 3"
                 strokeLinecap="round"
@@ -221,7 +216,6 @@ function LogoUpload({
         )}
       </button>
 
-      {/* Clear button */}
       {file && (
         <button
           type="button"
@@ -269,13 +263,12 @@ function CategoryPill({
 // ---------------------------------------------------------------------------
 
 interface FormFields {
-  plugin_name: string;
-  npm_package_name: string;
+  template_name: string;
   repository_url: string;
+  demo_url: string;
   description: string;
   logo_file: File | null;
   categories_list: string[];
-  readme: string;
   submission_notes: string;
   owner_name: string;
   owner_email: string;
@@ -283,13 +276,12 @@ interface FormFields {
 }
 
 const INITIAL: FormFields = {
-  plugin_name: "",
-  npm_package_name: "",
+  template_name: "",
   repository_url: "",
+  demo_url: "",
   description: "",
   logo_file: null,
   categories_list: [],
-  readme: "",
   submission_notes: "",
   owner_name: "",
   owner_email: "",
@@ -300,12 +292,15 @@ type FieldErrors = Partial<Record<keyof FormFields | "_form", string>>;
 
 function validate(f: FormFields): FieldErrors {
   const e: FieldErrors = {};
-  if (!f.plugin_name.trim()) e.plugin_name = "Plugin name is required.";
+  if (!f.template_name.trim()) e.template_name = "Template name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
   if (!f.repository_url.trim()) {
     e.repository_url = "Repository URL is required.";
   } else if (!/^https?:\/\//i.test(f.repository_url.trim())) {
     e.repository_url = "Must be a valid https:// URL.";
+  }
+  if (f.demo_url.trim() && !/^https?:\/\//i.test(f.demo_url.trim())) {
+    e.demo_url = "Must be a valid https:// URL.";
   }
   if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
   if (!f.owner_email.trim()) {
@@ -335,8 +330,8 @@ function SuccessScreen() {
                 stroke="currentColor"
                 strokeWidth="2"
                 className="h-8 w-8 text-(--color-primary600)"
+                aria-hidden="true"
               >
-                <title>Submission received</title>
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
@@ -344,8 +339,8 @@ function SuccessScreen() {
               Submission received!
             </h1>
             <p className="mb-8 max-w-md text-sm leading-relaxed text-(--color-neutral600)">
-              Thank you for submitting your plugin. Our team will review it and
-              reach out at the email address you provided.
+              Thank you for submitting your template. Our team will review it
+              and reach out at the email address you provided.
             </p>
             <Button href="/" variant="secondary">
               Back to Marketplace
@@ -361,14 +356,13 @@ function SuccessScreen() {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function SubmitPluginPage() {
+export default function SubmitTemplatePage() {
   const [fields, setFields] = useState<FormFields>(INITIAL);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Fetch categories from server-side proxy (avoids CORS + keeps token out of browser)
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => (r.ok ? r.json() : null))
@@ -425,18 +419,15 @@ export default function SubmitPluginPage() {
         );
         recaptchaToken = await window.grecaptcha.enterprise.execute(
           RECAPTCHA_SITE_KEY,
-          {
-            action: "submit_plugin",
-          },
+          { action: "submit_template" },
         );
       }
 
       const form = new FormData();
-      form.append("plugin_name", fields.plugin_name.trim());
-      form.append("npm_package_name", fields.npm_package_name.trim());
+      form.append("template_name", fields.template_name.trim());
       form.append("repository_url", fields.repository_url.trim());
+      form.append("demo_url", fields.demo_url.trim());
       form.append("description", fields.description.trim());
-      form.append("readme", fields.readme.trim());
       form.append("submission_notes", fields.submission_notes.trim());
       form.append("owner_name", fields.owner_name.trim());
       form.append("owner_email", fields.owner_email.trim());
@@ -447,7 +438,7 @@ export default function SubmitPluginPage() {
         form.append("logo_file", fields.logo_file, fields.logo_file.name);
       }
 
-      const res = await fetch("/api/submit-plugin", {
+      const res = await fetch("/api/submit-template", {
         method: "POST",
         body: form,
       });
@@ -470,7 +461,7 @@ export default function SubmitPluginPage() {
     } catch {
       setErrors({
         _form:
-          "Could not submit your plugin. Please check your connection and try again.",
+          "Could not submit your template. Please check your connection and try again.",
       });
     } finally {
       setSubmitting(false);
@@ -508,8 +499,8 @@ export default function SubmitPluginPage() {
                 stroke="currentColor"
                 strokeWidth="2"
                 className="h-4 w-4"
+                aria-hidden="true"
               >
-                <title>Back to submissions</title>
                 <polyline points="15 18 9 12 15 6" />
               </svg>
               Submit other content
@@ -517,19 +508,18 @@ export default function SubmitPluginPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
-            {/* ── Left: intro ── */}
+            {/* Left: intro */}
             <div className="lg:col-span-2 lg:pt-2">
               <p className="mb-2 text-sm text-(--color-neutral600)">
                 Submit your content
               </p>
               <h1 className="mb-4 text-4xl font-bold leading-tight text-(--color-primary800)">
-                Submit a Plugin
+                Submit a Template
               </h1>
               <p className="text-sm leading-7 text-(--color-neutral700)">
-                Share your Strapi plugin with the community. All submissions go
-                through a business and security review before being listed in
-                the marketplace. We&rsquo;ll reach out if we need more
-                information.{" "}
+                Share your Strapi starter template with the community. All
+                submissions are reviewed before being listed in the marketplace.
+                We&rsquo;ll reach out if we need more information.{" "}
                 <Link
                   href="/community"
                   className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -541,12 +531,12 @@ export default function SubmitPluginPage() {
               <div className="mt-8 space-y-3">
                 {[
                   {
-                    title: "Business review",
-                    body: "We check your repo is public, MIT-licensed, has a README, and lists Strapi as a peer dependency.",
+                    title: "Quick review",
+                    body: "Templates go through a simplified review process — no automated checks, just a manual approval.",
                   },
                   {
-                    title: "Security review",
-                    body: "We scan dependencies for known vulnerabilities and flag security concerns before listing.",
+                    title: "Get discovered",
+                    body: "Approved templates are listed in the marketplace and discoverable by the Strapi community.",
                   },
                 ].map(({ title, body }) => (
                   <div
@@ -560,8 +550,8 @@ export default function SubmitPluginPage() {
                         stroke="currentColor"
                         strokeWidth="2.5"
                         className="h-3 w-3"
+                        aria-hidden="true"
                       >
-                        <title>Business review</title>
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
@@ -578,7 +568,7 @@ export default function SubmitPluginPage() {
               </div>
             </div>
 
-            {/* ── Right: form ── */}
+            {/* Right: form */}
             <div className="lg:col-span-3">
               <form
                 onSubmit={handleSubmit}
@@ -594,35 +584,20 @@ export default function SubmitPluginPage() {
                   </div>
                 )}
 
-                {/* Plugin Name */}
+                {/* Template Name */}
                 <div className="mb-5">
-                  <Label htmlFor="plugin_name" required>
-                    Plugin Name
+                  <Label htmlFor="template_name" required>
+                    Template Name
                   </Label>
                   <Input
-                    id="plugin_name"
-                    value={fields.plugin_name}
-                    onChange={(e) => set("plugin_name", e.target.value)}
-                    placeholder="e.g. Strapi Plugin SEO"
-                    className={errors.plugin_name ? "border-red-400" : ""}
+                    id="template_name"
+                    value={fields.template_name}
+                    onChange={(e) => set("template_name", e.target.value)}
+                    placeholder="e.g. Strapi Blog Starter"
+                    className={errors.template_name ? "border-red-400" : ""}
                     autoComplete="off"
                   />
-                  <FieldError message={errors.plugin_name} />
-                </div>
-
-                {/* NPM Package Name */}
-                <div className="mb-5">
-                  <Label htmlFor="npm_package_name">NPM Package Name</Label>
-                  <Input
-                    id="npm_package_name"
-                    value={fields.npm_package_name}
-                    onChange={(e) => set("npm_package_name", e.target.value)}
-                    placeholder="@scope/strapi-plugin-name"
-                    autoComplete="off"
-                  />
-                  <Hint>
-                    Package name as it appears on npm, if already published.
-                  </Hint>
+                  <FieldError message={errors.template_name} />
                 </div>
 
                 {/* Repository URL */}
@@ -635,7 +610,7 @@ export default function SubmitPluginPage() {
                     type="url"
                     value={fields.repository_url}
                     onChange={(e) => set("repository_url", e.target.value)}
-                    placeholder="https://github.com/org/repo or https://gitlab.com/org/repo"
+                    placeholder="https://github.com/org/repo"
                     className={errors.repository_url ? "border-red-400" : ""}
                   />
                   <FieldError message={errors.repository_url} />
@@ -644,16 +619,31 @@ export default function SubmitPluginPage() {
                   </Hint>
                 </div>
 
+                {/* Demo URL */}
+                <div className="mb-5">
+                  <Label htmlFor="demo_url">Live Demo URL</Label>
+                  <Input
+                    id="demo_url"
+                    type="url"
+                    value={fields.demo_url}
+                    onChange={(e) => set("demo_url", e.target.value)}
+                    placeholder="https://my-template-demo.com"
+                    className={errors.demo_url ? "border-red-400" : ""}
+                  />
+                  <FieldError message={errors.demo_url} />
+                  <Hint>A live preview URL, if available.</Hint>
+                </div>
+
                 {/* Description */}
                 <div className="mb-5">
                   <Label htmlFor="description" required>
-                    Plugin Description
+                    Template Description
                   </Label>
                   <Textarea
                     id="description"
                     value={fields.description}
                     onChange={(v) => set("description", v)}
-                    placeholder="Tell us about your plugin — what it does and why it's useful."
+                    placeholder="Tell us about your template — what it includes and what use cases it covers."
                     rows={4}
                     hasError={!!errors.description}
                   />
@@ -662,7 +652,7 @@ export default function SubmitPluginPage() {
 
                 {/* Logo upload */}
                 <div className="mb-5">
-                  <Label htmlFor="logo_file">Plugin Logo / Icon</Label>
+                  <Label htmlFor="logo_file">Template Logo / Screenshot</Label>
                   <LogoUpload
                     file={fields.logo_file}
                     onChange={(f) => set("logo_file", f)}
@@ -707,18 +697,6 @@ export default function SubmitPluginPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                {/* README */}
-                <div className="mb-5">
-                  <Label htmlFor="readme">README / Documentation</Label>
-                  <Textarea
-                    id="readme"
-                    value={fields.readme}
-                    onChange={(v) => set("readme", v)}
-                    placeholder="Paste your plugin's README or any additional documentation here."
-                    rows={6}
-                  />
                 </div>
 
                 <SectionDivider label="Owner" />
@@ -771,8 +749,8 @@ export default function SubmitPluginPage() {
                 {/* Terms */}
                 <div className="mb-6">
                   <label
-                    className="flex cursor-pointer items-start gap-3"
                     htmlFor="agreed"
+                    className="flex cursor-pointer items-start gap-3"
                   >
                     <Checkbox
                       id="agreed"
@@ -783,8 +761,8 @@ export default function SubmitPluginPage() {
                       className={errors.agreed ? "border-red-400" : ""}
                     />
                     <span className="text-sm leading-relaxed text-(--color-neutral700)">
-                      I confirm this plugin is open-source, MIT-licensed, and
-                      compliant with the{" "}
+                      I confirm this template is open-source and compliant with
+                      the{" "}
                       <Link
                         href="/community"
                         className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -810,7 +788,7 @@ export default function SubmitPluginPage() {
                   className="w-full"
                   disabled={submitting}
                 >
-                  {submitting ? "Submitting…" : "Submit Plugin"}
+                  {submitting ? "Submitting…" : "Submit Template"}
                 </Button>
 
                 <p className="mt-4 text-center text-xs text-(--color-neutral600)">

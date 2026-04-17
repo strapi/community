@@ -2008,7 +2008,6 @@ export interface PluginModerationPluginSubmission
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
-    git_repository: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -2038,6 +2037,7 @@ export interface PluginModerationPluginSubmission
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     rejection_reason: Schema.Attribute.Text;
+    repository_url: Schema.Attribute.String & Schema.Attribute.Required;
     reviewer_feedback: Schema.Attribute.Text;
     security_review_notes: Schema.Attribute.Text;
     security_review_status: Schema.Attribute.Enumeration<
@@ -2050,6 +2050,64 @@ export interface PluginModerationPluginSubmission
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<false>;
     submitter_ip: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginModerationTemplateSubmission
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'template_submissions';
+  info: {
+    description: 'Incoming template submissions awaiting approval before publication';
+    displayName: 'Template Submission';
+    pluralName: 'template-submissions';
+    singularName: 'template-submission';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    categories_list: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    demo_url: Schema.Attribute.String;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.template-submission'
+    > &
+      Schema.Attribute.Private;
+    logo_url: Schema.Attribute.String;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'approved', 'rejected']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'submitted'>;
+    owner_email: Schema.Attribute.String & Schema.Attribute.Required;
+    owner_name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    rejection_reason: Schema.Attribute.Text;
+    repository_url: Schema.Attribute.String & Schema.Attribute.Required;
+    reviewer_feedback: Schema.Attribute.Text;
+    reviewer_notes: Schema.Attribute.Text;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
+    template_name: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2399,6 +2457,7 @@ declare module '@strapi/strapi' {
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
       'plugin::moderation.plugin-submission': PluginModerationPluginSubmission;
+      'plugin::moderation.template-submission': PluginModerationTemplateSubmission;
       'plugin::review-workflows.workflow': PluginReviewWorkflowsWorkflow;
       'plugin::review-workflows.workflow-stage': PluginReviewWorkflowsWorkflowStage;
       'plugin::upload.file': PluginUploadFile;

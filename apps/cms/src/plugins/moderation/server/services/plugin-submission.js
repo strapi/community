@@ -27,7 +27,7 @@ module.exports = ({ strapi }) => ({
         plugin_name: data.plugin_name,
         npm_package_name: data.npm_package_name || null,
         description: data.description,
-        git_repository: data.git_repository,
+        repository_url: data.repository_url,
         logo_url: data.logo_url || null,
         package_type: data.package_type || "plugin",
         categories_list: data.categories_list || [],
@@ -48,7 +48,7 @@ module.exports = ({ strapi }) => ({
     // Run checks asynchronously so the submission response is fast.
     // Results are saved back to the record once available.
     this.runChecksAsync(submission.documentId, {
-      git_repository: data.git_repository,
+      repository_url: data.repository_url,
       npm_package_name: data.npm_package_name,
       plugin_name: data.plugin_name,
     }).catch((err) => {
@@ -69,11 +69,11 @@ module.exports = ({ strapi }) => ({
    */
   async runChecksAsync(
     documentId,
-    { git_repository, npm_package_name, plugin_name },
+    { repository_url, npm_package_name, plugin_name },
   ) {
     const [businessChecks, securityChecks] = await Promise.allSettled([
-      runAutomatedChecks({ git_repository, npm_package_name }),
-      runSecurityChecks({ git_repository, npm_package_name, plugin_name }),
+      runAutomatedChecks({ repository_url, npm_package_name }),
+      runSecurityChecks({ repository_url, npm_package_name, plugin_name }),
     ]);
 
     const automated =
@@ -185,7 +185,7 @@ module.exports = ({ strapi }) => ({
       data: {
         name: submission.plugin_name,
         description: submission.description,
-        git_repository: submission.git_repository,
+        repository_url: submission.repository_url,
         package_location: submission.npm_package_name || null,
         type: submission.package_type,
         readme: submission.readme || null,

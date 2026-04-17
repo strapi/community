@@ -2,6 +2,7 @@ import type { StrapiApp } from "@strapi/strapi/admin";
 import { Route, Routes } from "react-router-dom";
 import { SubmissionDetail } from "./pages/SubmissionDetail";
 import { SubmissionList } from "./pages/SubmissionList";
+import { TemplateSubmissionDetail } from "./pages/TemplateSubmissionDetail";
 
 // Simple shield icon for the menu
 const ShieldIcon = () => (
@@ -10,8 +11,8 @@ const ShieldIcon = () => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
-    width="1em"
-    height="1em"
+    width="1.4em"
+    height="1.4em"
     aria-label="Moderation plugin"
   >
     <title>Moderation plugin</title>
@@ -36,6 +37,10 @@ export default {
               <Route
                 path="submissions/:documentId"
                 element={<SubmissionDetail />}
+              />
+              <Route
+                path="template-submissions/:documentId"
+                element={<TemplateSubmissionDetail />}
               />
             </Routes>
           ),

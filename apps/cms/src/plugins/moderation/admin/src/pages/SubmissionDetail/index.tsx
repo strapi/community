@@ -30,7 +30,7 @@ interface PluginSubmissionDetail {
   plugin_name: string;
   npm_package_name: string | null;
   description: string;
-  git_repository: string;
+  repository_url: string;
   logo_url: string | null;
   package_type: string;
   categories_list: string[];
@@ -423,10 +423,10 @@ export const SubmissionDetail = () => {
                     />
                     <Divider />
                     <InfoRow
-                      label="Git Repository"
+                      label="Repository URL"
                       value={
                         <a
-                          href={submission.git_repository}
+                          href={submission.repository_url}
                           target="_blank"
                           rel="noreferrer"
                           style={{ color: "inherit", textDecoration: "none" }}
@@ -440,7 +440,7 @@ export const SubmissionDetail = () => {
                                 textAlign: "left",
                               }}
                             >
-                              {submission.git_repository}
+                              {submission.repository_url}
                             </Typography>
                             <Box style={{ flexShrink: 0, marginTop: 2 }}>
                               <ExternalLink

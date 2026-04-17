@@ -1,9 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-// reCAPTCHA Enterprise — set these in .env
-// NEXT_PUBLIC_RECAPTCHA_SITE_KEY : your Enterprise site key (used on the frontend too)
-// RECAPTCHA_PROJECT_ID           : your Google Cloud project ID
-// RECAPTCHA_API_KEY              : a Google Cloud API key with reCAPTCHA Enterprise API enabled
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 const RECAPTCHA_PROJECT_ID = process.env.RECAPTCHA_PROJECT_ID;
 const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
@@ -21,19 +17,13 @@ interface EnterpriseAssessment {
   riskAnalysis?: { score: number; reasons?: string[] };
 }
 
-/**
- * Verify a reCAPTCHA Enterprise token via the REST Assessments API.
- * Returns { success, score } — success is true when the token is valid and
- * the score meets the minimum threshold.
- * When credentials are not configured (local dev) the check is skipped.
- */
 async function verifyRecaptcha(
   token: string,
   expectedAction: string,
 ): Promise<{ success: boolean; score: number }> {
   if (!RECAPTCHA_SITE_KEY || !RECAPTCHA_PROJECT_ID || !RECAPTCHA_API_KEY) {
     console.warn(
-      "[submit-plugin] reCAPTCHA Enterprise not configured — skipping verification.",
+      "[submit-template] reCAPTCHA Enterprise not configured — skipping verification.",
     );
     return { success: true, score: 1 };
   }
@@ -58,7 +48,7 @@ async function verifyRecaptcha(
 
   if (!data.tokenProperties?.valid) {
     console.warn(
-      "[submit-plugin] reCAPTCHA token invalid:",
+      "[submit-template] reCAPTCHA token invalid:",
       data.tokenProperties?.invalidReason,
     );
     return { success: false, score: 0 };
@@ -66,7 +56,7 @@ async function verifyRecaptcha(
 
   if (data.tokenProperties.action !== expectedAction) {
     console.warn(
-      `[submit-plugin] reCAPTCHA action mismatch: expected "${expectedAction}", got "${data.tokenProperties.action}"`,
+      `[submit-template] reCAPTCHA action mismatch: expected "${expectedAction}", got "${data.tokenProperties.action}"`,
     );
     return { success: false, score: 0 };
   }
@@ -81,10 +71,6 @@ function str(value: FormDataEntryValue | null): string | null {
   return t.length > 0 ? t : null;
 }
 
-/**
- * Upload a logo file to Strapi's media library.
- * Returns the public URL of the uploaded file, or null on failure.
- */
 async function uploadLogoToStrapi(file: File): Promise<string | null> {
   const form = new FormData();
   form.append("files", file, file.name);
@@ -101,7 +87,7 @@ async function uploadLogoToStrapi(file: File): Promise<string | null> {
     });
 
     if (!res.ok) {
-      console.error(`[submit-plugin] Logo upload failed: ${res.status}`);
+      console.error(`[submit-template] Logo upload failed: ${res.status}`);
       return null;
     }
 
@@ -109,16 +95,15 @@ async function uploadLogoToStrapi(file: File): Promise<string | null> {
     const url = data[0]?.url;
     if (!url) return null;
 
-    // Strapi returns a relative URL for local uploads — make it absolute.
     return url.startsWith("http") ? url : `${CMS_URL}${url}`;
   } catch (err) {
-    console.error("[submit-plugin] Logo upload error:", err);
+    console.error("[submit-template] Logo upload error:", err);
     return null;
   }
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/submit-plugin
+// POST /api/submit-template
 // ---------------------------------------------------------------------------
 
 export async function POST(req: NextRequest) {
@@ -139,7 +124,7 @@ export async function POST(req: NextRequest) {
       );
     }
     try {
-      const { success } = await verifyRecaptcha(token, "submit_plugin");
+      const { success } = await verifyRecaptcha(token, "submit_template");
       if (!success) {
         return NextResponse.json(
           { error: "reCAPTCHA verification failed. Please try again." },
@@ -147,7 +132,7 @@ export async function POST(req: NextRequest) {
         );
       }
     } catch (err) {
-      console.error("[submit-plugin] reCAPTCHA error:", err);
+      console.error("[submit-template] reCAPTCHA error:", err);
       return NextResponse.json(
         { error: "reCAPTCHA service unavailable. Please try again later." },
         { status: 503 },
@@ -156,19 +141,22 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Extract + validate fields ---
-  const plugin_name = str(formData.get("plugin_name"));
+  const template_name = str(formData.get("template_name"));
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
+  const demo_url = str(formData.get("demo_url"));
   const owner_name = str(formData.get("owner_name"));
   const owner_email = str(formData.get("owner_email"));
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
 
   const errors: string[] = [];
-  if (!plugin_name) errors.push("Plugin name is required.");
+  if (!template_name) errors.push("Template name is required.");
   if (!description) errors.push("Description is required.");
   if (!repository_url) errors.push("Repository URL is required.");
   else if (!/^https?:\/\//i.test(repository_url))
     errors.push("Repository URL must be a valid https:// URL.");
+  if (demo_url && !/^https?:\/\//i.test(demo_url))
+    errors.push("Demo URL must be a valid https:// URL.");
   if (!owner_name) errors.push("Owner name is required.");
   if (!owner_email) errors.push("Contact email is required.");
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(owner_email))
@@ -204,10 +192,9 @@ export async function POST(req: NextRequest) {
       );
     }
     logo_url = await uploadLogoToStrapi(logoFile);
-    // Non-fatal: submission proceeds even if upload fails; reviewer can add logo later.
     if (!logo_url) {
       console.warn(
-        "[submit-plugin] Logo upload failed — submission will proceed without logo.",
+        "[submit-template] Logo upload failed — submission will proceed without logo.",
       );
     }
   }
@@ -225,17 +212,14 @@ export async function POST(req: NextRequest) {
 
   // --- Build submission payload ---
   const payload = {
-    plugin_name,
-    npm_package_name: str(formData.get("npm_package_name")),
+    template_name,
     description,
     repository_url,
+    demo_url,
     logo_url,
-    package_type: "plugin",
     categories_list,
     owner_name,
     owner_email,
-    maintainers_list: [],
-    readme: str(formData.get("readme")),
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
   };
@@ -243,13 +227,13 @@ export async function POST(req: NextRequest) {
   // --- Proxy to Strapi ---
   if (!CMS_BEARER_TOKEN) {
     console.warn(
-      "[submit-plugin] CMS_BEARER_TOKEN not set — Strapi may reject the request.",
+      "[submit-template] CMS_BEARER_TOKEN not set — Strapi may reject the request.",
     );
   }
 
   let strapiRes: Response;
   try {
-    strapiRes = await fetch(`${CMS_URL}/api/moderation/plugin-submissions`, {
+    strapiRes = await fetch(`${CMS_URL}/api/moderation/template-submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -260,19 +244,20 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ data: payload }),
     });
   } catch (err) {
-    console.error("[submit-plugin] Could not reach Strapi:", err);
+    console.error("[submit-template] Could not reach Strapi:", err);
     return NextResponse.json(
       {
         error:
-          "Could not submit your plugin at this time. Please try again later.",
+          "Could not submit your template at this time. Please try again later.",
       },
       { status: 503 },
     );
   }
 
   if (!strapiRes.ok) {
-    const body = await strapiRes.text();
-    console.error(`[submit-plugin] Strapi ${strapiRes.status}: ${body}`);
+    console.error(
+      `[submit-template] Strapi returned status ${strapiRes.status}`,
+    );
     return NextResponse.json(
       { error: "Submission failed. Please try again." },
       { status: 500 },

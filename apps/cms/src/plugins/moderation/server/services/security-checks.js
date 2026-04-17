@@ -41,7 +41,7 @@ async function checkNpmAdvisories(npmPackageName) {
  * TODO: Fetch package.json, enumerate dependencies, and cross-reference
  *       against the OSV (https://osv.dev) or GitHub Advisory database.
  */
-async function checkDependencyVulnerabilities(gitRepository, npmPackageName) {
+async function checkDependencyVulnerabilities(_gitRepository, _npmPackageName) {
   // TODO: implement dependency scanning
   return {
     passed: null,
@@ -62,9 +62,9 @@ async function checkDependencyVulnerabilities(gitRepository, npmPackageName) {
  * Requires ANTHROPIC_API_KEY env var.
  */
 async function runAiSecurityAnalysis({
-  pluginName,
-  npmPackageName,
-  gitRepository,
+  pluginName: _pluginName,
+  npmPackageName: _npmPackageName,
+  gitRepository: _gitRepository,
 }) {
   // TODO: implement Claude API integration
   return {
@@ -80,17 +80,17 @@ async function runAiSecurityAnalysis({
  * Returns structured results to be merged into automated_check_results.
  */
 async function runSecurityChecks({
-  git_repository,
+  repository_url,
   npm_package_name,
   plugin_name,
 }) {
   const [advisories, dependencies, aiAnalysis] = await Promise.allSettled([
     checkNpmAdvisories(npm_package_name),
-    checkDependencyVulnerabilities(git_repository, npm_package_name),
+    checkDependencyVulnerabilities(repository_url, npm_package_name),
     runAiSecurityAnalysis({
       pluginName: plugin_name,
       npmPackageName: npm_package_name,
-      gitRepository: git_repository,
+      gitRepository: repository_url,
     }),
   ]);
 

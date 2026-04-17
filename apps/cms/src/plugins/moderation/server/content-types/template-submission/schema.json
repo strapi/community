@@ -1,0 +1,75 @@
+{
+  "kind": "collectionType",
+  "collectionName": "template_submissions",
+  "info": {
+    "singularName": "template-submission",
+    "pluralName": "template-submissions",
+    "displayName": "Template Submission",
+    "description": "Incoming template submissions awaiting approval before publication"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "template_name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "repository_url": {
+      "type": "string",
+      "required": true
+    },
+    "demo_url": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "categories_list": {
+      "type": "json",
+      "default": []
+    },
+    "owner_name": {
+      "type": "string",
+      "required": true
+    },
+    "owner_email": {
+      "type": "string",
+      "required": true
+    },
+    "submission_notes": {
+      "type": "text"
+    },
+    "submitter_agreed_to_terms": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "submitter_ip": {
+      "type": "string"
+    },
+    "overall_status": {
+      "type": "enumeration",
+      "enum": ["submitted", "approved", "rejected"],
+      "default": "submitted",
+      "required": true
+    },
+    "reviewer_feedback": {
+      "type": "text"
+    },
+    "reviewer_notes": {
+      "type": "text"
+    },
+    "rejection_reason": {
+      "type": "text"
+    }
+  }
+}

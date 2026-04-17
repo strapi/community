@@ -345,13 +345,13 @@ async function checkStrapiPeerDep(gitRepository, npmPackageName) {
 // Main entry point
 // ---------------------------------------------------------------------------
 
-async function runAutomatedChecks({ git_repository, npm_package_name }) {
+async function runAutomatedChecks({ repository_url, npm_package_name }) {
   const [repoPublic, readmeExists, mitLicense, strapiPeerDep] =
     await Promise.allSettled([
-      checkRepoPublic(git_repository),
-      checkReadmeExists(git_repository),
-      checkMitLicense(git_repository, npm_package_name),
-      checkStrapiPeerDep(git_repository, npm_package_name),
+      checkRepoPublic(repository_url),
+      checkReadmeExists(repository_url),
+      checkMitLicense(repository_url, npm_package_name),
+      checkStrapiPeerDep(repository_url, npm_package_name),
     ]);
 
   const resolve = (settled) =>
@@ -360,7 +360,7 @@ async function runAutomatedChecks({ git_repository, npm_package_name }) {
       : { passed: null, message: settled.reason?.message || "Check error." };
 
   // Detect provider for the result metadata
-  const info = parseRepoInfo(git_repository);
+  const info = parseRepoInfo(repository_url);
   const provider = info?.provider ?? "unknown";
 
   return {
