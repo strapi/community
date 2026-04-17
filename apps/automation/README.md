@@ -18,7 +18,7 @@ Node.js 20+ is required for the workflow export/import scripts (uses built-in `f
 | Service   | Port  | URL                              |
 | --------- | ----- | -------------------------------- |
 | n8n       | 5678  | <http://localhost:5678>          |
-| n8n-mcp   | 3000  | <http://localhost:3000/mcp>      |
+| n8n-mcp   | 3100  | <http://localhost:3100/mcp>      |
 
 ## First-time setup
 
@@ -113,7 +113,7 @@ Several skills under `.claude/skills/` wrap this stack:
 
 Once `n8n-mcp` is running (the `mcp` profile is up), Claude Code can connect to it at:
 
-- **URL:** `http://localhost:3000/mcp`
+- **URL:** `http://localhost:3100/mcp`
 - **Auth:** `Authorization: Bearer <MCP_AUTH_TOKEN>` (the same value in `apps/automation/.env`)
 
 Register the server **once per scope** using `claude mcp add`. There are three scopes to choose from; pick the one that fits how broadly you want this server available.
@@ -126,13 +126,13 @@ Register the server **once per scope** using `claude mcp add`. There are three s
 | **user** | `--scope user` | your user config | every project you open with `claude` | You plan to use n8n-mcp outside this repo too — e.g. wiring workflows from other codebases or ad-hoc sessions. |
 | **project** | `--scope project` | `.mcp.json` at the repo root (committed) | this repo, for every teammate who clones it | The team wants one shared config that travels with the repo. |
 
-All three assume n8n-mcp is running at `http://localhost:3000/mcp` on the machine where Claude Code is running. If you need a different layout later, change the `url`.
+All three assume n8n-mcp is running at `http://localhost:3100/mcp` on the machine where Claude Code is running. If you need a different layout later, change the `url`.
 
 #### Local scope (project-specific, personal)
 
 ```bash
 claude mcp add --transport http n8n-mcp \
-  http://localhost:3000/mcp \
+  http://localhost:3100/mcp \
   --header "Authorization: Bearer $(grep '^MCP_AUTH_TOKEN=' apps/automation/.env | cut -d= -f2-)"
 ```
 
@@ -142,7 +142,7 @@ The literal token is stored in your user config, attached to this project path. 
 
 ```bash
 claude mcp add --scope user --transport http n8n-mcp \
-  http://localhost:3000/mcp \
+  http://localhost:3100/mcp \
   --header "Authorization: Bearer $(grep '^MCP_AUTH_TOKEN=' apps/automation/.env | cut -d= -f2-)"
 ```
 
@@ -152,7 +152,7 @@ Same storage mechanism as local, but the server is exposed in every project you 
 
 ```bash
 claude mcp add --scope project --transport http n8n-mcp \
-  http://localhost:3000/mcp \
+  http://localhost:3100/mcp \
   --header "Authorization: Bearer \${MCP_AUTH_TOKEN}"
 ```
 
@@ -163,7 +163,7 @@ This writes a `.mcp.json` at the repo root:
   "mcpServers": {
     "n8n-mcp": {
       "type": "http",
-      "url": "http://localhost:3000/mcp",
+      "url": "http://localhost:3100/mcp",
       "headers": {
         "Authorization": "Bearer ${MCP_AUTH_TOKEN}"
       }
@@ -190,13 +190,13 @@ After running `claude mcp add`, confirm the server is reachable:
 
 ```bash
 claude mcp list | grep n8n-mcp
-# → n8n-mcp: http://localhost:3000/mcp (HTTP) - ✓ Connected
+# → n8n-mcp: http://localhost:3100/mcp (HTTP) - ✓ Connected
 ```
 
 You can also probe the endpoint directly:
 
 ```bash
-curl -sf -H "Authorization: Bearer $MCP_AUTH_TOKEN" http://localhost:3000/health
+curl -sf -H "Authorization: Bearer $MCP_AUTH_TOKEN" http://localhost:3100/health
 # → HTTP 200
 ```
 
@@ -208,7 +208,7 @@ If you rotate `MCP_AUTH_TOKEN` in `.env`, also re-run `claude mcp add` (for loca
 
 ## Troubleshooting
 
-- **Port 5678 or 3000 already in use** — another container or process is bound. Stop it or edit the port mapping in `docker-compose.yml`.
+- **Port 5678 or 3100 already in use** — another container or process is bound. Stop it or edit the port mapping in `docker-compose.yml`. (n8n-mcp uses 3100 on the host to avoid clashing with the Next.js dev server on 3000.)
 - **n8n-mcp refuses to start** — check `MCP_AUTH_TOKEN` is at least 32 chars and `N8N_API_KEY` is set. Both are required for the `mcp` profile.
 - **`podman-compose` not found** — `pip install --user podman-compose`, then ensure `~/.local/bin` is on your `PATH`.
 - **Can't reach n8n from n8n-mcp** — n8n-mcp uses `http://n8n:5678` (service DNS inside the compose network). Don't set `N8N_API_URL` to `localhost` in `.env`; it's overridden in the compose file.
