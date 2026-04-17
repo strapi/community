@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
   // --- Build submission payload ---
   const payload = {
     plugin_name,
-    npm_package_name: str(formData.get("npm_package_name")),
+    package_location: str(formData.get("package_location")),
     description,
     repository_url,
     logo_url,

@@ -270,7 +270,7 @@ function CategoryPill({
 
 interface FormFields {
   plugin_name: string;
-  npm_package_name: string;
+  package_location: string;
   repository_url: string;
   description: string;
   logo_file: File | null;
@@ -284,7 +284,7 @@ interface FormFields {
 
 const INITIAL: FormFields = {
   plugin_name: "",
-  npm_package_name: "",
+  package_location: "",
   repository_url: "",
   description: "",
   logo_file: null,
@@ -433,7 +433,7 @@ export default function SubmitPluginPage() {
 
       const form = new FormData();
       form.append("plugin_name", fields.plugin_name.trim());
-      form.append("npm_package_name", fields.npm_package_name.trim());
+      form.append("package_location", fields.package_location.trim());
       form.append("repository_url", fields.repository_url.trim());
       form.append("description", fields.description.trim());
       form.append("readme", fields.readme.trim());
@@ -610,18 +610,19 @@ export default function SubmitPluginPage() {
                   <FieldError message={errors.plugin_name} />
                 </div>
 
-                {/* NPM Package Name */}
+                {/* Registry URL */}
                 <div className="mb-5">
-                  <Label htmlFor="npm_package_name">NPM Package Name</Label>
+                  <Label htmlFor="package_location">Registry URL</Label>
                   <Input
-                    id="npm_package_name"
-                    value={fields.npm_package_name}
-                    onChange={(e) => set("npm_package_name", e.target.value)}
-                    placeholder="@scope/strapi-plugin-name"
+                    id="package_location"
+                    value={fields.package_location}
+                    onChange={(e) => set("package_location", e.target.value)}
+                    placeholder="https://www.npmjs.com/package/your-plugin"
                     autoComplete="off"
                   />
                   <Hint>
-                    Package name as it appears on npm, if already published.
+                    Full URL to your published package on npm, Packagist, PyPI,
+                    RubyGems, or NuGet. Leave blank if not yet published.
                   </Hint>
                 </div>
 
