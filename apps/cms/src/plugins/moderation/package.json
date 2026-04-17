@@ -1,0 +1,19 @@
+{
+  "name": "moderation",
+  "version": "0.0.1",
+  "strapi": {
+    "name": "moderation",
+    "displayName": "Moderation",
+    "description": "Review and approve incoming plugin submissions before they are published to the marketplace",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "./strapi-server.js"
+    },
+    "./strapi-admin": {
+      "source": "./admin/src/index.tsx",
+      "import": "./admin/src/index.tsx"
+    }
+  }
+}

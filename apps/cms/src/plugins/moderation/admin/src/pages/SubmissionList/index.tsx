@@ -1,0 +1,226 @@
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Loader,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from "@strapi/design-system";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export type SubmissionStatus =
+  | "submitted"
+  | "under_review"
+  | "changes_requested"
+  | "rejected"
+  | "approved";
+
+export interface PluginSubmission {
+  documentId: string;
+  plugin_name: string;
+  npm_package_name: string | null;
+  git_repository: string;
+  owner_name: string;
+  owner_email: string;
+  overall_status: SubmissionStatus;
+  business_review_status: "pending" | "approved" | "rejected";
+  security_review_status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
+const statusColour: Record<
+  SubmissionStatus,
+  "primary" | "success" | "warning" | "danger" | "secondary"
+> = {
+  submitted: "secondary",
+  under_review: "primary",
+  changes_requested: "warning",
+  rejected: "danger",
+  approved: "success",
+};
+
+const reviewColour = {
+  pending: "secondary" as const,
+  approved: "success" as const,
+  rejected: "danger" as const,
+};
+
+const STATUS_FILTERS: Array<{ label: string; value: string }> = [
+  { label: "All", value: "" },
+  { label: "Submitted", value: "submitted" },
+  { label: "Under Review", value: "under_review" },
+  { label: "Changes Requested", value: "changes_requested" },
+  { label: "Approved", value: "approved" },
+  { label: "Rejected", value: "rejected" },
+];
+
+export const SubmissionList = () => {
+  const { get } = useFetchClient();
+  const { toggleNotification } = useNotification();
+  const navigate = useNavigate();
+
+  const [submissions, setSubmissions] = useState<PluginSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const load = async (status: string) => {
+    setLoading(true);
+    try {
+      const qs = status ? `?status=${status}` : "";
+      const res = await get(`/moderation/submissions${qs}`);
+      setSubmissions(res.data.data ?? []);
+    } catch {
+      toggleNotification({
+        type: "danger",
+        message: "Failed to load submissions.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load(statusFilter);
+  }, [statusFilter]);
+
+  return (
+    <Box padding={8}>
+      <Flex justifyContent="space-between" alignItems="center" marginBottom={6}>
+        <Typography variant="alpha">Plugin Submissions</Typography>
+        <Typography variant="omega" textColor="neutral600">
+          {submissions.length} submission{submissions.length !== 1 ? "s" : ""}
+        </Typography>
+      </Flex>
+
+      {/* Status filter tabs */}
+      <Flex gap={2} marginBottom={6} flexWrap="wrap">
+        {STATUS_FILTERS.map((f) => (
+          <Button
+            key={f.value}
+            variant={statusFilter === f.value ? "default" : "tertiary"}
+            size="S"
+            onClick={() => setStatusFilter(f.value)}
+          >
+            {f.label}
+          </Button>
+        ))}
+      </Flex>
+
+      {loading ? (
+        <Flex justifyContent="center" padding={8}>
+          <Loader />
+        </Flex>
+      ) : submissions.length === 0 ? (
+        <Box padding={8} background="neutral100" hasRadius>
+          <Typography textColor="neutral600" textAlign="center">
+            No submissions found.
+          </Typography>
+        </Box>
+      ) : (
+        <Table colCount={7} rowCount={submissions.length}>
+          <Thead>
+            <Tr>
+              <Th>
+                <Typography variant="sigma">Plugin Name</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Owner</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Status</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Business</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Security</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Submitted</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Actions</Typography>
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {submissions.map((s) => (
+              <Tr key={s.documentId}>
+                <Td>
+                  <Flex direction="column" alignItems="flex-start" gap={1}>
+                    <Typography fontWeight="semiBold">
+                      {s.plugin_name}
+                    </Typography>
+                    {s.npm_package_name && (
+                      <Typography variant="pi" textColor="neutral600">
+                        {s.npm_package_name}
+                      </Typography>
+                    )}
+                  </Flex>
+                </Td>
+                <Td>
+                  <Flex direction="column" alignItems="flex-start" gap={1}>
+                    <Typography>{s.owner_name}</Typography>
+                    <Typography variant="pi" textColor="neutral600">
+                      {s.owner_email}
+                    </Typography>
+                  </Flex>
+                </Td>
+                <Td>
+                  <Badge
+                    active={false}
+                    backgroundColor={`${statusColour[s.overall_status]}100`}
+                  >
+                    {s.overall_status.replace("_", " ")}
+                  </Badge>
+                </Td>
+                <Td>
+                  <Badge
+                    active={false}
+                    backgroundColor={`${reviewColour[s.business_review_status]}100`}
+                  >
+                    {s.business_review_status}
+                  </Badge>
+                </Td>
+                <Td>
+                  <Badge
+                    active={false}
+                    backgroundColor={`${reviewColour[s.security_review_status]}100`}
+                  >
+                    {s.security_review_status}
+                  </Badge>
+                </Td>
+                <Td>
+                  <Typography variant="pi">
+                    {new Date(s.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Td>
+                <Td>
+                  <Button
+                    variant="tertiary"
+                    size="S"
+                    onClick={() =>
+                      navigate(
+                        `/plugins/moderation/submissions/${s.documentId}`,
+                      )
+                    }
+                  >
+                    Review
+                  </Button>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      )}
+    </Box>
+  );
+};

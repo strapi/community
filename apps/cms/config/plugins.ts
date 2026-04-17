@@ -23,6 +23,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/owner-selector",
   },
+  moderation: {
+    enabled: true,
+    resolve: "./src/plugins/moderation",
+  },
   "package-info": {
     enabled: true,
     resolve: "./src/plugins/package-info",

@@ -1975,6 +1975,87 @@ export interface PluginI18NLocale extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface PluginModerationPluginSubmission
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'plugin_submissions';
+  info: {
+    description: 'Incoming plugin submissions awaiting moderation before publication';
+    displayName: 'Plugin Submission';
+    pluralName: 'plugin-submissions';
+    singularName: 'plugin-submission';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    automated_check_results: Schema.Attribute.JSON;
+    business_review_notes: Schema.Attribute.Text;
+    business_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    categories_list: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    git_repository: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.plugin-submission'
+    > &
+      Schema.Attribute.Private;
+    logo_url: Schema.Attribute.String;
+    maintainers_list: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
+    npm_package_name: Schema.Attribute.String;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'submitted'>;
+    owner_email: Schema.Attribute.String & Schema.Attribute.Required;
+    owner_name: Schema.Attribute.String & Schema.Attribute.Required;
+    package_type: Schema.Attribute.Enumeration<
+      ['plugin', 'provider', 'sdk', 'tool']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'plugin'>;
+    plugin_name: Schema.Attribute.String & Schema.Attribute.Required;
+    promoted_package: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::package.package'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    readme: Schema.Attribute.RichText;
+    rejection_reason: Schema.Attribute.Text;
+    reviewer_feedback: Schema.Attribute.Text;
+    security_review_notes: Schema.Attribute.Text;
+    security_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginReviewWorkflowsWorkflow
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_workflows';
@@ -2317,6 +2398,7 @@ declare module '@strapi/strapi' {
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::moderation.plugin-submission': PluginModerationPluginSubmission;
       'plugin::review-workflows.workflow': PluginReviewWorkflowsWorkflow;
       'plugin::review-workflows.workflow-stage': PluginReviewWorkflowsWorkflowStage;
       'plugin::upload.file': PluginUploadFile;
