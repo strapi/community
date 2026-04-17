@@ -1,0 +1,568 @@
+{
+  "name": "security-scan",
+  "description": null,
+  "nodes": [
+    {
+      "id": "sticky-1",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        60
+      ],
+      "parameters": {
+        "content": "## Security Scan (issue #10)\n\nManually triggered from the Strapi moderation admin (cost control \u2014 not automatic on submit).\n\n**Payload is pre-enriched by the CMS.** The moderation plugin's `get-package-security-info.js` service reuses `package-info`'s registry extract patterns to fetch metadata before firing this webhook \u2014 so this workflow does not hit any registry directly.\n\nSupports both `plugin` and `template` submissions:\n- **plugin:** `package_info` is populated when a registry URL is provided (phase 1 = npm only; packagist/pypi/rubygems/nuget stubbed with `notImplemented: true`)\n- **template:** `package_info` is always null; scan is repo-only + AI\n\nTwo parallel branches:\n1. **Package scan** \u2014 OSV.dev vuln lookup + repo package.json cross-check + install-script flag\n2. **AI analysis** \u2014 Claude Haiku 4.5 reads the published README (falls back to submitted description) and flags supply-chain risks\n\nPer-stage results PATCH back via `POST /api/moderation/<plugin|template>-submissions/:documentId/security-scan-result`. Final summary sets `security_scan_status=completed`.\n\n**Inputs (POST body):**\n`{ submissionId, submission_kind: 'plugin'|'template', plugin_name, package_location, repository_url, readme, package_info | null }`\n\n**Required n8n credentials:**\n- `httpHeaderAuth` for the webhook (matches `N8N_WEBHOOK_AUTH_*` in CMS .env)\n- `httpHeaderAuth` separate for Strapi write-back (Strapi API token as `Authorization: Bearer ...`)\n- `httpHeaderAuth` separate for Anthropic API (`x-api-key: ...`)\n\n**Required n8n env vars:**\n- `STRAPI_API_URL` (base URL of the CMS)",
+        "height": 500,
+        "width": 980,
+        "color": 5
+      }
+    },
+    {
+      "id": "webhook-1",
+      "name": "Webhook: Security Scan",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        640
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "strapi/security-scan",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "Fired by the Strapi moderation admin. CMS has already set security_scan_status='running' before this request.",
+      "webhookId": "9f3c2a87-1e4b-4d6c-a2f8-5c6b7d8e9a11"
+    },
+    {
+      "id": "extract-1",
+      "name": "Extract Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        640
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "submissionId",
+              "type": "string",
+              "value": "={{ $json.body.submissionId }}"
+            },
+            {
+              "id": "a2",
+              "name": "submission_kind",
+              "type": "string",
+              "value": "={{ $json.body.submission_kind || 'plugin' }}"
+            },
+            {
+              "id": "a3",
+              "name": "plugin_name",
+              "type": "string",
+              "value": "={{ $json.body.plugin_name }}"
+            },
+            {
+              "id": "a4",
+              "name": "package_location",
+              "type": "string",
+              "value": "={{ $json.body.package_location || '' }}"
+            },
+            {
+              "id": "a5",
+              "name": "repository_url",
+              "type": "string",
+              "value": "={{ $json.body.repository_url }}"
+            },
+            {
+              "id": "a6",
+              "name": "readme",
+              "type": "string",
+              "value": "={{ $json.body.readme || '' }}"
+            },
+            {
+              "id": "a7",
+              "name": "package_info",
+              "type": "object",
+              "value": "={{ $json.body.package_info }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "parse-repo-1",
+      "name": "Parse Repo URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        640
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst item = $input.first().json;\nconst raw = (item.repository_url || '').trim();\n\nfunction parse(url) {\n  if (!url) return { provider: 'unknown' };\n  let href = url;\n  if (!/^https?:\\/\\//i.test(href)) href = 'https://' + href;\n  let u;\n  try { u = new URL(href); } catch { return { provider: 'unknown' }; }\n  const host = u.hostname.replace(/^www\\./i, '').toLowerCase();\n  const path = u.pathname.replace(/^\\//, '').replace(/\\.git$/, '').replace(/\\/$/, '');\n  if (host === 'github.com') {\n    const [owner, repo] = path.split('/');\n    if (!owner || !repo) return { provider: 'unknown' };\n    return { provider: 'github', owner, repo };\n  }\n  if (host === 'gitlab.com' || host.endsWith('.gitlab.com')) {\n    if (!path) return { provider: 'unknown' };\n    return { provider: 'gitlab', projectPath: path, encoded: encodeURIComponent(path) };\n  }\n  return { provider: 'unknown' };\n}\n\nreturn [{ json: { ...item, repo_info: parse(raw) } }];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: parse-repo-1\n  return [{ json: { ...$input.first().json, repo_info: { provider: \"unknown\" }, _node_error: errMsg } }];\n}"
+      },
+      "notes": "Parses repository_url to extract provider/owner/repo \u2014 used only by the repo cross-check fetch below. GitLab / unknown providers cause the cross-check to fall through.",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "deps-fetch-1",
+      "name": "Fetch Repo package.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        480
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://raw.githubusercontent.com/{{ $json.repo_info.owner || 'unknown' }}/{{ $json.repo_info.repo || 'unknown' }}/HEAD/package.json",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "notes": "Cross-check only: fetches source repo's package.json to compare against the published artifact. GitLab / unknown providers return null; scan falls back to package-only analysis."
+    },
+    {
+      "id": "osv-build-1",
+      "name": "Build Package Scan Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        480
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst repoPkg = $input.first().json;\nconst payload = $('Parse Repo URL').item.json;\nconst info = payload.package_info || null;\nconst kind = payload.submission_kind || 'plugin';\n\nconst repoValid = repoPkg && typeof repoPkg === 'object' && !Array.isArray(repoPkg) && !repoPkg.error && Object.keys(repoPkg).length > 0;\nconst pkgAvailable = !!(info && info.available);\n\n// Dependencies source: published package first, repo fallback.\nconst pkgDeps = pkgAvailable ? { ...(info.dependencies || {}), ...(info.peerDependencies || {}) } : {};\nconst repoDeps = repoValid ? { ...(repoPkg.dependencies || {}), ...(repoPkg.peerDependencies || {}) } : {};\nconst depsSource = pkgAvailable ? 'registry' : (repoValid ? 'repo' : 'none');\nconst deps = depsSource === 'registry' ? pkgDeps : (depsSource === 'repo' ? repoDeps : {});\n\n// OSV ecosystem tag from the pre-detected registry, default to npm.\nconst ecosystem = info?.ecosystem || 'npm';\n\nfunction cleanVersion(raw) {\n  if (typeof raw !== 'string') return null;\n  const match = raw.match(/\\d+\\.\\d+\\.\\d+/);\n  return match ? match[0] : null;\n}\n\nconst queries = Object.entries(deps)\n  .map(([name, version]) => {\n    const v = cleanVersion(version);\n    if (!v) return null;\n    return { package: { name, ecosystem }, version: v };\n  })\n  .filter(Boolean)\n  .slice(0, 100);\n\n// Cross-check published vs repo (only when BOTH are present).\nconst mismatches = [];\nif (pkgAvailable && repoValid) {\n  ['preinstall', 'install', 'postinstall'].forEach((k) => {\n    const pkgVal = info.scripts?.[k] || null;\n    const repoVal = repoPkg.scripts?.[k] || null;\n    if (pkgVal !== repoVal) {\n      mismatches.push({ kind: 'install_script_divergence', script: k, published: pkgVal, repo: repoVal });\n    }\n  });\n  const pkgSet = new Set(Object.keys(pkgDeps));\n  const repoSet = new Set(Object.keys(repoDeps));\n  const onlyInPkg = [...pkgSet].filter((n) => !repoSet.has(n));\n  const onlyInRepo = [...repoSet].filter((n) => !pkgSet.has(n));\n  if (onlyInPkg.length > 0) mismatches.push({ kind: 'deps_only_in_published', names: onlyInPkg.slice(0, 20) });\n  if (onlyInRepo.length > 0) mismatches.push({ kind: 'deps_only_in_repo', names: onlyInRepo.slice(0, 20) });\n  const submitted = (payload.repository_url || '').toLowerCase();\n  const declared = (info.declaredRepository || '').toLowerCase();\n  const owner = payload.repo_info?.owner?.toLowerCase();\n  if (declared && submitted && owner && !declared.includes(owner)) {\n    mismatches.push({ kind: 'declared_repo_vs_submitted', submitted, declared });\n  }\n}\n\nconst hasInstallScripts = pkgAvailable && Object.keys(info.installScripts || {}).length > 0;\n\nreturn [{\n  json: {\n    queries,\n    _skipped: queries.length === 0,\n    _reason: queries.length === 0 ? `No dependencies to scan (source: ${depsSource}).` : null,\n    ecosystem,\n    depsSource,\n    kind,\n    hasInstallScripts,\n    install_scripts: pkgAvailable ? info.installScripts || {} : {},\n    mismatches,\n    registry_available: pkgAvailable,\n    not_implemented: info?.notImplemented === true,\n    registry: info?.registry || null,\n    packageName: info?.packageName || null,\n    version: info?.version || null,\n    dist: info?.dist || null,\n  },\n}];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: osv-build-1\n  return [{ json: { queries: [], _skipped: true, _reason: \"Build Package Scan Data threw: \" + errMsg, ecosystem: \"npm\", depsSource: \"none\", kind: null, hasInstallScripts: false, install_scripts: {}, mismatches: [], registry_available: false, not_implemented: false, registry: null, packageName: null, version: null, dist: null, _node_error: errMsg } }];\n}"
+      },
+      "notes": "Consolidates the pre-fetched package_info with the repo cross-check. Uses the package_info.ecosystem for the OSV ecosystem tag. For template submissions (no package_info), only repo-side deps feed OSV.",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "osv-http-1",
+      "name": "OSV.dev Batch Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1260,
+        480
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.osv.dev/v1/querybatch",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ queries: $json.queries }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Free, unauthenticated. Supports all 5 ecosystems (npm, Packagist, PyPI, RubyGems, NuGet)."
+    },
+    {
+      "id": "deps-format-1",
+      "name": "Format Package Scan Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        480
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst osv = $input.first().json || {};\nconst batch = $('Build Package Scan Data').item.json;\nconst results = Array.isArray(osv.results) ? osv.results : [];\n\nconst common = {\n  runAt: new Date().toISOString(),\n  deps_source: batch.depsSource,\n  ecosystem: batch.ecosystem,\n  registry: batch.registry,\n  registry_available: batch.registry_available,\n  not_implemented: batch.not_implemented,\n  package_name: batch.packageName,\n  version: batch.version,\n  dist: batch.dist,\n  install_scripts: batch.install_scripts,\n  has_install_scripts: batch.hasInstallScripts,\n  cross_check_mismatches: batch.mismatches,\n};\n\nif (batch._skipped) {\n  return [{\n    json: {\n      stage: 'dependencies',\n      result: {\n        ...common,\n        skipped: true,\n        message: batch._reason || 'No dependencies to scan.',\n      },\n    },\n  }];\n}\n\nconst vulnerable = [];\nresults.forEach((r, idx) => {\n  if (r && Array.isArray(r.vulns) && r.vulns.length > 0) {\n    const q = batch.queries[idx];\n    vulnerable.push({\n      package: q.package.name,\n      version: q.version,\n      vulnIds: r.vulns.map((v) => v.id),\n    });\n  }\n});\n\nconst passed = vulnerable.length === 0 && !batch.hasInstallScripts && batch.mismatches.length === 0;\n\nreturn [{\n  json: {\n    stage: 'dependencies',\n    result: {\n      ...common,\n      scanned: batch.queries.length,\n      vulnerable_count: vulnerable.length,\n      vulnerable,\n      passed,\n    },\n  },\n}];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: deps-format-1\n  return [{ json: { stage: \"dependencies\", result: { runAt: new Date().toISOString(), error: errMsg, passed: false, skipped: true, message: \"Format Package Scan Result threw: \" + errMsg } } }];\n}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "deps-patch-1",
+      "name": "PATCH Scan Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1700,
+        480
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Writes the package scan stage result. URL path flips between plugin-submissions and template-submissions based on the submission_kind field."
+    },
+    {
+      "id": "fetch-code-1",
+      "name": "Fetch Package Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        800
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst payload = $input.first().json;\nconst info = payload.package_info || null;\nconst repo = payload.repo_info || {};\n\nconst ALLOW_EXT = /\\.(js|ts|mjs|cjs|jsx|tsx)$/;\nconst SKIP_PATTERNS = [/node_modules/, /\\.git/, /(^|\\/)test[s]?\\//, /\\.test\\./, /\\.spec\\./, /\\.d\\.ts$/, /\\.min\\.(js|css)$/, /\\.map$/, /(^|\\/)examples?\\//, /(^|\\/)docs?\\//, /(^|\\/)fixtures?\\//];\nconst PER_FILE_CAP = 10000;\nconst TOTAL_BUDGET = 100000;\nconst MAX_FILES = 20;\n\nfunction keepPath(path) {\n  if (!ALLOW_EXT.test(path)) return false;\n  return !SKIP_PATTERNS.some((r) => r.test(path));\n}\n\nfunction escRe(s) {\n  return s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\nasync function loadNpmTree(name, version) {\n  try {\n    const res = await fetch(`https://data.jsdelivr.com/v1/package/npm/${encodeURIComponent(name)}@${encodeURIComponent(version)}`);\n    if (!res.ok) return null;\n    const tree = await res.json();\n    const files = [];\n    function walk(node, prefix) {\n      if (node.type === 'file') {\n        const full = prefix + '/' + node.name;\n        if (keepPath(full)) files.push({ path: full, size: node.size || 0 });\n      } else if (Array.isArray(node.files)) {\n        node.files.forEach((c) => walk(c, prefix + '/' + node.name));\n      }\n    }\n    if (Array.isArray(tree.files)) tree.files.forEach((f) => walk(f, ''));\n    return {\n      source: 'npm:jsdelivr',\n      files,\n      fetchUrl: (p) => `https://cdn.jsdelivr.net/npm/${encodeURIComponent(name)}@${encodeURIComponent(version)}${p}`,\n    };\n  } catch {\n    return null;\n  }\n}\n\nasync function loadGitHubTree(owner, repoName) {\n  try {\n    const res = await fetch(`https://api.github.com/repos/${owner}/${repoName}/git/trees/HEAD?recursive=1`, {\n      headers: { Accept: 'application/vnd.github+json' },\n    });\n    if (!res.ok) return null;\n    const tree = await res.json();\n    const files = (tree.tree || [])\n      .filter((n) => n.type === 'blob')\n      .map((n) => ({ path: '/' + n.path, size: n.size || 0 }))\n      .filter((f) => keepPath(f.path));\n    return {\n      source: 'github:raw',\n      files,\n      fetchUrl: (p) => `https://raw.githubusercontent.com/${owner}/${repoName}/HEAD${p}`,\n    };\n  } catch {\n    return null;\n  }\n}\n\nlet scanner = null;\nif (info?.available && info.registry === 'npm') {\n  scanner = await loadNpmTree(info.packageName, info.version);\n}\nif (!scanner && repo.provider === 'github') {\n  scanner = await loadGitHubTree(repo.owner, repo.repo);\n}\n\nif (!scanner) {\n  return [{ json: { ...payload, package_code: null, files_scanned: 0, files_available: 0, bytes_scanned: 0, scan_source: null } }];\n}\n\n// Prioritisation: install scripts, main entry, bin/, common entry names, src/, then small files.\nconst priorityRegex = [];\nObject.values(info?.installScripts || {}).forEach((s) => {\n  const m = typeof s === 'string' ? s.match(/\\S+\\.(?:js|ts|mjs|cjs)/) : null;\n  if (m) priorityRegex.push(new RegExp(escRe(m[0]) + '$'));\n});\npriorityRegex.push(/\\/bin\\//);\npriorityRegex.push(/^\\/(index|main|entry|cli)\\.(js|ts|mjs|cjs)$/);\npriorityRegex.push(/^\\/src\\//);\n\nfunction priority(p) {\n  for (let i = 0; i < priorityRegex.length; i++) if (priorityRegex[i].test(p)) return i;\n  return 999;\n}\n\nscanner.files.sort((a, b) => priority(a.path) - priority(b.path) || a.size - b.size);\nconst candidates = scanner.files.slice(0, MAX_FILES);\n\nconst contents = await Promise.all(candidates.map(async (f) => {\n  try {\n    const res = await fetch(scanner.fetchUrl(f.path));\n    if (!res.ok) return null;\n    const text = await res.text();\n    return { path: f.path, body: text.slice(0, PER_FILE_CAP), bytes: Math.min(text.length, PER_FILE_CAP) };\n  } catch {\n    return null;\n  }\n}));\n\nconst included = [];\nlet used = 0;\nfor (const c of contents) {\n  if (!c) continue;\n  if (used + c.bytes > TOTAL_BUDGET) break;\n  included.push(c);\n  used += c.bytes;\n}\n\nconst code = included.map((c) => `// ==== ${c.path} (${c.bytes} bytes) ====\\n${c.body}`).join('\\n\\n');\n\nreturn [{\n  json: {\n    ...payload,\n    package_code: code || null,\n    files_scanned: included.length,\n    files_available: scanner.files.length,\n    bytes_scanned: used,\n    scan_source: scanner.source,\n  },\n}];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: fetch-code-1\n  return [{ json: { ...$input.first().json, package_code: null, files_scanned: 0, files_available: 0, bytes_scanned: 0, scan_source: null, _node_error: errMsg } }];\n}"
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Fetches up to 20 source files from the PUBLISHED package (npm via jsDelivr CDN) or the source repo (GitHub for templates / repo fallback). JS/TS only; skips tests / docs / min / node_modules. 10KB per file, 100KB total \u2014 feeds into Claude's user message so the AI can review actual runtime code, not just README/metadata."
+    },
+    {
+      "id": "ai-http-1",
+      "name": "Claude Haiku Security Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        800
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1024, system: 'You are a security auditor reviewing a Strapi community submission. You are given package metadata, install-time scripts, the README, and ACTUAL SOURCE FILES from the published package (or source repo for templates). Read the source files carefully \u2014 runtime exfiltration, credential theft, obfuscation, and suspicious network calls often hide in main entry files or bin scripts, not the README. Prioritise supply-chain signals: install-time scripts, typosquatting, mismatches between the published artifact and its source repo, obfuscated or minified code, dynamic eval / Function constructor use, network calls to unknown hosts, filesystem writes outside package dir. Respond ONLY with valid JSON matching this schema: {\"risk_level\":\"low|medium|high\",\"summary\":\"<one-sentence verdict>\",\"concerns\":[\"<concern>\",...],\"red_flags\":[\"<flag>\",...],\"recommendation\":\"approve|request_changes|reject\"}. Do not include explanation text outside the JSON.', messages: [{ role: 'user', content: `Submission kind: ${$json.submission_kind}\\nName: ${$json.plugin_name}\\npackage_location: ${$json.package_location || '(none \u2014 template or no registry URL)'}\\nregistry: ${$json.package_info?.registry || 'n/a'}\\nregistry_available: ${$json.package_info?.available ? 'yes' : 'no'}${$json.package_info?.notImplemented ? ' (deep scan not yet implemented for this registry)' : ''}\\nVersion: ${$json.package_info?.version || 'n/a'}\\nSubmitted repo: ${$json.repository_url}\\nDeclared repo on published artifact: ${$json.package_info?.declaredRepository || '(none declared)'}\\n\\nInstall-time scripts on the published artifact (immediate red flag if any are non-trivial):\\n${JSON.stringify($json.package_info?.installScripts || {}, null, 2)}\\n\\nSource files scanned: ${$json.files_scanned} of ${$json.files_available} (${$json.bytes_scanned} bytes, source: ${$json.scan_source || 'none'}).\\n\\nREADME:\\n---\\n${(($json.package_info?.readme || $json.readme) || '(no README available)').toString().slice(0, 8000)}\\n---\\n\\nSOURCE FILES (truncated per-file + overall):\\n---\\n${$json.package_code || '(no source files could be fetched)'}\\n---\\n\\nReview the code above against the schema. Output JSON only.` }] }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "Uses Claude Haiku 4.5 (claude-haiku-4-5). Prompt includes supply-chain context: install scripts, published vs submitted repo, package version. Structured JSON parsed in the next node."
+    },
+    {
+      "id": "ai-format-1",
+      "name": "Format AI Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        800
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst res = $input.first().json || {};\nconst fetchCodeOut = $('Fetch Package Code').item.json;\nconst text = res?.content?.[0]?.text || '';\nlet parsed = null;\nlet parseError = null;\ntry {\n  const match = text.match(/\\{[\\s\\S]*\\}/);\n  if (match) parsed = JSON.parse(match[0]);\n} catch (err) {\n  parseError = err.message;\n}\n\nreturn [{\n  json: {\n    stage: 'ai_analysis',\n    result: {\n      runAt: new Date().toISOString(),\n      model: 'claude-haiku-4-5',\n      raw_text: text,\n      parsed,\n      parse_error: parseError,\n      usage: res?.usage || null,\n      files_scanned: fetchCodeOut?.files_scanned ?? 0,\n      files_available: fetchCodeOut?.files_available ?? 0,\n      bytes_scanned: fetchCodeOut?.bytes_scanned ?? 0,\n      scan_source: fetchCodeOut?.scan_source || null,\n    },\n  },\n}];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: ai-format-1\n  return [{ json: { stage: \"ai_analysis\", result: { runAt: new Date().toISOString(), error: errMsg, parsed: null, parse_error: errMsg, model: \"claude-haiku-4-5\", raw_text: null } } }];\n}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "ai-patch-1",
+      "name": "PATCH AI Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1480,
+        800
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "merge-1",
+      "name": "Wait for All Stages",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1920,
+        640
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 2,
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "notes": "Waits for both branches (package scan + AI) to emit per-stage results, then combines them into one item with fields from each branch."
+    },
+    {
+      "id": "summary-1",
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2140,
+        640
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\nconst merged = $input.first().json;\n\nfunction pick(stageName) {\n  const stages = Array.isArray(merged.stage) ? merged.stage : [merged.stage];\n  const results = Array.isArray(merged.result) ? merged.result : [merged.result];\n  for (let i = 0; i < stages.length; i++) {\n    if (stages[i] === stageName) return results[i];\n  }\n  return null;\n}\n\nconst depsR = pick('dependencies');\nconst aiR = pick('ai_analysis');\n\nfunction stagePassed(r) {\n  if (!r) return null;\n  if (r.skipped) return null;\n  if (typeof r.passed === 'boolean') return r.passed;\n  return null;\n}\n\nconst summary = {\n  runAt: new Date().toISOString(),\n  dependencies_passed: stagePassed(depsR),\n  ai_risk_level: aiR?.parsed?.risk_level ?? null,\n  ai_recommendation: aiR?.parsed?.recommendation ?? null,\n  ai_files_scanned: aiR?.files_scanned ?? null,\n  ai_files_available: aiR?.files_available ?? null,\n  ai_scan_source: aiR?.scan_source ?? null,\n  ai_bytes_scanned: aiR?.bytes_scanned ?? null,\n  vulnerable_dep_count: depsR?.vulnerable_count ?? null,\n  ai_concern_count: Array.isArray(aiR?.parsed?.concerns) ? aiR.parsed.concerns.length : null,\n  registry: depsR?.registry ?? null,\n  registry_available: depsR?.registry_available ?? null,\n  not_implemented: depsR?.not_implemented ?? null,\n  package_name: depsR?.package_name ?? null,\n  version: depsR?.version ?? null,\n  has_install_scripts: depsR?.has_install_scripts ?? null,\n  install_scripts: depsR?.install_scripts ?? null,\n  cross_check_mismatch_count: Array.isArray(depsR?.cross_check_mismatches) ? depsR.cross_check_mismatches.length : null,\n};\n\nreturn [{ json: { stage: 'summary', result: summary, status: 'completed' } }];\n} catch (err) {\n  const errMsg = err && err.message ? err.message : String(err);\n  // Fallback shape so downstream nodes can proceed.\n  // Stage: summary-1\n  return [{ json: { stage: \"summary\", result: { runAt: new Date().toISOString(), error: errMsg, passed: false }, status: \"failed\" } }];\n}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "summary-patch-1",
+      "name": "PATCH Summary + Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2360,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result, status: $json.status }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Final write-back: stores summary blob and flips security_scan_status to 'completed'."
+    }
+  ],
+  "connections": {
+    "Webhook: Security Scan": {
+      "main": [
+        [
+          {
+            "node": "Extract Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payload": {
+      "main": [
+        [
+          {
+            "node": "Parse Repo URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Repo URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch Repo package.json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Package Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Package Code": {
+      "main": [
+        [
+          {
+            "node": "Claude Haiku Security Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Repo package.json": {
+      "main": [
+        [
+          {
+            "node": "Build Package Scan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Package Scan Data": {
+      "main": [
+        [
+          {
+            "node": "OSV.dev Batch Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OSV.dev Batch Query": {
+      "main": [
+        [
+          {
+            "node": "Format Package Scan Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Package Scan Result": {
+      "main": [
+        [
+          {
+            "node": "PATCH Scan Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH Scan Result": {
+      "main": [
+        [
+          {
+            "node": "Wait for All Stages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku Security Analysis": {
+      "main": [
+        [
+          {
+            "node": "Format AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI Result": {
+      "main": [
+        [
+          {
+            "node": "PATCH AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH AI Result": {
+      "main": [
+        [
+          {
+            "node": "Wait for All Stages",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait for All Stages": {
+      "main": [
+        [
+          {
+            "node": "Build Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Summary": {
+      "main": [
+        [
+          {
+            "node": "PATCH Summary + Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

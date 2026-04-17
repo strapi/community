@@ -1,10 +1,10 @@
 {
-  "name": "package-changes-requested",
+  "name": "plugin-declined",
   "description": null,
   "nodes": [
     {
       "id": "webhook-1",
-      "name": "Webhook: Changes Requested",
+      "name": "Webhook: Package Declined",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
@@ -13,7 +13,7 @@
       ],
       "parameters": {
         "httpMethod": "POST",
-        "path": "strapi/package-changes-requested",
+        "path": "strapi/plugin-declined",
         "authentication": "headerAuth",
         "responseMode": "onReceived",
         "responseData": "noData",
@@ -21,8 +21,8 @@
       },
       "onError": "continueRegularOutput",
       "alwaysOutputData": true,
-      "notes": "Fires when business_review_state transitions to 'changes_requested'. Expects body.entry { id, name, author { email, name }, business_review_feedback }.",
-      "webhookId": "2f6e1cec-6e97-4e6d-b9f6-8b3fbda1e310"
+      "notes": "Fired by the CMS moderation plugin after plugin-submission.rejectOrRequestChanges with status='rejected'. Payload: flat { submissionId, plugin_name, owner_email, reason, feedback, ... }.",
+      "webhookId": "37f3f735-2a1c-4c22-89e0-237bb2b5a245"
     },
     {
       "id": "extract-1",
@@ -40,39 +40,27 @@
           "assignments": [
             {
               "id": "a1",
-              "name": "package_id",
+              "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.entry.id }}"
+              "value": "={{ $json.body.plugin_name }}"
             },
             {
               "id": "a2",
-              "name": "package_name",
+              "name": "author_email",
               "type": "string",
-              "value": "={{ $json.body.entry.name }}"
+              "value": "={{ $json.body.owner_email }}"
             },
             {
               "id": "a3",
-              "name": "author_email",
+              "name": "author_name",
               "type": "string",
-              "value": "={{ $json.body.entry.author.email }}"
+              "value": "={{ $json.body.owner_name }}"
             },
             {
               "id": "a4",
-              "name": "author_name",
+              "name": "decline_reason",
               "type": "string",
-              "value": "={{ $json.body.entry.author.name }}"
-            },
-            {
-              "id": "a5",
-              "name": "reviewer_feedback",
-              "type": "string",
-              "value": "={{ $json.body.entry.business_review_feedback }}"
-            },
-            {
-              "id": "a6",
-              "name": "dashboard_link",
-              "type": "string",
-              "value": "=https://strapi.io/community/admin/content-manager/collectionType/api::package.package/{{ $json.body.entry.id }}"
+              "value": "={{ $json.body.reason || $json.body.feedback || '' }}"
             }
           ]
         },
@@ -98,7 +86,7 @@
               "id": "b1",
               "name": "template_key",
               "type": "string",
-              "value": "plugin-changes-requested"
+              "value": "plugin-declined"
             },
             {
               "id": "b2",
@@ -116,7 +104,7 @@
               "id": "b4",
               "name": "variables",
               "type": "object",
-              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, reviewer_feedback: $json.reviewer_feedback, dashboard_link: $json.dashboard_link } }}"
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, decline_reason: $json.decline_reason } }}"
             }
           ]
         },
@@ -149,7 +137,7 @@
     }
   ],
   "connections": {
-    "Webhook: Changes Requested": {
+    "Webhook: Package Declined": {
       "main": [
         [
           {
@@ -190,7 +178,8 @@
     "saveManualExecutions": true,
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
   },
   "staticData": null,
   "activeVersionId": null,

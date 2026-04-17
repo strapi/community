@@ -1,0 +1,317 @@
+{
+  "name": "scan-timeout-sweeper",
+  "description": null,
+  "nodes": [
+    {
+      "id": "sticky-1",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        60
+      ],
+      "parameters": {
+        "content": "## Scan Timeout Sweeper\n\nRuns every 15 minutes. Finds submissions whose `security_scan_status='running'` with `updatedAt` older than 30 minutes \u2014 assumes they're stuck (workflow killed mid-run, n8n container restart, unrecoverable crash) \u2014 and PATCHes each to `security_scan_status='failed'` via the moderation content-api write-back route.\n\nHandles both plugin-submissions and template-submissions. Posts a Slack summary to `#integration-marketplace` when any stuck scans are swept, silent otherwise.\n\n**Required n8n env vars:**\n- `STRAPI_API_URL`\n\n**Required credentials:**\n- `httpHeaderAuth` \u2014 Strapi API token (shared with security-scan)",
+        "height": 300,
+        "width": 760,
+        "color": 6
+      }
+    },
+    {
+      "id": "schedule-1",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        460
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "compute-cutoff-1",
+      "name": "Compute Cutoff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        460
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\n  const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();\n  return [{ json: { cutoff } }];\n} catch (err) {\n  return [{ json: { cutoff: null, _node_error: err.message || String(err) } }];\n}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "fetch-plugins-1",
+      "name": "Find Stale Plugin Scans",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        360
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/plugin-submissions/stale-scans",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "cutoff",
+              "value": "={{ $json.cutoff }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Content-api route (API-token auth) added to the moderation plugin specifically for the sweeper. Filters by security_scan_status='running' + security_scan_started_at < cutoff."
+    },
+    {
+      "id": "fetch-templates-1",
+      "name": "Find Stale Template Scans",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        560
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/template-submissions/stale-scans",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "cutoff",
+              "value": "={{ $('Compute Cutoff').item.json.cutoff }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "collect-1",
+      "name": "Collect Stuck Scans",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        460
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "try {\n  const pluginRes = $('Find Stale Plugin Scans').first().json || {};\n  const templateRes = $('Find Stale Template Scans').first().json || {};\n\n  function extract(res, kind) {\n    const items = Array.isArray(res?.data) ? res.data : [];\n    return items\n      .map((item) => ({\n        kind,\n        documentId: item.documentId || item.id,\n        name: item.plugin_name || item.template_name || 'unknown',\n        started_at: item.security_scan_started_at || null,\n      }))\n      .filter((x) => x.documentId);\n  }\n\n  const stuck = [\n    ...extract(pluginRes, 'plugin'),\n    ...extract(templateRes, 'template'),\n  ];\n\n  if (stuck.length === 0) return [];\n  return stuck.map((s) => ({ json: s }));\n} catch (err) {\n  return [{ json: { _node_error: err.message || String(err) } }];\n}"
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Returns one item per stuck submission so downstream runs once per. Returns [] (no items) when everything's healthy \u2014 downstream branches short-circuit."
+    },
+    {
+      "id": "mark-failed-1",
+      "name": "Mark Failed in Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $json.kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $json.documentId }}/security-scan-result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ stage: 'summary', status: 'failed', result: { runAt: new Date().toISOString(), error: 'Scan exceeded the 30-minute timeout and was reaped by scan-timeout-sweeper.', passed: false, reaped_at: new Date().toISOString(), started_at: $json.started_at } }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "id": "aggregate-1",
+      "name": "Aggregate Swept Count",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        460
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-1",
+      "name": "Notify #integration-marketplace",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1480,
+        460
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "integration-marketplace"
+        },
+        "text": "=:broom: Swept {{ $json.data.length }} stuck security scan(s) past the 30-minute timeout.\n{{ $json.data.map(s => `\u2022 ${s.kind}: ${s.name} (${s.documentId}) \u2014 started ${s.started_at}`).join('\\n') }}",
+        "otherOptions": {}
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "webhookId": "77a3ebc1-9f2d-4e58-b1c3-0fa4d9e7b2c1"
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Compute Cutoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Cutoff": {
+      "main": [
+        [
+          {
+            "node": "Find Stale Plugin Scans",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Stale Template Scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Stale Plugin Scans": {
+      "main": [
+        [
+          {
+            "node": "Collect Stuck Scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Stale Template Scans": {
+      "main": [
+        [
+          {
+            "node": "Collect Stuck Scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Stuck Scans": {
+      "main": [
+        [
+          {
+            "node": "Mark Failed in Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Failed in Strapi": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Swept Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Swept Count": {
+      "main": [
+        [
+          {
+            "node": "Notify #integration-marketplace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

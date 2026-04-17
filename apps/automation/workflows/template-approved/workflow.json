@@ -1,10 +1,10 @@
 {
-  "name": "package-submission-received",
+  "name": "template-approved",
   "description": null,
   "nodes": [
     {
       "id": "webhook-1",
-      "name": "Webhook: Submission Received",
+      "name": "Webhook: Package Approved",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
@@ -13,7 +13,7 @@
       ],
       "parameters": {
         "httpMethod": "POST",
-        "path": "strapi/package-submission-received",
+        "path": "strapi/template-approved",
         "authentication": "headerAuth",
         "responseMode": "onReceived",
         "responseData": "noData",
@@ -21,8 +21,8 @@
       },
       "onError": "continueRegularOutput",
       "alwaysOutputData": true,
-      "notes": "Fires from Strapi package.afterCreate lifecycle. Expects body.entry { id, name, git_repository, author { email, name } }. Requires header-auth credential in n8n.",
-      "webhookId": "e9741c13-e5b0-40a4-99a5-9a30031ea8a7"
+      "notes": "Fired by the CMS moderation plugin after template-submission.decide with status='approved'.",
+      "webhookId": "b6fa08e1-08dc-4a91-beaa-0aab4b4f39f8"
     },
     {
       "id": "extract-1",
@@ -42,37 +42,37 @@
               "id": "a1",
               "name": "package_id",
               "type": "string",
-              "value": "={{ $json.body.entry.id }}"
+              "value": "={{ $json.body.submissionId }}"
             },
             {
               "id": "a2",
               "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.entry.name }}"
+              "value": "={{ $json.body.template_name }}"
             },
             {
               "id": "a3",
-              "name": "git_repository",
+              "name": "package_slug",
               "type": "string",
-              "value": "={{ $json.body.entry.git_repository }}"
+              "value": ""
             },
             {
               "id": "a4",
               "name": "author_email",
               "type": "string",
-              "value": "={{ $json.body.entry.author.email }}"
+              "value": "={{ $json.body.owner_email }}"
             },
             {
               "id": "a5",
               "name": "author_name",
               "type": "string",
-              "value": "={{ $json.body.entry.author.name }}"
+              "value": "={{ $json.body.owner_name }}"
             },
             {
               "id": "a6",
-              "name": "dashboard_link",
+              "name": "marketplace_link",
               "type": "string",
-              "value": "=https://strapi.io/community/admin/content-manager/collectionType/api::package.package/{{ $json.body.entry.id }}"
+              "value": "={{ $json.body.demo_url || $json.body.repository_url }}"
             }
           ]
         },
@@ -98,7 +98,7 @@
               "id": "b1",
               "name": "template_key",
               "type": "string",
-              "value": "plugin-submission-received"
+              "value": "template-approved"
             },
             {
               "id": "b2",
@@ -116,7 +116,7 @@
               "id": "b4",
               "name": "variables",
               "type": "object",
-              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, git_repository: $json.git_repository } }}"
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, marketplace_link: $json.marketplace_link } }}"
             }
           ]
         },
@@ -145,8 +145,7 @@
       },
       "retryOnFail": true,
       "maxTries": 2,
-      "waitBetweenTries": 3000,
-      "notes": "Calls render-email sub-workflow. TODO when n8n UI available: bump to typeVersion 1.3 and use resourceMapper for typed inputs."
+      "waitBetweenTries": 3000
     },
     {
       "id": "build-slack-1",
@@ -166,7 +165,7 @@
               "id": "s1",
               "name": "text",
               "type": "string",
-              "value": "=:package: New package submission received: *{{ $json.package_name }}* by {{ $json.author_name }}\nRepo: {{ $json.git_repository }}\nReview: {{ $json.dashboard_link }}"
+              "value": "=:white_check_mark: *Template* approved: *{{ $json.package_name }}* by {{ $json.author_name }}\nLive: {{ $json.marketplace_link }}"
             }
           ]
         },
@@ -199,11 +198,11 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
-      "webhookId": "e70d036e-994f-4429-ab41-1c5e88539b7d"
+      "webhookId": "a41686e3-5d7a-4d21-b75b-09698c7fb293"
     }
   ],
   "connections": {
-    "Webhook: Submission Received": {
+    "Webhook: Package Approved": {
       "main": [
         [
           {
@@ -260,7 +259,8 @@
     "saveManualExecutions": true,
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
   },
   "staticData": null,
   "activeVersionId": null,

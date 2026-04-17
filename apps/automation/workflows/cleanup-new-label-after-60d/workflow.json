@@ -211,7 +211,8 @@
     "saveManualExecutions": true,
     "saveExecutionProgress": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
   },
   "staticData": null,
   "activeVersionId": null,
