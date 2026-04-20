@@ -37,7 +37,7 @@
     "src/admin/",
     // Do not include test files
     "**/*.test.*",
-    // Do not include plugins in the server compilation
-    "src/plugins/**"
+    // Do not include plugins admin code in the server compilation
+    "src/plugins/**/admin"
   ]
 }
