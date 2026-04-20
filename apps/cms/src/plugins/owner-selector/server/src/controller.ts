@@ -1,6 +1,6 @@
 const SUPPORTED = ["api::package.package", "api::template.template"];
 
-module.exports = ({ strapi }) => ({
+export default ({ strapi }) => ({
   async getUsers(ctx) {
     const users = await strapi.documents("plugin::better-auth.user").findMany({
       fields: ["name", "email", "documentId"],
