@@ -21,7 +21,7 @@ const { searchClient } = instantMeiliSearch(
 
 const GenericSearch = () => (
   <InstantSearchNext
-    indexName="generic_search:npm_downloads:asc"
+    indexName="generic_search:monthly_downloads:desc"
     searchClient={searchClient}
   >
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -68,11 +68,11 @@ const GenericSearch = () => (
             <SortBy
               items={[
                 {
-                  value: "generic_search:npm_downloads:desc",
+                  value: "generic_search:monthly_downloads:desc",
                   label: "Sort by: Popular",
                 },
                 {
-                  value: "generic_search:github_stars:desc",
+                  value: "generic_search:stars:desc",
                   label: "Sort by: Github stars",
                 },
                 {

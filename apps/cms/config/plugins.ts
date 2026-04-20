@@ -29,7 +29,7 @@ export default ({ env }) => ({
           ],
         },
         settings: {
-          sortableAttributes: ["npm_downloads", "github_stars", "createdAt"],
+          sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           filterableAttributes: [
             "type",
             "categories",
@@ -51,7 +51,7 @@ export default ({ env }) => ({
           ],
         },
         settings: {
-          sortableAttributes: ["npm_downloads", "github_stars", "createdAt"],
+          sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           filterableAttributes: [
             "type",
             "categories",
