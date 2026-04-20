@@ -26,6 +26,9 @@
       "type": "string",
       "required": true
     },
+    "airtableSlug": {
+      "type": "string"
+    },
     "description": {
       "type": "text",
       "required": true
@@ -69,8 +72,7 @@
     "labels": {
       "type": "component",
       "component": "shared.labels",
-      "repeatable": false,
-      "required": true
+      "repeatable": false
     },
     "stars": {
       "type": "integer"

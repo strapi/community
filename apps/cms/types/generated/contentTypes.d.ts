@@ -617,6 +617,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    airtableSlug: Schema.Attribute.String;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::category.category'
@@ -627,8 +628,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     description: Schema.Attribute.Text & Schema.Attribute.Required;
     git_repository: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    labels: Schema.Attribute.Component<'shared.labels', false> &
-      Schema.Attribute.Required;
+    labels: Schema.Attribute.Component<'shared.labels', false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
