@@ -13,8 +13,6 @@ type Props = {
 };
 
 const HomeTemplate = async ({ document, templates, packages }: Props) => {
-  console.log(packages);
-
   return (
     <div>
       <HomeHero

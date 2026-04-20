@@ -33,8 +33,6 @@ const Hit = ({ hit }: Props) => {
     size: "S" | "M" | "L";
   };
 
-  console.log(hit);
-
   return (
     <ContentCard
       link={hit.url_alias?.[0]?.url_path!}

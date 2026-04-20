@@ -117,8 +117,6 @@ const PackageTemplate = ({ document, owner }: Props) => {
   const githubStars = document.stars;
   const npmDownloads = document.monthly_downloads;
 
-  console.log(document.version_info);
-
   return (
     <>
       <Navigation theme="light" />
