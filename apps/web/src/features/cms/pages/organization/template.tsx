@@ -1,5 +1,6 @@
 "use client";
 
+import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import {
   AppWindow,
@@ -32,6 +33,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
   return (
     <>
+      <StrapiNavbar />
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
@@ -274,6 +276,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
           </TabsContent>
         </Tabs>
       </Container>
+      <StrapiFooter />
     </>
   );
 };
