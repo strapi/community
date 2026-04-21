@@ -1,3 +1,5 @@
+"use server";
+
 import { fetchFooter } from "../../api/fetch-footer";
 import type { FooterMainData } from "../../types/footer";
 import { StrapiFooterMain } from "./StrapiFooterMain";

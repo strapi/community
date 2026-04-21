@@ -1,3 +1,5 @@
+"use server";
+
 import { fetchNavigation } from "../../api/fetch-navigation";
 import { cn } from "../../utils/cn";
 import { fetchGithubStars } from "../../utils/github-stars";
