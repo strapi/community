@@ -1,3 +1,4 @@
+import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import {
   Download,
   ExternalLink,
@@ -119,6 +120,7 @@ const PackageTemplate = ({ document, owner }: Props) => {
 
   return (
     <>
+      <StrapiNavbar />
       <Navigation theme="light" />
       <Container>
         <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-12 mt-10">
@@ -279,6 +281,7 @@ const PackageTemplate = ({ document, owner }: Props) => {
           </aside>
         </div>
       </Container>
+      <StrapiFooter />
     </>
   );
 };

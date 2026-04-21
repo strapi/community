@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@repo/strapi-ui/styles.css";
 
 :root {
   --background: #ffffff;

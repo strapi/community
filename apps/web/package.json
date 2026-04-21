@@ -17,6 +17,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
     "@repo/strapi-client": "workspace:*",
+    "@repo/strapi-ui": "workspace:*",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "better-auth": "catalog:better-auth",
     "class-variance-authority": "^0.7.1",

@@ -1,3 +1,4 @@
+import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import { ExternalLink, ShieldCheck, ShieldX, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -111,6 +112,7 @@ const TemplateTemplate = ({ document, owner }: Props) => {
 
   return (
     <>
+      <StrapiNavbar />
       <Navigation theme="light" />
       <Container>
         <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-12 mt-10">
@@ -281,6 +283,7 @@ const TemplateTemplate = ({ document, owner }: Props) => {
           </aside>
         </div>
       </Container>
+      <StrapiFooter />
     </>
   );
 };
