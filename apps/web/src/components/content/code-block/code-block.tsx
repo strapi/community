@@ -30,10 +30,10 @@ const CodeBlock = ({ language, value, copyable = false }: Props) => {
           <button
             type="button"
             aria-label="Copy to clipboard"
-            className="absolute top-3.5 right-3.5 flex items-center justify-center h-7 w-7 rounded bg-transparent hover:bg-white border border-(--color-neutral150) text-(--color-neutral500) hover:text-(--color-neutral800) transition-all cursor-pointer"
+            className="absolute top-3.5 right-3.5 flex items-center justify-center h-7 w-7 rounded bg-transparent border border-(--color-neutral150) text-(--color-neutral500) transition-all cursor-pointer"
           >
             {copied ? (
-              <Check className="h-3.5 w-3.5 text-green-500" />
+              <Check className="h-3.5 w-3.5 stroke-(--color-neutral100)" />
             ) : (
               <Copy className="h-3.5 w-3.5 stroke-(--color-neutral100)" />
             )}

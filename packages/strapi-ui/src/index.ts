@@ -1,5 +1,6 @@
 export { StrapiFooter } from "./components/footer/StrapiFooter";
 export { StrapiNavbar } from "./components/navbar/StrapiNavbar";
+export { Button } from "./components/ui/button";
 export type {
   FooterContent,
   FooterLink,
