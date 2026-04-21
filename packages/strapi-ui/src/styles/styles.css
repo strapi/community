@@ -1,0 +1,130 @@
+/* Scan this package's source files for Tailwind class names */
+@import "./design-system.css";
+@import "tw-animate-css";
+@import "./animations.css";
+@source "../**/*.{ts,tsx}";
+
+/*
+  ---break---
+*/
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  * {
+    @apply border-gray-300 outline-purple-500/50;
+  }
+
+  body {
+    @apply bg-gray-100 text-gray-900;
+  }
+
+  /* Site header heights — used by sticky sub-navbars (e.g. BlogNavbar) to
+     offset below the header. Banner: h-13 (52px), nav: h-16 / lg:h-20. */
+  :root {
+    --banner-h: 3.25rem;
+    --nav-h: 4rem;
+    --site-header-h: calc(var(--banner-h) + var(--nav-h));
+
+    @media (width >= 1024px) {
+      --nav-h: 5rem;
+    }
+  }
+
+  /* Site header sticky — the wrapper must be the sticky element so the nav's
+     containing block spans the full page (not just the header height) */
+  [data-slot="site-header"] {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Navbar scroll bg + shadow via ::before so we can transition opacity */
+  nav[data-navbar]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-background);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    opacity: var(--nav-scrolled, 0);
+    transition: opacity 300ms ease-out;
+  }
+}
+
+@utility no-scrollbar {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Minimal layout — hide navbar and footer when a page opts in (top banner stays visible) */
+body:has([data-minimal-layout]) nav[data-navbar],
+body:has([data-minimal-layout]) [data-slot="site-footer"] {
+  display: none;
+}
+
+/* When a dark hero is present, swap to light logo on all sizes */
+body:has([data-dark-hero]) nav[data-navbar] {
+  --nav-logo-default-opacity: 0;
+  --nav-logo-light-opacity: 1;
+}
+
+/* On dark-hero pages the bg must appear instantly so it doesn't lag
+   behind the text color change (which switches via steps(1) at 1px scroll) */
+body:has([data-dark-hero]) nav[data-navbar]::before {
+  transition: opacity 0ms;
+}
+
+/* White nav text only on desktop */
+@media (width >= 1024px) {
+  body:has([data-dark-hero]) nav[data-navbar] {
+    --nav-text-initial: rgb(255 255 255);
+    --nav-link-hover-initial: rgb(255 255 255 / 0.6);
+  }
+}
+
+/* ── Navigation animations ── */
+
+@property --nav-scrolled {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@keyframes nav-scroll-detect {
+  to {
+    --nav-scrolled: 1;
+    color: var(--nav-text-scrolled);
+    --nav-link-hover: var(--nav-link-hover-scrolled);
+    --nav-logo-default-opacity: 1;
+    --nav-logo-light-opacity: 0;
+  }
+}
+
+@keyframes mobile-menu-open {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}

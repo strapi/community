@@ -1,0 +1,108 @@
+import Image from "next/image";
+import { Fragment } from "react";
+import type { FooterMainData } from "../../types/footer";
+import { NavLinkImageComponent } from "../../utils/image";
+import { NavLinkText } from "../../utils/link";
+import { Container } from "../elementary/Container";
+
+import gdprBadge from "./badges/gdpr.svg";
+import soc2Badge from "./badges/soc2.png";
+
+export function StrapiFooterMain({
+  component,
+}: {
+  readonly component: FooterMainData;
+}) {
+  const copyRight = component.copyRight?.replace?.(
+    "{YEAR}",
+    new Date().getFullYear().toString(),
+  );
+  const sectionCount = component.sections?.length ?? 0;
+
+  return (
+    <div className="bg-white">
+      <Container className="py-8 sm:py-15">
+        <div
+          className="grid grid-cols-2 gap-8 pb-12 sm:grid-cols-2 sm:gap-y-10 sm:pb-30 md:grid-cols-3 lg:grid-cols-[2fr_repeat(var(--section-count),1fr)]"
+          style={{ "--section-count": sectionCount } as React.CSSProperties}
+        >
+          <div className="col-span-2 flex flex-col gap-5 sm:col-span-1 sm:gap-10">
+            {component.logoImage && (
+              <NavLinkImageComponent
+                component={component.logoImage}
+                className="relative h-8 w-28"
+                imageMode="fill"
+                sizes="112px"
+              />
+            )}
+
+            {component.tagline && (
+              <>
+                <p className="w-full text-xs leading-relaxed">
+                  {component.tagline}
+                </p>
+                <div className="flex items-center gap-6">
+                  <Image src={soc2Badge} alt="SOC 2 certified" height={64} />
+                  <Image src={gdprBadge} alt="GDPR compliant" height={64} />
+                </div>
+              </>
+            )}
+          </div>
+
+          {component.sections?.map((section) => (
+            <div className="flex flex-col gap-6 sm:gap-8" key={section.id}>
+              <h4 className="text-base font-semibold uppercase">
+                {section.title}
+              </h4>
+
+              <nav>
+                <ul className="flex list-none flex-col gap-3 leading-none">
+                  {section.links?.map((link) => (
+                    <li key={link.id}>
+                      <NavLinkText
+                        component={link}
+                        className="text-strapi-neutral-700 animate-spring-sm inline-block text-sm leading-[1.2]"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-border flex flex-col-reverse gap-4 border-t pt-8 text-sm md:flex-row md:items-center md:justify-between">
+          <div className="text-foreground flex flex-wrap items-center gap-x-8">
+            {copyRight && <span className="text-foreground">{copyRight}</span>}
+
+            {component.links?.map((link) => (
+              <Fragment key={link.id}>
+                <NavLinkText component={link} />
+              </Fragment>
+            ))}
+          </div>
+
+          {component.socials && (
+            <div className="flex items-center gap-4">
+              {component.socials.title && (
+                <span className="text-strapi-neutral-500">
+                  {component.socials.title}
+                </span>
+              )}
+
+              {component.socials.socials?.map((social) => (
+                <NavLinkImageComponent
+                  key={social.id}
+                  component={social}
+                  className="animate-spring-lg relative size-5"
+                  imageMode="fill"
+                  sizes="20px"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </Container>
+    </div>
+  );
+}
