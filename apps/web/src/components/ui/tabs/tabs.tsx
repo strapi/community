@@ -87,7 +87,7 @@ const TabsTrigger = ({
       aria-selected={isActive}
       onClick={() => setActiveTab(value)}
       className={cn(
-        "cursor-pointer font-semibold inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm transition-colors",
+        "cursor-pointer font-semibold inline-flex items-center gap-2 rounded-full px-4 py-3 text-[15px] transition-colors",
         isActive
           ? "bg-(--color-primary600) text-white"
           : "bg-(--color-neutral100) text-(--color-neutral700) hover:bg-(--color-neutral150)",

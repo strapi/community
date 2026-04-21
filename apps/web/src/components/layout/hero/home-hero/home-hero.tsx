@@ -144,7 +144,7 @@ const HomeHero = (props: Props) => {
                       src={
                         pkg.icon
                           ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
-                          : "/plugin-fallback-icon.png"
+                          : "/package-fallback-icon.png"
                       }
                       width={80}
                       height={80}

@@ -131,7 +131,7 @@ const PackageTemplate = ({ document, owner }: Props) => {
                   src={
                     document.icon
                       ? `${process.env.NEXT_PUBLIC_CMS_URL}${document.icon.url}`
-                      : "/plugin-fallback-icon.png"
+                      : "/package-fallback-icon.png"
                   }
                   width={64}
                   height={64}

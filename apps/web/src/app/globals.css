@@ -17,6 +17,7 @@
   --color-primary600: #4945ff;
   --color-primary700: #271fe0;
   --color-primary800: #171693;
+  --color-blue800: #292875;
   --color-grey700: #364153;
   --color-success100: #eafbe7;
   --color-success200: #c6f0c2;
@@ -28,7 +29,7 @@
   --color-success700: #2f7a2f;
   --color-hero-bg: #030712;
   --color-hero-border: #202445;
-  --color-hero-muted: #a5afcc;
+  --color-hero-muted: #99A1AF;
   --color-hero-nav-muted: #b8bfd6;
   --color-hero-button-border: #3a416d;
   --color-hero-button-hover: #111633;
@@ -76,5 +77,5 @@ h2,
 h3,
 h4,
 h5 {
-  color: var(--color-primary800);
+  color: var(--color-blue800);
 }
