@@ -1,6 +1,5 @@
 import type { Metadata, NextPage } from "next";
 import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
-import { CategoryPage, categoryMetadata } from "@/features/cms/pages/category";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
 import {
   OrganizationPage,
@@ -46,9 +45,6 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     }
     case "api::template.template": {
       return <TemplatePage documentId={page.documentId} />;
-    }
-    case "api::category.category": {
-      return <CategoryPage documentId={page.documentId} />;
     }
     case "api::overview-page.overview-page": {
       return <OverviewPage documentId={page.documentId} />;
@@ -109,9 +105,6 @@ export const generateMetadata = async ({
     }
     case "api::template.template": {
       return templateMetadata(page.documentId);
-    }
-    case "api::category.category": {
-      return categoryMetadata(page.documentId);
     }
     case "api::overview-page.overview-page": {
       return overviewPageMetadata(page.documentId);

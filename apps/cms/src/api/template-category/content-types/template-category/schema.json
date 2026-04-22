@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "template_categories",
+  "info": {
+    "singularName": "template-category",
+    "pluralName": "template-categories",
+    "displayName": "Template categories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "children": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::template-category.template-category",
+      "inversedBy": "parent"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::template-category.template-category",
+      "mappedBy": "children"
+    }
+  }
+}

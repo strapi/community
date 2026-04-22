@@ -94,7 +94,16 @@ export interface SectionsSearch extends Struct.ComponentSchema {
     displayName: 'Search';
   };
   attributes: {
-    index_name: Schema.Attribute.Enumeration<['generic_search']> &
+    index_name: Schema.Attribute.Enumeration<
+      [
+        'generic_search',
+        'marketplace',
+        'integrations',
+        'showcases',
+        'partners',
+        'members',
+      ]
+    > &
       Schema.Attribute.Required;
   };
 }

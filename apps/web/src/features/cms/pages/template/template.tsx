@@ -91,7 +91,7 @@ const TemplateTemplate = ({ document, owner }: Props) => {
 
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
-            <div className="sticky top-6">
+            <div className="sticky top-25">
               {/* Preview link */}
               {document.preview_link && (
                 <Button

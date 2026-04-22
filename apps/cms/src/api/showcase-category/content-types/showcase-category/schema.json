@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "showcase_categories",
+  "info": {
+    "singularName": "showcase-category",
+    "pluralName": "showcase-categories",
+    "displayName": "Showcase categories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

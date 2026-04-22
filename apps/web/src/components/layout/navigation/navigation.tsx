@@ -40,7 +40,7 @@ const Navigation = async ({ theme }: Props) => {
               </Link>
             )}
             <ul
-              className={`hidden items-center gap-6 font-normal text-[15px] ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-muted)"} lg:flex`}
+              className={`hidden items-center gap-6 font-medium text-[15px] ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-muted)"} lg:flex`}
             >
               {data.data.nav_links?.map((link) => {
                 const isActive =
@@ -50,7 +50,7 @@ const Navigation = async ({ theme }: Props) => {
                   <li key={link.id}>
                     <Link
                       href={link.link!}
-                      className={`transition-colors hover:text-white ${isActive ? "text-white" : ""}`}
+                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? "text-white" : ""}`}
                     >
                       {link.label}
                     </Link>

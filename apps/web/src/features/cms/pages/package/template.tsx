@@ -89,7 +89,7 @@ const PackageTemplate = ({ document, owner }: Props) => {
 
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
-            <div className="sticky top-6">
+            <div className="sticky top-20">
               {/* Stats */}
               {(githubStars != null || npmDownloads != null) && (
                 <SidebarSection title="Stats">

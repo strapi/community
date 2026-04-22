@@ -18,7 +18,7 @@ export default ({ env }) => ({
       host: env("MEILISEARCH_HOST"),
       apiKey: env("MEILISEARCH_API_KEY"),
       package: {
-        indexName: env("MEILISEARCH_GENERIC_INDEX_NAME"),
+        indexName: env("MEILISEARCH_PACKAGES_INDEX_NAME"),
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
@@ -40,7 +40,7 @@ export default ({ env }) => ({
         },
       },
       template: {
-        indexName: env("MEILISEARCH_GENERIC_INDEX_NAME"),
+        indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
         entriesQuery: {
           populate: [
             "maintainers.profile.avatar",
@@ -59,6 +59,60 @@ export default ({ env }) => ({
             "labels.official",
             "labels.paid",
           ],
+        },
+      },
+      showcase: {
+        indexName: env("MEILISEARCH_SHOWCASES_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["image", "categories"],
+        },
+        settings: {
+          sortableAttributes: ["createdAt"],
+          filterableAttributes: ["categories"],
+        },
+      },
+      recipe: {
+        indexName: env("MEILISEARCH_RECIPES_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["image", "categories"],
+        },
+        settings: {
+          sortableAttributes: ["createdAt"],
+          filterableAttributes: ["categories"],
+        },
+      },
+      integration: {
+        indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["logo", "categories"],
+        },
+        settings: {
+          sortableAttributes: ["createdAt"],
+          filterableAttributes: ["categories"],
+        },
+      },
+      user: {
+        indexName: env("MEILISEARCH_USER_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["profile.avatar"],
+        },
+        settings: {
+          // @todo - implement partner filters
+          // filterableAttributes: [
+          //   "categories",
+          // ],
+        },
+      },
+      organization: {
+        indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["profile.avatar"],
+        },
+        settings: {
+          // @todo - implement partner filters
+          // filterableAttributes: [
+          //   "categories",
+          // ],
         },
       },
     },

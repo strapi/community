@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "package_categories",
+  "info": {
+    "singularName": "package-category",
+    "pluralName": "package-categories",
+    "displayName": "Package categories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "children": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::package-category.package-category",
+      "inversedBy": "parent"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::package-category.package-category",
+      "mappedBy": "children"
+    }
+  }
+}

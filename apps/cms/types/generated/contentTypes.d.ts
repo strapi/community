@@ -430,48 +430,6 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
-  collectionName: 'categories';
-  info: {
-    description: '';
-    displayName: 'Categories';
-    pluralName: 'categories';
-    singularName: 'category';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  pluginOptions: {
-    webtools: {
-      enabled: true;
-    };
-  };
-  attributes: {
-    children: Schema.Attribute.Relation<'oneToMany', 'api::category.category'>;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::category.category'
-    > &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    parent: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    url_alias: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::webtools.url-alias'
-    > &
-      Schema.Attribute.Unique;
-  };
-}
-
 export interface ApiCtaCta extends Struct.CollectionTypeSchema {
   collectionName: 'ctas';
   info: {
@@ -540,6 +498,79 @@ export interface ApiHomeHome extends Struct.SingleTypeSchema {
       Schema.Attribute.Required;
     subtitle: Schema.Attribute.String & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiIntegrationCategoryIntegrationCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'integration_categories';
+  info: {
+    displayName: 'Integration categories';
+    pluralName: 'integration-categories';
+    singularName: 'integration-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration-category.integration-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiIntegrationIntegration extends Struct.CollectionTypeSchema {
+  collectionName: 'integrations';
+  info: {
+    displayName: 'Integrations';
+    pluralName: 'integrations';
+    singularName: 'integration';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    categories: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration-category.integration-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration.integration'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -633,6 +664,54 @@ export interface ApiOverviewPageOverviewPage
   };
 }
 
+export interface ApiPackageCategoryPackageCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'package_categories';
+  info: {
+    displayName: 'Package categories';
+    pluralName: 'package-categories';
+    singularName: 'package-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    children: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::package-category.package-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::package-category.package-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    parent: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::package-category.package-category'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
 export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
   collectionName: 'packages';
   info: {
@@ -653,7 +732,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     airtableSlug: Schema.Attribute.String;
     categories: Schema.Attribute.Relation<
       'oneToMany',
-      'api::category.category'
+      'api::package-category.package-category'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -674,7 +753,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     >;
     monthly_downloads: Schema.Attribute.Integer;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
+    owner: Schema.Attribute.Relation<'morphToMany'>;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
@@ -738,6 +817,170 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
+  collectionName: 'recipes';
+  info: {
+    displayName: 'Recipes';
+    pluralName: 'recipes';
+    singularName: 'recipe';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    integrations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration.integration'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::recipe.recipe'
+    > &
+      Schema.Attribute.Private;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiShowcaseCategoryShowcaseCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'showcase_categories';
+  info: {
+    displayName: 'Showcase categories';
+    pluralName: 'showcase-categories';
+    singularName: 'showcase-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase-category.showcase-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
+  collectionName: 'showcases';
+  info: {
+    displayName: 'Showcases';
+    pluralName: 'showcases';
+    singularName: 'showcase';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: false;
+    };
+  };
+  attributes: {
+    categories: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase-category.showcase-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    link: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase.showcase'
+    > &
+      Schema.Attribute.Private;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    template: Schema.Attribute.Relation<'oneToOne', 'api::template.template'>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTemplateCategoryTemplateCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'template_categories';
+  info: {
+    displayName: 'Template categories';
+    pluralName: 'template-categories';
+    singularName: 'template-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    children: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::template-category.template-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::template-category.template-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    parent: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::template-category.template-category'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
 export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
   collectionName: 'templates';
   info: {
@@ -756,7 +999,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
   attributes: {
     categories: Schema.Attribute.Relation<
       'oneToMany',
-      'api::category.category'
+      'api::template-category.template-category'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -777,6 +1020,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     owner: Schema.Attribute.Relation<'morphToMany'>;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
@@ -1758,13 +2002,19 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::category.category': ApiCategoryCategory;
       'api::cta.cta': ApiCtaCta;
       'api::home.home': ApiHomeHome;
+      'api::integration-category.integration-category': ApiIntegrationCategoryIntegrationCategory;
+      'api::integration.integration': ApiIntegrationIntegration;
       'api::navigation.navigation': ApiNavigationNavigation;
       'api::overview-page.overview-page': ApiOverviewPageOverviewPage;
+      'api::package-category.package-category': ApiPackageCategoryPackageCategory;
       'api::package.package': ApiPackagePackage;
       'api::profile.profile': ApiProfileProfile;
+      'api::recipe.recipe': ApiRecipeRecipe;
+      'api::showcase-category.showcase-category': ApiShowcaseCategoryShowcaseCategory;
+      'api::showcase.showcase': ApiShowcaseShowcase;
+      'api::template-category.template-category': ApiTemplateCategoryTemplateCategory;
       'api::template.template': ApiTemplateTemplate;
       'plugin::better-auth.account': PluginBetterAuthAccount;
       'plugin::better-auth.invitation': PluginBetterAuthInvitation;

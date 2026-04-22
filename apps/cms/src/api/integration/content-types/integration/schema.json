@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "integrations",
+  "info": {
+    "singularName": "integration",
+    "pluralName": "integrations",
+    "displayName": "Integrations"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::integration-category.integration-category"
+    }
+  }
+}

@@ -25,10 +25,7 @@ const GenericSearch = () => (
     searchClient={searchClient}
   >
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-      <aside className="lg:col-span-3">
-        <div className="mb-6 max-w-70">
-          <SearchBox />
-        </div>
+      <aside className="lg:col-span-3 sticky top-25">
         <div className="flex w-full flex-col items-start gap-8">
           <div className="flex w-full flex-col items-start gap-4">
             <h3 className="text-xs font-semibold tracking-[0.22em] text-(--color-primary600) uppercase">
@@ -62,6 +59,9 @@ const GenericSearch = () => (
         </div>
       </aside>
       <section className="lg:col-span-9">
+        <div className="mb-6">
+          <SearchBox />
+        </div>
         <div className="mb-6 flex w-full items-center">
           <Stats />
           <div className="ml-auto">

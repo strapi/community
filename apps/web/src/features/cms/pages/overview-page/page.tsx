@@ -11,6 +11,7 @@ const query = {
     sections: {
       populate: "*",
     },
+    image: true,
   },
 } satisfies GetQueryParams<typeof contentType>;
 
