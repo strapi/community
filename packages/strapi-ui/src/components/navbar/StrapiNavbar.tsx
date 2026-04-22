@@ -17,7 +17,7 @@ export async function StrapiNavbar({ className }: { className?: string }) {
     <nav
       data-navbar
       className={cn(
-        "relative sticky top-0 z-40 flex h-16 w-full items-center",
+        "relative border-b border-(--color-neutral300) top-0 z-40 flex h-16 w-full items-center",
         "[animation:nav-scroll-detect_steps(1,end)_both]",
         "[animation-range:0px_1px]",
         "[animation-timeline:scroll()]",

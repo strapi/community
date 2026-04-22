@@ -28,6 +28,11 @@
     "description": {
       "type": "text"
     },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
     "seo": {
       "type": "component",
       "component": "shared.seo",
