@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 // ─── Context ────────────────────────────────────────────────────────────────
@@ -36,13 +37,34 @@ const Tabs = ({
   children,
   className,
 }: TabsProps) => {
-  const [internalValue, setInternalValue] = useState(defaultValue);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [internalValue, setInternalValue] = useState(
+    searchParams.get("tab") ?? defaultValue,
+  );
+  const activeTabRef = useRef(internalValue);
 
   const activeTab = value ?? internalValue;
+
   const setActiveTab = (next: string) => {
+    activeTabRef.current = next;
     setInternalValue(next);
     onValueChange?.(next);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", next);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
+  // Re-assert the tab param if another router update (e.g. InstantSearch) drops it.
+  useEffect(() => {
+    if (searchParams.get("tab") === activeTabRef.current) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", activeTabRef.current);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, pathname, router]);
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
