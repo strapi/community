@@ -42,6 +42,39 @@ export function getGithubOwnerAvatarUrl(repoUrl) {
   };
 }
 
+export async function uploadMarkdownImages(markdown: string): Promise<string> {
+  const markdownImageRegex = /!\[([^\]]*)\]\((https?:\/\/[^)\s"]+)[^)]*\)/g;
+  const htmlImageRegex = /<img[^>]+src="(https?:\/\/[^"]+)"[^>]*>/g;
+
+  const urls = new Set<string>();
+  for (const match of markdown.matchAll(markdownImageRegex)) {
+    urls.add(match[2]);
+  }
+  for (const match of markdown.matchAll(htmlImageRegex)) {
+    urls.add(match[1]);
+  }
+
+  const urlMap = new Map<string, string>();
+  for (const url of urls) {
+    try {
+      const fileName = path.basename(new URL(url).pathname) || "image";
+      const uploaded = await uploadFromUrl(url, fileName);
+      if (uploaded?.url) {
+        urlMap.set(url, uploaded.url);
+      }
+    } catch (e) {
+      console.error(`Failed to upload markdown image: ${url}`, e);
+    }
+  }
+
+  let result = markdown;
+  for (const [oldUrl, newUrl] of urlMap) {
+    result = result.replaceAll(oldUrl, newUrl);
+  }
+
+  return result;
+}
+
 export const generatePassword = () => {
   let length = 20,
     charset =
