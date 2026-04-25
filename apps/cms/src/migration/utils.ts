@@ -3,10 +3,19 @@ import * as os from "node:os";
 import * as path from "node:path";
 
 export async function uploadFromUrl(url, fileName) {
-  const response = await fetch(url);
+  let response = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      response = await fetch(url);
+      if (response.ok) break;
+    } catch (error) {
+      if (attempt === 2) throw error;
+    }
+  }
   const buffer = Buffer.from(await response.arrayBuffer());
-  const tmpPath = path.join(os.tmpdir(), fileName);
-  fs.writeFileSync(tmpPath, buffer);
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${fileName}`;
+  const tmpPath = path.join(os.tmpdir(), uniqueName);
+  await fs.promises.writeFile(tmpPath, buffer);
   try {
     const uploadedFiles = await strapi
       .plugin("upload")
@@ -29,7 +38,7 @@ export async function uploadFromUrl(url, fileName) {
       });
     return uploadedFiles[0];
   } finally {
-    fs.unlinkSync(tmpPath);
+    await fs.promises.unlink(tmpPath);
   }
 }
 
