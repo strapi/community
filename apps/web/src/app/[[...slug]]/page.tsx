@@ -1,6 +1,8 @@
 import type { Metadata, NextPage } from "next";
 import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
+import { integrationMetadata } from "@/features/cms/pages/integrations/metadata";
+import { IntegrationPage } from "@/features/cms/pages/integrations/page";
 import {
   OrganizationPage,
   organizationMetadata,
@@ -39,6 +41,9 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     }
     case "api::package.package": {
       return <PackagePage documentId={page.documentId} />;
+    }
+    case "api::integration.integration": {
+      return <IntegrationPage documentId={page.documentId} />;
     }
     case "plugin::better-auth.user": {
       return <UserPage documentId={page.documentId} />;
@@ -99,6 +104,9 @@ export const generateMetadata = async ({
     }
     case "api::package.package": {
       return packageMetadata(page.documentId);
+    }
+    case "api::integration.integration": {
+      return integrationMetadata(page.documentId);
     }
     case "plugin::better-auth.user": {
       return userMetadata(page.documentId);
