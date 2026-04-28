@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import Link, { type LinkProps } from "next/link";
 import { Slot as SlotPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -12,6 +13,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
@@ -43,22 +45,46 @@ const buttonVariants = cva(
   },
 );
 
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    isLoading?: boolean;
+    href?: LinkProps["href"];
+  } & Pick<LinkProps, "replace" | "scroll" | "prefetch">;
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
   isLoading = false,
+  href,
+  replace,
+  scroll,
+  prefetch,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-    isLoading?: boolean;
-  }) {
+}: ButtonProps) {
   const Comp = asChild ? SlotPrimitive.Slot : "button";
 
   if (isLoading) {
     props.children = <Spinner size="sm" />;
+  }
+
+  if (href) {
+    return (
+      <Link
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        className={cn(buttonVariants({ variant, size, className }))}
+        href={href}
+        replace={replace}
+        scroll={scroll}
+        prefetch={prefetch}
+        ref={props.ref as React.Ref<HTMLAnchorElement>}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      />
+    );
   }
 
   return (

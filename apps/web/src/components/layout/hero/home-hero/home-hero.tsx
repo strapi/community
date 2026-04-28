@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import { Code2, LayoutTemplate, Search } from "lucide-react";
 import Image from "next/image";
@@ -7,7 +8,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { Hero, HeroSection } from "@/components/layout/hero/hero";
-import { Button } from "@/components/ui/button";
 import type { HomePackages, HomeTemplates } from "@/features/cms/pages/home";
 import { cn } from "@/lib/utils";
 

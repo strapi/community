@@ -1,9 +1,9 @@
+import { Button } from "@repo/strapi-ui";
 import type { BaseHit } from "instantsearch.js";
 import {
   type UseInfiniteHitsProps,
   useInfiniteHits,
 } from "react-instantsearch";
-import { Button } from "@/components/ui/button";
 
 type Props<T extends BaseHit> = UseInfiniteHitsProps<T> & {
   hitComponent: React.ComponentType<{ hit: T }>;
