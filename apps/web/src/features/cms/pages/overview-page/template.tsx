@@ -1,4 +1,3 @@
-import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import Image from "next/image";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -12,7 +11,6 @@ type Props = {
 const OverviewPageTemplate = ({ document }: Props) => {
   return (
     <div>
-      <StrapiNavbar />
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
@@ -46,7 +44,6 @@ const OverviewPageTemplate = ({ document }: Props) => {
           />
         );
       })}
-      <StrapiFooter />
     </div>
   );
 };

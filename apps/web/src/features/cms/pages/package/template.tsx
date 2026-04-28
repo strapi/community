@@ -1,5 +1,5 @@
-import { Button, StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
-import { Download, ExternalLink, Star } from "lucide-react";
+import { Button } from "@repo/strapi-ui";
+import { Download, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
@@ -29,7 +29,6 @@ const PackageTemplate = ({ document, owner }: Props) => {
 
   return (
     <>
-      <StrapiNavbar />
       <Navigation theme="light" />
       <Container>
         <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-12 mt-10">
@@ -174,7 +173,6 @@ const PackageTemplate = ({ document, owner }: Props) => {
           </aside>
         </div>
       </Container>
-      <StrapiFooter />
     </>
   );
 };

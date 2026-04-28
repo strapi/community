@@ -1,6 +1,4 @@
-"use client";
-
-import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
+import { Button } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import {
   AppWindow,
@@ -15,6 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
+import { Markdown } from "@/components/content/markdown";
 import { Container } from "@/components/layout/container";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -34,7 +33,6 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
   return (
     <>
-      <StrapiNavbar />
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
@@ -105,30 +103,20 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                     GitHub
                   </Link>
                 )}
-                {document.profile?.website && (
+              </div>
+
+              {/* Website button */}
+              {document.profile?.website && (
+                <Button asChild variant="secondary">
                   <Link
                     href={document.profile.website}
-                    className="flex items-center gap-1.5 transition-colors hover:text-white"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Globe className="h-4 w-4" />
-                    Visit Website
+                    Visit website
+                    <ExternalLink className="h-4 w-4" />
                   </Link>
-                )}
-              </div>
-
-              {/* Contact button */}
-              {document.profile?.email && (
-                <Link
-                  href={`mailto:${document.profile.email}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-5 py-2.5 text-md font-semibold text-white transition-colors hover:bg-(--color-hero-bg)"
-                >
-                  Contact {document.name}
-                  <ExternalLink className="h-4 w-4" />
-                </Link>
+                </Button>
               )}
             </div>
           </div>
@@ -225,9 +213,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
               About {document.name}
             </h2>
             {document.profile?.readme ? (
-              <p className="text-md leading-7 text-(--color-neutral700)">
-                {document.profile.readme}
-              </p>
+              <Markdown markdown={document.profile.readme} />
             ) : (
               <p className="text-md text-(--color-neutral600)">
                 No description provided.
@@ -284,7 +270,6 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
           </TabsContent>
         </Tabs>
       </Container>
-      <StrapiFooter />
     </>
   );
 };
