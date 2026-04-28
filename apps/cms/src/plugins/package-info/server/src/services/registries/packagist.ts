@@ -1,15 +1,19 @@
-function extractPackagistPackageName(pathname) {
+import type { RegistryInfo } from "../../types";
+
+export function extractPackagistPackageName(pathname: string): string | null {
   const match = pathname.match(/^\/packages\/([^/]+\/[^/]+)/);
   return match?.[1] ?? null;
 }
 
-async function getPackagistPackageInfo(packageName) {
+export async function getPackagistPackageInfo(
+  packageName: string,
+): Promise<RegistryInfo> {
   const res = await fetch(`https://packagist.org/packages/${packageName}.json`);
 
   if (!res.ok) throw new Error(`Packagist returned ${res.status}`);
 
-  const data = await res.json();
-  const versions = data.package?.versions ?? {};
+  const data: any = await res.json();
+  const versions: Record<string, any> = data.package?.versions ?? {};
 
   const stable = Object.values(versions).find(
     (v) => !v.version.startsWith("dev-") && !v.version.includes("dev"),
@@ -31,8 +35,7 @@ async function getPackagistPackageInfo(packageName) {
       monthly: dl?.monthly ?? null,
       total: dl?.total ?? null,
     },
+    readme: null,
     stars: null,
   };
 }
-
-module.exports = { extractPackagistPackageName, getPackagistPackageInfo };

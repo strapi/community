@@ -1,9 +1,13 @@
-function extractNugetPackageName(pathname) {
+import type { RegistryInfo } from "../../types";
+
+export function extractNugetPackageName(pathname: string): string | null {
   const match = pathname.match(/^\/packages\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
-async function getNugetPackageInfo(packageName) {
+export async function getNugetPackageInfo(
+  packageName: string,
+): Promise<RegistryInfo> {
   const id = packageName.toLowerCase();
 
   const indexRes = await fetch(
@@ -12,8 +16,8 @@ async function getNugetPackageInfo(packageName) {
 
   if (!indexRes.ok) throw new Error(`NuGet returned ${indexRes.status}`);
 
-  const index = await indexRes.json();
-  const versions = index.versions ?? [];
+  const index: any = await indexRes.json();
+  const versions: string[] = index.versions ?? [];
   const latest = versions[versions.length - 1];
 
   if (!latest) throw new Error("NuGet package has no versions");
@@ -25,18 +29,18 @@ async function getNugetPackageInfo(packageName) {
     ),
   ]);
 
-  let publishedAt = null;
-  let description = null;
-  let totalDownloads = null;
+  let publishedAt: string | null = null;
+  let description: string | null = null;
+  let totalDownloads: number | null = null;
 
   if (leafRes.ok) {
-    const leaf = await leafRes.json();
+    const leaf: any = await leafRes.json();
     publishedAt = leaf.published ?? null;
     description = leaf.catalogEntry?.description ?? null;
   }
 
   if (searchRes.ok) {
-    const search = await searchRes.json();
+    const search: any = await searchRes.json();
     totalDownloads = search.data?.[0]?.totalDownloads ?? null;
   }
 
@@ -52,8 +56,7 @@ async function getNugetPackageInfo(packageName) {
       monthly: null,
       total: totalDownloads,
     },
+    readme: null,
     stars: null,
   };
 }
-
-module.exports = { extractNugetPackageName, getNugetPackageInfo };

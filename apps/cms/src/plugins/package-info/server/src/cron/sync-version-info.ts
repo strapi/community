@@ -1,9 +1,12 @@
-const { getPackageInfo } = require("../services/get-package-info");
+import { getPackageInfo } from "../services/get-package-info";
 
-const syncVersionInfo = async () => {
+export async function syncVersionInfo(): Promise<{
+  updated: number;
+  failed: number;
+}> {
   const packages = await strapi.documents("api::package.package").findMany({
     status: "published",
-    fields: ["documentId", "package_location"],
+    fields: ["documentId", "package_location", "git_repository"],
     pagination: { pageSize: 500 },
   });
 
@@ -14,14 +17,20 @@ const syncVersionInfo = async () => {
     if (!pkg.package_location) continue;
 
     try {
-      const info = await getPackageInfo(pkg.package_location);
-
+      strapi.log.info(
+        `[package-info] Syncing version info for ${pkg.package_location}`,
+      );
+      const info = await getPackageInfo(
+        pkg.package_location,
+        pkg.git_repository ?? undefined,
+      );
       if (!info) continue;
 
       await strapi.documents("api::package.package").update({
         status: "published",
         documentId: pkg.documentId,
         data: {
+          readme: info.readme ?? null,
           version_info: {
             version: info.version ?? null,
             published_at: info.publishedAt ?? null,
@@ -40,6 +49,4 @@ const syncVersionInfo = async () => {
   }
 
   return { updated, failed };
-};
-
-module.exports = { syncVersionInfo };
+}

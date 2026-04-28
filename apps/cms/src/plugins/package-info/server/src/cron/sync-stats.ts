@@ -1,7 +1,11 @@
-const { getPackageInfo } = require("../services/get-package-info");
-const { getGitStars } = require("../services/get-git-stars");
+import { getGitStars } from "../services/get-git-stars";
+import { getPackageInfo } from "../services/get-package-info";
+import { getReadme } from "../services/get-readme";
 
-const syncStats = async () => {
+export async function syncStats(): Promise<{
+  updated: number;
+  failed: number;
+}> {
   const [packages, templates] = await Promise.all([
     strapi.documents("api::package.package").findMany({
       status: "published",
@@ -18,23 +22,23 @@ const syncStats = async () => {
   let updated = 0;
   let failed = 0;
 
-  // Packages: stars + monthly downloads
   for (const pkg of packages) {
     if (!pkg.package_location) continue;
 
     try {
+      strapi.log.info(
+        `[package-info] Syncing stats for package ${pkg.package_location}`,
+      );
       const info = await getPackageInfo(
         pkg.package_location,
         pkg.git_repository ?? undefined,
       );
-
       if (!info) continue;
 
-      const patch = {};
+      const patch: Record<string, unknown> = {};
       if (info.stars !== null) patch.stars = info.stars;
-      if (info.downloads?.monthly !== null) {
+      if (info.downloads?.monthly !== null)
         patch.monthly_downloads = info.downloads?.monthly ?? null;
-      }
 
       if (Object.keys(patch).length === 0) continue;
 
@@ -53,17 +57,28 @@ const syncStats = async () => {
     }
   }
 
-  // Templates: stars only
   for (const template of templates) {
     if (!template.git_repository) continue;
 
     try {
-      const stars = await getGitStars(template.git_repository);
-      if (stars === null) continue;
+      strapi.log.info(
+        `[package-info] Syncing stats for template ${template.git_repository}`,
+      );
+      const [stars, readme] = await Promise.all([
+        getGitStars(template.git_repository),
+        getReadme(template.git_repository),
+      ]);
+
+      const patch: Record<string, unknown> = {};
+      if (stars !== null) patch.stars = stars;
+      if (readme !== null) patch.readme = readme;
+
+      if (Object.keys(patch).length === 0) continue;
 
       await strapi.documents("api::template.template").update({
+        status: "published",
         documentId: template.documentId,
-        data: { stars },
+        data: patch,
       });
 
       updated++;
@@ -76,6 +91,4 @@ const syncStats = async () => {
   }
 
   return { updated, failed };
-};
-
-module.exports = { syncStats };
+}

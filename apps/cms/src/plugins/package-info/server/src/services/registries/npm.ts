@@ -1,9 +1,13 @@
-function extractNpmPackageName(pathname) {
+import type { RegistryInfo } from "../../types";
+
+export function extractNpmPackageName(pathname: string): string | null {
   const match = pathname.match(/^\/package\/(@[^/]+\/[^/]+|[^/]+)/);
   return match?.[1] ?? null;
 }
 
-async function getNpmPackageInfo(packageName) {
+export async function getNpmPackageInfo(
+  packageName: string,
+): Promise<RegistryInfo> {
   const encoded = encodeURIComponent(packageName);
 
   const [registryRes, weeklyRes, monthlyRes] = await Promise.all([
@@ -17,17 +21,17 @@ async function getNpmPackageInfo(packageName) {
   if (!registryRes.ok)
     throw new Error(`npm registry returned ${registryRes.status}`);
 
-  const data = await registryRes.json();
+  const data: any = await registryRes.json();
   const latest = data["dist-tags"]?.latest;
   const publishedAt = data.time?.[latest] ?? null;
 
-  const weeklyData = weeklyRes.ok ? await weeklyRes.json() : null;
-  const monthlyData = monthlyRes.ok ? await monthlyRes.json() : null;
+  const weeklyData: any = weeklyRes.ok ? await weeklyRes.json() : null;
+  const monthlyData: any = monthlyRes.ok ? await monthlyRes.json() : null;
 
   return {
     registry: "npm",
     packageName,
-    version: latest,
+    version: latest ?? null,
     publishedAt,
     description: data.description ?? null,
     installCommand: `npm install ${packageName}`,
@@ -36,8 +40,7 @@ async function getNpmPackageInfo(packageName) {
       monthly: monthlyData?.downloads ?? null,
       total: null,
     },
+    readme: data.readme ?? null,
     stars: null,
   };
 }
-
-module.exports = { extractNpmPackageName, getNpmPackageInfo };

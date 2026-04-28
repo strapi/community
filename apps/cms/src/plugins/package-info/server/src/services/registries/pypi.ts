@@ -1,9 +1,13 @@
-function extractPypiPackageName(pathname) {
+import type { RegistryInfo } from "../../types";
+
+export function extractPypiPackageName(pathname: string): string | null {
   const match = pathname.match(/^\/project\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
-async function getPypiPackageInfo(packageName) {
+export async function getPypiPackageInfo(
+  packageName: string,
+): Promise<RegistryInfo> {
   const [pypiRes, statsRes] = await Promise.all([
     fetch(`https://pypi.org/pypi/${packageName}/json`),
     fetch(
@@ -13,12 +17,12 @@ async function getPypiPackageInfo(packageName) {
 
   if (!pypiRes.ok) throw new Error(`PyPI returned ${pypiRes.status}`);
 
-  const data = await pypiRes.json();
-  const version = data.info?.version;
+  const data: any = await pypiRes.json();
+  const version = data.info?.version ?? null;
   const urls = data.urls ?? [];
   const publishedAt = urls[0]?.upload_time_iso_8601 ?? null;
 
-  const statsData = statsRes.ok ? await statsRes.json() : null;
+  const statsData: any = statsRes.ok ? await statsRes.json() : null;
 
   return {
     registry: "pypi",
@@ -32,8 +36,7 @@ async function getPypiPackageInfo(packageName) {
       monthly: statsData?.data?.last_month ?? null,
       total: null,
     },
+    readme: data.info?.description ?? null,
     stars: null,
   };
 }
-
-module.exports = { extractPypiPackageName, getPypiPackageInfo };
