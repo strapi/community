@@ -1,6 +1,7 @@
 import { createCategories, uploadFromUrl, uploadMarkdownImages } from "./utils";
 
 export const migrateIntegrations = async () => {
+  strapi.log.info("Starting integrations migration...");
   try {
     const firstPage = (await fetch(
       "https://api-prod.strapi.io/api/integrations?pagination[pageSize]=100",
@@ -43,8 +44,6 @@ export const migrateIntegrations = async () => {
           integration.attributes.content || "",
         );
 
-        console.log(`Migrating integration: ${integration.attributes.title}`);
-
         await strapi.documents("api::integration.integration").create({
           status: "published",
           data: {
@@ -69,6 +68,8 @@ export const migrateIntegrations = async () => {
       }),
     );
   } catch (error) {
-    console.error("Error migrating integrations:", error);
+    strapi.log.error("Error migrating integrations:", error);
+  } finally {
+    strapi.log.info("Integrations migration finished.");
   }
 };

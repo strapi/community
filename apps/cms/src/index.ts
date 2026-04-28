@@ -3,6 +3,7 @@ import { migrateIntegrations } from "./migration/integrations";
 import { migratePartners } from "./migration/partners";
 import { migratePlugins } from "./migration/plugins";
 import { migrateProviders } from "./migration/providers";
+import { migrateShowcases } from "./migration/showcases";
 
 export default {
   /**
@@ -29,5 +30,6 @@ export default {
     await migrateIntegrations();
     await migratePlugins();
     await migrateProviders();
+    await migrateShowcases();
   },
 };

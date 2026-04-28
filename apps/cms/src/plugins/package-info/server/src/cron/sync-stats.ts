@@ -26,9 +26,6 @@ export async function syncStats(): Promise<{
     if (!pkg.package_location) continue;
 
     try {
-      strapi.log.info(
-        `[package-info] Syncing stats for package ${pkg.package_location}`,
-      );
       const info = await getPackageInfo(
         pkg.package_location,
         pkg.git_repository ?? undefined,
@@ -51,7 +48,7 @@ export async function syncStats(): Promise<{
       updated++;
     } catch (err) {
       failed++;
-      strapi.log.warn(
+      strapi.log.error(
         `[package-info] Failed to sync package ${pkg.package_location}: ${err}`,
       );
     }
@@ -61,9 +58,6 @@ export async function syncStats(): Promise<{
     if (!template.git_repository) continue;
 
     try {
-      strapi.log.info(
-        `[package-info] Syncing stats for template ${template.git_repository}`,
-      );
       const [stars, readme] = await Promise.all([
         getGitStars(template.git_repository),
         getReadme(template.git_repository),
@@ -84,7 +78,7 @@ export async function syncStats(): Promise<{
       updated++;
     } catch (err) {
       failed++;
-      strapi.log.warn(
+      strapi.log.error(
         `[package-info] Failed to sync template ${template.git_repository}: ${err}`,
       );
     }

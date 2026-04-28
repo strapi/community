@@ -1,6 +1,7 @@
 import { createCategories, uploadFromUrl } from "./utils";
 
 export const migratePartners = async () => {
+  strapi.log.info("Starting partners migration...");
   try {
     const partners = (await fetch(
       "https://api-prod.strapi.io/api/partners?pagination[pageSize]=100",
@@ -30,8 +31,6 @@ export const migratePartners = async () => {
           partner.attributes.techStacks?.data || [],
         );
 
-        console.log(`Migrating partner: ${partner.attributes.intro.title}`);
-
         const profile = await strapi.documents("api::profile.profile").create({
           data: {
             bio: partner.attributes.seo.metaDescription,
@@ -59,6 +58,8 @@ export const migratePartners = async () => {
       }),
     );
   } catch (error) {
-    console.error("Error migrating partners:", error);
+    strapi.log.error("Error migrating partners:", error);
+  } finally {
+    strapi.log.info("Partners migration finished.");
   }
 };

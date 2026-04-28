@@ -17,9 +17,6 @@ export async function syncVersionInfo(): Promise<{
     if (!pkg.package_location) continue;
 
     try {
-      strapi.log.info(
-        `[package-info] Syncing version info for ${pkg.package_location}`,
-      );
       const info = await getPackageInfo(
         pkg.package_location,
         pkg.git_repository ?? undefined,
@@ -42,7 +39,7 @@ export async function syncVersionInfo(): Promise<{
       updated++;
     } catch (err) {
       failed++;
-      strapi.log.warn(
+      strapi.log.error(
         `[package-info] Failed to sync version info for ${pkg.package_location}: ${err}`,
       );
     }

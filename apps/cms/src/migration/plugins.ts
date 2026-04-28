@@ -21,51 +21,60 @@ export const getPlugins = async () => {
 };
 
 export const migratePlugins = async () => {
-  const plugins = await getPlugins();
-  for (const plugin of plugins) {
-    console.log(`Processing plugin: `, plugin.fields["Name"]);
-    const existingPackage = await strapi
-      .documents("api::package.package")
-      .findFirst({
-        fields: [],
-        filters: {
+  strapi.log.info("Starting plugins migration...");
+  try {
+    const plugins = await getPlugins();
+    for (const plugin of plugins) {
+      const existingPackage = await strapi
+        .documents("api::package.package")
+        .findFirst({
+          fields: [],
+          filters: {
+            airtableSlug: plugin.fields["Slug"] as string,
+          },
+        });
+      if (existingPackage) {
+        continue;
+      }
+      const author = await findOrCreateAuthor(
+        plugin.fields["Developer email"],
+        plugin.fields["Developer name"],
+        plugin.fields["Repository URL"],
+      );
+      const logoUrl = plugin.fields["Logo URL"]?.[0];
+      const logoKey = plugin.fields["Logo Key"]?.[0];
+      let icon = null;
+      if (logoUrl && logoKey) {
+        icon = await uploadFromUrl(
+          logoUrl,
+          logoKey.split("/").pop() || logoKey,
+        );
+      }
+      await strapi.documents("api::package.package").create({
+        status: "published",
+        data: {
+          name: plugin.fields["Name"] as string,
+          description: plugin.fields["Description"] as string,
+          type: plugin.fields["Type"] as "plugin",
+          package_location: plugin.fields["npm package URL"] as string,
+          git_repository: plugin.fields["Repository URL"] as string,
+          stars: plugin.fields["GitHub stars"] as number,
+          icon: icon?.id,
+          monthly_downloads: plugin.fields["npm downloads"] as number,
+          maintainers: [author.author.documentId],
+          owner: [
+            {
+              __type: author.type,
+              id: author.author.id,
+            },
+          ],
           airtableSlug: plugin.fields["Slug"] as string,
         },
       });
-    if (existingPackage) {
-      continue;
     }
-    const author = await findOrCreateAuthor(
-      plugin.fields["Developer email"],
-      plugin.fields["Developer name"],
-      plugin.fields["Repository URL"],
-    );
-    const logoUrl = plugin.fields["Logo URL"]?.[0];
-    const logoKey = plugin.fields["Logo Key"]?.[0];
-    let icon = null;
-    if (logoUrl && logoKey) {
-      icon = await uploadFromUrl(logoUrl, logoKey.split("/").pop() || logoKey);
-    }
-    await strapi.documents("api::package.package").create({
-      status: "published",
-      data: {
-        name: plugin.fields["Name"] as string,
-        description: plugin.fields["Description"] as string,
-        type: plugin.fields["Type"] as "plugin",
-        package_location: plugin.fields["npm package URL"] as string,
-        git_repository: plugin.fields["Repository URL"] as string,
-        stars: plugin.fields["GitHub stars"] as number,
-        icon: icon?.id,
-        monthly_downloads: plugin.fields["npm downloads"] as number,
-        maintainers: [author.author.documentId],
-        owner: [
-          {
-            __type: author.type,
-            id: author.author.id,
-          },
-        ],
-        airtableSlug: plugin.fields["Slug"] as string,
-      },
-    });
+  } catch (error) {
+    strapi.log.error("Error migrating plugins:", error);
+  } finally {
+    strapi.log.info("Plugins migration finished.");
   }
 };

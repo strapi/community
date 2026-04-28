@@ -2,6 +2,34 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
+export async function uploadFile(
+  filePath: string,
+  fileName: string,
+  mimeType: string,
+) {
+  const { size } = await fs.promises.stat(filePath);
+  const uploadedFiles = await strapi
+    .plugin("upload")
+    .service("upload")
+    .upload({
+      data: {
+        fileInfo: {
+          name: fileName,
+          alternativeText: "",
+          caption: "",
+        },
+      },
+      files: {
+        filepath: filePath,
+        name: fileName,
+        mimetype: mimeType,
+        type: mimeType,
+        size,
+      },
+    });
+  return uploadedFiles[0];
+}
+
 export async function uploadFromUrl(url, fileName) {
   let response = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -17,26 +45,11 @@ export async function uploadFromUrl(url, fileName) {
   const tmpPath = path.join(os.tmpdir(), uniqueName);
   await fs.promises.writeFile(tmpPath, buffer);
   try {
-    const uploadedFiles = await strapi
-      .plugin("upload")
-      .service("upload")
-      .upload({
-        data: {
-          fileInfo: {
-            name: fileName,
-            alternativeText: "",
-            caption: "",
-          },
-        },
-        files: {
-          filepath: tmpPath,
-          name: fileName,
-          mimetype: response.headers.get("content-type"),
-          type: response.headers.get("content-type"),
-          size: buffer.length,
-        },
-      });
-    return uploadedFiles[0];
+    return await uploadFile(
+      tmpPath,
+      fileName,
+      response.headers.get("content-type"),
+    );
   } finally {
     await fs.promises.unlink(tmpPath);
   }
@@ -72,7 +85,7 @@ export async function uploadMarkdownImages(markdown: string): Promise<string> {
         urlMap.set(url, uploaded.url);
       }
     } catch (e) {
-      console.error(`Failed to upload markdown image: ${url}`, e);
+      strapi.log.error(`Failed to upload markdown image: ${url}`, e);
     }
   }
 
@@ -95,7 +108,9 @@ export const generatePassword = () => {
   return password;
 };
 
-export const createCategories = async (uid, data) => {
+type CategoryTag = string | { attributes: { name: string } };
+
+export const createCategories = async (uid, data: CategoryTag[]) => {
   const categories = [];
 
   if (!data || data.length === 0) {
@@ -104,10 +119,10 @@ export const createCategories = async (uid, data) => {
 
   await Promise.all(
     data.map(async (tag) => {
+      const name = typeof tag === "string" ? tag : tag.attributes.name;
+
       const existingCategory = await strapi.documents(uid).findFirst({
-        filters: {
-          name: tag.attributes.name,
-        },
+        filters: { name },
       });
 
       if (existingCategory) {
@@ -116,9 +131,7 @@ export const createCategories = async (uid, data) => {
       }
 
       const newCategory = await strapi.documents(uid).create({
-        data: {
-          name: tag.attributes.name,
-        },
+        data: { name },
       });
 
       categories.push(newCategory.id);
