@@ -7,15 +7,13 @@
   "options": {},
   "attributes": {
     "metaTitle": {
-      "required": true,
       "type": "string",
-      "maxLength": 60
+      "maxLength": 60,
+      "required": true
     },
     "metaDescription": {
       "type": "string",
-      "required": true,
-      "maxLength": 160,
-      "minLength": 50
+      "required": true
     },
     "metaImage": {
       "type": "media",
@@ -25,8 +23,8 @@
     },
     "openGraph": {
       "type": "component",
-      "repeatable": false,
-      "component": "shared.open-graph"
+      "component": "shared.open-graph",
+      "repeatable": false
     },
     "keywords": {
       "type": "text",
