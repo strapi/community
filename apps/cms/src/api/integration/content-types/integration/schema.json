@@ -15,6 +15,12 @@
     }
   },
   "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
     "name": {
       "type": "string",
       "required": true
@@ -26,13 +32,39 @@
     "logo": {
       "type": "media",
       "multiple": false,
-      "required": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
       "allowedTypes": ["images"]
     },
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::integration-category.integration-category"
+    },
+    "seo": {
+      "type": "component",
+      "component": "shared.seo",
+      "repeatable": false
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::package.package",
+      "inversedBy": "integrations"
+    },
+    "templates": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::template.template",
+      "inversedBy": "integrations"
     }
   }
 }

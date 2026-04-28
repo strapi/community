@@ -36,6 +36,17 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::package.package"
+    },
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
     }
   }
 }

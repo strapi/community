@@ -47,8 +47,22 @@
     "owner": {
       "type": "relation",
       "relation": "morphToMany",
-      "required": true,
-      "mappedBy": "profile"
+      "target": "plugin::better-auth.organization"
+    },
+    "countries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::country.country"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service"
+    },
+    "tech_stacks": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tech-stack.tech-stack"
     }
   }
 }

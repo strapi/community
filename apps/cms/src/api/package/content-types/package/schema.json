@@ -83,6 +83,12 @@
       "type": "component",
       "component": "shared.version-info",
       "repeatable": false
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::integration.integration",
+      "mappedBy": "packages"
     }
   }
 }

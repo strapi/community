@@ -430,6 +430,34 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCountryCountry extends Struct.CollectionTypeSchema {
+  collectionName: 'countries';
+  info: {
+    displayName: 'Countries';
+    pluralName: 'countries';
+    singularName: 'country';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::country.country'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiCtaCta extends Struct.CollectionTypeSchema {
   collectionName: 'ctas';
   info: {
@@ -558,19 +586,27 @@ export interface ApiIntegrationIntegration extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::integration-category.integration-category'
     >;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::integration.integration'
     > &
       Schema.Attribute.Private;
-    logo: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    logo: Schema.Attribute.Media<'images'>;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    packages: Schema.Attribute.Relation<'manyToMany', 'api::package.package'>;
     publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+    templates: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::template.template'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -740,6 +776,10 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     description: Schema.Attribute.Text & Schema.Attribute.Required;
     git_repository: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    integrations: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::integration.integration'
+    >;
     labels: Schema.Attribute.Component<'shared.labels', false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -794,6 +834,7 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   attributes: {
     avatar: Schema.Attribute.Media<'images'>;
     bio: Schema.Attribute.Text;
+    countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -806,10 +847,15 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     location: Schema.Attribute.String;
-    owner: Schema.Attribute.Relation<'morphToMany'> & Schema.Attribute.Required;
+    owner: Schema.Attribute.Relation<'morphToMany'>;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
     subtitle: Schema.Attribute.String;
+    tech_stacks: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tech-stack.tech-stack'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -838,6 +884,7 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'>;
     integrations: Schema.Attribute.Relation<
       'oneToMany',
       'api::integration.integration'
@@ -859,6 +906,34 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiServiceService extends Struct.CollectionTypeSchema {
+  collectionName: 'services';
+  info: {
+    displayName: 'Services';
+    pluralName: 'services';
+    singularName: 'service';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::service.service'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -927,6 +1002,34 @@ export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     template: Schema.Attribute.Relation<'oneToOne', 'api::template.template'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTechStackTechStack extends Struct.CollectionTypeSchema {
+  collectionName: 'tech_stacks';
+  info: {
+    displayName: 'Tech stacks';
+    pluralName: 'tech-stacks';
+    singularName: 'tech-stack';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tech-stack.tech-stack'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1006,6 +1109,10 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
     git_repository: Schema.Attribute.String;
+    integrations: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::integration.integration'
+    >;
     labels: Schema.Attribute.Component<'shared.labels', false> &
       Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1322,6 +1429,10 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    partner: Schema.Attribute.Boolean;
+    partner_level: Schema.Attribute.Enumeration<
+      ['Enterprise', 'Business', 'Community']
+    >;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.String &
@@ -2002,6 +2113,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::country.country': ApiCountryCountry;
       'api::cta.cta': ApiCtaCta;
       'api::home.home': ApiHomeHome;
       'api::integration-category.integration-category': ApiIntegrationCategoryIntegrationCategory;
@@ -2012,8 +2124,10 @@ declare module '@strapi/strapi' {
       'api::package.package': ApiPackagePackage;
       'api::profile.profile': ApiProfileProfile;
       'api::recipe.recipe': ApiRecipeRecipe;
+      'api::service.service': ApiServiceService;
       'api::showcase-category.showcase-category': ApiShowcaseCategoryShowcaseCategory;
       'api::showcase.showcase': ApiShowcaseShowcase;
+      'api::tech-stack.tech-stack': ApiTechStackTechStack;
       'api::template-category.template-category': ApiTemplateCategoryTemplateCategory;
       'api::template.template': ApiTemplateTemplate;
       'plugin::better-auth.account': PluginBetterAuthAccount;
