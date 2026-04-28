@@ -1,6 +1,6 @@
+import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import { ContentCard, UserCard } from "@/components/content/card";
-import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { cmsClient } from "@/features/cms/lib/strapi";
 

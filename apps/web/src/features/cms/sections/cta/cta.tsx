@@ -1,7 +1,7 @@
+import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import Image from "next/image";
 import { AvatarPile } from "@/components/content/avatar-pile";
-import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { cmsClient } from "@/features/cms/lib/strapi";
 

@@ -1,4 +1,4 @@
-import { Button } from "@repo/strapi-ui";
+import { Button, Container } from "@repo/strapi-ui";
 import { Download, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,6 @@ import { Markdown } from "@/components/content/markdown";
 import { RegistryLogo } from "@/components/content/registry-logo";
 import { SidebarSection } from "@/components/content/sidebar-section";
 import { VersionSecurityBadge } from "@/components/content/version-info";
-import { Container } from "@/components/layout/container";
 import { Navigation } from "@/components/layout/navigation";
 import type { PackagePageData } from "@/features/cms/pages/package";
 import type { Owner } from "@/utils/types";

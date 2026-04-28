@@ -1,3 +1,4 @@
+export { Container } from "./components/elementary/Container";
 export { StrapiFooter } from "./components/footer/StrapiFooter";
 export { StrapiNavbar } from "./components/navbar/StrapiNavbar";
 export { Button } from "./components/ui/button";

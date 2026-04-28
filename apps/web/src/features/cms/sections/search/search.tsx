@@ -1,5 +1,5 @@
+import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
-import { Container } from "@/components/layout/container";
 import { IntegrationsSearch } from "@/features/search/indexes/integrations";
 import { MarketplaceSearch } from "@/features/search/indexes/marketplace/marketplace";
 import { MembersSearch } from "@/features/search/indexes/members/members";

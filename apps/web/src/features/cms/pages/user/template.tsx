@@ -1,3 +1,4 @@
+import { Container } from "@repo/strapi-ui";
 import {
   AppWindow,
   CalendarDays,
@@ -10,7 +11,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
-import { Container } from "@/components/layout/container";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

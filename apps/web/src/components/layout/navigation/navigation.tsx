@@ -1,9 +1,8 @@
 "use server";
 
-import { Button } from "@repo/strapi-ui";
+import { Button, Container } from "@repo/strapi-ui";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Container } from "@/components/layout/container";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {

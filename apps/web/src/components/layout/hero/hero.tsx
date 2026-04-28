@@ -1,7 +1,7 @@
 "use client";
 
+import { Container } from "@repo/strapi-ui";
 import type { PropsWithChildren } from "react";
-import { Container } from "@/components/layout/container";
 
 const Hero = ({ children }: PropsWithChildren) => {
   return (
