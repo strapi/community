@@ -7,7 +7,7 @@ import { TemplatesSearch } from "@/features/search/indexes/templates";
 const MarketplaceSearch = () => {
   return (
     <Tabs defaultValue="packages" className="w-full">
-      <TabsList className="border-(--color-neutral300) pt-10">
+      <TabsList className="border-(--color-neutral300) pb-10">
         <TabsTrigger value="packages" icon={<LayoutGrid className="h-4 w-4" />}>
           Packages
         </TabsTrigger>

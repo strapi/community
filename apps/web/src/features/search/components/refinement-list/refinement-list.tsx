@@ -1,17 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import {
   type RefinementListProps,
   useRefinementList,
 } from "react-instantsearch";
 import { Checkbox } from "@/components/ui/checkbox";
 
+const COLLAPSED_COUNT = 5;
+
 const RefinementList = (props: RefinementListProps) => {
   const { items, refine } = useRefinementList(props);
+  const [expanded, setExpanded] = useState(false);
+
+  const visibleItems = expanded ? items : items.slice(0, COLLAPSED_COUNT);
+  const hasMore = items.length > COLLAPSED_COUNT;
 
   return (
     <div className="flex w-full flex-col gap-2">
-      {items.map((item) => {
+      {visibleItems.map((item) => {
         const id = `refinement-${props.attribute}-${String(item.value)}`;
 
         return (
@@ -32,6 +39,17 @@ const RefinementList = (props: RefinementListProps) => {
           </label>
         );
       })}
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="mt-1 self-start text-sm font-medium text-(--color-primary600) hover:underline"
+        >
+          {expanded
+            ? "Show less"
+            : `Show ${items.length - COLLAPSED_COUNT} more`}
+        </button>
+      )}
     </div>
   );
 };
