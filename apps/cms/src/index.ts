@@ -1,4 +1,6 @@
 // import type { Core } from '@strapi/strapi';
+import { migrateIntegrations } from "./migration/integrations";
+import { migratePartners } from "./migration/partners";
 import { migratePlugins } from "./migration/plugins";
 import { migrateProviders } from "./migration/providers";
 
@@ -23,6 +25,8 @@ export default {
       return;
     }
 
+    await migratePartners();
+    await migrateIntegrations();
     await migratePlugins();
     await migrateProviders();
   },

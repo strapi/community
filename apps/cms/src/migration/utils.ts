@@ -94,3 +94,36 @@ export const generatePassword = () => {
   }
   return password;
 };
+
+export const createCategories = async (uid, data) => {
+  const categories = [];
+
+  if (!data || data.length === 0) {
+    return categories;
+  }
+
+  await Promise.all(
+    data.map(async (tag) => {
+      const existingCategory = await strapi.documents(uid).findFirst({
+        filters: {
+          name: tag.attributes.name,
+        },
+      });
+
+      if (existingCategory) {
+        categories.push(existingCategory.id);
+        return;
+      }
+
+      const newCategory = await strapi.documents(uid).create({
+        data: {
+          name: tag.attributes.name,
+        },
+      });
+
+      categories.push(newCategory.id);
+    }),
+  );
+
+  return categories;
+};
