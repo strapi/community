@@ -47,6 +47,16 @@
         }
       },
       "required": true
+    },
+    "verified": {
+      "type": "boolean",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "default": true
     }
   }
 }

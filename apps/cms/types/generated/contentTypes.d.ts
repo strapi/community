@@ -1595,6 +1595,13 @@ export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
+    verified: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<true>;
   };
 }
 
