@@ -44,6 +44,11 @@
     "sections": {
       "type": "dynamiczone",
       "components": ["sections.cta"]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     }
   }
 }

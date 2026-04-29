@@ -65,6 +65,11 @@
       "relation": "manyToMany",
       "target": "api::template.template",
       "inversedBy": "integrations"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     }
   }
 }

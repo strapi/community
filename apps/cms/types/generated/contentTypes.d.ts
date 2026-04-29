@@ -603,6 +603,7 @@ export interface ApiIntegrationIntegration extends Struct.CollectionTypeSchema {
     packages: Schema.Attribute.Relation<'manyToMany', 'api::package.package'>;
     publishedAt: Schema.Attribute.DateTime;
     seo: Schema.Attribute.Component<'shared.seo', false>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     templates: Schema.Attribute.Relation<
       'manyToMany',
       'api::template.template'
@@ -688,6 +689,7 @@ export interface ApiOverviewPageOverviewPage
       ]
     >;
     seo: Schema.Attribute.Component<'shared.seo', false>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -738,6 +740,7 @@ export interface ApiPackageCategoryPackageCategory
     >;
     publishedAt: Schema.Attribute.DateTime;
     sections: Schema.Attribute.DynamicZone<['sections.card-grid']>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -766,7 +769,6 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    airtableSlug: Schema.Attribute.String;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::package-category.package-category'
@@ -798,6 +800,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     stars: Schema.Attribute.Integer;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
@@ -898,6 +901,7 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1080,6 +1084,7 @@ export interface ApiTemplateCategoryTemplateCategory
     >;
     publishedAt: Schema.Attribute.DateTime;
     sections: Schema.Attribute.DynamicZone<['sections.cta']>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1139,6 +1144,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     stars: Schema.Attribute.Integer;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

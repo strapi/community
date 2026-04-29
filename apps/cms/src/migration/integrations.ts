@@ -48,6 +48,7 @@ export const migrateIntegrations = async () => {
           status: "published",
           data: {
             name: integration.attributes.title,
+            slug: integration.attributes.slug,
             description: integration.attributes.description,
             content: markdown,
             logo: icon?.id,

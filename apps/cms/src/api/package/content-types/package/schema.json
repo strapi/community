@@ -26,9 +26,6 @@
       "type": "string",
       "required": true
     },
-    "airtableSlug": {
-      "type": "string"
-    },
     "description": {
       "type": "text",
       "required": true
@@ -89,6 +86,11 @@
       "relation": "manyToMany",
       "target": "api::integration.integration",
       "mappedBy": "packages"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     }
   }
 }

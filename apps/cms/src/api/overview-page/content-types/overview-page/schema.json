@@ -46,6 +46,11 @@
         "sections.highlights",
         "sections.cta"
       ]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
     }
   }
 }

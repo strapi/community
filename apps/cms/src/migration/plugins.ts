@@ -30,7 +30,7 @@ export const migratePlugins = async () => {
         .findFirst({
           fields: [],
           filters: {
-            airtableSlug: plugin.fields["Slug"] as string,
+            slug: plugin.fields["Slug"] as string,
           },
         });
       if (existingPackage) {
@@ -68,7 +68,7 @@ export const migratePlugins = async () => {
               id: author.author.id,
             },
           ],
-          airtableSlug: plugin.fields["Slug"] as string,
+          slug: plugin.fields["Slug"] as string,
         },
       });
     }

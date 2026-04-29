@@ -30,7 +30,7 @@ export const migrateProviders = async () => {
         .findFirst({
           fields: [],
           filters: {
-            airtableSlug: provider.fields["Slug"] as string,
+            slug: provider.fields["Slug"] as string,
           },
         });
       if (existingPackage) {
@@ -68,7 +68,7 @@ export const migrateProviders = async () => {
               id: author.author.id,
             },
           ],
-          airtableSlug: provider.fields["Slug"] as string,
+          slug: provider.fields["Slug"] as string,
         },
       });
     }
