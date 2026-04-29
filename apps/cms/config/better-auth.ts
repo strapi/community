@@ -1,3 +1,4 @@
+import { dash } from "@better-auth/infra";
 // @ts-expect-error
 import { strapiAdapter } from "@strapi-community/plugin-better-auth/adapter";
 import { betterAuth } from "better-auth";
@@ -12,7 +13,7 @@ const auth = () => {
   return betterAuth({
     trustedOrigins: [process.env.WEBSITE_URL],
     secret: process.env.BETTER_AUTH_SECRET,
-    plugins: [organization()],
+    plugins: [organization(), dash()],
     emailAndPassword: {
       enabled: true,
     },
