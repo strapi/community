@@ -18,8 +18,8 @@ type Props = {
   description: string;
   githubStars?: number;
   npmDownloads?: number;
-  maintainers: Data.ContentType<"plugin::better-auth.user">[];
-  labels: Data.Component<"shared.labels">;
+  maintainers?: Data.ContentType<"plugin::better-auth.user">[];
+  labels?: Data.Component<"shared.labels">;
 };
 
 const imageSizeMap = { S: 80, M: 112, L: 144 };
@@ -110,7 +110,7 @@ const ContentCard = (props: Props) => {
           </p>
 
           {/* Avatars */}
-          <AvatarPile items={maintainers} />
+          {maintainers && <AvatarPile items={maintainers} />}
         </div>
       </article>
     </Link>

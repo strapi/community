@@ -69,7 +69,7 @@ export default ({ env }) => ({
       showcase: {
         indexName: env("MEILISEARCH_SHOWCASES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "categories", "url_alias"],
+          populate: ["image", "categories"],
         },
         settings: {
           sortableAttributes: ["createdAt"],

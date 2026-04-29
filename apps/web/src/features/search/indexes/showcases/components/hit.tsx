@@ -2,39 +2,24 @@ import type { Modules } from "@strapi/types";
 import { ContentCard } from "@/components/content/card";
 
 type Props = {
-  hit:
-    | Modules.Documents.Result<"api::package.package", { populate: "*" }>
-    | Modules.Documents.Result<"api::template.template", { populate: "*" }>;
-};
-
-const getImageUrl = (hit: Props["hit"]) => {
-  if ("preview_image" in hit && hit.preview_image) {
-    return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.preview_image.url}`,
-      alt: hit.preview_image.alternativeText ?? hit.name ?? "",
-      size: "L" as const,
-    };
-  }
-  if ("icon" in hit && hit.icon) {
-    return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.icon.url}`,
-      alt: hit.icon.alternativeText ?? hit.name ?? "",
-      size: "S" as const,
-    };
-  }
+  hit: Modules.Documents.Result<"api::showcase.showcase", { populate: "*" }>;
 };
 
 const Hit = ({ hit }: Props) => {
-  const image = getImageUrl(hit);
+  const image = hit.image
+    ? {
+        src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.image.url}`,
+        alt: hit.image.alternativeText ?? hit.title ?? "",
+        size: "L" as const,
+      }
+    : undefined;
 
   return (
     <ContentCard
-      link={hit.url_alias?.[0]?.url_path!}
-      name={hit.name!}
-      badge={"preview_link" in hit ? "Template" : "Package"}
+      link={hit.url!}
+      name={hit.title!}
+      badge={hit.categories?.[0]?.name ?? "Showcase"}
       description={hit.description!}
-      maintainers={hit.maintainers || []}
-      labels={hit.labels!}
       image={image as any}
     />
   );
