@@ -22,7 +22,7 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {
-    if (process.env.ENABLE_MIGRATION === "false") {
+    if (process.env.ENABLE_MIGRATION !== "true") {
       return;
     }
 
