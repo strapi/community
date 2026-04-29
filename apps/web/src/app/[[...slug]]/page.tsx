@@ -22,6 +22,9 @@ import { UserPage, userMetadata } from "@/features/cms/pages/user";
 // Regenerate static pages periodically.
 export const revalidate = 60;
 
+// Skip generation during build.
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
