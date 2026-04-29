@@ -718,7 +718,7 @@ export interface ApiPackageCategoryPackageCategory
   };
   attributes: {
     children: Schema.Attribute.Relation<
-      'manyToOne',
+      'oneToMany',
       'api::package-category.package-category'
     >;
     createdAt: Schema.Attribute.DateTime;
@@ -733,10 +733,11 @@ export interface ApiPackageCategoryPackageCategory
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     parent: Schema.Attribute.Relation<
-      'oneToMany',
+      'manyToOne',
       'api::package-category.package-category'
     >;
     publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<['sections.card-grid']>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1059,7 +1060,7 @@ export interface ApiTemplateCategoryTemplateCategory
   };
   attributes: {
     children: Schema.Attribute.Relation<
-      'manyToOne',
+      'oneToMany',
       'api::template-category.template-category'
     >;
     createdAt: Schema.Attribute.DateTime;
@@ -1074,10 +1075,11 @@ export interface ApiTemplateCategoryTemplateCategory
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     parent: Schema.Attribute.Relation<
-      'oneToMany',
+      'manyToOne',
       'api::template-category.template-category'
     >;
     publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<['sections.cta']>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

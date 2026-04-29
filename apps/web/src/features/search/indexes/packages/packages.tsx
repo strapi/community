@@ -5,24 +5,34 @@ import { SearchIndex } from "@/features/search/components/search-index";
 import { ToggleRefinement } from "@/features/search/components/toggle-refinement/toggle-refinement";
 import { Hit } from "./components";
 
-const PackagesSearch = () => (
+interface PackagesSearchProps {
+  categoryFilter?: string;
+  showFilters?: boolean;
+}
+
+const PackagesSearch = ({
+  categoryFilter,
+  showFilters = true,
+}: PackagesSearchProps) => (
   <SearchIndex
     indexName="packages:monthly_downloads:desc"
     useNextSearch={false}
   >
     <SearchIndex.Layout>
-      <SearchIndex.Sidebar>
-        <SearchIndex.FilterGroup label="Type">
-          <RefinementList sortBy={["count"]} attribute="type" />
-        </SearchIndex.FilterGroup>
-        <SearchIndex.FilterGroup label="Categories">
-          <RefinementList sortBy={["count"]} attribute="categories.name" />
-        </SearchIndex.FilterGroup>
-        <SearchIndex.FilterGroup label="Integrations">
-          <RefinementList sortBy={["count"]} attribute="integrations.name" />
-        </SearchIndex.FilterGroup>
-      </SearchIndex.Sidebar>
-      <SearchIndex.Content>
+      {showFilters && (
+        <SearchIndex.Sidebar>
+          <SearchIndex.FilterGroup label="Type">
+            <RefinementList sortBy={["count"]} attribute="type" />
+          </SearchIndex.FilterGroup>
+          <SearchIndex.FilterGroup label="Categories">
+            <RefinementList sortBy={["count"]} attribute="categories.name" />
+          </SearchIndex.FilterGroup>
+          <SearchIndex.FilterGroup label="Integrations">
+            <RefinementList sortBy={["count"]} attribute="integrations.name" />
+          </SearchIndex.FilterGroup>
+        </SearchIndex.Sidebar>
+      )}
+      <SearchIndex.Content fullWidth={!showFilters}>
         <SearchIndex.SearchBox />
         <SearchIndex.Toolbar>
           <SearchIndex.Stats />
@@ -38,7 +48,12 @@ const PackagesSearch = () => (
           />
         </SearchIndex.Toolbar>
         <SearchIndex.Hits hitComponent={Hit} />
-        <SearchIndex.Configure hitsPerPage={24} />
+        <SearchIndex.Configure
+          hitsPerPage={24}
+          {...(categoryFilter
+            ? { filters: `categories.name = "${categoryFilter}"` }
+            : {})}
+        />
       </SearchIndex.Content>
     </SearchIndex.Layout>
   </SearchIndex>

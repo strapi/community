@@ -12,6 +12,10 @@ import {
   overviewPageMetadata,
 } from "@/features/cms/pages/overview-page";
 import { PackagePage, packageMetadata } from "@/features/cms/pages/package";
+import {
+  PackageCategoryPage,
+  packageCategoryMetadata,
+} from "@/features/cms/pages/package-category";
 import { TemplatePage, templateMetadata } from "@/features/cms/pages/template";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
@@ -53,6 +57,9 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     }
     case "api::overview-page.overview-page": {
       return <OverviewPage documentId={page.documentId} />;
+    }
+    case "api::package-category.package-category": {
+      return <PackageCategoryPage documentId={page.documentId} />;
     }
     case "api::home.home": {
       return <HomePage />;
@@ -116,6 +123,9 @@ export const generateMetadata = async ({
     }
     case "api::overview-page.overview-page": {
       return overviewPageMetadata(page.documentId);
+    }
+    case "api::package-category.package-category": {
+      return packageCategoryMetadata(page.documentId);
     }
     case "api::home.home": {
       return homeMetadata();

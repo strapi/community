@@ -84,8 +84,16 @@ const SearchIndexFilterGroup = ({
 
 // Content
 
-const SearchIndexContent = ({ children }: { children: ReactNode }) => (
-  <section className="lg:col-span-9">{children}</section>
+const SearchIndexContent = ({
+  children,
+  fullWidth,
+}: {
+  children: ReactNode;
+  fullWidth?: boolean;
+}) => (
+  <section className={fullWidth ? "lg:col-span-12" : "lg:col-span-9"}>
+    {children}
+  </section>
 );
 
 // SearchBox

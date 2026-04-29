@@ -26,6 +26,8 @@ const buttonVariants = cva(
           "bg-strapi-purple-500 text-primary-foreground hover:bg-strapi-purple-500/90",
         ghost: "hover:text-accent-foreground",
         link: "underline-offset-4 hover:underline",
+        category:
+          "border border-dashed border-(--color-hero-border) bg-(--color-hero-bg) text-white justify-start rounded-xl whitespace-normal hover:border-(--color-strapi-purple-600) transition-colors",
       },
       size: {
         xs: "h-[28px] gap-1 px-3 text-xs has-[>svg]:px-2 [&_svg:not([class*='size-'])]:size-3",
@@ -36,6 +38,7 @@ const buttonVariants = cva(
         "icon-xs": "size-[28px] [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-[38px]",
         "icon-lg": "size-[50px]",
+        category: "h-auto w-full gap-4 p-5",
       },
     },
     defaultVariants: {

@@ -15,6 +15,12 @@
     }
   },
   "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
     "name": {
       "type": "string",
       "required": true
@@ -25,15 +31,19 @@
     },
     "children": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "oneToMany",
       "target": "api::template-category.template-category",
-      "inversedBy": "parent"
+      "mappedBy": "parent"
     },
     "parent": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToOne",
       "target": "api::template-category.template-category",
-      "mappedBy": "children"
+      "inversedBy": "children"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["sections.cta"]
     }
   }
 }

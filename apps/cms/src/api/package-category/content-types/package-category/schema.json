@@ -15,6 +15,12 @@
     }
   },
   "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
     "name": {
       "type": "string",
       "required": true
@@ -23,17 +29,21 @@
       "type": "text",
       "required": true
     },
-    "children": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::package-category.package-category",
-      "inversedBy": "parent"
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["sections.card-grid"]
     },
-    "parent": {
+    "children": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::package-category.package-category",
-      "mappedBy": "children"
+      "mappedBy": "parent"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::package-category.package-category",
+      "inversedBy": "children"
     }
   }
 }
