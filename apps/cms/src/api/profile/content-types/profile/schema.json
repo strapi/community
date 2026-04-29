@@ -44,11 +44,6 @@
       "multiple": false,
       "allowedTypes": ["images"]
     },
-    "owner": {
-      "type": "relation",
-      "relation": "morphToMany",
-      "target": "plugin::better-auth.organization"
-    },
     "countries": {
       "type": "relation",
       "relation": "oneToMany",

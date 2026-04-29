@@ -72,8 +72,17 @@
     "profile": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::profile.profile",
-      "inversedBy": "owner"
+      "target": "api::profile.profile"
+    },
+    "twoFactorEnabled": {
+      "type": "boolean",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "default": false
     }
   }
 }

@@ -851,7 +851,6 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     location: Schema.Attribute.String;
-    owner: Schema.Attribute.Relation<'morphToMany'>;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
@@ -1543,6 +1542,62 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
+  collectionName: 'better_auth_two_factors';
+  info: {
+    displayName: 'Two Factors';
+    pluralName: 'two-factors';
+    singularName: 'two-factor';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    backupCodes: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::better-auth.two-factor'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    secret: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+  };
+}
+
 export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
   collectionName: 'better_auth_users';
   info: {
@@ -1606,6 +1661,13 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       }>;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
+    twoFactorEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2148,6 +2210,7 @@ declare module '@strapi/strapi' {
       'plugin::better-auth.member': PluginBetterAuthMember;
       'plugin::better-auth.organization': PluginBetterAuthOrganization;
       'plugin::better-auth.session': PluginBetterAuthSession;
+      'plugin::better-auth.two-factor': PluginBetterAuthTwoFactor;
       'plugin::better-auth.user': PluginBetterAuthUser;
       'plugin::better-auth.verification': PluginBetterAuthVerification;
       'plugin::content-releases.release': PluginContentReleasesRelease;

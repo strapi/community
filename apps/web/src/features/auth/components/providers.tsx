@@ -16,6 +16,12 @@ export function AuthProviders({ children }: { children: React.ReactNode }) {
       Link={({ href, ...props }) => <Link href={href ?? "#"} {...props} />}
       basePath="/auth"
       account
+      twoFactor={["totp"]}
+      organization={{
+        basePath: "/org",
+        pathMode: "slug",
+        personalPath: "/account",
+      }}
     >
       {children}
     </AuthUIProvider>

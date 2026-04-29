@@ -2,7 +2,7 @@ import { dash } from "@better-auth/infra";
 // @ts-expect-error
 import { strapiAdapter } from "@strapi-community/plugin-better-auth/adapter";
 import { betterAuth } from "better-auth";
-import { organization } from "better-auth/plugins";
+import { organization, twoFactor } from "better-auth/plugins";
 
 const auth = () => {
   // Skip Better Auth during the build process to avoid issues with missing environment variables
@@ -13,7 +13,7 @@ const auth = () => {
   return betterAuth({
     trustedOrigins: [process.env.WEBSITE_URL],
     secret: process.env.BETTER_AUTH_SECRET,
-    plugins: [organization(), dash()],
+    plugins: [organization(), twoFactor(), dash()],
     emailAndPassword: {
       enabled: true,
     },
