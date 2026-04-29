@@ -27,12 +27,9 @@ const auth = () => {
       database: {
         generateId: "serial",
       },
-    },
-    session: {
-      cookieCache: {
-        enabled: true,
-        maxAge: 5 * 60,
-        strategy: "jwt",
+      defaultCookieAttributes: {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       },
     },
   });
