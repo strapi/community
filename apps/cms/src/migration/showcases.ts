@@ -77,9 +77,10 @@ export const migrateShowcases = async () => {
       let image = null;
       try {
         image = await captureScreenshot(site.url, site.title);
-      } catch {
+      } catch (err) {
         strapi.log.warn(
           `Failed to capture screenshot for ${site.url}, skipping.`,
+          err,
         );
         continue;
       }

@@ -22,9 +22,9 @@ export const getProviders = async () => {
 
 export const migrateProviders = async () => {
   strapi.log.info("Starting providers migration...");
-  try {
-    const providers = await getProviders();
-    for (const provider of providers) {
+  const providers = await getProviders();
+  for (const provider of providers) {
+    try {
       const existingPackage = await strapi
         .documents("api::package.package")
         .findFirst({
@@ -71,10 +71,12 @@ export const migrateProviders = async () => {
           slug: provider.fields["Slug"] as string,
         },
       });
+    } catch (error) {
+      strapi.log.error(
+        `Error migrating provider ${provider.fields["Name"]}:`,
+        error,
+      );
     }
-  } catch (error) {
-    strapi.log.error("Error migrating providers:", error);
-  } finally {
-    strapi.log.info("Providers migration finished.");
   }
+  strapi.log.info("Providers migration finished.");
 };

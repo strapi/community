@@ -26,8 +26,8 @@ export default {
       return;
     }
 
-    await migratePartners();
-    await migrateIntegrations();
+    // await migratePartners();
+    // await migrateIntegrations();
     await migratePlugins();
     await migrateProviders();
     await migrateShowcases();

@@ -22,9 +22,9 @@ export const getPlugins = async () => {
 
 export const migratePlugins = async () => {
   strapi.log.info("Starting plugins migration...");
-  try {
-    const plugins = await getPlugins();
-    for (const plugin of plugins) {
+  const plugins = await getPlugins();
+  for (const plugin of plugins) {
+    try {
       const existingPackage = await strapi
         .documents("api::package.package")
         .findFirst({
@@ -71,10 +71,12 @@ export const migratePlugins = async () => {
           slug: plugin.fields["Slug"] as string,
         },
       });
+    } catch (error) {
+      strapi.log.error(
+        `Error migrating plugin ${plugin.fields["Name"]}:`,
+        error,
+      );
     }
-  } catch (error) {
-    strapi.log.error("Error migrating plugins:", error);
-  } finally {
-    strapi.log.info("Plugins migration finished.");
   }
+  strapi.log.info("Plugins migration finished.");
 };
