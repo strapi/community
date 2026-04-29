@@ -1,22 +1,22 @@
 {
-  "extends": "@repo/typescript-config/base.json",
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
-    "next.config.js",
-    ".next/types/**/*.ts",
-    "../../apps/cms/types/generated/*.d.ts"
-  ],
-  "exclude": ["node_modules"]
+	"extends": "@repo/typescript-config/base.json",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"next-env.d.ts",
+		"next.config.js",
+		".next/types/**/*.ts",
+		"../../apps/cms/types/generated/*.d.ts"
+	],
+	"exclude": ["node_modules"]
 }

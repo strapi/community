@@ -1,4 +1,9 @@
 // import type { Core } from '@strapi/strapi';
+import { migrateIntegrations } from "./migration/integrations";
+import { migratePartners } from "./migration/partners";
+import { migratePlugins } from "./migration/plugins";
+import { migrateProviders } from "./migration/providers";
+import { migrateShowcases } from "./migration/showcases";
 
 export default {
   /**
@@ -16,5 +21,15 @@ export default {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  async bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {
+    if (process.env.ENABLE_MIGRATION !== "true") {
+      return;
+    }
+
+    await migratePartners();
+    await migrateIntegrations();
+    await migratePlugins();
+    await migrateProviders();
+    await migrateShowcases();
+  },
 };

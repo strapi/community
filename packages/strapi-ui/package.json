@@ -7,7 +7,7 @@
     "access": "public"
   },
   "scripts": {
-    "lint": "biome check --fix .",
+    "lint": "biome check .",
     "check-types": "tsc --noEmit"
   },
   "main": "./src/index.ts",

@@ -9,7 +9,7 @@
   },
   "exports": {
     "./strapi-server": {
-      "require": "./strapi-server.js"
+      "require": "../../../dist/src/plugins/package-info/server/src/index.js"
     }
   }
 }

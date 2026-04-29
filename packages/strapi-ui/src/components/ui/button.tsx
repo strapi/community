@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import Link, { type LinkProps } from "next/link";
 import { Slot as SlotPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -12,6 +13,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
@@ -24,6 +26,8 @@ const buttonVariants = cva(
           "bg-strapi-purple-500 text-primary-foreground hover:bg-strapi-purple-500/90",
         ghost: "hover:text-accent-foreground",
         link: "underline-offset-4 hover:underline",
+        category:
+          "border border-dashed border-(--color-hero-border) bg-(--color-hero-bg) text-white justify-start rounded-xl whitespace-normal hover:border-(--color-strapi-purple-600) transition-colors",
       },
       size: {
         xs: "h-[28px] gap-1 px-3 text-xs has-[>svg]:px-2 [&_svg:not([class*='size-'])]:size-3",
@@ -34,6 +38,7 @@ const buttonVariants = cva(
         "icon-xs": "size-[28px] [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-[38px]",
         "icon-lg": "size-[50px]",
+        category: "h-auto w-full gap-4 p-5",
       },
     },
     defaultVariants: {
@@ -43,22 +48,46 @@ const buttonVariants = cva(
   },
 );
 
+export type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    isLoading?: boolean;
+    href?: LinkProps["href"];
+  } & Pick<LinkProps, "replace" | "scroll" | "prefetch">;
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
   isLoading = false,
+  href,
+  replace,
+  scroll,
+  prefetch,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-    isLoading?: boolean;
-  }) {
+}: ButtonProps) {
   const Comp = asChild ? SlotPrimitive.Slot : "button";
 
   if (isLoading) {
     props.children = <Spinner size="sm" />;
+  }
+
+  if (href) {
+    return (
+      <Link
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        className={cn(buttonVariants({ variant, size, className }))}
+        href={href}
+        replace={replace}
+        scroll={scroll}
+        prefetch={prefetch}
+        ref={props.ref as React.Ref<HTMLAnchorElement>}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      />
+    );
   }
 
   return (

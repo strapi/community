@@ -51,15 +51,14 @@
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::category.category"
+      "target": "api::package-category.package-category"
     },
     "readme": {
       "type": "richtext"
     },
     "owner": {
       "type": "relation",
-      "relation": "morphToMany",
-      "required": true
+      "relation": "morphToMany"
     },
     "maintainers": {
       "type": "relation",
@@ -69,8 +68,7 @@
     "labels": {
       "type": "component",
       "component": "shared.labels",
-      "repeatable": false,
-      "required": true
+      "repeatable": false
     },
     "stars": {
       "type": "integer"
@@ -82,6 +80,17 @@
       "type": "component",
       "component": "shared.version-info",
       "repeatable": false
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::integration.integration",
+      "mappedBy": "packages"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     }
   }
 }

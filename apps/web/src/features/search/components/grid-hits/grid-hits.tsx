@@ -1,9 +1,9 @@
+import { Button } from "@repo/strapi-ui";
 import type { BaseHit } from "instantsearch.js";
 import {
   type UseInfiniteHitsProps,
   useInfiniteHits,
 } from "react-instantsearch";
-import { Button } from "@/components/ui/button";
 
 type Props<T extends BaseHit> = UseInfiniteHitsProps<T> & {
   hitComponent: React.ComponentType<{ hit: T }>;
@@ -20,7 +20,7 @@ const GridHits = <T extends BaseHit>(props: Props<T>) => {
     <div className="w-full">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((hit) => (
-          <div key={hit.objectID}>
+          <div key={hit.documentId}>
             <Hit hit={hit} />
           </div>
         ))}

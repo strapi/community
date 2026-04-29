@@ -1,7 +1,8 @@
 import type { Metadata, NextPage } from "next";
 import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
-import { CategoryPage, categoryMetadata } from "@/features/cms/pages/category";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
+import { integrationMetadata } from "@/features/cms/pages/integrations/metadata";
+import { IntegrationPage } from "@/features/cms/pages/integrations/page";
 import {
   OrganizationPage,
   organizationMetadata,
@@ -11,11 +12,18 @@ import {
   overviewPageMetadata,
 } from "@/features/cms/pages/overview-page";
 import { PackagePage, packageMetadata } from "@/features/cms/pages/package";
+import {
+  PackageCategoryPage,
+  packageCategoryMetadata,
+} from "@/features/cms/pages/package-category";
 import { TemplatePage, templateMetadata } from "@/features/cms/pages/template";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
 // Regenerate static pages periodically.
 export const revalidate = 60;
+
+// Skip generation during build.
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -41,17 +49,20 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     case "api::package.package": {
       return <PackagePage documentId={page.documentId} />;
     }
+    case "api::integration.integration": {
+      return <IntegrationPage documentId={page.documentId} />;
+    }
     case "plugin::better-auth.user": {
       return <UserPage documentId={page.documentId} />;
     }
     case "api::template.template": {
       return <TemplatePage documentId={page.documentId} />;
     }
-    case "api::category.category": {
-      return <CategoryPage documentId={page.documentId} />;
-    }
     case "api::overview-page.overview-page": {
       return <OverviewPage documentId={page.documentId} />;
+    }
+    case "api::package-category.package-category": {
+      return <PackageCategoryPage documentId={page.documentId} />;
     }
     case "api::home.home": {
       return <HomePage />;
@@ -104,17 +115,20 @@ export const generateMetadata = async ({
     case "api::package.package": {
       return packageMetadata(page.documentId);
     }
+    case "api::integration.integration": {
+      return integrationMetadata(page.documentId);
+    }
     case "plugin::better-auth.user": {
       return userMetadata(page.documentId);
     }
     case "api::template.template": {
       return templateMetadata(page.documentId);
     }
-    case "api::category.category": {
-      return categoryMetadata(page.documentId);
-    }
     case "api::overview-page.overview-page": {
       return overviewPageMetadata(page.documentId);
+    }
+    case "api::package-category.package-category": {
+      return packageCategoryMetadata(page.documentId);
     }
     case "api::home.home": {
       return homeMetadata();

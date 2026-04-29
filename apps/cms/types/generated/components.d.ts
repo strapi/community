@@ -94,7 +94,16 @@ export interface SectionsSearch extends Struct.ComponentSchema {
     displayName: 'Search';
   };
   attributes: {
-    index_name: Schema.Attribute.Enumeration<['generic_search']> &
+    index_name: Schema.Attribute.Enumeration<
+      [
+        'generic_search',
+        'marketplace',
+        'integrations',
+        'showcases',
+        'partners',
+        'members',
+      ]
+    > &
       Schema.Attribute.Required;
   };
 }
@@ -160,12 +169,7 @@ export interface SharedSeo extends Struct.ComponentSchema {
   attributes: {
     canonicalURL: Schema.Attribute.String;
     keywords: Schema.Attribute.Text;
-    metaDescription: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 160;
-        minLength: 50;
-      }>;
+    metaDescription: Schema.Attribute.String & Schema.Attribute.Required;
     metaImage: Schema.Attribute.Media<'images'>;
     metaRobots: Schema.Attribute.String;
     metaTitle: Schema.Attribute.String &

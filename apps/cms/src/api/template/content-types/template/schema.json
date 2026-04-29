@@ -37,7 +37,7 @@
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::category.category"
+      "target": "api::template-category.template-category"
     },
     "owner": {
       "type": "relation",
@@ -64,6 +64,22 @@
     },
     "stars": {
       "type": "integer"
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::package.package"
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::integration.integration",
+      "mappedBy": "templates"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     }
   }
 }

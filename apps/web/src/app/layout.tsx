@@ -1,4 +1,5 @@
 import "./globals.css";
+import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -16,7 +17,9 @@ export default function RootLayout({
         className={`antialiased ${poppins.className}`}
         suppressHydrationWarning
       >
+        <StrapiNavbar />
         {children}
+        <StrapiFooter />
       </body>
     </html>
   );

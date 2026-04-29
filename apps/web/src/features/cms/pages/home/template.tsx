@@ -1,4 +1,3 @@
-import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import { HomeHero } from "@/components/layout/hero";
 import type {
   HomePackages,
@@ -14,11 +13,8 @@ type Props = {
 };
 
 const HomeTemplate = async ({ document, templates, packages }: Props) => {
-  console.log(packages);
-
   return (
     <div>
-      <StrapiNavbar />
       <HomeHero
         title={document.title!}
         subtitle={document.subtitle!}
@@ -37,7 +33,6 @@ const HomeTemplate = async ({ document, templates, packages }: Props) => {
           />
         );
       })}
-      <StrapiFooter />
     </div>
   );
 };

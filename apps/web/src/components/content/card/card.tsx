@@ -13,11 +13,13 @@ type Props = {
   link: string;
   name: string;
   badge: string;
+  badgeColor?: string;
+  badgeTextColor?: string;
   description: string;
   githubStars?: number;
   npmDownloads?: number;
-  maintainers: Data.ContentType<"plugin::better-auth.user">[];
-  labels: Data.Component<"shared.labels">;
+  maintainers?: Data.ContentType<"plugin::better-auth.user">[];
+  labels?: Data.Component<"shared.labels">;
 };
 
 const imageSizeMap = { S: 80, M: 112, L: 144 };
@@ -28,6 +30,8 @@ const ContentCard = (props: Props) => {
     image,
     name,
     badge,
+    badgeColor,
+    badgeTextColor,
     description,
     githubStars,
     npmDownloads,
@@ -62,7 +66,9 @@ const ContentCard = (props: Props) => {
               />
             )
           ) : null}
-          <span className="absolute -bottom-3 left-3 rounded-md bg-(--color-primary600) px-3 py-1 text-sm font-semibold text-white">
+          <span
+            className={`absolute -bottom-3 left-3 rounded-md ${badgeColor ? badgeColor : "bg-(--color-primary600)"} px-3 py-1 text-sm font-semibold ${badgeTextColor ? badgeTextColor : "text-white"}`}
+          >
             {badge}
           </span>
         </div>
@@ -104,7 +110,7 @@ const ContentCard = (props: Props) => {
           </p>
 
           {/* Avatars */}
-          <AvatarPile items={maintainers} />
+          {maintainers && <AvatarPile items={maintainers} />}
         </div>
       </article>
     </Link>

@@ -1,7 +1,6 @@
+import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import { ContentCard, UserCard } from "@/components/content/card";
-import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {
@@ -106,7 +105,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     image={{
                       src: pkg.icon
                         ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
-                        : "/plugin-fallback-icon.png",
+                        : "/package-fallback-icon.png",
                       alt: pkg.icon?.alternativeText ?? "",
                       size: "S",
                     }}

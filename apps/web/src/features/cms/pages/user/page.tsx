@@ -8,7 +8,9 @@ const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
 
 const query = {
   populate: {
-    profile: true,
+    profile: {
+      populate: ["avatar"],
+    },
   },
 } satisfies GetQueryParams<typeof contentType>;
 
@@ -27,7 +29,7 @@ const UserPage = async ({ documentId }: Props) => {
     .findOne(documentId, query);
 
   const content: RelatedContentItems = await cmsClient
-    .fetch(`/users/${document.data.id}/related-content`)
+    .fetch(`/users/${document.data.id}/related-content?populate=*`)
     .then((res) => res.json());
 
   return <UserTemplate document={document.data} relatedContent={content} />;

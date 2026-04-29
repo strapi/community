@@ -1,7 +1,6 @@
+import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import Image from "next/image";
-import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   section: Data.Component<"sections.card-grid">;

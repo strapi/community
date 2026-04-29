@@ -17,7 +17,9 @@ const auth = () => {
       enabled: true,
     },
     database: strapiAdapter({
-      debugLogs: process.env.NODE_ENV === "development",
+      debugLogs:
+        process.env.NODE_ENV === "development" &&
+        process.env.ENABLE_MIGRATION !== "true",
     }),
     advanced: {
       database: {

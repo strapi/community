@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "package_categories",
+  "info": {
+    "singularName": "package-category",
+    "pluralName": "package-categories",
+    "displayName": "Package categories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["sections.card-grid"]
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::package-category.package-category",
+      "mappedBy": "parent"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::package-category.package-category",
+      "inversedBy": "children"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    }
+  }
+}

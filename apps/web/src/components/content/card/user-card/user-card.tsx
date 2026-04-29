@@ -1,6 +1,6 @@
+import { Button } from "@repo/strapi-ui";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   name: string;

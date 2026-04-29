@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@repo/strapi-ui";
 import { Search } from "lucide-react";
 import { type SearchBoxProps, useSearchBox } from "react-instantsearch";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const SearchBox = (props: SearchBoxProps) => {
