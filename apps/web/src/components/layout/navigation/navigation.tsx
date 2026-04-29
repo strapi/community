@@ -3,6 +3,8 @@
 import { Button, Container } from "@repo/strapi-ui";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { AuthNavigation } from "@/features/auth/components/auth-navigation";
+import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {
@@ -60,11 +62,15 @@ const Navigation = async ({ theme }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {data.data.cta_links?.map((link) => (
-              <Button key={link.id} asChild>
-                <Link href={link.link!}>{link.label}</Link>
-              </Button>
-            ))}
+            {isAuthEnabled ? (
+              <AuthNavigation theme={theme} />
+            ) : (
+              data.data.cta_links?.map((link) => (
+                <Button key={link.id} asChild>
+                  <Link href={link.link!}>{link.label}</Link>
+                </Button>
+              ))
+            )}
           </div>
         </div>
       </Container>

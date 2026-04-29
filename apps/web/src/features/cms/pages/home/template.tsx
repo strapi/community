@@ -1,4 +1,5 @@
 import { HomeHero } from "@/components/layout/hero";
+import { Navigation } from "@/components/layout/navigation";
 import type {
   HomePackages,
   HomePageData,
@@ -15,6 +16,7 @@ type Props = {
 const HomeTemplate = async ({ document, templates, packages }: Props) => {
   return (
     <div>
+      <Navigation theme="dark" />
       <HomeHero
         title={document.title!}
         subtitle={document.subtitle!}
