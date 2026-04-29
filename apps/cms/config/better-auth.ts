@@ -28,6 +28,11 @@ const auth = () => {
         generateId: "serial",
       },
     },
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+      strategy: "jwt",
+    },
   });
 };
 
