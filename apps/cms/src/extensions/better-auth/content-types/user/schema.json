@@ -29,7 +29,7 @@
       "configurable": false
     },
     "name": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -61,18 +61,13 @@
       "default": false
     },
     "image": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
           "managed": true
         }
       }
-    },
-    "profile": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::profile.profile"
     },
     "twoFactorEnabled": {
       "type": "boolean",
@@ -83,6 +78,11 @@
         }
       },
       "default": false
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile"
     }
   }
 }

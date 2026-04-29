@@ -19,7 +19,7 @@
   },
   "attributes": {
     "secret": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -29,7 +29,7 @@
       "required": true
     },
     "backupCodes": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {

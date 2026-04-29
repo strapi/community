@@ -22,7 +22,7 @@
   },
   "attributes": {
     "name": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -32,7 +32,7 @@
       "required": true
     },
     "slug": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -43,7 +43,7 @@
       "unique": true
     },
     "logo": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -52,7 +52,7 @@
       }
     },
     "metadata": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {

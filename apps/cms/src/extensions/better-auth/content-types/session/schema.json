@@ -30,7 +30,7 @@
       "required": true
     },
     "token": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -41,7 +41,7 @@
       "unique": true
     },
     "ipAddress": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -50,7 +50,7 @@
       }
     },
     "userAgent": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -69,7 +69,7 @@
       "required": true
     },
     "activeOrganizationId": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {

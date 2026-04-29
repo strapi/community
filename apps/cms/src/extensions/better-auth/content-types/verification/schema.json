@@ -1,10 +1,11 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_members",
+  "collectionName": "better_auth_verifications",
   "info": {
-    "singularName": "member",
-    "pluralName": "members",
-    "displayName": "Members"
+    "singularName": "verification",
+    "pluralName": "verifications",
+    "displayName": "Verifications",
+    "description": "Better Auth verification"
   },
   "options": {
     "draftAndPublish": false
@@ -18,8 +19,8 @@
     }
   },
   "attributes": {
-    "organizationId": {
-      "type": "integer",
+    "identifier": {
+      "type": "string",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -28,8 +29,8 @@
       },
       "required": true
     },
-    "userId": {
-      "type": "integer",
+    "value": {
+      "type": "string",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -38,16 +39,15 @@
       },
       "required": true
     },
-    "role": {
-      "type": "text",
+    "expiresAt": {
+      "type": "datetime",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
           "managed": true
         }
       },
-      "required": true,
-      "default": "member"
+      "required": true
     }
   }
 }
