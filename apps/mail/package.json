@@ -1,0 +1,9 @@
+{
+  "name": "mail",
+  "version": "0.0.0",
+  "description": "Mailpit local email catcher",
+  "scripts": {
+    "dev": "docker-compose up",
+    "start": "docker-compose up"
+  }
+}

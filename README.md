@@ -75,6 +75,7 @@ apps/
 ├── cms/               # Strapi 5 application
 ├── web/               # Next.js 15 web application
 ├── search/            # Meilisearch instance
+├── mail/              # Mailpit local email catcher
 └── automation/               # n8n instance
 ```
 
@@ -107,6 +108,12 @@ See [CMS README](./apps/cms/README.md) for more details.
 A Meilisearch instance that is consumes content from Strapi and serves as a search index for the front-end.
 
 See [CMS README](./apps/search/README.md) for more details.
+
+### Mail (`apps/mail`)
+
+A [Mailpit](https://github.com/axllent/mailpit) instance used to catch all outgoing emails during local development. All emails sent by the CMS are intercepted here rather than delivered to real inboxes. The web UI runs at [http://localhost:8025](http://localhost:8025).
+
+Start it with `pnpm --filter mail dev` or as part of the full `pnpm dev` command.
 
 ### Automation (`apps/automation`)
 

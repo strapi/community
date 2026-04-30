@@ -1,4 +1,24 @@
 export default ({ env }) => ({
+  email: {
+    config:
+      env("NODE_ENV") === "production"
+        ? {
+            settings: {
+              defaultFrom: env("EMAIL_FROM", "noreply@strapi.io"),
+              defaultReplyTo: env("EMAIL_FROM", "noreply@strapi.io"),
+            },
+          }
+        : {
+            provider: "@piksail/strapi-provider-email-mailpit",
+            providerOptions: {
+              baseUrl: env("MAILPIT_BASE_URL", "http://localhost:8025"),
+            },
+            settings: {
+              defaultFrom: env("EMAIL_FROM", "noreply@strapi.io"),
+              defaultReplyTo: env("EMAIL_FROM", "noreply@strapi.io"),
+            },
+          },
+  },
   "owner-selector": {
     enabled: true,
     resolve: "./src/plugins/owner-selector",

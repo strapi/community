@@ -17,7 +17,10 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
+    "@better-auth-ui/react": "^1.6.3",
     "@better-auth/infra": "^0.2.5",
+    "@piksail/strapi-provider-email-mailpit": "^1.0.0",
+    "@react-email/render": "^1.4.0",
     "@strapi-community/plugin-better-auth": "catalog:strapi",
     "@strapi-community/plugin-seo": "^2.1.1",
     "@strapi/admin": "catalog:strapi",
