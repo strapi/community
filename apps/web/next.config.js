@@ -10,13 +10,11 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        pathname: "/uploads/**",
       },
       // Strapi Cloud
       {
         protocol: "https",
         hostname: "**.strapiapp.com",
-        pathname: "/uploads/**",
       },
     ],
   },
