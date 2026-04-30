@@ -6,9 +6,17 @@ const nextConfig = {
   images: {
     dangerouslyAllowLocalIP: IsDEV,
     remotePatterns: [
+      // Local development
       {
-        protocol: IsDEV ? "http" : "https",
-        hostname: new URL(CMS_URL).hostname,
+        protocol: "http",
+        hostname: "localhost",
+        pathname: "/uploads/**",
+      },
+      // Strapi Cloud
+      {
+        protocol: "https",
+        hostname: "**.strapiapp.com",
+        pathname: "/uploads/**",
       },
     ],
   },
