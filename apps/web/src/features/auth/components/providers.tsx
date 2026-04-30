@@ -15,7 +15,10 @@ export function AuthProviders({ children }: { children: React.ReactNode }) {
       replace={(href) => router.replace(href)}
       Link={({ href, ...props }) => <Link href={href ?? "#"} {...props} />}
       basePath="/auth"
+      baseURL={process.env.NEXT_PUBLIC_WEB_URL}
       account
+      emailOTP
+      emailVerification
       twoFactor={["totp"]}
       organization={{
         basePath: "/org",
