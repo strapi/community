@@ -4,8 +4,10 @@ import { RefinementList } from "@/features/search/components/refinement-list";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_PARTNERS_INDEX_NAME!;
+
 const PartnersSearch = () => (
-  <SearchIndex indexName="partners:partner_level_rank:asc">
+  <SearchIndex indexName={`${idx}:partner_level_rank:asc`}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar>
         <SearchIndex.FilterGroup label="Type">

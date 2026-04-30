@@ -10,12 +10,14 @@ interface PackagesSearchProps {
   showFilters?: boolean;
 }
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_PACKAGES_INDEX_NAME!;
+
 const PackagesSearch = ({
   categoryFilter,
   showFilters = true,
 }: PackagesSearchProps) => (
   <SearchIndex
-    indexName="packages:monthly_downloads:desc"
+    indexName={`${idx}:monthly_downloads:desc`}
     useNextSearch={false}
   >
     <SearchIndex.Layout>
@@ -39,11 +41,11 @@ const PackagesSearch = ({
           <SearchIndex.SortBy
             items={[
               {
-                value: "packages:monthly_downloads:desc",
+                value: `${idx}:monthly_downloads:desc`,
                 label: "Sort by: Popular",
               },
-              { value: "packages:stars:desc", label: "Sort by: Github stars" },
-              { value: "packages:createdAt:desc", label: "Sort by: Newest" },
+              { value: `${idx}:stars:desc`, label: "Sort by: Github stars" },
+              { value: `${idx}:createdAt:desc`, label: "Sort by: Newest" },
             ]}
           />
         </SearchIndex.Toolbar>

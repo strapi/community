@@ -7,8 +7,10 @@ interface TemplatesSearchProps {
   categoryFilter?: string;
 }
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_TEMPLATES_INDEX_NAME!;
+
 const TemplatesSearch = ({ categoryFilter }: TemplatesSearchProps) => (
-  <SearchIndex indexName="templates:stars:desc" useNextSearch={false}>
+  <SearchIndex indexName={`${idx}:stars:desc`} useNextSearch={false}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar />
       <SearchIndex.Content>
@@ -17,8 +19,8 @@ const TemplatesSearch = ({ categoryFilter }: TemplatesSearchProps) => (
           <SearchIndex.Stats />
           <SearchIndex.SortBy
             items={[
-              { value: "templates:stars:desc", label: "Sort by: Github stars" },
-              { value: "templates:createdAt:desc", label: "Sort by: Newest" },
+              { value: `${idx}:stars:desc`, label: "Sort by: Github stars" },
+              { value: `${idx}:createdAt:desc`, label: "Sort by: Newest" },
             ]}
           />
         </SearchIndex.Toolbar>

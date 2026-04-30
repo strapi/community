@@ -4,8 +4,10 @@ import { RefinementList } from "@/features/search/components/refinement-list";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_SHOWCASES_INDEX_NAME!;
+
 const ShowcasesSearch = () => (
-  <SearchIndex indexName="showcases:createdAt:desc">
+  <SearchIndex indexName={`${idx}:createdAt:desc`}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar>
         <SearchIndex.FilterGroup label="Categories">
@@ -19,7 +21,7 @@ const ShowcasesSearch = () => (
           <SearchIndex.SortBy
             items={[
               {
-                value: "showcases:createdAt:desc",
+                value: `${idx}:createdAt:desc`,
                 label: "Sort by: Popular",
               },
             ]}

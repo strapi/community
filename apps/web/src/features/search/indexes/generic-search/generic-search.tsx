@@ -5,8 +5,10 @@ import { SearchIndex } from "@/features/search/components/search-index";
 import { ToggleRefinement } from "@/features/search/components/toggle-refinement";
 import { Hit } from "./components";
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_GENERIC_INDEX_NAME!;
+
 const GenericSearch = () => (
-  <SearchIndex indexName="generic_search:monthly_downloads:desc">
+  <SearchIndex indexName={`${idx}:monthly_downloads:desc`}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar>
         <SearchIndex.FilterGroup label="Application">
@@ -27,15 +29,15 @@ const GenericSearch = () => (
           <SearchIndex.SortBy
             items={[
               {
-                value: "generic_search:monthly_downloads:desc",
+                value: `${idx}:monthly_downloads:desc`,
                 label: "Sort by: Popular",
               },
               {
-                value: "generic_search:stars:desc",
+                value: `${idx}:stars:desc`,
                 label: "Sort by: Github stars",
               },
               {
-                value: "generic_search:createdAt:desc",
+                value: `${idx}:createdAt:desc`,
                 label: "Sort by: Newest",
               },
             ]}

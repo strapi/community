@@ -4,8 +4,10 @@ import { RefinementList } from "@/features/search/components/refinement-list";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_MEMBERS_INDEX_NAME!;
+
 const MembersSearch = () => (
-  <SearchIndex indexName="members:createdAt:desc">
+  <SearchIndex indexName={`${idx}:createdAt:desc`}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar>
         <SearchIndex.FilterGroup label="Expertise">

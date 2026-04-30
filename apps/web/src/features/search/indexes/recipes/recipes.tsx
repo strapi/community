@@ -3,8 +3,10 @@
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
+const idx = process.env.NEXT_PUBLIC_MEILISEARCH_RECIPES_INDEX_NAME!;
+
 const RecipesSearch = () => (
-  <SearchIndex indexName="recipes:createdAt:desc" useNextSearch={false}>
+  <SearchIndex indexName={`${idx}:createdAt:desc`} useNextSearch={false}>
     <SearchIndex.Layout>
       <SearchIndex.Sidebar />
       <SearchIndex.Content>
@@ -13,7 +15,7 @@ const RecipesSearch = () => (
           <SearchIndex.Stats />
           <SearchIndex.SortBy
             items={[
-              { value: "recipes:createdAt:desc", label: "Sort by: Newest" },
+              { value: `${idx}:createdAt:desc`, label: "Sort by: Newest" },
             ]}
           />
         </SearchIndex.Toolbar>
