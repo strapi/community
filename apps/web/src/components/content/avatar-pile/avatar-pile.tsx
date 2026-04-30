@@ -1,5 +1,6 @@
 import type { Data } from "@strapi/types";
 import Image from "next/image";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   items: Data.ContentType<"plugin::better-auth.user">[];
@@ -39,7 +40,7 @@ const AvatarLarge = ({
           >
             {avatarUrl ? (
               <Image
-                src={`${process.env.NEXT_PUBLIC_CMS_URL}${avatarUrl}`}
+                src={cmsImageUrl(avatarUrl)}
                 fill
                 sizes="(max-width: 360px) 32vw, 115px"
                 alt={m.profile?.avatar?.alternativeText ?? ""}
@@ -71,7 +72,7 @@ const AvatarPile = ({ items, size = "S" }: Props) => {
         return avatarUrl ? (
           <Image
             key={m.documentId}
-            src={`${process.env.NEXT_PUBLIC_CMS_URL}${avatarUrl}`}
+            src={cmsImageUrl(avatarUrl)}
             width={28}
             height={28}
             alt={m.profile?.avatar?.alternativeText ?? ""}

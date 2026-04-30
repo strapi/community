@@ -1,6 +1,7 @@
 import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import { ContentCard, UserCard } from "@/components/content/card";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {
@@ -104,7 +105,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     key={pkg.documentId}
                     image={{
                       src: pkg.icon
-                        ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
+                        ? cmsImageUrl(pkg.icon.url)
                         : "/package-fallback-icon.png",
                       alt: pkg.icon?.alternativeText ?? "",
                       size: "S",
@@ -128,7 +129,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     key={tpl.documentId}
                     image={{
                       src: tpl.preview_image
-                        ? `${process.env.NEXT_PUBLIC_CMS_URL}${tpl.preview_image.url}`
+                        ? cmsImageUrl(tpl.preview_image.url)
                         : "/template-fallback-preview.png",
                       alt: tpl.preview_image?.alternativeText ?? "",
                       size: "L",
@@ -153,7 +154,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     bio={user.profile?.bio ?? undefined}
                     avatarUrl={
                       user.profile?.avatar?.url
-                        ? `${process.env.NEXT_PUBLIC_CMS_URL}${user.profile.avatar.url}`
+                        ? cmsImageUrl(user.profile.avatar.url)
                         : undefined
                     }
                     profileUrl={user.url_alias?.[0]?.url_path ?? "#"}

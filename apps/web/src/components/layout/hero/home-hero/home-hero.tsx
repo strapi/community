@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { Hero, HeroSection } from "@/components/layout/hero/hero";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { HomePackages, HomeTemplates } from "@/features/cms/pages/home";
 import { cn } from "@/lib/utils";
 
@@ -143,7 +144,7 @@ const HomeHero = (props: Props) => {
                     <Image
                       src={
                         pkg.icon
-                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
+                          ? cmsImageUrl(pkg.icon.url)
                           : "/package-fallback-icon.png"
                       }
                       width={80}
@@ -174,7 +175,7 @@ const HomeHero = (props: Props) => {
                     <Image
                       src={
                         template.preview_image
-                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${template.preview_image.url}`
+                          ? cmsImageUrl(template.preview_image.url)
                           : "/template-fallback-preview.png"
                       }
                       fill

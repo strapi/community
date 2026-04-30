@@ -1,5 +1,6 @@
 import type { Modules } from "@strapi/types";
 import { ContentCard } from "@/components/content/card";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   hit:
@@ -15,7 +16,7 @@ type Props = {
 const getImageUrl = (hit: Props["hit"]) => {
   if ("preview_image" in hit && hit.preview_image) {
     return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.preview_image.url}`,
+      src: cmsImageUrl(hit.preview_image.url),
       alt:
         hit.preview_image.alternativeText ??
         ("name" in hit ? hit.name : "") ??
@@ -25,21 +26,21 @@ const getImageUrl = (hit: Props["hit"]) => {
   }
   if ("icon" in hit && hit.icon) {
     return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.icon.url}`,
+      src: cmsImageUrl(hit.icon.url),
       alt: hit.icon.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
       size: "S" as const,
     };
   }
   if ("logo" in hit && hit.logo) {
     return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.logo.url}`,
+      src: cmsImageUrl(hit.logo.url),
       alt: hit.logo.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
       size: "S" as const,
     };
   }
   if ("image" in hit && hit.image) {
     return {
-      src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.image.url}`,
+      src: cmsImageUrl(hit.image.url),
       alt: hit.image.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
       size: "L" as const,
     };

@@ -5,6 +5,7 @@ import { ContentCard } from "@/components/content/card/card";
 import { Markdown } from "@/components/content/markdown";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { IntegrationPageData } from "@/features/cms/pages/integrations";
 
 type Props = {
@@ -28,7 +29,7 @@ const IntegrationTemplate = ({ document }: Props) => {
             </div>
             {document.logo && (
               <Image
-                src={`${process.env.NEXT_PUBLIC_CMS_URL}${document.logo.url}`}
+                src={cmsImageUrl(document.logo.url)}
                 alt={document.name!}
                 width={150}
                 height={150}
@@ -60,7 +61,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                   key={pkg.documentId}
                   image={{
                     src: pkg.icon
-                      ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
+                      ? cmsImageUrl(pkg.icon.url)
                       : "/package-fallback-icon.png",
                     alt: pkg.icon?.alternativeText ?? "",
                     size: "S",
@@ -89,7 +90,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                   key={tpl.documentId}
                   image={{
                     src: tpl.preview_image
-                      ? `${process.env.NEXT_PUBLIC_CMS_URL}${tpl.preview_image.url}`
+                      ? cmsImageUrl(tpl.preview_image.url)
                       : "/template-fallback-preview.png",
                     alt: tpl.preview_image?.alternativeText ?? "",
                     size: "L",

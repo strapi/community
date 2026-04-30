@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OverviewPageData } from "@/features/cms/pages/overview-page";
 import { SectionsMapper } from "@/features/cms/sections/mapper";
 
@@ -25,7 +26,7 @@ const OverviewPageTemplate = ({ document }: Props) => {
             </div>
             {document.image && (
               <Image
-                src={`${process.env.NEXT_PUBLIC_CMS_URL}${document.image.url}`}
+                src={cmsImageUrl(document.image.url)}
                 alt={document.title!}
                 width={480}
                 height={480}

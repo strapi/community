@@ -1,5 +1,6 @@
 import type { Modules } from "@strapi/types";
 import { ContentCard } from "@/components/content/card";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   hit: Modules.Documents.Result<"api::showcase.showcase", { populate: "*" }>;
@@ -8,7 +9,7 @@ type Props = {
 const Hit = ({ hit }: Props) => {
   const image = hit.image
     ? {
-        src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.image.url}`,
+        src: cmsImageUrl(hit.image.url),
         alt: hit.image.alternativeText ?? hit.title ?? "",
         size: "L" as const,
       }

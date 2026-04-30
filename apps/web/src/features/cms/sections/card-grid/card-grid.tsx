@@ -1,6 +1,7 @@
 import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import Image from "next/image";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   section: Data.Component<"sections.card-grid">;
@@ -34,7 +35,7 @@ const CardGridSection = ({ section }: Props) => {
               </div>
               {item.image?.url && (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image.url}`}
+                  src={cmsImageUrl(item.image.url)}
                   alt={item.image.alternativeText || item.title || "Card image"}
                   width={290}
                   height={180}

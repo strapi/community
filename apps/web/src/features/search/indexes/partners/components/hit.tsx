@@ -1,5 +1,6 @@
 import type { Modules } from "@strapi/types";
 import { ContentCard } from "@/components/content/card";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   hit: Modules.Documents.Result<
@@ -11,7 +12,7 @@ type Props = {
 const Hit = ({ hit }: Props) => {
   const image = hit.profile?.avatar?.url
     ? {
-        src: `${process.env.NEXT_PUBLIC_CMS_URL}${hit.profile?.avatar?.url}`,
+        src: cmsImageUrl(hit.profile?.avatar?.url),
         alt: hit.name ?? "",
         size: "S" as const,
       }

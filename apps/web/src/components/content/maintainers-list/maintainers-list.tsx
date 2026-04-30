@@ -1,5 +1,6 @@
 import type { Modules } from "@strapi/types";
 import Image from "next/image";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   maintainers: Modules.Documents.Result<
@@ -14,7 +15,7 @@ const MaintainersList = ({ maintainers }: Props) => {
       <div className="flex items-center">
         <Image
           style={{ borderRadius: "50%" }}
-          src={`${process.env.NEXT_PUBLIC_CMS_URL}${maintainers?.[0]?.profile?.avatar.url}`}
+          src={cmsImageUrl(maintainers?.[0]?.profile?.avatar.url)}
           width={32}
           height={32}
           alt={maintainers?.[0]?.profile?.avatar.alternativeText}
@@ -36,7 +37,7 @@ const MaintainersList = ({ maintainers }: Props) => {
             border: "2px solid white",
             marginLeft: index === 0 ? "0" : "-8px",
           }}
-          src={`${process.env.NEXT_PUBLIC_CMS_URL}${maintainer?.profile?.avatar.url}`}
+          src={cmsImageUrl(maintainer?.profile?.avatar.url)}
           width={32}
           height={32}
           alt={maintainer?.profile?.avatar.alternativeText || ""}

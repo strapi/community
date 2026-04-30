@@ -7,6 +7,7 @@ import { GitProviderLogo } from "@/components/content/git-provider-logo";
 import { Markdown } from "@/components/content/markdown";
 import { SidebarSection } from "@/components/content/sidebar-section/sidebar-section";
 import { Navigation } from "@/components/layout/navigation";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { TemplatePageData } from "@/features/cms/pages/template/page";
 import type { Owner } from "@/utils/types";
 
@@ -36,7 +37,7 @@ const TemplateTemplate = ({ document, owner }: Props) => {
                 <Image
                   src={
                     document.preview_image
-                      ? `${process.env.NEXT_PUBLIC_CMS_URL}${document.preview_image.url}`
+                      ? cmsImageUrl(document.preview_image.url)
                       : "/template-fallback-image.png"
                   }
                   width={64}
@@ -74,7 +75,7 @@ const TemplateTemplate = ({ document, owner }: Props) => {
             <Image
               src={
                 document.preview_image
-                  ? `${process.env.NEXT_PUBLIC_CMS_URL}${document.preview_image.url}`
+                  ? cmsImageUrl(document.preview_image.url)
                   : "/template-fallback-image.png"
               }
               width={1000}

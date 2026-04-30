@@ -14,6 +14,7 @@ import { ContentCard } from "@/components/content/card";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import type { RelatedContentItems } from "@/utils/types";
 
@@ -37,7 +38,7 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-(--color-primary600) bg-white">
                 {document.profile?.avatar?.url ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_CMS_URL}${document.profile.avatar.url}`}
+                    src={cmsImageUrl(document.profile.avatar.url)}
                     width={118}
                     height={118}
                     alt={document.name ?? ""}
@@ -159,7 +160,7 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
                       key={template.documentId}
                       image={{
                         src: template.preview_image
-                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${template.preview_image.url}`
+                          ? cmsImageUrl(template.preview_image.url)
                           : "/template-fallback-preview.png",
                         alt: template.preview_image?.alternativeText ?? "",
                         size: "L",
@@ -187,7 +188,7 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
                       key={pkg.documentId}
                       image={{
                         src: pkg.icon
-                          ? `${process.env.NEXT_PUBLIC_CMS_URL}${pkg.icon.url}`
+                          ? cmsImageUrl(pkg.icon.url)
                           : "/package-fallback-icon.png",
                         alt: pkg.icon?.alternativeText ?? "",
                         size: "S",

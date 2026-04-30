@@ -9,6 +9,7 @@ import { RegistryLogo } from "@/components/content/registry-logo";
 import { SidebarSection } from "@/components/content/sidebar-section";
 import { VersionSecurityBadge } from "@/components/content/version-info";
 import { Navigation } from "@/components/layout/navigation";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { PackagePageData } from "@/features/cms/pages/package";
 import type { Owner } from "@/utils/types";
 
@@ -39,7 +40,7 @@ const PackageTemplate = ({ document, owner }: Props) => {
                 <Image
                   src={
                     document.icon
-                      ? `${process.env.NEXT_PUBLIC_CMS_URL}${document.icon.url}`
+                      ? cmsImageUrl(document.icon.url)
                       : "/package-fallback-icon.png"
                   }
                   width={64}

@@ -2,6 +2,7 @@ import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import Image from "next/image";
 import { AvatarPile } from "@/components/content/avatar-pile";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 type Props = {
@@ -110,7 +111,7 @@ const CTASection = async ({ section }: Props) => {
                   ) : (
                     cta.image?.url && (
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
+                        src={cmsImageUrl(cta.image.url)}
                         alt={
                           cta.image.alternativeText || cta.title || "CTA image"
                         }
@@ -162,7 +163,7 @@ const CTASection = async ({ section }: Props) => {
             ) : (
               cta?.image?.url && (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${cta.image.url}`}
+                  src={cmsImageUrl(cta.image.url)}
                   alt={cta.image.alternativeText || cta?.title || "CTA image"}
                   width={420}
                   height={220}

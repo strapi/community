@@ -1,5 +1,6 @@
 import type { Modules } from "@strapi/types";
 import { UserCard } from "@/components/content/card";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   hit: Modules.Documents.Result<"plugin::better-auth.user", { populate: "*" }>;
@@ -12,9 +13,7 @@ const Hit = ({ hit }: Props) => {
       name={hit.name!}
       bio={hit.profile?.bio!}
       avatarUrl={
-        hit.profile?.avatar
-          ? `${process.env.NEXT_PUBLIC_CMS_URL}${hit.profile.avatar.url}`
-          : undefined
+        hit.profile?.avatar ? cmsImageUrl(hit.profile.avatar.url) : undefined
       }
     />
   );
