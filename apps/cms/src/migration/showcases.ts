@@ -39,7 +39,9 @@ const captureScreenshot = async (url: string, title: string) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Screenshot API returned ${response.status} for ${url}`);
+    throw new Error(
+      `Screenshot API returned ${response.status} for ${url}. ${response.statusText}. ${response.text}. ${response.json()}`,
+    );
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());
