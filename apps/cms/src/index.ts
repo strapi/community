@@ -28,8 +28,8 @@ export default {
 
     // await migratePartners();
     // await migrateIntegrations();
-    await migratePlugins();
-    await migrateProviders();
+    // await migratePlugins();
+    // await migrateProviders();
     await migrateShowcases();
   },
 };
