@@ -49,7 +49,7 @@ const auth = () => {
     },
     database: strapiAdapter({
       debugLogs:
-        process.env.BETTER_AUTH_DEBUG === "true" ||
+        process.env.BETTER_AUTH_DEBUG === "true" &&
         process.env.ENABLE_MIGRATION !== "true",
     }),
     advanced: {

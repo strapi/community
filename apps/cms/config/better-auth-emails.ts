@@ -8,7 +8,7 @@ import type {
   PasswordChangedEmailProps,
   ResetPasswordEmailProps,
 } from "@better-auth-ui/react";
-import { render } from "@react-email/render";
+import { render, toPlainText } from "@react-email/render";
 import React from "react";
 
 type EmailComponents = {
@@ -45,8 +45,13 @@ async function sendEmail(
   if (process.env.ENABLE_MIGRATION === "true") {
     return;
   }
-  const html = await render(element);
-  await strapi.plugins.email.services.email.send({ to, subject, html });
+  const rawHtml = await render(element, { pretty: false });
+  await strapi.plugins.email.services.email.send({
+    to,
+    subject,
+    html: rawHtml,
+    text: toPlainText(rawHtml),
+  });
 }
 
 export async function sendVerificationEmail(
