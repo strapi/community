@@ -14,11 +14,23 @@ const PUPPETEER_CACHE_DIR = path.resolve(
 );
 process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
 
+const logDir = (dirPath: string) => {
+  try {
+    const entries = fs.readdirSync(dirPath);
+    strapi.log.info(`Contents of ${dirPath}: ${JSON.stringify(entries)}`);
+  } catch {
+    strapi.log.info(`Cannot read ${dirPath}`);
+  }
+};
+
 const ensureChrome = async () => {
   const { default: puppeteer } = await import("puppeteer");
   const execPath = puppeteer.executablePath();
 
-  if (fs.existsSync(execPath)) return;
+  if (fs.existsSync(execPath)) {
+    strapi.log.info(`Chrome found at ${execPath}`);
+    return;
+  }
 
   strapi.log.info(`Chrome not found at ${execPath}, downloading...`);
   const installScript = path.join(
@@ -26,7 +38,20 @@ const ensureChrome = async () => {
     "install.mjs",
   );
   execFileSync(process.execPath, [installScript], { stdio: "inherit" });
-  strapi.log.info("Chrome downloaded successfully.");
+
+  // Diagnose what was actually extracted
+  const versionDir = path.dirname(path.dirname(execPath)); // .cache/puppeteer/chrome/linux-X.Y.Z
+  logDir(versionDir);
+  logDir(path.dirname(execPath)); // .cache/puppeteer/chrome/linux-X.Y.Z/chrome-linux64
+
+  if (fs.existsSync(execPath)) {
+    fs.chmodSync(execPath, 0o755);
+    strapi.log.info("Chrome downloaded successfully.");
+  } else {
+    strapi.log.warn(
+      `Chrome binary still not found at ${execPath} after download.`,
+    );
+  }
 };
 
 const GITHUB_API_URL =
