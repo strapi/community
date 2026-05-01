@@ -5,16 +5,24 @@ import * as path from "node:path";
 import { parse } from "yaml";
 import { createCategories, uploadFile } from "./utils";
 
+// __dirname is dist/migration at runtime; ../../ resolves to the CMS app root.
+// Setting this before any puppeteer import ensures all copies use the same cache dir,
+// regardless of what process.cwd() is on Strapi Cloud.
+const PUPPETEER_CACHE_DIR = path.resolve(__dirname, "../../.cache/puppeteer");
+process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
+
 const ensureChrome = async () => {
   const { default: puppeteer } = await import("puppeteer");
-  if (fs.existsSync(puppeteer.executablePath())) return;
+  const execPath = puppeteer.executablePath();
 
-  strapi.log.info("Chrome not found, downloading for screenshot capture...");
+  if (fs.existsSync(execPath)) return;
+
+  strapi.log.info(`Chrome not found at ${execPath}, downloading...`);
   const installScript = path.join(
-    process.cwd(),
-    "node_modules/puppeteer/install.mjs",
+    path.dirname(require.resolve("puppeteer/package.json")),
+    "install.mjs",
   );
-  execFileSync(process.execPath, [installScript], { stdio: "pipe" });
+  execFileSync(process.execPath, [installScript], { stdio: "inherit" });
   strapi.log.info("Chrome downloaded successfully.");
 };
 
