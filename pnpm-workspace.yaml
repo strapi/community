@@ -15,4 +15,3 @@ catalogs:
 
 onlyBuiltDependencies:
   - better-sqlite3
-  - puppeteer

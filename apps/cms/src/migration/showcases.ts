@@ -1,58 +1,8 @@
-import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { parse } from "yaml";
 import { createCategories, uploadFile } from "./utils";
-
-// __dirname is dist/migration at runtime; ../../ resolves to the CMS app root.
-// Setting this before any puppeteer import ensures all copies use the same cache dir,
-// regardless of what process.cwd() is on Strapi Cloud.
-const PUPPETEER_CACHE_DIR = path.resolve(
-  __dirname,
-  "../../../.cache/puppeteer",
-);
-process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
-
-const logDir = (dirPath: string) => {
-  try {
-    const entries = fs.readdirSync(dirPath);
-    strapi.log.info(`Contents of ${dirPath}: ${JSON.stringify(entries)}`);
-  } catch {
-    strapi.log.info(`Cannot read ${dirPath}`);
-  }
-};
-
-const ensureChrome = async () => {
-  const { default: puppeteer } = await import("puppeteer");
-  const execPath = puppeteer.executablePath();
-
-  if (fs.existsSync(execPath)) {
-    strapi.log.info(`Chrome found at ${execPath}`);
-    return;
-  }
-
-  strapi.log.info(`Chrome not found at ${execPath}, downloading...`);
-  const installScript = path.join(
-    path.dirname(require.resolve("puppeteer/package.json")),
-    "install.mjs",
-  );
-  execFileSync(process.execPath, [installScript], { stdio: "inherit" });
-
-  // Diagnose what was actually extracted
-  const versionDir = path.dirname(path.dirname(execPath)); // .cache/puppeteer/chrome/linux-X.Y.Z
-  logDir(versionDir);
-  logDir(path.dirname(execPath)); // .cache/puppeteer/chrome/linux-X.Y.Z/chrome-linux64
-
-  if (fs.existsSync(execPath)) {
-    fs.chmodSync(execPath, 0o755);
-    strapi.log.info("Chrome downloaded successfully.");
-  } else {
-    strapi.log.warn(
-      `Chrome binary still not found at ${execPath} after download.`,
-    );
-  }
-};
 
 const GITHUB_API_URL =
   "https://api.github.com/repos/strapi/community-content/contents/showcase/sites.yml?ref=master";
@@ -68,22 +18,40 @@ type ShowcaseSite = {
 };
 
 const captureScreenshot = async (url: string, title: string) => {
-  const { default: captureWebsite } = await import("capture-website");
-  const tmpPath = path.join(
-    os.tmpdir(),
-    `screenshot-${Date.now()}-${Math.random().toString(36).slice(2)}.png`,
-  );
-
-  await captureWebsite.file(url, tmpPath, {
-    width: 1280,
-    height: 800,
-    timeout: 15,
-    delay: 5,
-    overwrite: true,
+  const params = new URLSearchParams({
+    access_key: process.env.SCREENSHOTONE_KEY,
+    url,
+    viewport_width: "1024",
+    viewport_height: "768",
+    format: "jpg",
+    block_ads: "true",
+    block_cookie_banners: "true",
+    block_banners_by_heuristics: "false",
+    block_trackers: "true",
+    delay: "3",
+    timeout: "20",
+    response_type: "by_format",
+    image_quality: "80",
   });
 
+  const response = await fetch(`https://api.screenshotone.com/take?${params}`, {
+    signal: AbortSignal.timeout(90_000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Screenshot API returned ${response.status} for ${url}`);
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const tmpPath = path.join(
+    os.tmpdir(),
+    `screenshot-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`,
+  );
+
+  await fs.promises.writeFile(tmpPath, buffer);
+
   try {
-    return await uploadFile(tmpPath, `${title}.png`, "image/png");
+    return await uploadFile(tmpPath, `${title}.jpg`, "image/jpeg");
   } finally {
     await fs.promises.unlink(tmpPath).catch(() => {});
   }
@@ -91,7 +59,6 @@ const captureScreenshot = async (url: string, title: string) => {
 
 export const migrateShowcases = async () => {
   strapi.log.info("Starting showcases migration...");
-  await ensureChrome();
 
   try {
     const response = await fetch(GITHUB_API_URL, {
