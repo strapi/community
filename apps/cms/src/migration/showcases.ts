@@ -1,8 +1,22 @@
+import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { parse } from "yaml";
 import { createCategories, uploadFile } from "./utils";
+
+const ensureChrome = async () => {
+  const { default: puppeteer } = await import("puppeteer");
+  if (fs.existsSync(puppeteer.executablePath())) return;
+
+  strapi.log.info("Chrome not found, downloading for screenshot capture...");
+  const installScript = path.join(
+    process.cwd(),
+    "node_modules/puppeteer/install.mjs",
+  );
+  execFileSync(process.execPath, [installScript], { stdio: "pipe" });
+  strapi.log.info("Chrome downloaded successfully.");
+};
 
 const GITHUB_API_URL =
   "https://api.github.com/repos/strapi/community-content/contents/showcase/sites.yml?ref=master";
@@ -41,6 +55,7 @@ const captureScreenshot = async (url: string, title: string) => {
 
 export const migrateShowcases = async () => {
   strapi.log.info("Starting showcases migration...");
+  await ensureChrome();
 
   try {
     const response = await fetch(GITHUB_API_URL, {
