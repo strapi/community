@@ -8,7 +8,10 @@ import { createCategories, uploadFile } from "./utils";
 // __dirname is dist/migration at runtime; ../../ resolves to the CMS app root.
 // Setting this before any puppeteer import ensures all copies use the same cache dir,
 // regardless of what process.cwd() is on Strapi Cloud.
-const PUPPETEER_CACHE_DIR = path.resolve(__dirname, "../../.cache/puppeteer");
+const PUPPETEER_CACHE_DIR = path.resolve(
+  __dirname,
+  "../../../.cache/puppeteer",
+);
 process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
 
 const ensureChrome = async () => {
