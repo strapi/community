@@ -4,6 +4,7 @@
   "private": true,
   "description": "A Strapi application",
   "scripts": {
+    "postinstall": "node node_modules/puppeteer/install.mjs",
     "build": "strapi build",
     "console": "strapi console",
     "deploy": "strapi deploy",
