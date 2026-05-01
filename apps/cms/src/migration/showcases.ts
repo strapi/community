@@ -40,7 +40,7 @@ const captureScreenshot = async (url: string, title: string) => {
 
   if (!response.ok) {
     throw new Error(
-      `Screenshot API returned ${response.status} for ${url}. ${response.statusText}. ${response.text}. ${response.json()}`,
+      `Screenshot API returned ${response.status} for ${url}. ${await response.text()}`,
     );
   }
 
