@@ -41,7 +41,7 @@ const auth = () => {
       sendOnSignIn: true,
     },
     emailAndPassword: {
-      enabled: false,
+      enabled: true,
       requireEmailVerification: true,
       sendResetPassword: async ({ user, url }) => {
         await sendResetPasswordEmail(user.email, url);
