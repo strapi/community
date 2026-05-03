@@ -39,11 +39,6 @@
     "readme": {
       "type": "richtext"
     },
-    "avatar": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": ["images"]
-    },
     "countries": {
       "type": "relation",
       "relation": "oneToMany",

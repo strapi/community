@@ -50,7 +50,6 @@ export const migratePartners = async () => {
         data: {
           bio: partner.attributes.seo.metaDescription,
           readme: partner.attributes.intro.text,
-          avatar: logo?.id,
           countries: countries,
           services: services,
           tech_stacks: techStacks,
@@ -68,6 +67,7 @@ export const migratePartners = async () => {
           slug: partner.attributes.slug,
           partner: true,
           partner_level: partner.attributes.level,
+          logo: logo?.url,
         },
       });
       migrated++;

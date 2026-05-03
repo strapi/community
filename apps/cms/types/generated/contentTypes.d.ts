@@ -836,7 +836,6 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    avatar: Schema.Attribute.Media<'images'>;
     bio: Schema.Attribute.Text;
     countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
