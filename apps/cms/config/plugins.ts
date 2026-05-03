@@ -43,7 +43,7 @@ export default ({ env }) => ({
         entriesQuery: {
           populate: [
             "owner",
-            "maintainers.profile.avatar",
+            "maintainers",
             "icon",
             "labels",
             "url_alias",
@@ -68,7 +68,7 @@ export default ({ env }) => ({
         indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
         entriesQuery: {
           populate: [
-            "maintainers.profile.avatar",
+            "maintainers",
             "preview_image",
             "labels",
             "url_alias",
@@ -119,7 +119,7 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["profile.avatar", "url_alias"],
+          populate: ["profile", "url_alias"],
         },
         settings: {
           sortableAttributes: ["createdAt"],
@@ -130,7 +130,7 @@ export default ({ env }) => ({
         indexName: env("MEILISEARCH_PARTNERS_INDEX_NAME"),
         entriesQuery: {
           populate: [
-            "profile.avatar",
+            "profile",
             "profile.services",
             "profile.countries",
             "url_alias",
