@@ -36,9 +36,9 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
             {/* Logo + Name */}
             <div className="mb-6 sm:flex items-center gap-5">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-(--color-primary600) bg-white">
-                {document.profile?.avatar?.url ? (
+                {document.image ? (
                   <Image
-                    src={cmsImageUrl(document.profile.avatar.url)}
+                    src={cmsImageUrl(document.image)}
                     width={118}
                     height={118}
                     alt={document.name ?? ""}

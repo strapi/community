@@ -67,13 +67,7 @@ const CTASection = async ({ section }: Props) => {
   const users = isCommunity
     ? await cmsClient.collection("plugin::better-auth.user").find({
         limit: 5,
-        populate: {
-          profile: {
-            populate: {
-              avatar: true,
-            },
-          },
-        },
+        populate: ["profile"],
       })
     : null;
 

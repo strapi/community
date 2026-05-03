@@ -21,7 +21,7 @@ export const findOrCreateAuthor = async (email, name, githubUrl, createdAt) => {
         name: name,
         email: email?.toLowerCase(),
         password: generatePassword(),
-        image: uploadedAvatar?.url,
+        image: uploadedAvatar?.formats?.small?.url || uploadedAvatar?.url,
       },
     });
     author = await strapi.documents("plugin::better-auth.user").findFirst({

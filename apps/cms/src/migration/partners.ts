@@ -67,7 +67,7 @@ export const migratePartners = async () => {
           slug: partner.attributes.slug,
           partner: true,
           partner_level: partner.attributes.level,
-          logo: logo?.url,
+          logo: logo?.formats?.small?.url || logo?.url,
         },
       });
       migrated++;

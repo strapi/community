@@ -16,9 +16,7 @@ const gridColsMap: Record<number, string> = {
 
 const maintainersPopulate = {
   populate: {
-    profile: {
-      populate: { avatar: true },
-    },
+    profile: true,
   },
 };
 
@@ -64,7 +62,7 @@ async function fetchItems(query: string, amount: number) {
       pagination: { limit: amount },
       populate: {
         url_alias: true,
-        profile: { populate: { avatar: true } },
+        profile: true,
       },
     });
     return { type: "user" as const, items: res.data ?? [] };
@@ -152,11 +150,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     name={user.name!}
                     subtitle={user.profile?.subtitle ?? undefined}
                     bio={user.profile?.bio ?? undefined}
-                    avatarUrl={
-                      user.profile?.avatar?.url
-                        ? cmsImageUrl(user.profile.avatar.url)
-                        : undefined
-                    }
+                    avatarUrl={user.image ? cmsImageUrl(user.image) : undefined}
                     profileUrl={user.url_alias?.[0]?.url_path ?? "#"}
                   />
                 ),

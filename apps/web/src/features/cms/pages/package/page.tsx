@@ -17,9 +17,7 @@ const query = {
     version_info: true,
     maintainers: {
       populate: {
-        profile: {
-          populate: { avatar: true },
-        },
+        profile: true,
         url_alias: true,
       },
     },

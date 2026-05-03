@@ -40,9 +40,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
             {/* Logo + Name */}
             <div className="mb-6 sm:flex items-center gap-5">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-(--color-primary600) bg-white">
-                {document.profile?.avatar?.url ? (
+                {document.logo ? (
                   <Image
-                    src={cmsImageUrl(document.profile.avatar.url)}
+                    src={cmsImageUrl(document.logo)}
                     width={118}
                     height={118}
                     alt={document.name ?? ""}
@@ -231,7 +231,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
             {members.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {members.map((member) => {
-                  const avatarUrl = member?.profile?.avatar?.url;
+                  const avatarUrl = member?.image;
                   return (
                     <div
                       key={member.id}
@@ -242,7 +242,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                           src={cmsImageUrl(avatarUrl)}
                           width={40}
                           height={40}
-                          alt={member?.profile?.avatar?.alternativeText ?? ""}
+                          alt={member?.name ?? ""}
                           className="rounded-full"
                         />
                       ) : (

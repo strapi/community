@@ -7,11 +7,7 @@ import type { RelatedContentItems } from "@/utils/types";
 const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
 
 const query = {
-  populate: {
-    profile: {
-      populate: ["avatar"],
-    },
-  },
+  populate: ["profile"],
 } satisfies GetQueryParams<typeof contentType>;
 
 export type UserPageData = Modules.Documents.Result<

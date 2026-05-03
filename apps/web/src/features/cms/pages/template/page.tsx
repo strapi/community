@@ -16,9 +16,7 @@ const query = {
     categories: true,
     maintainers: {
       populate: {
-        profile: {
-          populate: { avatar: true },
-        },
+        profile: true,
         url_alias: true,
       },
     },

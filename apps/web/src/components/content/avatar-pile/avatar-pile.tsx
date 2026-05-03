@@ -26,7 +26,7 @@ const AvatarLarge = ({
         const configIdx = 2 + distFromCenter;
         const width = SLOT_WIDTHS[configIdx] ?? "18%";
         const zIndex = 10 - Math.abs(distFromCenter);
-        const avatarUrl = m.profile?.avatar?.url;
+        const avatarUrl = m.image;
 
         return (
           <div
@@ -43,7 +43,7 @@ const AvatarLarge = ({
                 src={cmsImageUrl(avatarUrl)}
                 fill
                 sizes="(max-width: 360px) 32vw, 115px"
-                alt={m.profile?.avatar?.alternativeText ?? ""}
+                alt={m.name ?? ""}
                 className="object-cover"
               />
             ) : (
@@ -68,14 +68,14 @@ const AvatarPile = ({ items, size = "S" }: Props) => {
   return (
     <div className="flex items-center">
       {items.slice(0, 5).map((m, i) => {
-        const avatarUrl = m.profile?.avatar?.url;
+        const avatarUrl = m.image;
         return avatarUrl ? (
           <Image
             key={m.documentId}
             src={cmsImageUrl(avatarUrl)}
             width={28}
             height={28}
-            alt={m.profile?.avatar?.alternativeText ?? ""}
+            alt={m.name ?? ""}
             className="rounded-full border-2 border-(--color-primary400) object-cover"
             style={{ marginLeft: i === 0 ? 0 : -8 }}
           />

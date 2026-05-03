@@ -10,9 +10,9 @@ type Props = {
 };
 
 const Hit = ({ hit }: Props) => {
-  const image = hit.profile?.avatar?.url
+  const image = hit.logo
     ? {
-        src: cmsImageUrl(hit.profile?.avatar?.url),
+        src: cmsImageUrl(hit.logo),
         alt: hit.name ?? "",
         size: "S" as const,
       }
