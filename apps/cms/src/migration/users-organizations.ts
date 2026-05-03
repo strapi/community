@@ -4,7 +4,7 @@ import {
   uploadFromUrl,
 } from "./utils";
 
-export const findOrCreateAuthor = async (email, name, githubUrl) => {
+export const findOrCreateAuthor = async (email, name, githubUrl, createdAt) => {
   let author = await strapi.documents("plugin::better-auth.user").findFirst({
     fields: ["id"],
     filters: {
@@ -37,6 +37,7 @@ export const findOrCreateAuthor = async (email, name, githubUrl) => {
     await strapi.documents("plugin::better-auth.user").update({
       documentId: author.documentId,
       data: {
+        createdAt: createdAt,
         profile: profile.id,
       },
     });

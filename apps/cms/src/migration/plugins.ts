@@ -22,6 +22,9 @@ export const getPlugins = async () => {
 
 export const migratePlugins = async () => {
   strapi.log.info("Starting plugins migration...");
+  let migrated = 0;
+  let skipped = 0;
+  let failed = 0;
   const plugins = await getPlugins();
   for (const plugin of plugins) {
     try {
@@ -34,12 +37,14 @@ export const migratePlugins = async () => {
           },
         });
       if (existingPackage) {
+        skipped++;
         continue;
       }
       const author = await findOrCreateAuthor(
         plugin.fields["Developer email"],
         plugin.fields["Developer name"],
         plugin.fields["Repository URL"],
+        plugin.fields["Submission date"],
       );
       const logoUrl = plugin.fields["Logo URL"]?.[0];
       const logoKey = plugin.fields["Logo Key"]?.[0];
@@ -71,12 +76,16 @@ export const migratePlugins = async () => {
           slug: plugin.fields["Slug"] as string,
         },
       });
+      migrated++;
     } catch (error) {
+      failed++;
       strapi.log.error(
         `Error migrating plugin ${plugin.fields["Name"]}:`,
         error,
       );
     }
   }
-  strapi.log.info("Plugins migration finished.");
+  strapi.log.info(
+    `Plugins migration finished. Migrated: ${migrated}, Skipped: ${skipped}, Failed: ${failed}`,
+  );
 };

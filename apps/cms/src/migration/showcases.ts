@@ -61,6 +61,9 @@ const captureScreenshot = async (url: string, title: string) => {
 
 export const migrateShowcases = async () => {
   strapi.log.info("Starting showcases migration...");
+  let migrated = 0;
+  let skipped = 0;
+  let failed = 0;
 
   try {
     const response = await fetch(GITHUB_API_URL, {
@@ -81,6 +84,7 @@ export const migrateShowcases = async () => {
         .findFirst({ filters: { url: site.url } });
 
       if (existing) {
+        skipped++;
         continue;
       }
 
@@ -102,6 +106,7 @@ export const migrateShowcases = async () => {
           `Failed to capture screenshot for ${site.url}, skipping.`,
           err,
         );
+        failed++;
         continue;
       }
 
@@ -115,10 +120,13 @@ export const migrateShowcases = async () => {
           ...(image ? { image: image.id } : {}),
         },
       });
+      migrated++;
     }
   } catch (error) {
     strapi.log.error("Error migrating showcases:", error);
   } finally {
-    strapi.log.info("Showcases migration finished.");
+    strapi.log.info(
+      `Showcases migration finished. Migrated: ${migrated}, Skipped: ${skipped}, Failed: ${failed}`,
+    );
   }
 };

@@ -22,6 +22,9 @@ export const getProviders = async () => {
 
 export const migrateProviders = async () => {
   strapi.log.info("Starting providers migration...");
+  let migrated = 0;
+  let skipped = 0;
+  let failed = 0;
   const providers = await getProviders();
   for (const provider of providers) {
     try {
@@ -34,12 +37,14 @@ export const migrateProviders = async () => {
           },
         });
       if (existingPackage) {
+        skipped++;
         continue;
       }
       const author = await findOrCreateAuthor(
         provider.fields["Developer email"],
         provider.fields["Developer name"],
         provider.fields["Repository URL"],
+        provider.fields["Submission date"],
       );
       const logoUrl = provider.fields["Logo URL"]?.[0];
       const logoKey = provider.fields["Logo Key"]?.[0];
@@ -71,12 +76,16 @@ export const migrateProviders = async () => {
           slug: provider.fields["Slug"] as string,
         },
       });
+      migrated++;
     } catch (error) {
+      failed++;
       strapi.log.error(
         `Error migrating provider ${provider.fields["Name"]}:`,
         error,
       );
     }
   }
-  strapi.log.info("Providers migration finished.");
+  strapi.log.info(
+    `Providers migration finished. Migrated: ${migrated}, Skipped: ${skipped}, Failed: ${failed}`,
+  );
 };
