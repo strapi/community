@@ -21,7 +21,7 @@
     "@better-auth/infra": "^0.2.5",
     "@piksail/strapi-provider-email-mailpit": "^1.0.0",
     "@react-email/render": "^1.4.0",
-    "@strapi-community/plugin-better-auth": "catalog:strapi",
+    "@strapi-community/plugin-better-auth": "^1.0.0-beta.2",
     "@strapi-community/plugin-seo": "^2.1.1",
     "@strapi/admin": "catalog:strapi",
     "@strapi/design-system": "^2.0.0",

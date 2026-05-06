@@ -26,6 +26,11 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         minLength: 1;
       }>;
+    adminPermissions: Schema.Attribute.Relation<
+      'oneToMany',
+      'admin::permission'
+    >;
+    adminUserOwner: Schema.Attribute.Relation<'manyToOne', 'admin::user'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -39,6 +44,9 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
         minLength: 1;
       }>;
     expiresAt: Schema.Attribute.DateTime;
+    kind: Schema.Attribute.Enumeration<['content-api', 'admin']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'content-api'>;
     lastUsedAt: Schema.Attribute.DateTime;
     lifespan: Schema.Attribute.BigInteger;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -56,7 +64,6 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
     >;
     publishedAt: Schema.Attribute.DateTime;
     type: Schema.Attribute.Enumeration<['read-only', 'full-access', 'custom']> &
-      Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'read-only'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -134,6 +141,7 @@ export interface AdminPermission extends Struct.CollectionTypeSchema {
         minLength: 1;
       }>;
     actionParameters: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<{}>;
+    apiToken: Schema.Attribute.Relation<'manyToOne', 'admin::api-token'>;
     conditions: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -385,6 +393,8 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    apiTokens: Schema.Attribute.Relation<'oneToMany', 'admin::api-token'> &
+      Schema.Attribute.Private;
     blocked: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;
@@ -1156,7 +1166,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
 }
 
 export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_accounts';
+  collectionName: 'ba_account';
   info: {
     description: 'Better Auth account';
     displayName: 'Accounts';
@@ -1256,7 +1266,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
 
 export interface PluginBetterAuthInvitation
   extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_invitations';
+  collectionName: 'ba_invitation';
   info: {
     displayName: 'Invitations';
     pluralName: 'invitations';
@@ -1333,7 +1343,7 @@ export interface PluginBetterAuthInvitation
 }
 
 export interface PluginBetterAuthMember extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_members';
+  collectionName: 'ba_member';
   info: {
     displayName: 'Members';
     pluralName: 'members';
@@ -1391,7 +1401,7 @@ export interface PluginBetterAuthMember extends Struct.CollectionTypeSchema {
 
 export interface PluginBetterAuthOrganization
   extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_organizations';
+  collectionName: 'ba_organization';
   info: {
     displayName: 'Organizations';
     pluralName: 'organizations';
@@ -1466,7 +1476,7 @@ export interface PluginBetterAuthOrganization
 }
 
 export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_sessions';
+  collectionName: 'ba_session';
   info: {
     description: 'Better Auth session';
     displayName: 'Sessions';
@@ -1542,7 +1552,7 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
 }
 
 export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_two_factors';
+  collectionName: 'ba_two_factor';
   info: {
     displayName: 'Two Factors';
     pluralName: 'two-factors';
@@ -1605,7 +1615,7 @@ export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
 }
 
 export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_users';
+  collectionName: 'ba_user';
   info: {
     description: 'Better Auth user';
     displayName: 'Users';
@@ -1687,7 +1697,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
 
 export interface PluginBetterAuthVerification
   extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_verifications';
+  collectionName: 'ba_verification';
   info: {
     description: 'Better Auth verification';
     displayName: 'Verifications';

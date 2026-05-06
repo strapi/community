@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_sessions",
+  "collectionName": "ba_session",
   "info": {
     "singularName": "session",
     "pluralName": "sessions",

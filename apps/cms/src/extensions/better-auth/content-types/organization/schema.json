@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_organizations",
+  "collectionName": "ba_organization",
   "info": {
     "singularName": "organization",
     "pluralName": "organizations",

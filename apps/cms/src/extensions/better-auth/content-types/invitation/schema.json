@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_invitations",
+  "collectionName": "ba_invitation",
   "info": {
     "singularName": "invitation",
     "pluralName": "invitations",

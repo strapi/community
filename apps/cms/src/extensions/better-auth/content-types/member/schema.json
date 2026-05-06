@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_members",
+  "collectionName": "ba_member",
   "info": {
     "singularName": "member",
     "pluralName": "members",

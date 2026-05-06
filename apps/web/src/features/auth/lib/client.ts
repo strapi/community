@@ -7,7 +7,7 @@ import { createAuthClient } from "better-auth/react";
 
 export const authClient: ReturnType<typeof createAuthClient> = createAuthClient(
   {
-    baseURL: `${process.env.NEXT_PUBLIC_CMS_URL}/api/better-auth`,
+    baseURL: `${process.env.NEXT_PUBLIC_CMS_URL}/api/auth`,
     plugins: [organizationClient(), twoFactorClient(), emailOTPClient()],
   },
 );

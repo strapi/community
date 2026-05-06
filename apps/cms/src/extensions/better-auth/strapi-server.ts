@@ -16,7 +16,6 @@ export default (plugin) => {
   plugin.routes["content-api"] = {
     type: "content-api",
     routes: [
-      ...plugin.routes["content-api"]().routes,
       ...organizationRoutes["content-api"].routes,
       ...userRoutes["content-api"].routes,
     ],

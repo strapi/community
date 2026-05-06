@@ -1,6 +1,6 @@
 {
   "kind": "collectionType",
-  "collectionName": "better_auth_two_factors",
+  "collectionName": "ba_two_factor",
   "info": {
     "singularName": "two-factor",
     "pluralName": "two-factors",
