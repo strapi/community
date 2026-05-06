@@ -68,6 +68,7 @@ export default ({ env }) => ({
         indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
         entriesQuery: {
           populate: [
+            "owner",
             "maintainers",
             "preview_image",
             "labels",

@@ -14,12 +14,6 @@ const gridColsMap: Record<number, string> = {
   4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
 };
 
-const maintainersPopulate = {
-  populate: {
-    profile: true,
-  },
-};
-
 async function fetchItems(query: string, amount: number) {
   const isHighlighted = query.endsWith("_highlighted");
   const featuredFilter = isHighlighted
@@ -35,7 +29,7 @@ async function fetchItems(query: string, amount: number) {
         icon: true,
         url_alias: true,
         labels: true,
-        maintainers: maintainersPopulate,
+        owner: true,
       },
     });
     return { type: "package" as const, items: res.data ?? [] };
@@ -50,7 +44,7 @@ async function fetchItems(query: string, amount: number) {
         preview_image: true,
         url_alias: true,
         labels: true,
-        maintainers: maintainersPopulate,
+        owner: true,
       },
     });
     return { type: "template" as const, items: res.data ?? [] };
@@ -114,7 +108,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     description={pkg.description ?? ""}
                     githubStars={pkg.stars || undefined}
                     npmDownloads={pkg.monthly_downloads || undefined}
-                    maintainers={pkg.maintainers!}
+                    owner={pkg.owner!}
                     labels={pkg.labels!}
                   />
                 ),
@@ -136,7 +130,7 @@ const HighlightsSection = async ({ section }: Props) => {
                     badge="Template"
                     name={tpl.name!}
                     description={tpl.description ?? ""}
-                    maintainers={tpl.maintainers!}
+                    owner={tpl.owner!}
                     labels={tpl.labels!}
                   />
                 ),

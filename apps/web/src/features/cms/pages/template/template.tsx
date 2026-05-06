@@ -13,14 +13,14 @@ import type { Owner } from "@/utils/types";
 
 type Props = {
   document: TemplatePageData;
-  owner: Owner;
 };
 
-const TemplateTemplate = ({ document, owner }: Props) => {
+const TemplateTemplate = ({ document }: Props) => {
   const categories = (document.categories ?? []) as {
     documentId: string;
     name: string;
   }[];
+  const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
   const githubStars = document.stars;
 

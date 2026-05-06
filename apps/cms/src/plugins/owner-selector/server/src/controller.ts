@@ -1,10 +1,13 @@
-const SUPPORTED = ["api::package.package", "api::template.template"];
+const SUPPORTED = [
+  "api::package.package",
+  "api::template.template",
+  "api::showcase.showcase",
+];
 
 export default ({ strapi }) => ({
   async getUsers(ctx) {
     const users = await strapi.documents("plugin::better-auth.user").findMany({
       fields: ["name", "email", "documentId"],
-      populate: { profile: { populate: { avatar: { fields: ["url"] } } } },
       pagination: { limit: 100 },
     });
     ctx.body = { data: users };
@@ -15,7 +18,6 @@ export default ({ strapi }) => ({
       .documents("plugin::better-auth.organization")
       .findMany({
         fields: ["name", "slug", "documentId"],
-        populate: { profile: { populate: { avatar: { fields: ["url"] } } } },
         pagination: { limit: 100 },
       });
     ctx.body = { data: orgs };
@@ -39,7 +41,7 @@ export default ({ strapi }) => ({
       },
     });
 
-    ctx.body = { data: entry?.owner ?? [] };
+    ctx.body = { data: entry?.owner ?? null };
   },
 
   async setOwner(ctx) {
@@ -50,11 +52,21 @@ export default ({ strapi }) => ({
       return ctx.badRequest("Unsupported content type");
     }
 
-    const ownerValue = ownerDocumentId
-      ? { set: [{ documentId: ownerDocumentId, __type: ownerType }] }
-      : { set: [] };
+    let ownerValue = null;
+    if (ownerDocumentId) {
+      const ownerEntity = await strapi.db
+        .query(ownerType)
+        .findOne({ where: { documentId: ownerDocumentId } });
+
+      if (!ownerEntity) {
+        return ctx.badRequest("Owner not found");
+      }
+
+      ownerValue = { id: ownerEntity.id, __type: ownerType };
+    }
 
     await strapi.documents(contentType).update({
+      status: "published",
       documentId,
       data: { owner: ownerValue },
     });

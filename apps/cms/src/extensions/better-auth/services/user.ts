@@ -18,8 +18,8 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
     const contentTypeName = extractContentTypeName(uid);
 
     const IDs: Record<string, unknown>[] = await strapi.db
-      .connection(`${contentTypeName}s_owner_mph`)
-      .select(`${contentTypeName}_id`)
+      .connection(`${contentTypeName}s`)
+      .select("id")
       .where({
         owner_id: organizationId,
         owner_type: "plugin::better-auth.user",
@@ -31,7 +31,7 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
         ...query?.filters,
         id: {
           $in: IDs.map(
-            (row) => row[`${contentTypeName}_id`],
+            (row) => row.id,
           ) as Modules.Documents.Params.Attribute.ID[],
         },
       },

@@ -15,14 +15,14 @@ import type { Owner } from "@/utils/types";
 
 type Props = {
   document: PackagePageData;
-  owner: Owner;
 };
 
-const PackageTemplate = ({ document, owner }: Props) => {
+const PackageTemplate = ({ document }: Props) => {
   const categories = (document.categories ?? []) as {
     documentId: string;
     name: string;
   }[];
+  const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
   const githubStars = document.stars;
   const npmDownloads = document.monthly_downloads;

@@ -76,7 +76,7 @@ export const OwnerModal = ({
     },
     {
       onSuccess() {
-        queryClient.invalidateQueries(["users", "organizations", "owner"]);
+        queryClient.invalidateQueries("owner");
         toggleNotification({ type: "success", message: "Owner saved" });
         onSaved();
         onClose();

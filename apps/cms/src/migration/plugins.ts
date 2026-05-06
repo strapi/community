@@ -67,12 +67,10 @@ export const migratePlugins = async () => {
           icon: icon?.id,
           monthly_downloads: plugin.fields["npm downloads"] as number,
           maintainers: [author.author.documentId],
-          owner: [
-            {
-              __type: author.type,
-              id: author.author.id,
-            },
-          ],
+          owner: {
+            __type: author.type,
+            id: author.author.id,
+          },
           slug: plugin.fields["Slug"] as string,
         },
       });

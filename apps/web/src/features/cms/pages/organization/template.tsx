@@ -168,7 +168,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                       link={template.url_alias?.[0]?.url_path!}
                       badge="Template"
                       name={template.name!}
-                      maintainers={template.maintainers!}
+                      owner={template.owner!}
                       labels={template.labels!}
                     />
                   ))}
@@ -196,7 +196,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
                       link={pkg.url_alias?.[0]?.url_path!}
                       badge="Package"
                       name={pkg.name!}
-                      maintainers={pkg.maintainers!}
+                      owner={pkg.owner!}
                       labels={pkg.labels!}
                     />
                   ))}

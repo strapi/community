@@ -32,7 +32,7 @@ export type HomePageData = Modules.Documents.Result<
 >;
 
 const packagesQuery = {
-  populate: ["icon", "maintainers", "url_alias"],
+  populate: ["icon", "owner", "url_alias"],
   // @ts-expect-error - issue in the strapi-client
   pagination: {
     limit: 3,
@@ -44,7 +44,7 @@ export type HomePackages = Modules.Documents.Result<
 >[];
 
 const templatesQuery = {
-  populate: ["preview_image", "maintainers", "url_alias"],
+  populate: ["preview_image", "owner", "url_alias"],
   // @ts-expect-error - issue in the strapi-client
   pagination: {
     limit: 3,

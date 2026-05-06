@@ -58,7 +58,16 @@
     },
     "owner": {
       "type": "relation",
-      "relation": "morphToMany"
+      "relation": "morphToOne",
+      "morphColumn": {
+        "typeColumn": {
+          "name": "owner_type"
+        },
+        "idColumn": {
+          "name": "owner_id",
+          "referencedColumn": "id"
+        }
+      }
     },
     "maintainers": {
       "type": "relation",

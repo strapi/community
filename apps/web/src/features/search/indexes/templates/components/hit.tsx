@@ -21,7 +21,7 @@ const Hit = ({ hit }: Props) => {
       name={hit.name!}
       badge="Template"
       description={hit.description!}
-      maintainers={hit.maintainers || []}
+      owner={hit.owner!}
       labels={hit.labels!}
       image={image as any}
     />

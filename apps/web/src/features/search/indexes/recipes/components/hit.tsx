@@ -21,7 +21,6 @@ const Hit = ({ hit }: Props) => {
       name={hit.title!}
       badge="Recipe"
       description={hit.description!}
-      maintainers={[]}
       labels={null as any}
       image={image as any}
     />

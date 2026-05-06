@@ -58,7 +58,7 @@ const Hit = ({ hit }: Props) => {
       name={name}
       badge={"preview_link" in hit ? "Template" : "Package"}
       description={hit.description!}
-      maintainers={"maintainers" in hit ? hit.maintainers || [] : []}
+      owner={"owner" in hit ? hit.owner! : undefined}
       labels={"labels" in hit ? hit.labels! : (null as any)}
       image={image as any}
     />

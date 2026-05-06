@@ -806,7 +806,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     >;
     monthly_downloads: Schema.Attribute.Integer;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'morphToMany'>;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
@@ -1010,7 +1010,7 @@ export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
       'api::showcase.showcase'
     > &
       Schema.Attribute.Private;
-    owner: Schema.Attribute.Relation<'morphToMany'>;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     publishedAt: Schema.Attribute.DateTime;
     tech_stacks: Schema.Attribute.Relation<
@@ -1146,7 +1146,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'morphToMany'>;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;

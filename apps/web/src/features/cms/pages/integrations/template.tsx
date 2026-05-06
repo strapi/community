@@ -72,7 +72,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                   description={pkg.description ?? ""}
                   githubStars={pkg.stars || undefined}
                   npmDownloads={pkg.monthly_downloads || undefined}
-                  maintainers={pkg.maintainers!}
+                  owner={pkg.owner!}
                   labels={pkg.labels!}
                 />
               ))}
@@ -99,7 +99,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                   badge="Template"
                   name={tpl.name!}
                   description={tpl.description ?? ""}
-                  maintainers={tpl.maintainers!}
+                  owner={tpl.owner!}
                   labels={tpl.labels!}
                 />
               ))}

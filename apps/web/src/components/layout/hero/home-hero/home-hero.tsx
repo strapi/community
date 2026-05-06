@@ -161,7 +161,7 @@ const HomeHero = (props: Props) => {
                   </p>
                   {/* Avatar pile */}
                   <div className="mt-4 flex">
-                    <AvatarPile items={pkg.maintainers!} />
+                    <AvatarPile items={[pkg.owner!]} />
                   </div>
                 </Link>
               </div>
@@ -195,7 +195,7 @@ const HomeHero = (props: Props) => {
                   </p>
                   {/* Avatar pile */}
                   <div className="mt-4 flex">
-                    <AvatarPile items={template.maintainers!} />
+                    <AvatarPile items={[template.owner!]} />
                   </div>
                 </Link>
               </div>

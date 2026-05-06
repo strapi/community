@@ -34,26 +34,23 @@ export const OwnerPanel = ({ model, documentId }: Props) => {
   );
 
   const [selectedId, setSelectedId] = useState<string>("");
-  const [initialised, setInitialised] = useState(false);
-
   if (!SUPPORTED.includes(model) || !documentId) return null;
 
-  const { isLoading } = useQuery<CurrentOwner[]>(
+  const { isLoading } = useQuery<CurrentOwner>(
     "owner",
     async () => {
       const res = await get(
         `/owner-selector/owner?contentType=${model}&documentId=${documentId}`,
       );
-      return res.data.data ?? [];
+      return res.data.data ?? null;
     },
     {
       onSuccess(current) {
-        if (!initialised) {
-          if (current.length > 0) {
-            setOwnerType(current[0].__type);
-            setSelectedId(current[0].documentId);
-          }
-          setInitialised(true);
+        if (current) {
+          setOwnerType(current.__type);
+          setSelectedId(current.documentId);
+        } else {
+          setSelectedId("");
         }
       },
       onError() {

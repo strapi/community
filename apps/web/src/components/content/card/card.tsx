@@ -3,6 +3,7 @@ import { BadgeCheck, Download, Github, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
+import type { Owner } from "@/utils/types";
 
 type Props = {
   image: {
@@ -18,7 +19,7 @@ type Props = {
   description: string;
   githubStars?: number;
   npmDownloads?: number;
-  maintainers?: Data.ContentType<"plugin::better-auth.user">[];
+  owner?: Owner;
   labels?: Data.Component<"shared.labels">;
 };
 
@@ -35,8 +36,8 @@ const ContentCard = (props: Props) => {
     description,
     githubStars,
     npmDownloads,
-    maintainers,
     labels,
+    owner,
   } = props;
   const isLarge = image?.size === "L";
   const imgSize = imageSizeMap[image?.size ?? "M"];
@@ -110,7 +111,7 @@ const ContentCard = (props: Props) => {
           </p>
 
           {/* Avatars */}
-          {maintainers && <AvatarPile items={maintainers} />}
+          {owner && <AvatarPile items={[owner]} />}
         </div>
       </article>
     </Link>

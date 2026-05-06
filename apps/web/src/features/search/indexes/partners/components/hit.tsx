@@ -48,7 +48,6 @@ const Hit = ({ hit }: Props) => {
       badgeColor={getBadgeColors(hit.partner_level!)?.badgeColor}
       badgeTextColor={getBadgeColors(hit.partner_level!)?.badgeTextColor}
       description={(hit.profile as any)?.bio ?? ""}
-      maintainers={[]}
       labels={null as any}
       image={image as any}
     />

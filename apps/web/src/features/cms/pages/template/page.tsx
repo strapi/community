@@ -1,11 +1,7 @@
-import type {
-  DocumentResponseCollection,
-  GetQueryParams,
-} from "@repo/strapi-client";
+import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { TemplateTemplate } from "@/features/cms/pages/template";
-import type { Owner } from "@/utils/types";
 
 const contentType = "api::template.template" satisfies UID.ContentType;
 
@@ -14,6 +10,9 @@ const query = {
     preview_image: true,
     labels: true,
     categories: true,
+    owner: {
+      populate: "*",
+    },
     maintainers: {
       populate: {
         profile: true,
@@ -37,13 +36,7 @@ const TemplatePage = async ({ documentId }: Props) => {
     .collection(contentType)
     .findOne(documentId, query);
 
-  const owner: DocumentResponseCollection<Owner> = await cmsClient
-    .fetch(
-      `/owner?contentType=${contentType}&documentId=${documentId}&populate=*`,
-    )
-    .then((response) => response.json());
-
-  return <TemplateTemplate document={document.data} owner={owner.data[0]!} />;
+  return <TemplateTemplate document={document.data} />;
 };
 
 export { TemplatePage };

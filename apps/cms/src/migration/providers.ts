@@ -67,12 +67,10 @@ export const migrateProviders = async () => {
           icon: icon?.id,
           monthly_downloads: provider.fields["npm downloads"] as number,
           maintainers: [author.author.documentId],
-          owner: [
-            {
-              __type: author.type,
-              id: author.author.id,
-            },
-          ],
+          owner: {
+            __type: author.type,
+            id: author.author.id,
+          },
           slug: provider.fields["Slug"] as string,
         },
       });
