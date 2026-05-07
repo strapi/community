@@ -1,7 +1,7 @@
 "use client";
 
+import { SignedIn, SignedOut, UserButton } from "@daveyplate/better-auth-ui";
 import { Button } from "@repo/strapi-ui";
-import { SignedIn, SignedOut, UserButton } from "better-auth-ui";
 import Link from "next/link";
 
 type Props = {

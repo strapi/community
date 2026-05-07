@@ -1,3 +1,3 @@
 "use client";
 
-export { OrganizationView } from "better-auth-ui";
+export { OrganizationView } from "@daveyplate/better-auth-ui";

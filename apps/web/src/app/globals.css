@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "@repo/strapi-ui/styles.css";
-@import "better-auth-ui/css";
+@import "@daveyplate/better-auth-ui/css";
 
 :root {
   --background: #ffffff;

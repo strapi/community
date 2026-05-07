@@ -1,3 +1,3 @@
 "use client";
 
-export { AuthView } from "better-auth-ui";
+export { AuthView } from "@daveyplate/better-auth-ui";
