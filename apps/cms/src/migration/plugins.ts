@@ -59,6 +59,7 @@ export const migratePlugins = async () => {
         status: "published",
         data: {
           name: plugin.fields["Name"] as string,
+          createdAt: plugin.fields["Submission date"] as string,
           description: plugin.fields["Description"] as string,
           type: plugin.fields["Type"] as "plugin",
           package_location: plugin.fields["npm package URL"] as string,

@@ -59,6 +59,7 @@ export const migrateProviders = async () => {
         status: "published",
         data: {
           name: provider.fields["Name"] as string,
+          createdAt: provider.fields["Submission date"] as string,
           description: provider.fields["Description"] as string,
           type: provider.fields["Type"] as "provider",
           package_location: provider.fields["npm package URL"] as string,
