@@ -59,6 +59,9 @@ importers:
       '@strapi-community/plugin-better-auth':
         specifier: ^1.0.0-beta.6
         version: 1.0.0-beta.6(a80320d2b3c100240f1b6d9aa38fc9cc)
+      '@strapi-community/plugin-better-auth-dashboard':
+        specifier: ^1.0.0-alpha.7
+        version: 1.0.0-alpha.7(ad9d530d8af271083130a2cea15ea1bc)
       '@strapi-community/plugin-seo':
         specifier: ^2.1.1
         version: 2.1.1(e3f447537173103563715ad9a8f1d62b)
@@ -108,8 +111,8 @@ importers:
         specifier: ^0.15.0
         version: 0.15.0(8ab7b9b0f0b73e2ce0716c22fe7c4062)
       strapi-plugin-webtools:
-        specifier: ^1.7.3
-        version: 1.7.3(5e02a4a117c41729c03586d7cc91122a)
+        specifier: ^1.10.0
+        version: 1.10.0(5e02a4a117c41729c03586d7cc91122a)
       styled-components:
         specifier: ^6.0.0
         version: 6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3972,6 +3975,23 @@ packages:
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+
+  '@strapi-community/plugin-better-auth-dashboard@1.0.0-alpha.7':
+    resolution: {integrity: sha512-UTI+M2uCn4nzWJtKWHGZYe2NhCtGKmzDu3SqMtEo68RQQ2c9zmznpK+5KQdmx0lUfZfjD3542xSsvgn+dW+XBQ==}
+    peerDependencies:
+      '@better-auth/infra': ^0.2.6
+      '@strapi-community/plugin-better-auth': ^1.0.0-beta.6
+      '@strapi/design-system': ^2.0.0
+      '@strapi/icons': ^2.0.0
+      '@strapi/strapi': ^5.45.0
+      '@strapi/types': ^5.45.0
+      '@strapi/utils': ^5.45.0
+      better-auth: '>=1.4.0 <2'
+      react: ^18.0.0
+      react-dom: ^18.0.0
+      react-intl: ^6.0.0 || ^7.0.0
+      react-query: ^3.0.0
+      styled-components: ^6.0.0
 
   '@strapi-community/plugin-better-auth@1.0.0-beta.6':
     resolution: {integrity: sha512-xeFtx5fqtlZIQgN8UO58W1vkXnaT0Ws27wvtO7kdsMkqlekHwxBIh8TihSoPHvTFXthOQ7jUzvnMNy0O92gsLA==}
@@ -8208,11 +8228,6 @@ packages:
     peerDependencies:
       react: '>=16.4.1'
 
-  react-copy-to-clipboard@5.1.0:
-    resolution: {integrity: sha512-k61RsNgAayIJNoy9yDsYzDe/yAZAzEbEgcz3DZMhF686LEyukcE1hzurxe85JandPUG+yTfGVFzuEw3xt8WP/A==}
-    peerDependencies:
-      react: ^15.3.0 || 16 || 17 || 18
-
   react-copy-to-clipboard@5.1.1:
     resolution: {integrity: sha512-s+HrzLyJBxrpGTYXF15dTgMjAJpEPZT/Yp6NytAtZMRngejxt6Pt5WrfFxLAcsqUDU6sY1Jz6tyHwIicE1U2Xg==}
     peerDependencies:
@@ -8950,15 +8965,15 @@ packages:
       react-router-dom: ^6.30.3
       styled-components: ^6.3.11
 
-  strapi-plugin-webtools@1.7.3:
-    resolution: {integrity: sha512-SsH8055c5c1o2QqKPZZ9VLAjmiIWdGYJ+bS1NPGMqBGhQ8QZddrBFeWkb5EQEH4BuR7WWg1l4p4peH4Lx2H9Bg==}
-    engines: {node: '>=18.x.x <=22.x.x', npm: '>=6.0.0'}
+  strapi-plugin-webtools@1.10.0:
+    resolution: {integrity: sha512-nTY3S3/CeYpEg8VzxcDSdf/yv9GkBZSY7I864MF3ggC2EwH+uLY63biwzW4pVmPjPhvw5veuYlh8kej1mtKEqg==}
+    engines: {node: '>=20.x.x <=24.x.x', npm: '>=6.0.0'}
     peerDependencies:
-      '@strapi/admin': ^5.0.0
+      '@strapi/admin': ^5.42.1
       '@strapi/design-system': ^2.0.0
       '@strapi/icons': ^2.0.0
-      '@strapi/strapi': ^5.0.0
-      '@strapi/utils': ^5.0.0
+      '@strapi/strapi': ^5.42.1
+      '@strapi/utils': ^5.42.1
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
       react-router-dom: ^6.0.0
@@ -13359,6 +13374,22 @@ snapshots:
   '@standard-schema/spec@1.1.0': {}
 
   '@standard-schema/utils@0.3.0': {}
+
+  '@strapi-community/plugin-better-auth-dashboard@1.0.0-alpha.7(ad9d530d8af271083130a2cea15ea1bc)':
+    dependencies:
+      '@better-auth/infra': 0.2.5(7c3408f67f1810742ac02ae68fa740e8)
+      '@strapi-community/plugin-better-auth': 1.0.0-beta.6(a80320d2b3c100240f1b6d9aa38fc9cc)
+      '@strapi/design-system': 2.2.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@strapi/icons@2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)))(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(codemirror@5.65.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@strapi/icons': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@strapi/strapi': 5.45.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@emotion/is-prop-valid@1.2.2)(@swc/helpers@0.5.18)(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(esbuild@0.27.7)(koa@2.16.4)(lightningcss@1.31.1)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.44.1)(type-fest@4.41.0)
+      '@strapi/types': 5.45.0(@types/node@20.19.27)(better-sqlite3@12.4.1)(typescript@5.9.2)
+      '@strapi/utils': 5.45.0
+      better-auth: 1.6.9(@opentelemetry/api@1.9.0)(better-sqlite3@12.4.1)(mongodb@7.1.0(socks@2.8.8))(next@16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-intl: 6.8.9(react@18.3.1)(typescript@5.9.2)
+      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      styled-components: 6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@strapi-community/plugin-better-auth@1.0.0-beta.6(a80320d2b3c100240f1b6d9aa38fc9cc)':
     dependencies:
@@ -19021,12 +19052,6 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
 
-  react-copy-to-clipboard@5.1.0(react@18.3.1):
-    dependencies:
-      copy-to-clipboard: 3.3.3
-      prop-types: 15.8.1
-      react: 18.3.1
-
   react-copy-to-clipboard@5.1.1(react@18.3.1):
     dependencies:
       copy-to-clipboard: 3.3.3
@@ -19983,7 +20008,7 @@ snapshots:
       - '@types/react-dom'
       - codemirror
 
-  strapi-plugin-webtools@1.7.3(5e02a4a117c41729c03586d7cc91122a):
+  strapi-plugin-webtools@1.10.0(5e02a4a117c41729c03586d7cc91122a):
     dependencies:
       '@strapi/admin': 5.45.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@emotion/is-prop-valid@1.2.2)(@strapi/data-transfer@5.45.0(@types/node@20.19.27)(better-sqlite3@12.4.1)(typescript@5.9.2))(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(debug@4.3.4)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@strapi/design-system': 2.2.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@strapi/icons@2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)))(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(codemirror@5.65.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -19991,12 +20016,12 @@ snapshots:
       '@strapi/strapi': 5.45.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.39.4)(@emotion/is-prop-valid@1.2.2)(@swc/helpers@0.5.18)(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(esbuild@0.27.7)(koa@2.16.4)(lightningcss@1.31.1)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.44.1)(type-fest@4.41.0)
       '@strapi/utils': 5.45.0
       formik: 2.4.5(@types/react@18.3.27)(react@18.3.1)
-      lodash: 4.17.21
-      qs: 6.14.0
+      lodash: 4.18.1
+      qs: 6.15.0
       react: 18.3.1
-      react-copy-to-clipboard: 5.1.0(react@18.3.1)
+      react-copy-to-clipboard: 5.1.1(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
-      react-intl: 6.6.2(react@18.3.1)(typescript@5.9.2)
+      react-intl: 6.8.9(react@18.3.1)(typescript@5.9.2)
       react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router-dom: 6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       styled-components: 6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

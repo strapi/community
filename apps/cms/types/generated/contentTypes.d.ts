@@ -1342,6 +1342,61 @@ export interface PluginBetterAuthInvitation
   };
 }
 
+export interface PluginBetterAuthJwks extends Struct.CollectionTypeSchema {
+  collectionName: 'ba_jwks';
+  info: {
+    displayName: 'Jwks';
+    pluralName: 'jwks';
+    singularName: 'jwks';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    expiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::better-auth.jwks'
+    > &
+      Schema.Attribute.Private;
+    privateKey: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    publicKey: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginBetterAuthMember extends Struct.CollectionTypeSchema {
   collectionName: 'ba_member';
   info: {
@@ -1412,7 +1467,7 @@ export interface PluginBetterAuthOrganization
   };
   pluginOptions: {
     'content-manager': {
-      visible: true;
+      visible: false;
     };
     'content-type-builder': {
       visible: true;
@@ -1627,7 +1682,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
   };
   pluginOptions: {
     'content-manager': {
-      visible: true;
+      visible: false;
     };
     'content-type-builder': {
       visible: true;
@@ -2223,6 +2278,7 @@ declare module '@strapi/strapi' {
       'api::template.template': ApiTemplateTemplate;
       'plugin::better-auth.account': PluginBetterAuthAccount;
       'plugin::better-auth.invitation': PluginBetterAuthInvitation;
+      'plugin::better-auth.jwks': PluginBetterAuthJwks;
       'plugin::better-auth.member': PluginBetterAuthMember;
       'plugin::better-auth.organization': PluginBetterAuthOrganization;
       'plugin::better-auth.session': PluginBetterAuthSession;

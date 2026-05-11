@@ -1,7 +1,7 @@
 import { dash } from "@better-auth/infra";
 import { strapiAdapter } from "@strapi-community/plugin-better-auth";
 import { betterAuth } from "better-auth";
-import { emailOTP, organization, twoFactor } from "better-auth/plugins";
+import { emailOTP, jwt, organization, twoFactor } from "better-auth/plugins";
 import { sendOtpEmail, sendResetPasswordEmail } from "./email";
 
 export const auth = betterAuth({
@@ -17,7 +17,13 @@ export const auth = betterAuth({
         },
       },
     }),
-    dash(),
+    dash({
+      apiUrl: process.env.STRAPI_URL || "http://localhost:1337",
+      apiKey:
+        process.env.BETTER_AUTH_DASHBOARD_SECRET ||
+        "strapi-internal-dashboard-key",
+    }),
+    jwt(),
     emailOTP({
       overrideDefaultEmailVerification: true,
       sendVerificationOTP: async ({ email, otp }) => {

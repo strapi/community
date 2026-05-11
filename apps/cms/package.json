@@ -22,6 +22,7 @@
     "@piksail/strapi-provider-email-mailpit": "^1.0.0",
     "@react-email/render": "^1.4.0",
     "@strapi-community/plugin-better-auth": "^1.0.0-beta.6",
+    "@strapi-community/plugin-better-auth-dashboard": "^1.0.0-alpha.7",
     "@strapi-community/plugin-seo": "^2.1.1",
     "@strapi/admin": "catalog:strapi",
     "@strapi/design-system": "^2.0.0",
@@ -38,7 +39,7 @@
     "react-query": "^3.39.3",
     "react-router-dom": "^6.0.0",
     "strapi-plugin-meilisearch": "^0.15.0",
-    "strapi-plugin-webtools": "^1.7.3",
+    "strapi-plugin-webtools": "^1.10.0",
     "styled-components": "^6.0.0",
     "yaml": "^2.8.2"
   },

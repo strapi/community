@@ -11,7 +11,7 @@
   },
   "pluginOptions": {
     "content-manager": {
-      "visible": true
+      "visible": false
     },
     "content-type-builder": {
       "visible": true
@@ -59,12 +59,6 @@
           "managed": true
         }
       }
-    },
-    "url_alias": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::webtools.url-alias",
-      "configurable": false
     },
     "partner": {
       "type": "boolean",
