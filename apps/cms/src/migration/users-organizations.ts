@@ -1,3 +1,4 @@
+import { auth } from "../lib/auth";
 import {
   generatePassword,
   getGithubOwnerAvatarUrl,
@@ -16,7 +17,7 @@ export const findOrCreateAuthor = async (email, name, githubUrl, createdAt) => {
     const uploadedAvatar = profilePic
       ? await uploadFromUrl(profilePic.url, profilePic.name)
       : null;
-    await strapi["internal_config"]["better-auth"].api.signUpEmail({
+    await auth.api.signUpEmail({
       body: {
         name: name,
         email: email?.toLowerCase(),
