@@ -23,7 +23,6 @@
     "@react-email/render": "^1.4.0",
     "@strapi-community/plugin-better-auth": "^1.0.0-beta.6",
     "@strapi-community/plugin-better-auth-dashboard": "^1.0.0-alpha.7",
-    "@strapi-community/plugin-seo": "^2.1.1",
     "@strapi/admin": "catalog:strapi",
     "@strapi/design-system": "^2.0.0",
     "@strapi/icons": "^2.0.0",
