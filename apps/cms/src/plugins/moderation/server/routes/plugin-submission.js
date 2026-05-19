@@ -4,33 +4,25 @@ module.exports = {
     routes: [
       {
         method: "POST",
-        path: "/plugin-submissions",
+        path: "/packages/submit",
         handler: "plugin-submission.create",
         config: {
-          // Public endpoint — auth is handled at the Next.js proxy layer.
-          // The proxy must include a valid API token via Authorization header.
-          auth: false,
+          // Next.js proxy sends a valid API token — auth must be true.
+          auth: true,
           policies: [],
         },
       },
       {
         method: "POST",
-        path: "/plugin-submissions/:documentId/security-scan-result",
+        path: "/packages/:documentId/security-scan-result",
         handler: "plugin-submission.updateSecurityScan",
-        config: {
-          // Called by n8n over the public API using a Strapi API token.
-          // Strapi's content-api token middleware enforces the token.
-          policies: [],
-        },
+        config: { policies: [] },
       },
       {
         method: "GET",
-        path: "/plugin-submissions/stale-scans",
+        path: "/packages/stale-scans",
         handler: "plugin-submission.listStaleScans",
-        config: {
-          // Called by the scan-timeout-sweeper n8n workflow over API token.
-          policies: [],
-        },
+        config: { policies: [] },
       },
     ],
   },
@@ -57,8 +49,8 @@ module.exports = {
       },
       {
         method: "POST",
-        path: "/submissions/:documentId/promote",
-        handler: "plugin-submission.promote",
+        path: "/submissions/:documentId/publish",
+        handler: "plugin-submission.publish",
         config: { policies: [] },
       },
       {

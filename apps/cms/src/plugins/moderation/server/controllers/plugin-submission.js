@@ -11,7 +11,7 @@ const service = (strapi) =>
 
 module.exports = ({ strapi }) => ({
   /**
-   * POST /api/moderation/plugin-submissions
+   * POST /api/moderation/packages/submit
    * Accepts a new plugin submission from the public.
    * Called by the Next.js proxy, never directly from the browser.
    */
@@ -93,14 +93,14 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * POST /moderation/submissions/:documentId/promote
-   * Promote an approved submission to a real package entry (admin only).
+   * POST /moderation/submissions/:documentId/publish
+   * Publish an approved draft Package (admin only).
    */
-  async promote(ctx) {
+  async publish(ctx) {
     const { documentId } = ctx.params;
 
     try {
-      const pkg = await service(strapi).promoteToPackage(documentId);
+      const pkg = await service(strapi).publishPackage(documentId);
       ctx.body = { data: pkg };
     } catch (err) {
       ctx.badRequest(err.message);
@@ -144,8 +144,8 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * GET /api/moderation/plugin-submissions/stale-scans?cutoff=<ISO timestamp>
-   * Content-api + API-token: returns plugin submissions whose scan has been
+   * GET /api/moderation/packages/stale-scans?cutoff=<ISO timestamp>
+   * Content-api + API-token: returns packages whose scan has been
    * 'running' since before `cutoff`. Consumed by the n8n scan-timeout-sweeper.
    */
   async listStaleScans(ctx) {
@@ -160,7 +160,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * POST /api/moderation/plugin-submissions/:documentId/security-scan-result
+   * POST /api/moderation/packages/:documentId/security-scan-result
    * Called by n8n (with a Strapi API token) to write back per-stage scan results.
    */
   async updateSecurityScan(ctx) {
