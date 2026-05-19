@@ -78,11 +78,7 @@ async function uploadLogoToStrapi(file: File): Promise<string | null> {
   try {
     const res = await fetch(`${CMS_URL}/api/upload`, {
       method: "POST",
-      headers: {
-        ...(CMS_BEARER_TOKEN
-          ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` }
-          : {}),
-      },
+      headers: CMS_BEARER_TOKEN ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` } : {},
       body: form,
     });
 
@@ -91,11 +87,8 @@ async function uploadLogoToStrapi(file: File): Promise<string | null> {
       return null;
     }
 
-    const data = (await res.json()) as Array<{ url: string }>;
-    const url = data[0]?.url;
-    if (!url) return null;
-
-    return url.startsWith("http") ? url : `${CMS_URL}${url}`;
+    const data = (await res.json()) as Array<{ documentId: string }>;
+    return data[0]?.documentId ?? null;
   } catch (err) {
     console.error("[submit-template] Logo upload error:", err);
     return null;
@@ -168,7 +161,7 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Logo upload ---
-  let logo_url: string | null = null;
+  let logoDocumentId: string | null = null;
   const logoFile = formData.get("logo_file");
   if (logoFile instanceof File && logoFile.size > 0) {
     if (
@@ -191,8 +184,8 @@ export async function POST(req: NextRequest) {
         { status: 422 },
       );
     }
-    logo_url = await uploadLogoToStrapi(logoFile);
-    if (!logo_url) {
+    logoDocumentId = await uploadLogoToStrapi(logoFile);
+    if (!logoDocumentId) {
       console.warn(
         "[submit-template] Logo upload failed — submission will proceed without logo.",
       );
@@ -216,12 +209,13 @@ export async function POST(req: NextRequest) {
     description,
     repository_url,
     demo_url,
-    logo_url,
     categories_list,
     owner_name,
     owner_email,
+    maintainers_list: [],
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
+    logo_documentId: logoDocumentId ?? null,
   };
 
   // --- Proxy to Strapi ---
@@ -233,7 +227,7 @@ export async function POST(req: NextRequest) {
 
   let strapiRes: Response;
   try {
-    strapiRes = await fetch(`${CMS_URL}/api/moderation/template-submissions`, {
+    strapiRes = await fetch(`${CMS_URL}/api/moderation/templates/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -255,9 +249,8 @@ export async function POST(req: NextRequest) {
   }
 
   if (!strapiRes.ok) {
-    console.error(
-      `[submit-template] Strapi returned status ${strapiRes.status}`,
-    );
+    const body = await strapiRes.text();
+    console.error(`[submit-template] Strapi ${strapiRes.status}: ${body}`);
     return NextResponse.json(
       { error: "Submission failed. Please try again." },
       { status: 500 },
