@@ -7,10 +7,14 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { ArrowLeft, ExternalLink } from "@strapi/icons";
+import type { Data } from "@strapi/strapi";
 import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ReviewPanel } from "../../components/ReviewPanel";
+
+// Inferred from generated types — no manual sync needed.
+type PackageSubmissionDetail = Data.ContentType<"api::package.package">;
 
 interface AutomatedCheckResult {
   passed: boolean | null;
@@ -23,32 +27,6 @@ interface AutomatedChecks {
   runAt?: string;
   provider?: string;
   checks?: Record<string, AutomatedCheckResult>;
-}
-
-interface PluginSubmissionDetail {
-  documentId: string;
-  plugin_name: string;
-  package_location: string | null;
-  description: string;
-  repository_url: string;
-  logo_url: string | null;
-  package_type: string;
-  categories_list: string[];
-  owner_name: string;
-  owner_email: string;
-  maintainers_list: Array<{ name: string; email?: string }>;
-  readme: string | null;
-  submission_notes: string | null;
-  overall_status: string;
-  business_review_status: "pending" | "approved" | "rejected";
-  security_review_status: "pending" | "approved" | "rejected";
-  reviewer_feedback: string | null;
-  rejection_reason: string | null;
-  business_review_notes: string | null;
-  security_review_notes: string | null;
-  automated_check_results: AutomatedChecks | null;
-  promoted_package: { documentId: string } | null;
-  createdAt: string;
 }
 
 const STATUS_STYLES: Record<
@@ -276,7 +254,7 @@ export const SubmissionDetail = () => {
   const { get } = useFetchClient();
   const { toggleNotification } = useNotification();
 
-  const [submission, setSubmission] = useState<PluginSubmissionDetail | null>(
+  const [submission, setSubmission] = useState<PackageSubmissionDetail | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
@@ -346,26 +324,8 @@ export const SubmissionDetail = () => {
           background="neutral200"
           style={{ width: 1, height: 20, flexShrink: 0 }}
         />
-        {submission.logo_url && (
-          <Box
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              overflow: "hidden",
-              border: "1px solid #e3e9ef",
-              flexShrink: 0,
-            }}
-          >
-            <img
-              src={submission.logo_url}
-              alt=""
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </Box>
-        )}
         <Typography variant="alpha" style={{ lineHeight: 1 }}>
-          {submission.plugin_name}
+          {submission.name}
         </Typography>
         <StatusBadge status={submission.overall_status} />
       </Flex>
@@ -407,62 +367,48 @@ export const SubmissionDetail = () => {
               <Box style={{ width: "100%" }}>
                 <Card title="Plugin Info">
                   <Box>
-                    <InfoRow
-                      label="Plugin Name"
-                      value={submission.plugin_name}
-                    />
+                    <InfoRow label="Plugin Name" value={submission.name} />
                     <Divider />
                     <InfoRow
                       label="Registry URL"
                       value={submission.package_location ?? "—"}
                     />
                     <Divider />
-                    <InfoRow
-                      label="Package Type"
-                      value={submission.package_type}
-                    />
-                    <Divider />
-                    <InfoRow
-                      label="Repository URL"
-                      value={
-                        <a
-                          href={submission.repository_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ color: "inherit", textDecoration: "none" }}
-                        >
-                          <Flex as="span" gap={1} alignItems="flex-start">
-                            <Typography
-                              textColor="primary600"
-                              style={{
-                                wordBreak: "break-all",
-                                display: "inline",
-                                textAlign: "left",
-                              }}
-                            >
-                              {submission.repository_url}
-                            </Typography>
-                            <Box style={{ flexShrink: 0, marginTop: 2 }}>
-                              <ExternalLink
-                                aria-hidden
-                                style={{ width: 12, height: 12 }}
-                              />
-                            </Box>
-                          </Flex>
-                        </a>
-                      }
-                    />
-                    {submission.categories_list?.length > 0 && (
+                    <InfoRow label="Package Type" value={submission.type} />
+                    {submission.git_repository && (
                       <>
                         <Divider />
                         <InfoRow
-                          label="Categories"
+                          label="Repository URL"
                           value={
-                            <Flex gap={1} flexWrap="wrap">
-                              {submission.categories_list.map((c) => (
-                                <CategoryPill key={c} label={c} />
-                              ))}
-                            </Flex>
+                            <a
+                              href={submission.git_repository}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                color: "inherit",
+                                textDecoration: "none",
+                              }}
+                            >
+                              <Flex as="span" gap={1} alignItems="flex-start">
+                                <Typography
+                                  textColor="primary600"
+                                  style={{
+                                    wordBreak: "break-all",
+                                    display: "inline",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  {submission.git_repository}
+                                </Typography>
+                                <Box style={{ flexShrink: 0, marginTop: 2 }}>
+                                  <ExternalLink
+                                    aria-hidden
+                                    style={{ width: 12, height: 12 }}
+                                  />
+                                </Box>
+                              </Flex>
+                            </a>
                           }
                         />
                       </>
@@ -492,26 +438,32 @@ export const SubmissionDetail = () => {
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Card title="Owner">
                     <Flex gap={3} alignItems="center">
-                      <Box
-                        background="primary100"
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Typography
-                          fontWeight="bold"
-                          textColor="primary600"
-                          variant="beta"
+                      {(submission.owner as { name?: string } | null)?.name && (
+                        <Box
+                          background="primary100"
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
                         >
-                          {submission.owner_name.charAt(0).toUpperCase()}
-                        </Typography>
-                      </Box>
+                          <Typography
+                            fontWeight="bold"
+                            textColor="primary600"
+                            variant="beta"
+                          >
+                            {(
+                              submission.owner as { name?: string } | null
+                            )?.name
+                              ?.charAt(0)
+                              .toUpperCase()}
+                          </Typography>
+                        </Box>
+                      )}
                       <Box style={{ minWidth: 0 }}>
                         <Typography
                           fontWeight="semiBold"
@@ -524,7 +476,8 @@ export const SubmissionDetail = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {submission.owner_name}
+                          {(submission.owner as { name?: string } | null)
+                            ?.name ?? "—"}
                         </Typography>
                         <Typography
                           variant="pi"
@@ -537,7 +490,8 @@ export const SubmissionDetail = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {submission.owner_email}
+                          {(submission.owner as { email?: string } | null)
+                            ?.email ?? ""}
                         </Typography>
                       </Box>
                     </Flex>

@@ -25,11 +25,9 @@ export type SubmissionStatus =
 
 export interface PluginSubmission {
   documentId: string;
-  plugin_name: string;
+  name: string;
   package_location: string | null;
-  repository_url: string;
-  owner_name: string;
-  owner_email: string;
+  owner?: { name?: string; email?: string } | null;
   overall_status: SubmissionStatus;
   business_review_status: "pending" | "approved" | "rejected";
   security_review_status: "pending" | "approved" | "rejected";
@@ -38,10 +36,8 @@ export interface PluginSubmission {
 
 export interface TemplateSubmission {
   documentId: string;
-  template_name: string;
-  repository_url: string;
-  owner_name: string;
-  owner_email: string;
+  name: string;
+  owner?: { name?: string; email?: string } | null;
   overall_status: "submitted" | "approved" | "rejected";
   createdAt: string;
 }
@@ -234,9 +230,7 @@ export const SubmissionList = () => {
                 <Tr key={s.documentId}>
                   <Td>
                     <Flex direction="column" alignItems="flex-start" gap={1}>
-                      <Typography fontWeight="semiBold">
-                        {s.plugin_name}
-                      </Typography>
+                      <Typography fontWeight="semiBold">{s.name}</Typography>
                       {s.package_location && (
                         <Typography variant="pi" textColor="neutral600">
                           {s.package_location}
@@ -246,9 +240,9 @@ export const SubmissionList = () => {
                   </Td>
                   <Td>
                     <Flex direction="column" alignItems="flex-start" gap={1}>
-                      <Typography>{s.owner_name}</Typography>
+                      <Typography>{s.owner?.name ?? "—"}</Typography>
                       <Typography variant="pi" textColor="neutral600">
-                        {s.owner_email}
+                        {s.owner?.email ?? ""}
                       </Typography>
                     </Flex>
                   </Td>
@@ -330,15 +324,13 @@ export const SubmissionList = () => {
             {templates.map((s) => (
               <Tr key={s.documentId}>
                 <Td>
-                  <Typography fontWeight="semiBold">
-                    {s.template_name}
-                  </Typography>
+                  <Typography fontWeight="semiBold">{s.name}</Typography>
                 </Td>
                 <Td>
                   <Flex direction="column" alignItems="flex-start" gap={1}>
-                    <Typography>{s.owner_name}</Typography>
+                    <Typography>{s.owner?.name ?? "—"}</Typography>
                     <Typography variant="pi" textColor="neutral600">
-                      {s.owner_email}
+                      {s.owner?.email ?? ""}
                     </Typography>
                   </Flex>
                 </Td>
