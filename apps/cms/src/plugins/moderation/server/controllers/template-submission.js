@@ -11,7 +11,7 @@ const service = (strapi) =>
 
 module.exports = ({ strapi }) => ({
   /**
-   * POST /api/moderation/template-submissions
+   * POST /api/moderation/templates/submit
    * Accepts a new template submission from the public.
    * Called by the Next.js proxy, never directly from the browser.
    */
@@ -54,7 +54,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * GET /moderation/template-submissions
+   * GET /api/moderation/template-submissions
    * List all template submissions (admin only).
    */
   async find(ctx) {
@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * GET /moderation/template-submissions/:documentId
+   * GET /api/moderation/template-submissions/:documentId
    * Fetch a single template submission (admin only).
    */
   async findOne(ctx) {
@@ -79,7 +79,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * PUT /moderation/template-submissions/:documentId/review
+   * PUT /api/moderation/template-submissions/:documentId/review
    * Save draft review fields (admin only).
    */
   async updateReview(ctx) {
@@ -95,35 +95,13 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * POST /moderation/template-submissions/:documentId/decide
-   * Approve or reject a template submission (admin only).
+   * POST /api/moderation/template-submissions/:documentId/publish
+   * Publish an approved template submission (admin only).
    */
-  async decide(ctx) {
-    const { documentId } = ctx.params;
-    const body = ctx.request.body?.data || ctx.request.body;
-    const { status, feedback, notes, reason } = body;
-
-    try {
-      const updated = await service(strapi).decide(documentId, {
-        status,
-        feedback,
-        notes,
-        reason,
-      });
-      ctx.body = { data: updated };
-    } catch (err) {
-      ctx.badRequest(err.message);
-    }
-  },
-
-  /**
-   * POST /moderation/template-submissions/:documentId/run-security-scan
-   * Manually trigger the n8n security-scan workflow for a template submission (admin only).
-   */
-  async runSecurityScan(ctx) {
+  async publish(ctx) {
     const { documentId } = ctx.params;
     try {
-      const result = await service(strapi).triggerSecurityScan(documentId);
+      const result = await service(strapi).publishTemplate(documentId);
       ctx.body = { data: result };
     } catch (err) {
       ctx.badRequest(err.message);
@@ -131,35 +109,20 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * GET /api/moderation/template-submissions/stale-scans?cutoff=<ISO timestamp>
-   * Content-api + API-token: returns template submissions whose scan has been
-   * 'running' since before `cutoff`. Consumed by the n8n scan-timeout-sweeper.
+   * POST /api/moderation/template-submissions/:documentId/decide
+   * Reject or request changes on a template submission (admin only).
    */
-  async listStaleScans(ctx) {
-    const { cutoff } = ctx.query;
-    if (!cutoff) return ctx.badRequest("cutoff query param is required");
-    try {
-      const results = await service(strapi).listStaleScans({ cutoff });
-      ctx.body = { data: results };
-    } catch (err) {
-      ctx.internalServerError(err.message);
-    }
-  },
-
-  /**
-   * POST /api/moderation/template-submissions/:documentId/security-scan-result
-   * Called by n8n (with a Strapi API token) to write back per-stage scan results.
-   */
-  async updateSecurityScan(ctx) {
+  async decide(ctx) {
     const { documentId } = ctx.params;
     const body = ctx.request.body?.data || ctx.request.body;
-    const { stage, result, status } = body || {};
+    const { status, feedback, reason } = body;
 
     try {
-      const updated = await service(strapi).updateSecurityScanResult(
-        documentId,
-        { stage, result, status },
-      );
+      const updated = await service(strapi).rejectOrRequestChanges(documentId, {
+        status,
+        feedback,
+        reason,
+      });
       ctx.body = { data: updated };
     } catch (err) {
       ctx.badRequest(err.message);
