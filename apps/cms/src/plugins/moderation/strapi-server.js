@@ -3,12 +3,10 @@ const server = require("./server");
 /**
  * Moderation plugin for the Strapi Marketplace.
  *
- * Architecture: Option B — separate moderation content type.
- *
- * Incoming plugin submissions are stored as plugin::moderation.plugin-submission
- * records. They go through two independent review tracks (business + security)
- * before a moderator can promote them to a real api::package.package entry.
- * This keeps unapproved content completely isolated from the live catalogue.
+ * Architecture: submissions create draft Package / Template records directly.
+ * This plugin owns no content types — it provides the admin UI, routes,
+ * controllers, and services that operate on api::package.package and
+ * api::template.template. See docs/adr/0001-moderation-fields-on-package-not-intermediary.md.
  */
 module.exports = {
   register() {
@@ -17,7 +15,6 @@ module.exports = {
 
   bootstrap() {},
 
-  contentTypes: server.contentTypes,
   controllers: server.controllers,
   services: server.services,
   routes: server.routes,
