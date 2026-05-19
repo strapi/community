@@ -298,7 +298,7 @@ module.exports = ({ strapi }) => ({
 
     triggerN8nWebhook(
       "plugin-approved",
-      buildLifecyclePayload(published, { package_slug: published.slug }),
+      buildLifecyclePayload(pkg, { package_slug: published.slug }),
       { strapi },
     );
 
