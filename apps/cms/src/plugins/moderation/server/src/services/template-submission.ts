@@ -6,12 +6,16 @@
  * Approval = publish the draft. No data copy needed.
  */
 
+import { auth } from "../../../../../lib/auth";
 import { triggerN8nWebhook } from "./n8n-webhook";
 
 const CONTENT_TYPE = "api::template.template";
 
 /**
- * Find a Better Auth user by email, or create a minimal record.
+ * Find a Better Auth user by email, or create one via the BA API.
+ * Creating through auth.api.signUpEmail ensures the related account record
+ * and any BA lifecycle hooks run correctly. Document Service is used for
+ * lookups only — never for creating BA users.
  * Blocking — caller must await this before creating the Template.
  */
 async function findOrCreateUser(strapi, { email, name }) {
@@ -22,11 +26,17 @@ async function findOrCreateUser(strapi, { email, name }) {
 
   if (existing?.length > 0) return existing[0].documentId;
 
-  const created = await strapi
-    .documents("plugin::better-auth.user")
-    .create({ data: { email, name } });
+  // Create via BA API so the account record and lifecycle hooks are handled correctly.
+  await auth.api.signUpEmail({
+    body: { email, name, password: crypto.randomUUID() },
+  });
 
-  return created.documentId;
+  const created = await strapi.documents("plugin::better-auth.user").findMany({
+    filters: { email: { $eq: email } },
+    pagination: { pageSize: 1 },
+  });
+
+  return created[0]?.documentId ?? null;
 }
 
 /**
