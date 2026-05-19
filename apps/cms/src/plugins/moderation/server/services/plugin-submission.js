@@ -287,7 +287,9 @@ module.exports = ({ strapi }) => ({
    * No data copy — the draft IS the package.
    */
   async publishPackage(documentId) {
-    const pkg = await strapi.documents(CONTENT_TYPE).findOne({ documentId });
+    const pkg = await strapi
+      .documents(CONTENT_TYPE)
+      .findOne({ documentId, status: "draft" });
     if (!pkg) throw new Error("Package not found.");
     if (pkg.overall_status !== "approved")
       throw new Error("Package must be approved before publishing.");

@@ -668,41 +668,6 @@ export const SubmissionDetail = () => {
             initialSecurityNotes={submission.security_review_notes || ""}
             onSaved={load}
           />
-
-          {submission.promoted_package && (
-            <Box
-              marginTop={4}
-              background="success100"
-              padding={5}
-              hasRadius
-              borderColor="success200"
-              borderWidth="1px"
-              borderStyle="solid"
-            >
-              <Flex direction="column" alignItems="flex-start" gap={3}>
-                <Typography
-                  fontWeight="semiBold"
-                  textColor="success700"
-                  variant="omega"
-                >
-                  Promoted to Package
-                </Typography>
-                <Button
-                  variant="tertiary"
-                  size="S"
-                  endIcon={<ExternalLink />}
-                  onClick={() =>
-                    window.open(
-                      `${window.strapi.backendURL}/admin/content-manager/collection-types/api::package.package/${submission.promoted_package!.documentId}`,
-                      "_blank",
-                    )
-                  }
-                >
-                  Open in Content Manager
-                </Button>
-              </Flex>
-            </Box>
-          )}
         </Box>
       </Flex>
     </Box>

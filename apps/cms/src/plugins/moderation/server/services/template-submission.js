@@ -101,6 +101,7 @@ module.exports = ({ strapi }) => ({
         // Moderation fields
         overall_status: "submitted",
         business_review_status: "pending",
+        security_review_status: "pending",
         submitter_ip: submitterIp || null,
         submitter_agreed_to_terms: data.submitter_agreed_to_terms === true,
         submission_notes: data.submission_notes || null,
@@ -124,7 +125,7 @@ module.exports = ({ strapi }) => ({
   async publishTemplate(documentId) {
     const template = await strapi
       .documents(CONTENT_TYPE)
-      .findOne({ documentId });
+      .findOne({ documentId, status: "draft" });
     if (!template) throw new Error("Template not found.");
     if (template.overall_status !== "approved")
       throw new Error("Template must be approved before publishing.");
