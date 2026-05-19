@@ -90,6 +90,68 @@
       "targetField": "name",
       "required": true,
       "regex": "^[A-Za-z0-9-_.~@]*$"
+    },
+    "overall_status": {
+      "type": "enumeration",
+      "enum": [
+        "submitted",
+        "under_review",
+        "changes_requested",
+        "rejected",
+        "approved"
+      ]
+    },
+    "business_review_status": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"]
+    },
+    "security_review_status": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"]
+    },
+    "reviewer_feedback": {
+      "type": "text"
+    },
+    "rejection_reason": {
+      "type": "text"
+    },
+    "business_review_notes": {
+      "type": "text"
+    },
+    "security_review_notes": {
+      "type": "text"
+    },
+    "automated_check_results": {
+      "type": "json"
+    },
+    "security_scan_status": {
+      "type": "enumeration",
+      "enum": ["pending", "running", "completed", "failed"]
+    },
+    "security_scan_started_at": {
+      "type": "datetime"
+    },
+    "security_scan_run_at": {
+      "type": "datetime"
+    },
+    "security_scan_dependencies": {
+      "type": "json"
+    },
+    "security_scan_ai_analysis": {
+      "type": "json"
+    },
+    "security_scan_summary": {
+      "type": "json"
+    },
+    "submitter_ip": {
+      "type": "string"
+    },
+    "submitter_agreed_to_terms": {
+      "type": "boolean",
+      "default": false
+    },
+    "submission_notes": {
+      "type": "text"
     }
   }
 }

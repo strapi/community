@@ -887,6 +887,32 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Unique;
     version_info: Schema.Attribute.Component<'shared.version-info', false>;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
+    business_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    >;
+    security_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    >;
+    reviewer_feedback: Schema.Attribute.Text;
+    rejection_reason: Schema.Attribute.Text;
+    business_review_notes: Schema.Attribute.Text;
+    security_review_notes: Schema.Attribute.Text;
+    automated_check_results: Schema.Attribute.JSON;
+    security_scan_status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    >;
+    security_scan_started_at: Schema.Attribute.DateTime;
+    security_scan_run_at: Schema.Attribute.DateTime;
+    security_scan_dependencies: Schema.Attribute.JSON;
+    security_scan_ai_analysis: Schema.Attribute.JSON;
+    security_scan_summary: Schema.Attribute.JSON;
+    submitter_ip: Schema.Attribute.String;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submission_notes: Schema.Attribute.Text;
   };
 }
 
@@ -1225,6 +1251,32 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
+    business_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    >;
+    security_review_status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    >;
+    reviewer_feedback: Schema.Attribute.Text;
+    rejection_reason: Schema.Attribute.Text;
+    business_review_notes: Schema.Attribute.Text;
+    security_review_notes: Schema.Attribute.Text;
+    automated_check_results: Schema.Attribute.JSON;
+    security_scan_status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    >;
+    security_scan_started_at: Schema.Attribute.DateTime;
+    security_scan_run_at: Schema.Attribute.DateTime;
+    security_scan_dependencies: Schema.Attribute.JSON;
+    security_scan_ai_analysis: Schema.Attribute.JSON;
+    security_scan_summary: Schema.Attribute.JSON;
+    submitter_ip: Schema.Attribute.String;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submission_notes: Schema.Attribute.Text;
   };
 }
 

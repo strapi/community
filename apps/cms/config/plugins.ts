@@ -3,9 +3,16 @@ export default ({ env }) => ({
     config:
       env("NODE_ENV") === "production"
         ? {
+            provider: "sendgrid",
+            providerOptions: {
+              apiKey: env("SENDGRID_API_KEY"),
+            },
             settings: {
-              defaultFrom: env("EMAIL_FROM", "noreply@strapi.io"),
-              defaultReplyTo: env("EMAIL_FROM", "noreply@strapi.io"),
+              defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
+              defaultReplyTo: env(
+                "EMAIL_DEFAULT_REPLY_TO",
+                "community@strapi.io",
+              ),
             },
           }
         : {
@@ -23,18 +30,6 @@ export default ({ env }) => ({
     config: {
       security: {
         strictSsrf: true,
-      },
-    },
-  },
-  email: {
-    config: {
-      provider: "sendgrid",
-      providerOptions: {
-        apiKey: env("SENDGRID_API_KEY"),
-      },
-      settings: {
-        defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
-        defaultReplyTo: env("EMAIL_DEFAULT_REPLY_TO", "community@strapi.io"),
       },
     },
   },
