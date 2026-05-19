@@ -7,9 +7,9 @@
  * See docs/adr/0001-moderation-fields-on-package-not-intermediary.md.
  */
 
-const { runAutomatedChecks } = require("./automated-checks");
-const { getPackageSecurityInfo } = require("./get-package-security-info");
-const { triggerN8nWebhook } = require("./n8n-webhook");
+import { runAutomatedChecks } from "./automated-checks";
+import { getPackageSecurityInfo } from "./get-package-security-info";
+import { triggerN8nWebhook } from "./n8n-webhook";
 
 const CONTENT_TYPE = "api::package.package";
 
@@ -81,7 +81,7 @@ function buildLifecyclePayload(pkg, extras = {}) {
 
 const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
 
-module.exports = ({ strapi }) => ({
+export default ({ strapi }) => ({
   /**
    * Create a draft Package from a public submission.
    * Owner and maintainers are resolved to Better Auth users (blocking).
@@ -218,7 +218,7 @@ module.exports = ({ strapi }) => ({
       );
     }
 
-    const data = {};
+    const data: Record<string, unknown> = {};
     if (stage === "dependencies")
       data.security_scan_dependencies = result ?? null;
     if (stage === "ai_analysis")
@@ -333,7 +333,15 @@ module.exports = ({ strapi }) => ({
     return updated;
   },
 
-  async listSubmissions({ status, page = 1, pageSize = 25 } = {}) {
+  async listSubmissions({
+    status,
+    page = 1,
+    pageSize = 25,
+  }: {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  } = {}) {
     const baseFilter = {
       overall_status: status
         ? { $eq: status }

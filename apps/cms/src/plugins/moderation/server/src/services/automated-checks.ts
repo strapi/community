@@ -68,7 +68,9 @@ function parseRepoInfo(gitRepository) {
 // ---------------------------------------------------------------------------
 
 function githubHeaders() {
-  const headers = { Accept: "application/vnd.github+json" };
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+  };
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
@@ -84,7 +86,7 @@ async function githubFetch(path) {
 // ---------------------------------------------------------------------------
 
 function gitlabHeaders() {
-  const headers = { Accept: "application/json" };
+  const headers: Record<string, string> = { Accept: "application/json" };
   if (process.env.GITLAB_TOKEN) {
     // GitLab supports both header styles; PRIVATE-TOKEN is more universally supported.
     headers["PRIVATE-TOKEN"] = process.env.GITLAB_TOKEN;
@@ -141,7 +143,7 @@ async function checkRepoPublic(gitRepository) {
       if (!res.ok) {
         return { passed: null, message: `GitHub API returned ${res.status}.` };
       }
-      const data = await res.json();
+      const data = (await res.json()) as { private: boolean };
       const isPublic = !data.private;
       return {
         passed: isPublic,
@@ -164,7 +166,7 @@ async function checkRepoPublic(gitRepository) {
       if (!res.ok) {
         return { passed: null, message: `GitLab API returned ${res.status}.` };
       }
-      const data = await res.json();
+      const data = (await res.json()) as { visibility: string };
       const isPublic = data.visibility === "public";
       return {
         passed: isPublic,
@@ -271,7 +273,7 @@ function extractNpmNameFromLocation(packageLocation) {
   if (!packageLocation) return null;
   let href = packageLocation.toString().trim();
   if (!/^https?:\/\//i.test(href)) href = `https://${href}`;
-  let url;
+  let url: URL;
   try {
     url = new URL(href);
   } catch {
@@ -408,4 +410,4 @@ async function runAutomatedChecks({ repository_url, package_location }) {
   };
 }
 
-module.exports = { runAutomatedChecks };
+export { runAutomatedChecks };

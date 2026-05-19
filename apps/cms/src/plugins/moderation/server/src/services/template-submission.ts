@@ -6,7 +6,7 @@
  * Approval = publish the draft. No data copy needed.
  */
 
-const { triggerN8nWebhook } = require("./n8n-webhook");
+import { triggerN8nWebhook } from "./n8n-webhook";
 
 const CONTENT_TYPE = "api::template.template";
 
@@ -59,7 +59,7 @@ function buildLifecyclePayload(template, extras = {}) {
   };
 }
 
-module.exports = ({ strapi }) => ({
+export default ({ strapi }) => ({
   /**
    * Create a draft Template from a public submission.
    * Owner is resolved to a Better Auth user (blocking).
@@ -199,7 +199,15 @@ module.exports = ({ strapi }) => ({
   /**
    * List template submissions with optional status filter and pagination.
    */
-  async listSubmissions({ status, page = 1, pageSize = 25 } = {}) {
+  async listSubmissions({
+    status,
+    page = 1,
+    pageSize = 25,
+  }: {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  } = {}) {
     const baseFilter = {
       overall_status: status
         ? { $eq: status }

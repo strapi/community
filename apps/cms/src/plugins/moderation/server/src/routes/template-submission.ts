@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   "content-api": {
     type: "content-api",
     routes: [

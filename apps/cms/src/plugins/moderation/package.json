@@ -9,7 +9,7 @@
   },
   "exports": {
     "./strapi-server": {
-      "require": "./strapi-server.js"
+      "require": "../../../dist/src/plugins/moderation/server/src/index.js"
     },
     "./strapi-admin": {
       "source": "./admin/src/index.tsx",

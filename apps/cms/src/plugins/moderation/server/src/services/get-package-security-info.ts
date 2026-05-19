@@ -13,21 +13,11 @@
  *    downstream scan branches fall back to repo-only analysis.
  */
 
-const {
-  extractNpmPackageName,
-} = require("../../../package-info/server/services/registries/npm");
-const {
-  extractPypiPackageName,
-} = require("../../../package-info/server/services/registries/pypi");
-const {
-  extractRubyGemsPackageName,
-} = require("../../../package-info/server/services/registries/rubygems");
-const {
-  extractPackagistPackageName,
-} = require("../../../package-info/server/services/registries/packagist");
-const {
-  extractNugetPackageName,
-} = require("../../../package-info/server/services/registries/nuget");
+import { extractNpmPackageName } from "../../../../package-info/server/src/services/registries/npm";
+import { extractNugetPackageName } from "../../../../package-info/server/src/services/registries/nuget";
+import { extractPackagistPackageName } from "../../../../package-info/server/src/services/registries/packagist";
+import { extractPypiPackageName } from "../../../../package-info/server/src/services/registries/pypi";
+import { extractRubyGemsPackageName } from "../../../../package-info/server/src/services/registries/rubygems";
 
 const INSTALL_SCRIPT_KEYS = ["preinstall", "install", "postinstall"];
 
@@ -85,7 +75,7 @@ function detectRegistry(packageLocation) {
   }
 }
 
-async function fetchNpmSecurity(packageName) {
+async function fetchNpmSecurity(packageName: string) {
   const res = await fetch(
     `https://registry.npmjs.org/${encodeURIComponent(packageName)}`,
     { headers: { Accept: "application/json" } },
@@ -93,7 +83,11 @@ async function fetchNpmSecurity(packageName) {
   if (!res.ok) {
     return { available: false, reason: `npm registry returned ${res.status}` };
   }
-  const data = await res.json();
+  const data = (await res.json()) as Record<string, unknown> & {
+    "dist-tags"?: { latest?: string };
+    versions?: Record<string, Record<string, unknown>>;
+    readme?: string;
+  };
   const latestVersion = data["dist-tags"]?.latest;
   const versionMeta = data.versions?.[latestVersion];
   if (!versionMeta) {
@@ -101,15 +95,17 @@ async function fetchNpmSecurity(packageName) {
   }
 
   const scripts = versionMeta.scripts || {};
-  const installScripts = {};
+  const installScripts: Record<string, string> = {};
   for (const key of INSTALL_SCRIPT_KEYS) {
     if (scripts[key]) installScripts[key] = scripts[key];
   }
 
+  const repository = versionMeta.repository as
+    | string
+    | { url?: string }
+    | undefined;
   const declaredRepository =
-    typeof versionMeta.repository === "string"
-      ? versionMeta.repository
-      : versionMeta.repository?.url || null;
+    typeof repository === "string" ? repository : repository?.url || null;
 
   const readme =
     (typeof data.readme === "string" && data.readme) ||
@@ -164,4 +160,4 @@ async function getPackageSecurityInfo(packageLocation) {
   }
 }
 
-module.exports = { getPackageSecurityInfo, detectRegistry };
+export { detectRegistry, getPackageSecurityInfo };

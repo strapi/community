@@ -9,7 +9,7 @@
 const service = (strapi) =>
   strapi.plugin("moderation").service("plugin-submission");
 
-module.exports = ({ strapi }) => ({
+export default ({ strapi }) => ({
   /**
    * POST /api/moderation/packages/submit
    * Accepts a new plugin submission from the public.

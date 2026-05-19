@@ -17,7 +17,7 @@
  * Keep paths aligned with the `path` parameter on each workflow's Webhook node
  * under apps/automation/workflows/{slug}/workflow.json.
  */
-const WEBHOOK_PATHS = {
+const WEBHOOK_PATHS: Record<string, string> = {
   "security-scan": "strapi/security-scan",
   "plugin-submission-received": "strapi/plugin-submission-received",
   "plugin-approved": "strapi/plugin-approved",
@@ -28,7 +28,7 @@ const WEBHOOK_PATHS = {
   "template-declined": "strapi/template-declined",
 };
 
-function getWebhookUrl(key) {
+function getWebhookUrl(key: string) {
   const base = process.env.N8N_WEBHOOK_BASE_URL;
   const mode = (process.env.N8N_WEBHOOK_MODE || "production").toLowerCase();
   const path = WEBHOOK_PATHS[key];
@@ -57,8 +57,12 @@ function getWebhookUrl(key) {
  * POST a payload to the named n8n webhook. Returns `{ ok, url, error? }` —
  * never throws, so callers control failure behaviour.
  */
-async function triggerN8nWebhook(key, payload, { strapi } = {}) {
-  let url;
+async function triggerN8nWebhook(
+  key,
+  payload,
+  { strapi }: { strapi?: { log?: { warn?: (msg: string) => void } } } = {},
+) {
+  let url: string;
   try {
     url = getWebhookUrl(key);
   } catch (err) {
@@ -92,4 +96,4 @@ async function triggerN8nWebhook(key, payload, { strapi } = {}) {
   }
 }
 
-module.exports = { triggerN8nWebhook, getWebhookUrl, WEBHOOK_PATHS };
+export { getWebhookUrl, triggerN8nWebhook, WEBHOOK_PATHS };

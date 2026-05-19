@@ -1,16 +1,16 @@
-const pluginSubmission = require("./plugin-submission");
-const templateSubmission = require("./template-submission");
+import pluginSubmission from "./plugin-submission";
+import templateSubmission from "./template-submission";
 
-module.exports = {
+export default {
   "content-api": {
-    type: "content-api",
+    type: "content-api" as const,
     routes: [
       ...pluginSubmission["content-api"].routes,
       ...templateSubmission["content-api"].routes,
     ],
   },
   admin: {
-    type: "admin",
+    type: "admin" as const,
     routes: [
       ...pluginSubmission.admin.routes,
       ...templateSubmission.admin.routes,
