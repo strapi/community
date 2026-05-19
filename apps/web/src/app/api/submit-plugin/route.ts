@@ -83,7 +83,7 @@ function str(value: FormDataEntryValue | null): string | null {
 
 /**
  * Upload a logo file to Strapi's media library.
- * Returns the public URL of the uploaded file, or null on failure.
+ * Returns the documentId of the uploaded file, or null on failure.
  */
 async function uploadLogoToStrapi(file: File): Promise<string | null> {
   const form = new FormData();
@@ -92,27 +92,13 @@ async function uploadLogoToStrapi(file: File): Promise<string | null> {
   try {
     const res = await fetch(`${CMS_URL}/api/upload`, {
       method: "POST",
-      headers: {
-        ...(CMS_BEARER_TOKEN
-          ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` }
-          : {}),
-      },
+      headers: CMS_BEARER_TOKEN ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` } : {},
       body: form,
     });
-
-    if (!res.ok) {
-      console.error(`[submit-plugin] Logo upload failed: ${res.status}`);
-      return null;
-    }
-
-    const data = (await res.json()) as Array<{ url: string }>;
-    const url = data[0]?.url;
-    if (!url) return null;
-
-    // Strapi returns a relative URL for local uploads — make it absolute.
-    return url.startsWith("http") ? url : `${CMS_URL}${url}`;
-  } catch (err) {
-    console.error("[submit-plugin] Logo upload error:", err);
+    if (!res.ok) return null;
+    const data = (await res.json()) as Array<{ documentId: string }>;
+    return data[0]?.documentId ?? null;
+  } catch {
     return null;
   }
 }
@@ -180,7 +166,7 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Logo upload ---
-  let logo_url: string | null = null;
+  let logoDocumentId: string | null = null;
   const logoFile = formData.get("logo_file");
   if (logoFile instanceof File && logoFile.size > 0) {
     if (
@@ -203,9 +189,9 @@ export async function POST(req: NextRequest) {
         { status: 422 },
       );
     }
-    logo_url = await uploadLogoToStrapi(logoFile);
+    logoDocumentId = await uploadLogoToStrapi(logoFile);
     // Non-fatal: submission proceeds even if upload fails; reviewer can add logo later.
-    if (!logo_url) {
+    if (!logoDocumentId) {
       console.warn(
         "[submit-plugin] Logo upload failed — submission will proceed without logo.",
       );
@@ -226,11 +212,10 @@ export async function POST(req: NextRequest) {
   // --- Build submission payload ---
   const payload = {
     plugin_name,
-    package_location: str(formData.get("package_location")),
     description,
     repository_url,
-    logo_url,
-    package_type: "plugin",
+    package_location: str(formData.get("package_location")),
+    package_type: str(formData.get("package_type")) || "plugin",
     categories_list,
     owner_name,
     owner_email,
@@ -238,6 +223,7 @@ export async function POST(req: NextRequest) {
     readme: str(formData.get("readme")),
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
+    logo_documentId: logoDocumentId ?? null,
   };
 
   // --- Proxy to Strapi ---
@@ -249,7 +235,7 @@ export async function POST(req: NextRequest) {
 
   let strapiRes: Response;
   try {
-    strapiRes = await fetch(`${CMS_URL}/api/moderation/plugin-submissions`, {
+    strapiRes = await fetch(`${CMS_URL}/api/moderation/packages/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
