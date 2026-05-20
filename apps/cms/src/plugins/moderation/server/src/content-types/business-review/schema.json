@@ -19,6 +19,12 @@
     "notes": { "type": "text" },
     "reviewer_feedback": { "type": "text" },
     "rejection_reason": { "type": "text" },
-    "automated_check_results": { "type": "json" }
+    "automated_check_results": { "type": "json" },
+    "package": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::package.package",
+      "mappedBy": "business_review"
+    }
   }
 }

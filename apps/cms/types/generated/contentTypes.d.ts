@@ -1263,6 +1263,7 @@ export interface PluginModerationBusinessReview extends Struct.CollectionTypeSch
     reviewer_feedback: Schema.Attribute.Text;
     rejection_reason: Schema.Attribute.Text;
     automated_check_results: Schema.Attribute.JSON;
+    package: Schema.Attribute.Relation<'oneToOne', 'api::package.package'>;
     createdAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;

@@ -105,7 +105,8 @@
     "business_review": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugin::moderation.business-review"
+      "target": "plugin::moderation.business-review",
+      "inversedBy": "package"
     },
     "security_reviews": {
       "type": "relation",
