@@ -7,7 +7,7 @@ export default {
         path: "/templates/submit",
         handler: "template-submission.create",
         config: {
-          auth: true,
+          auth: { scope: [] },
           policies: [],
         },
       },

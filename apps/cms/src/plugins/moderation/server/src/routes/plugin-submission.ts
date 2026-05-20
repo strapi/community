@@ -8,7 +8,7 @@ export default {
         handler: "plugin-submission.create",
         config: {
           // Next.js proxy sends a valid API token — auth must be true.
-          auth: true,
+          auth: { scope: [] },
           policies: [],
         },
       },
@@ -16,13 +16,13 @@ export default {
         method: "POST",
         path: "/packages/:documentId/security-scan-result",
         handler: "plugin-submission.updateSecurityScan",
-        config: { auth: true, policies: [] },
+        config: { auth: { scope: [] }, policies: [] },
       },
       {
         method: "GET",
         path: "/packages/stale-scans",
         handler: "plugin-submission.listStaleScans",
-        config: { auth: true, policies: [] },
+        config: { auth: { scope: [] }, policies: [] },
       },
     ],
   },
