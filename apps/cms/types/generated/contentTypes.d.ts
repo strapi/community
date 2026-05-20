@@ -890,25 +890,8 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
-    business_review_status: Schema.Attribute.Enumeration<
-      ['pending', 'approved', 'rejected']
-    >;
-    security_review_status: Schema.Attribute.Enumeration<
-      ['pending', 'approved', 'rejected']
-    >;
-    reviewer_feedback: Schema.Attribute.Text;
-    rejection_reason: Schema.Attribute.Text;
-    business_review_notes: Schema.Attribute.Text;
-    security_review_notes: Schema.Attribute.Text;
-    automated_check_results: Schema.Attribute.JSON;
-    security_scan_status: Schema.Attribute.Enumeration<
-      ['pending', 'running', 'completed', 'failed']
-    >;
-    security_scan_started_at: Schema.Attribute.DateTime;
-    security_scan_run_at: Schema.Attribute.DateTime;
-    security_scan_dependencies: Schema.Attribute.JSON;
-    security_scan_ai_analysis: Schema.Attribute.JSON;
-    security_scan_summary: Schema.Attribute.JSON;
+    business_review: Schema.Attribute.Relation<'oneToOne', 'plugin::moderation.business-review'>;
+    security_reviews: Schema.Attribute.Relation<'oneToMany', 'plugin::moderation.security-review'>;
     submitter_ip: Schema.Attribute.String;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
@@ -1254,29 +1237,62 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
-    business_review_status: Schema.Attribute.Enumeration<
-      ['pending', 'approved', 'rejected']
-    >;
-    security_review_status: Schema.Attribute.Enumeration<
-      ['pending', 'approved', 'rejected']
-    >;
-    reviewer_feedback: Schema.Attribute.Text;
-    rejection_reason: Schema.Attribute.Text;
-    business_review_notes: Schema.Attribute.Text;
-    security_review_notes: Schema.Attribute.Text;
-    automated_check_results: Schema.Attribute.JSON;
-    security_scan_status: Schema.Attribute.Enumeration<
-      ['pending', 'running', 'completed', 'failed']
-    >;
-    security_scan_started_at: Schema.Attribute.DateTime;
-    security_scan_run_at: Schema.Attribute.DateTime;
-    security_scan_dependencies: Schema.Attribute.JSON;
-    security_scan_ai_analysis: Schema.Attribute.JSON;
-    security_scan_summary: Schema.Attribute.JSON;
+    business_review: Schema.Attribute.Relation<'oneToOne', 'plugin::moderation.business-review'>;
+    security_reviews: Schema.Attribute.Relation<'oneToMany', 'plugin::moderation.security-review'>;
     submitter_ip: Schema.Attribute.String;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     submission_notes: Schema.Attribute.Text;
+  };
+}
+
+export interface PluginModerationBusinessReview extends Struct.CollectionTypeSchema {
+  collectionName: 'business_reviews';
+  info: {
+    singularName: 'business-review';
+    pluralName: 'business-reviews';
+    displayName: 'Business Review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    status: Schema.Attribute.Enumeration<['pending', 'approved', 'rejected', 'changes_requested']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    notes: Schema.Attribute.Text;
+    reviewer_feedback: Schema.Attribute.Text;
+    rejection_reason: Schema.Attribute.Text;
+    automated_check_results: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    documentId: Schema.Attribute.String;
+  };
+}
+
+export interface PluginModerationSecurityReview extends Struct.CollectionTypeSchema {
+  collectionName: 'security_reviews';
+  info: {
+    singularName: 'security-review';
+    pluralName: 'security-reviews';
+    displayName: 'Security Review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    status: Schema.Attribute.Enumeration<['pending', 'running', 'completed', 'failed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    started_at: Schema.Attribute.DateTime;
+    run_at: Schema.Attribute.DateTime;
+    dependencies: Schema.Attribute.JSON;
+    ai_analysis: Schema.Attribute.JSON;
+    summary: Schema.Attribute.JSON;
+    package: Schema.Attribute.Relation<'manyToOne', 'api::package.package'>;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    documentId: Schema.Attribute.String;
   };
 }
 
@@ -2393,6 +2409,8 @@ declare module '@strapi/strapi' {
       'api::tech-stack.tech-stack': ApiTechStackTechStack;
       'api::template-category.template-category': ApiTemplateCategoryTemplateCategory;
       'api::template.template': ApiTemplateTemplate;
+      'plugin::moderation.business-review': PluginModerationBusinessReview;
+      'plugin::moderation.security-review': PluginModerationSecurityReview;
       'plugin::better-auth.account': PluginBetterAuthAccount;
       'plugin::better-auth.invitation': PluginBetterAuthInvitation;
       'plugin::better-auth.jwks': PluginBetterAuthJwks;
