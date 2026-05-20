@@ -56,9 +56,9 @@
           "assignments": [
             {
               "id": "a1",
-              "name": "submissionId",
+              "name": "packageId",
               "type": "string",
-              "value": "={{ $json.body.submissionId }}"
+              "value": "={{ $json.body.packageId }}"
             },
             {
               "id": "a2",
@@ -214,7 +214,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
@@ -229,7 +229,7 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
-      "notes": "Writes the package scan stage result. URL path flips between plugin-submissions and template-submissions based on the submission_kind field."
+      "notes": "Writes the package scan stage result."
     },
     {
       "id": "fetch-code-1",
@@ -310,7 +310,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
@@ -371,7 +371,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/{{ $('Extract Payload').item.json.submission_kind === 'template' ? 'template-submissions' : 'plugin-submissions' }}/{{ $('Extract Payload').item.json.submissionId }}/security-scan-result",
+        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
