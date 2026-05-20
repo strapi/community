@@ -2,22 +2,18 @@
  * Template submission service.
  *
  * Submissions create a draft api::template.template record directly.
- * Moderation fields (overall_status, review statuses) live on Template.
+ * Moderation is tracked via plugin::moderation.business-review (oneToOne).
+ * Templates do not have security scanning.
  * Approval = publish the draft. No data copy needed.
+ * See docs/adr/0002-review-content-types-in-moderation-plugin.md.
  */
 
 import { auth } from "../../../../../lib/auth";
 import { triggerN8nWebhook } from "./n8n-webhook";
 
-const CONTENT_TYPE = "api::template.template";
+const TEMPLATE_CT = "api::template.template";
+const BUSINESS_REVIEW_CT = "plugin::moderation.business-review";
 
-/**
- * Find a Better Auth user by email, or create one via the BA API.
- * Creating through auth.api.signUpEmail ensures the related account record
- * and any BA lifecycle hooks run correctly. Document Service is used for
- * lookups only — never for creating BA users.
- * Blocking — caller must await this before creating the Template.
- */
 async function findOrCreateUser(strapi, { email, name }) {
   const existing = await strapi.documents("plugin::better-auth.user").findMany({
     filters: { email: { $eq: email } },
@@ -26,7 +22,6 @@ async function findOrCreateUser(strapi, { email, name }) {
 
   if (existing?.length > 0) return existing[0].documentId;
 
-  // Create via BA API so the account record and lifecycle hooks are handled correctly.
   await auth.api.signUpEmail({
     body: { email, name, password: crypto.randomUUID() },
   });
@@ -39,10 +34,6 @@ async function findOrCreateUser(strapi, { email, name }) {
   return created[0]?.documentId ?? null;
 }
 
-/**
- * Resolve category name strings to template-category documentIds.
- * Unknown categories are silently dropped — Template schema is the authority.
- */
 async function resolveCategories(strapi, categoryNames) {
   if (!Array.isArray(categoryNames) || categoryNames.length === 0) return [];
   const results = await strapi
@@ -70,24 +61,21 @@ function buildLifecyclePayload(template, extras = {}) {
 }
 
 export default ({ strapi }) => ({
-  /**
-   * Create a draft Template from a public submission.
-   * Owner is resolved to a Better Auth user (blocking).
-   */
   async createSubmission(data, submitterIp) {
-    // Resolve owner (blocking — required relation)
     const ownerDocumentId = await findOrCreateUser(strapi, {
       email: data.owner_email,
       name: data.owner_name,
     });
-
-    // Resolve categories
     const categoryConnect = await resolveCategories(
       strapi,
       data.categories_list || [],
     );
 
-    const template = await strapi.documents(CONTENT_TYPE).create({
+    const businessReview = await strapi.documents(BUSINESS_REVIEW_CT).create({
+      data: { status: "pending" },
+    });
+
+    const template = await strapi.documents(TEMPLATE_CT).create({
       data: {
         name: data.template_name,
         description: data.description,
@@ -108,41 +96,35 @@ export default ({ strapi }) => ({
               },
             }
           : {}),
-        // Moderation fields
+        business_review: {
+          connect: [{ documentId: businessReview.documentId }],
+        },
         overall_status: "submitted",
-        business_review_status: "pending",
-        security_review_status: "pending",
         submitter_ip: submitterIp || null,
         submitter_agreed_to_terms: data.submitter_agreed_to_terms === true,
         submission_notes: data.submission_notes || null,
       },
     });
 
-    // Fire-and-forget n8n notification
     triggerN8nWebhook(
       "template-submission-received",
       buildLifecyclePayload(template),
       { strapi },
     );
-
     return template;
   },
 
-  /**
-   * Approve a submission by publishing the draft Template.
-   * No data copy — the draft IS the template.
-   */
-  async publishTemplate(documentId) {
+  async publishTemplate(templateDocumentId) {
     const template = await strapi
-      .documents(CONTENT_TYPE)
-      .findOne({ documentId, status: "draft" });
+      .documents(TEMPLATE_CT)
+      .findOne({ documentId: templateDocumentId, status: "draft" });
     if (!template) throw new Error("Template not found.");
     if (template.overall_status !== "approved")
       throw new Error("Template must be approved before publishing.");
 
     const published = await strapi
-      .documents(CONTENT_TYPE)
-      .publish({ documentId });
+      .documents(TEMPLATE_CT)
+      .publish({ documentId: templateDocumentId });
 
     triggerN8nWebhook(
       "template-approved",
@@ -153,44 +135,73 @@ export default ({ strapi }) => ({
     return published;
   },
 
-  /**
-   * Update review fields on a template submission (notes, feedback, status).
-   * Used for saving draft review state without finalising the decision.
-   */
-  async updateReview(documentId, reviewData) {
+  async updateReview(templateDocumentId, reviewData) {
     const {
       business_review_status,
       reviewer_feedback,
       rejection_reason,
-      business_review_notes,
+      notes,
       overall_status,
     } = reviewData;
 
-    return strapi.documents(CONTENT_TYPE).update({
-      documentId,
+    const template = await strapi.documents(TEMPLATE_CT).findOne({
+      documentId: templateDocumentId,
+      populate: ["business_review"],
+      status: "draft",
+    });
+    if (!template?.business_review)
+      throw new Error("No business review found for this template.");
+
+    await strapi.documents(BUSINESS_REVIEW_CT).update({
+      documentId: (template.business_review as { documentId: string })
+        .documentId,
       data: {
-        ...(business_review_status && { business_review_status }),
+        ...(business_review_status && { status: business_review_status }),
         ...(reviewer_feedback !== undefined && { reviewer_feedback }),
         ...(rejection_reason !== undefined && { rejection_reason }),
-        ...(business_review_notes !== undefined && { business_review_notes }),
-        ...(overall_status && { overall_status }),
+        ...(notes !== undefined && { notes }),
       },
     });
+
+    if (overall_status) {
+      await strapi.documents(TEMPLATE_CT).update({
+        documentId: templateDocumentId,
+        data: { overall_status },
+      });
+    }
   },
 
-  async rejectOrRequestChanges(documentId, { status, reason, feedback }) {
+  async rejectOrRequestChanges(
+    templateDocumentId,
+    { status, reason, feedback },
+  ) {
     if (!["rejected", "changes_requested"].includes(status)) {
       throw new Error("Status must be 'rejected' or 'changes_requested'.");
     }
 
-    const updated = await strapi.documents(CONTENT_TYPE).update({
-      documentId,
-      data: {
-        overall_status: status,
-        rejection_reason: reason || null,
-        reviewer_feedback: feedback || null,
-      },
+    const template = await strapi.documents(TEMPLATE_CT).findOne({
+      documentId: templateDocumentId,
+      status: "draft",
+      populate: ["business_review"],
     });
+    if (!template) throw new Error("Template not found.");
+
+    const updated = await strapi.documents(TEMPLATE_CT).update({
+      documentId: templateDocumentId,
+      data: { overall_status: status },
+    });
+
+    if (template.business_review) {
+      await strapi.documents(BUSINESS_REVIEW_CT).update({
+        documentId: (template.business_review as { documentId: string })
+          .documentId,
+        data: {
+          status: status === "rejected" ? "rejected" : "changes_requested",
+          ...(reason && { rejection_reason: reason }),
+          ...(feedback && { reviewer_feedback: feedback }),
+        },
+      });
+    }
 
     triggerN8nWebhook(
       status === "rejected"
@@ -206,9 +217,6 @@ export default ({ strapi }) => ({
     return updated;
   },
 
-  /**
-   * List template submissions with optional status filter and pagination.
-   */
   async listSubmissions({
     status,
     page = 1,
@@ -223,20 +231,20 @@ export default ({ strapi }) => ({
         ? { $eq: status }
         : { $in: ["submitted", "under_review", "changes_requested"] },
     };
-    return strapi.documents(CONTENT_TYPE).findMany({
+    return strapi.documents(TEMPLATE_CT).findMany({
       filters: baseFilter,
       sort: { createdAt: "desc" },
       pagination: { page, pageSize },
       status: "draft",
+      populate: ["business_review"],
     });
   },
 
-  /**
-   * Fetch a single template submission by documentId.
-   */
-  async getSubmission(documentId) {
-    return strapi
-      .documents(CONTENT_TYPE)
-      .findOne({ documentId, status: "draft" });
+  async getSubmission(templateDocumentId) {
+    return strapi.documents(TEMPLATE_CT).findOne({
+      documentId: templateDocumentId,
+      status: "draft",
+      populate: ["business_review"],
+    });
   },
 });
