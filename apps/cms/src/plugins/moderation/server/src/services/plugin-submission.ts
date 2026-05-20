@@ -2,9 +2,10 @@
  * Package submission service.
  *
  * Submissions create a draft api::package.package record directly.
- * Moderation fields (overall_status, review statuses, scan results) live on Package.
+ * Moderation is tracked via plugin::moderation.business-review (oneToOne)
+ * and plugin::moderation.security-review (oneToMany, latest = current scan).
  * Approval = publish the draft. No data copy needed.
- * See docs/adr/0001-moderation-fields-on-package-not-intermediary.md.
+ * See docs/adr/0002-review-content-types-in-moderation-plugin.md.
  */
 
 import { auth } from "../../../../../lib/auth";
@@ -12,14 +13,15 @@ import { runAutomatedChecks } from "./automated-checks";
 import { getPackageSecurityInfo } from "./get-package-security-info";
 import { triggerN8nWebhook } from "./n8n-webhook";
 
-const CONTENT_TYPE = "api::package.package";
+const PACKAGE_CT = "api::package.package";
+const BUSINESS_REVIEW_CT = "plugin::moderation.business-review";
+const SECURITY_REVIEW_CT = "plugin::moderation.security-review";
+
+const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
 
 /**
  * Find a Better Auth user by email, or create one via the BA API.
- * Creating through auth.api.signUpEmail ensures the related account record
- * and any BA lifecycle hooks run correctly. Document Service is used for
- * lookups only — never for creating BA users.
- * Blocking — caller must await this before creating the Package.
+ * Document Service is used for lookups only — never for creating BA users.
  */
 async function findOrCreateUser(strapi, { email, name }) {
   const existing = await strapi.documents("plugin::better-auth.user").findMany({
@@ -29,7 +31,6 @@ async function findOrCreateUser(strapi, { email, name }) {
 
   if (existing?.length > 0) return existing[0].documentId;
 
-  // Create via BA API so the account record and lifecycle hooks are handled correctly.
   await auth.api.signUpEmail({
     body: { email, name, password: crypto.randomUUID() },
   });
@@ -42,9 +43,6 @@ async function findOrCreateUser(strapi, { email, name }) {
   return created[0]?.documentId ?? null;
 }
 
-/**
- * Resolve an array of { email, name } maintainer objects to Better Auth user documentIds.
- */
 async function resolveMaintainers(strapi, maintainersList) {
   if (!Array.isArray(maintainersList) || maintainersList.length === 0)
     return [];
@@ -58,10 +56,6 @@ async function resolveMaintainers(strapi, maintainersList) {
   return ids.filter(Boolean);
 }
 
-/**
- * Resolve category name strings to package-category documentIds.
- * Unknown categories are silently dropped — Package schema is the authority.
- */
 async function resolveCategories(strapi, categoryNames) {
   if (!Array.isArray(categoryNames) || categoryNames.length === 0) return [];
   const results = await strapi
@@ -89,33 +83,31 @@ function buildLifecyclePayload(pkg, extras = {}) {
   };
 }
 
-const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
-
 export default ({ strapi }) => ({
   /**
    * Create a draft Package from a public submission.
-   * Owner and maintainers are resolved to Better Auth users (blocking).
+   * Creates a BusinessReview record and connects it to the Package.
    */
   async createSubmission(data, submitterIp) {
-    // Resolve owner (blocking — required relation)
     const ownerDocumentId = await findOrCreateUser(strapi, {
       email: data.owner_email,
       name: data.owner_name,
     });
-
-    // Resolve maintainers
     const maintainerIds = await resolveMaintainers(
       strapi,
       data.maintainers_list || [],
     );
-
-    // Resolve categories
     const categoryConnect = await resolveCategories(
       strapi,
       data.categories_list || [],
     );
 
-    const pkg = await strapi.documents(CONTENT_TYPE).create({
+    // Create BusinessReview first so we can connect it during Package creation.
+    const businessReview = await strapi.documents(BUSINESS_REVIEW_CT).create({
+      data: { status: "pending" },
+    });
+
+    const pkg = await strapi.documents(PACKAGE_CT).create({
       data: {
         name: data.plugin_name,
         description: data.description,
@@ -136,18 +128,17 @@ export default ({ strapi }) => ({
         ...(data.logo_documentId
           ? { icon: { connect: [{ documentId: data.logo_documentId }] } }
           : {}),
-        // Moderation fields
+        business_review: {
+          connect: [{ documentId: businessReview.documentId }],
+        },
         overall_status: "submitted",
-        business_review_status: "pending",
-        security_review_status: "pending",
         submitter_ip: submitterIp || null,
         submitter_agreed_to_terms: data.submitter_agreed_to_terms === true,
         submission_notes: data.submission_notes || null,
       },
     });
 
-    // Run business checks async — do not block the response
-    this.runChecksAsync(pkg.documentId, {
+    this.runChecksAsync(pkg.documentId, businessReview.documentId, {
       git_repository: data.repository_url,
       package_location: data.package_location,
     }).catch((err) => {
@@ -156,43 +147,48 @@ export default ({ strapi }) => ({
       );
     });
 
-    // Fire-and-forget n8n notification
     triggerN8nWebhook(
       "plugin-submission-received",
       buildLifecyclePayload(pkg),
       { strapi },
     );
-
     return pkg;
   },
 
-  async runChecksAsync(documentId, { git_repository, package_location }) {
+  async runChecksAsync(
+    packageDocumentId,
+    businessReviewDocumentId,
+    { git_repository, package_location },
+  ) {
     const businessChecks = await runAutomatedChecks({
       repository_url: git_repository,
       package_location,
     }).catch(() => null);
 
-    await strapi.documents(CONTENT_TYPE).update({
-      documentId,
-      data: {
-        automated_check_results: businessChecks,
-        overall_status: "under_review",
-      },
+    await strapi.documents(BUSINESS_REVIEW_CT).update({
+      documentId: businessReviewDocumentId,
+      data: { automated_check_results: businessChecks },
+    });
+
+    await strapi.documents(PACKAGE_CT).update({
+      documentId: packageDocumentId,
+      data: { overall_status: "under_review" },
     });
   },
 
-  async triggerSecurityScan(documentId) {
-    const pkg = await strapi.documents(CONTENT_TYPE).findOne({ documentId });
+  async triggerSecurityScan(packageDocumentId) {
+    const pkg = await strapi
+      .documents(PACKAGE_CT)
+      .findOne({ documentId: packageDocumentId, status: "draft" });
     if (!pkg) throw new Error("Package not found.");
-    if (pkg.security_scan_status === "running") {
-      throw new Error("A security scan is already running for this package.");
-    }
 
-    await strapi.documents(CONTENT_TYPE).update({
-      documentId,
+    // Create a new SecurityReview record for this scan run.
+    // The manyToOne `package` relation on SecurityReview connects it to the Package.
+    const securityReview = await strapi.documents(SECURITY_REVIEW_CT).create({
       data: {
-        security_scan_status: "running",
-        security_scan_started_at: new Date().toISOString(),
+        status: "running",
+        started_at: new Date().toISOString(),
+        package: { connect: [{ documentId: packageDocumentId }] },
       },
     });
 
@@ -211,102 +207,104 @@ export default ({ strapi }) => ({
     );
 
     if (!result.ok) {
-      await strapi.documents(CONTENT_TYPE).update({
-        documentId,
-        data: { security_scan_status: "failed" },
+      await strapi.documents(SECURITY_REVIEW_CT).update({
+        documentId: securityReview.documentId,
+        data: { status: "failed" },
       });
       throw new Error(result.error || "Failed to trigger n8n security scan.");
     }
 
-    return { documentId, status: "running" };
+    return {
+      packageDocumentId,
+      securityReviewDocumentId: securityReview.documentId,
+      status: "running",
+    };
   },
 
-  async updateSecurityScanResult(documentId, { stage, result, status }) {
+  async updateSecurityScanResult(packageDocumentId, { stage, result, status }) {
     if (stage && !VALID_SCAN_STAGES.includes(stage)) {
       throw new Error(
         `Invalid scan stage '${stage}'. Expected one of: ${VALID_SCAN_STAGES.join(", ")}.`,
       );
     }
 
-    const data: Record<string, unknown> = {};
-    if (stage === "dependencies")
-      data.security_scan_dependencies = result ?? null;
-    if (stage === "ai_analysis")
-      data.security_scan_ai_analysis = result ?? null;
-    if (stage === "summary") data.security_scan_summary = result ?? null;
+    // Find the latest SecurityReview for this package via the back-relation.
+    const reviews = await strapi.documents(SECURITY_REVIEW_CT).findMany({
+      filters: { package: { documentId: { $eq: packageDocumentId } } },
+      sort: { createdAt: "desc" },
+      pagination: { pageSize: 1 },
+    });
+    const review = reviews[0];
+    if (!review) throw new Error("No security review found for this package.");
 
+    const data: Record<string, unknown> = {};
+    if (stage === "dependencies") data.dependencies = result ?? null;
+    if (stage === "ai_analysis") data.ai_analysis = result ?? null;
+    if (stage === "summary") data.summary = result ?? null;
     if (status === "completed" || status === "failed") {
-      data.security_scan_status = status;
-      data.security_scan_run_at = new Date().toISOString();
+      data.status = status;
+      data.run_at = new Date().toISOString();
     }
 
     if (Object.keys(data).length === 0) {
       throw new Error("No stage result or status transition provided.");
     }
 
-    return strapi.documents(CONTENT_TYPE).update({ documentId, data });
+    return strapi
+      .documents(SECURITY_REVIEW_CT)
+      .update({ documentId: review.documentId, data });
   },
 
-  async updateReview(documentId, reviewData) {
+  async updateReview(packageDocumentId, reviewData) {
     const {
       business_review_status,
-      security_review_status,
       reviewer_feedback,
       rejection_reason,
-      business_review_notes,
-      security_review_notes,
+      notes,
       overall_status,
     } = reviewData;
 
-    let computedOverall = overall_status;
-    if (business_review_status && security_review_status) {
-      if (
-        business_review_status === "approved" &&
-        security_review_status === "approved"
-      ) {
-        if (!overall_status || overall_status === "under_review")
-          computedOverall = "approved";
-      } else if (
-        business_review_status === "rejected" ||
-        security_review_status === "rejected"
-      ) {
-        if (overall_status === "approved") {
-          throw new Error(
-            "Cannot approve when either review track is rejected.",
-          );
-        }
-      }
-    }
+    const pkg = await strapi.documents(PACKAGE_CT).findOne({
+      documentId: packageDocumentId,
+      populate: ["business_review"],
+      status: "draft",
+    });
+    if (!pkg?.business_review)
+      throw new Error("No business review found for this package.");
 
-    return strapi.documents(CONTENT_TYPE).update({
-      documentId,
+    await strapi.documents(BUSINESS_REVIEW_CT).update({
+      documentId: (pkg.business_review as { documentId: string }).documentId,
       data: {
-        ...(business_review_status && { business_review_status }),
-        ...(security_review_status && { security_review_status }),
+        ...(business_review_status && { status: business_review_status }),
         ...(reviewer_feedback !== undefined && { reviewer_feedback }),
         ...(rejection_reason !== undefined && { rejection_reason }),
-        ...(business_review_notes !== undefined && { business_review_notes }),
-        ...(security_review_notes !== undefined && { security_review_notes }),
-        ...(computedOverall && { overall_status: computedOverall }),
+        ...(notes !== undefined && { notes }),
       },
     });
+
+    if (overall_status) {
+      await strapi.documents(PACKAGE_CT).update({
+        documentId: packageDocumentId,
+        data: { overall_status },
+      });
+    }
   },
 
   /**
    * Approve a submission by publishing the draft Package.
-   * No data copy — the draft IS the package.
    */
-  async publishPackage(documentId) {
-    const pkg = await strapi
-      .documents(CONTENT_TYPE)
-      .findOne({ documentId, status: "draft" });
+  async publishPackage(packageDocumentId) {
+    const pkg = await strapi.documents(PACKAGE_CT).findOne({
+      documentId: packageDocumentId,
+      status: "draft",
+    });
     if (!pkg) throw new Error("Package not found.");
     if (pkg.overall_status !== "approved")
       throw new Error("Package must be approved before publishing.");
 
     const published = await strapi
-      .documents(CONTENT_TYPE)
-      .publish({ documentId });
+      .documents(PACKAGE_CT)
+      .publish({ documentId: packageDocumentId });
 
     triggerN8nWebhook(
       "plugin-approved",
@@ -317,19 +315,36 @@ export default ({ strapi }) => ({
     return published;
   },
 
-  async rejectOrRequestChanges(documentId, { status, reason, feedback }) {
+  async rejectOrRequestChanges(
+    packageDocumentId,
+    { status, reason, feedback },
+  ) {
     if (!["rejected", "changes_requested"].includes(status)) {
       throw new Error("Status must be 'rejected' or 'changes_requested'.");
     }
 
-    const updated = await strapi.documents(CONTENT_TYPE).update({
-      documentId,
-      data: {
-        overall_status: status,
-        rejection_reason: reason || null,
-        reviewer_feedback: feedback || null,
-      },
+    const pkg = await strapi.documents(PACKAGE_CT).findOne({
+      documentId: packageDocumentId,
+      status: "draft",
+      populate: ["business_review"],
     });
+    if (!pkg) throw new Error("Package not found.");
+
+    const updated = await strapi.documents(PACKAGE_CT).update({
+      documentId: packageDocumentId,
+      data: { overall_status: status },
+    });
+
+    if (pkg.business_review) {
+      await strapi.documents(BUSINESS_REVIEW_CT).update({
+        documentId: (pkg.business_review as { documentId: string }).documentId,
+        data: {
+          status: status === "rejected" ? "rejected" : "changes_requested",
+          ...(reason && { rejection_reason: reason }),
+          ...(feedback && { reviewer_feedback: feedback }),
+        },
+      });
+    }
 
     triggerN8nWebhook(
       status === "rejected" ? "plugin-declined" : "plugin-changes-requested",
@@ -357,30 +372,37 @@ export default ({ strapi }) => ({
         ? { $eq: status }
         : { $in: ["submitted", "under_review", "changes_requested"] },
     };
-    return strapi.documents(CONTENT_TYPE).findMany({
+    return strapi.documents(PACKAGE_CT).findMany({
       filters: baseFilter,
       sort: { createdAt: "desc" },
       pagination: { page, pageSize },
       status: "draft",
+      populate: ["business_review"],
     });
   },
 
+  /**
+   * Returns running SecurityReview records that started before `cutoff`.
+   * Populates `package` so n8n knows which package each stale scan belongs to.
+   */
   async listStaleScans({ cutoff }) {
     if (!cutoff) return [];
-    return strapi.documents(CONTENT_TYPE).findMany({
+    return strapi.documents(SECURITY_REVIEW_CT).findMany({
       filters: {
-        security_scan_status: { $eq: "running" },
-        security_scan_started_at: { $lt: cutoff },
+        status: { $eq: "running" },
+        started_at: { $lt: cutoff },
       },
-      fields: ["documentId", "name", "security_scan_started_at"],
+      fields: ["documentId", "started_at"],
+      populate: ["package"],
       pagination: { page: 1, pageSize: 50 },
-      status: "draft",
     });
   },
 
-  async getSubmission(documentId) {
-    return strapi
-      .documents(CONTENT_TYPE)
-      .findOne({ documentId, status: "draft" });
+  async getSubmission(packageDocumentId) {
+    return strapi.documents(PACKAGE_CT).findOne({
+      documentId: packageDocumentId,
+      status: "draft",
+      populate: ["business_review", "security_reviews"],
+    });
   },
 });
