@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "business_reviews",
+  "info": {
+    "singularName": "business-review",
+    "pluralName": "business-reviews",
+    "displayName": "Business Review"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected", "changes_requested"],
+      "default": "pending"
+    },
+    "notes": { "type": "text" },
+    "reviewer_feedback": { "type": "text" },
+    "rejection_reason": { "type": "text" },
+    "automated_check_results": { "type": "json" }
+  }
+}
