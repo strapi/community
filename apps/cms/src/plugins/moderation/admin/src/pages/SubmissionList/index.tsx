@@ -29,8 +29,7 @@ export interface PluginSubmission {
   package_location: string | null;
   owner?: { name?: string; email?: string } | null;
   overall_status: SubmissionStatus;
-  business_review_status: "pending" | "approved" | "rejected";
-  security_review_status: "pending" | "approved" | "rejected";
+  business_review: { status?: "pending" | "approved" | "rejected" } | null;
   createdAt: string;
 }
 
@@ -255,19 +254,23 @@ export const SubmissionList = () => {
                     </Badge>
                   </Td>
                   <Td>
-                    <Badge
-                      active={false}
-                      backgroundColor={`${reviewColour[s.business_review_status]}100`}
-                    >
-                      {s.business_review_status}
-                    </Badge>
+                    {(() => {
+                      const bStatus =
+                        (s.business_review as { status?: string } | null)
+                          ?.status ?? "pending";
+                      return (
+                        <Badge
+                          active={false}
+                          backgroundColor={`${reviewColour[bStatus as keyof typeof reviewColour] ?? "secondary"}100`}
+                        >
+                          {bStatus}
+                        </Badge>
+                      );
+                    })()}
                   </Td>
                   <Td>
-                    <Badge
-                      active={false}
-                      backgroundColor={`${reviewColour[s.security_review_status]}100`}
-                    >
-                      {s.security_review_status}
+                    <Badge active={false} backgroundColor="secondary100">
+                      —
                     </Badge>
                   </Td>
                   <Td>

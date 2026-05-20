@@ -118,9 +118,7 @@ export const ReviewPanel = ({
       await put(`/moderation/submissions/${documentId}/review`, {
         data: {
           business_review_status: businessStatus,
-          security_review_status: securityStatus,
-          business_review_notes: businessNotes,
-          security_review_notes: securityNotes,
+          notes: businessNotes,
           reviewer_feedback: feedback,
           rejection_reason: rejectionReason,
         },
@@ -146,9 +144,7 @@ export const ReviewPanel = ({
       await put(`/moderation/submissions/${documentId}/review`, {
         data: {
           business_review_status: businessStatus,
-          security_review_status: securityStatus,
-          business_review_notes: businessNotes,
-          security_review_notes: securityNotes,
+          notes: businessNotes,
           overall_status: "approved",
         },
       });
