@@ -16,6 +16,26 @@ import { ReviewPanel } from "../../components/ReviewPanel";
 // Inferred from generated types — no manual sync needed.
 type PackageSubmissionDetail = Data.ContentType<"api::package.package">;
 
+// The populated shape returned by getSubmission — business_review and security_reviews are relations.
+interface BusinessReview {
+  documentId: string;
+  status: "pending" | "approved" | "rejected" | "changes_requested";
+  notes: string | null;
+  reviewer_feedback: string | null;
+  rejection_reason: string | null;
+  automated_check_results: AutomatedChecks | null;
+}
+
+interface SecurityReview {
+  documentId: string;
+  status: "pending" | "running" | "completed" | "failed";
+  started_at: string | null;
+  run_at: string | null;
+  dependencies: unknown | null;
+  ai_analysis: unknown | null;
+  summary: unknown | null;
+}
+
 interface AutomatedCheckResult {
   passed: boolean | null;
   skipped?: boolean;
@@ -295,11 +315,24 @@ export const SubmissionDetail = () => {
     );
   }
 
-  const checks = submission.automated_check_results?.checks ?? {};
+  const securityReviews =
+    (submission.security_reviews as SecurityReview[] | null) ?? [];
+  const latestScan =
+    securityReviews.length > 0
+      ? securityReviews.reduce((latest, r) =>
+          new Date(r.started_at ?? 0) > new Date(latest.started_at ?? 0)
+            ? r
+            : latest,
+        )
+      : null;
+
+  const automatedChecks = (submission.business_review as BusinessReview | null)
+    ?.automated_check_results;
+  const checks = automatedChecks?.checks ?? {};
   const securityChecks =
     (checks.security as Record<string, AutomatedCheckResult> | undefined) ?? {};
   const businessCheckKeys = Object.keys(checks).filter((k) => k !== "security");
-  const hasChecks = Boolean(submission.automated_check_results);
+  const hasChecks = Boolean(automatedChecks);
   const hasReadme = Boolean(submission.readme);
 
   const TABS: Array<{ id: TabId; label: string }> = [
@@ -659,13 +692,29 @@ export const SubmissionDetail = () => {
         >
           <ReviewPanel
             documentId={submission.documentId}
-            initialBusinessStatus={submission.business_review_status}
-            initialSecurityStatus={submission.security_review_status}
+            initialBusinessStatus={
+              ((submission.business_review as BusinessReview | null)?.status ??
+                "pending") as "pending" | "approved" | "rejected"
+            }
+            initialSecurityStatus={
+              (latestScan?.status === "completed"
+                ? "approved"
+                : latestScan?.status === "failed"
+                  ? "rejected"
+                  : "pending") as "pending" | "approved" | "rejected"
+            }
             initialOverallStatus={submission.overall_status}
-            initialFeedback={submission.reviewer_feedback || ""}
-            initialRejectionReason={submission.rejection_reason || ""}
-            initialBusinessNotes={submission.business_review_notes || ""}
-            initialSecurityNotes={submission.security_review_notes || ""}
+            initialFeedback={
+              (submission.business_review as BusinessReview | null)
+                ?.reviewer_feedback || ""
+            }
+            initialRejectionReason={
+              (submission.business_review as BusinessReview | null)
+                ?.rejection_reason || ""
+            }
+            initialBusinessNotes={
+              (submission.business_review as BusinessReview | null)?.notes || ""
+            }
             onSaved={load}
           />
         </Box>

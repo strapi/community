@@ -7,27 +7,36 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { ArrowLeft, ExternalLink } from "@strapi/icons";
+import type { Data } from "@strapi/strapi";
 import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TemplateReviewPanel } from "../../components/TemplateReviewPanel";
 
-interface TemplateSubmissionDetail {
+// Inferred from generated types — no manual sync needed.
+type TemplateSubmissionDetail = Data.ContentType<"api::template.template">;
+
+// The populated shape returned by getSubmission — business_review is a relation.
+interface BusinessReview {
   documentId: string;
-  template_name: string;
-  description: string;
-  repository_url: string;
-  demo_url: string | null;
-  logo_url: string | null;
-  categories_list: string[];
-  owner_name: string;
-  owner_email: string;
-  submission_notes: string | null;
-  overall_status: "submitted" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "changes_requested";
+  notes: string | null;
   reviewer_feedback: string | null;
-  reviewer_notes: string | null;
   rejection_reason: string | null;
-  createdAt: string;
+  automated_check_results: AutomatedChecks | null;
+}
+
+interface AutomatedCheckResult {
+  passed: boolean | null;
+  skipped?: boolean;
+  message: string;
+  detail?: unknown;
+}
+
+interface AutomatedChecks {
+  runAt?: string;
+  provider?: string;
+  checks?: Record<string, AutomatedCheckResult>;
 }
 
 const STATUS_STYLES: Record<
@@ -453,9 +462,17 @@ export const TemplateSubmissionDetail = () => {
           <TemplateReviewPanel
             documentId={submission.documentId}
             initialStatus={submission.overall_status}
-            initialFeedback={submission.reviewer_feedback || ""}
-            initialNotes={submission.reviewer_notes || ""}
-            initialRejectionReason={submission.rejection_reason || ""}
+            initialFeedback={
+              (submission.business_review as BusinessReview | null)
+                ?.reviewer_feedback || ""
+            }
+            initialNotes={
+              (submission.business_review as BusinessReview | null)?.notes || ""
+            }
+            initialRejectionReason={
+              (submission.business_review as BusinessReview | null)
+                ?.rejection_reason || ""
+            }
             onSaved={load}
           />
         </Box>
