@@ -68,6 +68,7 @@ const AvatarPile = ({ items, size = "S" }: Props) => {
   return (
     <div className="flex items-center">
       {items.slice(0, 5).map((m, i) => {
+        if (!m) return null;
         const avatarUrl = m.image;
         return avatarUrl ? (
           <Image
