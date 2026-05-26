@@ -1,37 +1,21 @@
 /**
  * n8n webhook helper.
  *
- * Centralises URL construction + POST mechanics for every lifecycle event the
- * moderation plugin emits into n8n. Flipping `N8N_WEBHOOK_MODE` between
- * `production` and `test` toggles all webhooks between n8n's always-on prod URL
- * (`/webhook/<path>`) and the developer-only test URL (`/webhook-test/<path>`,
- * active only while "Listen for test event" is open in the n8n UI).
+ * Accepts webhook paths directly (e.g. "strapi/plugin-submission-received").
+ * Paths come from the plugin config's `webhooks` object per content type.
+ * The SECURITY_SCAN_PATH constant is hardcoded because security scanning is
+ * not configurable — it always applies to api::package.package.
  *
- * Failures are logged and surfaced via the returned object — NOT thrown — so
- * callers can decide whether a lifecycle webhook failure should block the user's
- * action (security-scan does block) or be fire-and-forget (notifications don't).
+ * Flipping N8N_WEBHOOK_MODE between 'production' and 'test' toggles all
+ * webhooks between n8n's always-on prod URL (/webhook/<path>) and the
+ * developer-only test URL (/webhook-test/<path>).
  */
 
-/**
- * Registry of webhook keys → n8n webhook paths.
- * Keep paths aligned with the `path` parameter on each workflow's Webhook node
- * under apps/automation/workflows/{slug}/workflow.json.
- */
-const WEBHOOK_PATHS: Record<string, string> = {
-  "security-scan": "strapi/security-scan",
-  "plugin-submission-received": "strapi/plugin-submission-received",
-  "plugin-approved": "strapi/plugin-approved",
-  "plugin-declined": "strapi/plugin-declined",
-  "plugin-changes-requested": "strapi/plugin-changes-requested",
-  "template-submission-received": "strapi/template-submission-received",
-  "template-approved": "strapi/template-approved",
-  "template-declined": "strapi/template-declined",
-};
+export const SECURITY_SCAN_PATH = "strapi/security-scan";
 
-function getWebhookUrl(key: string) {
+function getWebhookUrl(path: string) {
   const base = process.env.N8N_WEBHOOK_BASE_URL;
   const mode = (process.env.N8N_WEBHOOK_MODE || "production").toLowerCase();
-  const path = WEBHOOK_PATHS[key];
 
   if (!base) {
     throw new Error(
@@ -39,9 +23,7 @@ function getWebhookUrl(key: string) {
     );
   }
   if (!path) {
-    throw new Error(
-      `Unknown webhook key '${key}'. Known keys: ${Object.keys(WEBHOOK_PATHS).join(", ")}.`,
-    );
+    throw new Error("Webhook path is required.");
   }
   if (mode !== "production" && mode !== "test") {
     throw new Error(
@@ -54,20 +36,20 @@ function getWebhookUrl(key: string) {
 }
 
 /**
- * POST a payload to the named n8n webhook. Returns `{ ok, url, error? }` —
+ * POST a payload to an n8n webhook path. Returns `{ ok, url, error? }` —
  * never throws, so callers control failure behaviour.
  */
 async function triggerN8nWebhook(
-  key,
-  payload,
+  path: string,
+  payload: object,
   { strapi }: { strapi?: { log?: { warn?: (msg: string) => void } } } = {},
 ) {
   let url: string;
   try {
-    url = getWebhookUrl(key);
+    url = getWebhookUrl(path);
   } catch (err) {
-    strapi?.log?.warn?.(`[moderation] ${err.message}`);
-    return { ok: false, error: err.message };
+    strapi?.log?.warn?.(`[moderation] ${(err as Error).message}`);
+    return { ok: false, error: (err as Error).message };
   }
 
   const authHeader = process.env.N8N_WEBHOOK_AUTH_HEADER || "X-N8N-Auth";
@@ -84,16 +66,16 @@ async function triggerN8nWebhook(
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
-      const error = `n8n webhook '${key}' returned ${res.status}${body ? `: ${body.slice(0, 200)}` : ""}`;
+      const error = `n8n webhook '${path}' returned ${res.status}${body ? `: ${body.slice(0, 200)}` : ""}`;
       strapi?.log?.warn?.(`[moderation] ${error}`);
       return { ok: false, url, error };
     }
     return { ok: true, url };
   } catch (err) {
-    const error = `n8n webhook '${key}' fetch failed: ${err.message}`;
+    const error = `n8n webhook '${path}' fetch failed: ${(err as Error).message}`;
     strapi?.log?.warn?.(`[moderation] ${error}`);
-    return { ok: false, url, error };
+    return { ok: false, url: url!, error };
   }
 }
 
-export { getWebhookUrl, triggerN8nWebhook, WEBHOOK_PATHS };
+export { getWebhookUrl, triggerN8nWebhook };

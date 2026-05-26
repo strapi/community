@@ -842,6 +842,10 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    business_review: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::moderation.business-review'
+    >;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::package-category.package-category'
@@ -869,12 +873,23 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     >;
     monthly_downloads: Schema.Attribute.Integer;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    security_reviews: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    >;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     stars: Schema.Attribute.Integer;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -887,15 +902,6 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Unique;
     version_info: Schema.Attribute.Component<'shared.version-info', false>;
-    overall_status: Schema.Attribute.Enumeration<
-      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
-    >;
-    business_review: Schema.Attribute.Relation<'oneToOne', 'plugin::moderation.business-review'>;
-    security_reviews: Schema.Attribute.Relation<'oneToMany', 'plugin::moderation.security-review'>;
-    submitter_ip: Schema.Attribute.String;
-    submitter_agreed_to_terms: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    submission_notes: Schema.Attribute.Text;
   };
 }
 
@@ -1192,6 +1198,10 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    business_review: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::moderation.business-review'
+    >;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::template-category.template-category'
@@ -1218,14 +1228,25 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    security_reviews: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    >;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     stars: Schema.Attribute.Integer;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1234,66 +1255,6 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
-    overall_status: Schema.Attribute.Enumeration<
-      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
-    >;
-    business_review: Schema.Attribute.Relation<'oneToOne', 'plugin::moderation.business-review'>;
-    security_reviews: Schema.Attribute.Relation<'oneToMany', 'plugin::moderation.security-review'>;
-    submitter_ip: Schema.Attribute.String;
-    submitter_agreed_to_terms: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    submission_notes: Schema.Attribute.Text;
-  };
-}
-
-export interface PluginModerationBusinessReview extends Struct.CollectionTypeSchema {
-  collectionName: 'business_reviews';
-  info: {
-    singularName: 'business-review';
-    pluralName: 'business-reviews';
-    displayName: 'Business Review';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    status: Schema.Attribute.Enumeration<['pending', 'approved', 'rejected', 'changes_requested']> &
-      Schema.Attribute.DefaultTo<'pending'>;
-    notes: Schema.Attribute.Text;
-    reviewer_feedback: Schema.Attribute.Text;
-    rejection_reason: Schema.Attribute.Text;
-    automated_check_results: Schema.Attribute.JSON;
-    package: Schema.Attribute.Relation<'oneToOne', 'api::package.package'>;
-    createdAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    publishedAt: Schema.Attribute.DateTime;
-    documentId: Schema.Attribute.String;
-  };
-}
-
-export interface PluginModerationSecurityReview extends Struct.CollectionTypeSchema {
-  collectionName: 'security_reviews';
-  info: {
-    singularName: 'security-review';
-    pluralName: 'security-reviews';
-    displayName: 'Security Review';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    status: Schema.Attribute.Enumeration<['pending', 'running', 'completed', 'failed']> &
-      Schema.Attribute.DefaultTo<'pending'>;
-    started_at: Schema.Attribute.DateTime;
-    run_at: Schema.Attribute.DateTime;
-    dependencies: Schema.Attribute.JSON;
-    ai_analysis: Schema.Attribute.JSON;
-    summary: Schema.Attribute.JSON;
-    package: Schema.Attribute.Relation<'manyToOne', 'api::package.package'>;
-    createdAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    publishedAt: Schema.Attribute.DateTime;
-    documentId: Schema.Attribute.String;
   };
 }
 
@@ -2079,6 +2040,81 @@ export interface PluginI18NLocale extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface PluginModerationBusinessReview
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'business_reviews';
+  info: {
+    displayName: 'Business Review';
+    pluralName: 'business-reviews';
+    singularName: 'business-review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    automated_check_results: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.business-review'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    package: Schema.Attribute.Relation<'oneToOne', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    rejection_reason: Schema.Attribute.Text;
+    reviewer_feedback: Schema.Attribute.Text;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected', 'changes_requested']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginModerationSecurityReview
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'security_reviews';
+  info: {
+    displayName: 'Security Review';
+    pluralName: 'security-reviews';
+    singularName: 'security-review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    ai_analysis: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dependencies: Schema.Attribute.JSON;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    > &
+      Schema.Attribute.Private;
+    package: Schema.Attribute.Relation<'manyToOne', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    run_at: Schema.Attribute.DateTime;
+    started_at: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    summary: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginReviewWorkflowsWorkflow
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_workflows';
@@ -2410,8 +2446,6 @@ declare module '@strapi/strapi' {
       'api::tech-stack.tech-stack': ApiTechStackTechStack;
       'api::template-category.template-category': ApiTemplateCategoryTemplateCategory;
       'api::template.template': ApiTemplateTemplate;
-      'plugin::moderation.business-review': PluginModerationBusinessReview;
-      'plugin::moderation.security-review': PluginModerationSecurityReview;
       'plugin::better-auth.account': PluginBetterAuthAccount;
       'plugin::better-auth.invitation': PluginBetterAuthInvitation;
       'plugin::better-auth.jwks': PluginBetterAuthJwks;
@@ -2424,6 +2458,8 @@ declare module '@strapi/strapi' {
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::moderation.business-review': PluginModerationBusinessReview;
+      'plugin::moderation.security-review': PluginModerationSecurityReview;
       'plugin::review-workflows.workflow': PluginReviewWorkflowsWorkflow;
       'plugin::review-workflows.workflow-stage': PluginReviewWorkflowsWorkflowStage;
       'plugin::upload.file': PluginUploadFile;

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import slugify from "slugify";
 import {
   isRecaptchaConfigured,
   verifyRecaptcha,
@@ -94,17 +95,17 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = {
-    template_name,
+    name: template_name,
+    slug: slugify(template_name!),
     description,
-    repository_url,
-    demo_url,
+    git_repository: repository_url,
+    preview_link: demo_url,
     categories_list: parseCategories(formData.get("categories_list")),
     owner_name,
     owner_email,
-    maintainers_list: [],
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
-    logo_documentId: logoDocumentId ?? null,
+    preview_image: logoDocumentId ? { documentId: logoDocumentId } : null,
   };
 
   try {

@@ -7,16 +7,19 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { ArrowLeft, ExternalLink } from "@strapi/icons";
-import type { Data } from "@strapi/strapi";
 import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ReviewPanel } from "../../components/ReviewPanel";
 
-// Inferred from generated types — no manual sync needed.
-type PackageSubmissionDetail = Data.ContentType<"api::package.package">;
+interface ContentTypeConfig {
+  uid: string;
+  pluralName: string;
+  label: string;
+  hasSecurityScan: boolean;
+  checks: string[];
+}
 
-// The populated shape returned by getSubmission — business_review and security_reviews are relations.
 interface BusinessReview {
   documentId: string;
   status: "pending" | "approved" | "rejected" | "changes_requested";
@@ -31,9 +34,9 @@ interface SecurityReview {
   status: "pending" | "running" | "completed" | "failed";
   started_at: string | null;
   run_at: string | null;
-  dependencies: unknown | null;
-  ai_analysis: unknown | null;
-  summary: unknown | null;
+  dependencies: unknown;
+  ai_analysis: unknown;
+  summary: unknown;
 }
 
 interface AutomatedCheckResult {
@@ -47,6 +50,24 @@ interface AutomatedChecks {
   runAt?: string;
   provider?: string;
   checks?: Record<string, AutomatedCheckResult>;
+}
+
+interface Submission {
+  documentId: string;
+  name: string;
+  overall_status: string;
+  description?: string;
+  readme?: string;
+  submission_notes?: string;
+  git_repository?: string;
+  package_location?: string;
+  type?: string;
+  preview_link?: string;
+  createdAt: string;
+  owner?: { name?: string; email?: string } | null;
+  business_review?: BusinessReview | null;
+  security_reviews?: SecurityReview[] | null;
+  [key: string]: unknown;
 }
 
 const STATUS_STYLES: Record<
@@ -74,9 +95,6 @@ const CHECK_LABELS: Record<string, string> = {
   mit_license: "MIT license",
   strapi_peer_dep: "Strapi peer dependency",
   enterprise_competition: "Enterprise competition",
-  npm_advisories: "NPM advisories",
-  dependency_vulnerabilities: "Dependency vulnerabilities",
-  ai_analysis: "AI security analysis",
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -97,21 +115,6 @@ const StatusBadge = ({ status }: { status: string }) => {
     </Box>
   );
 };
-
-// Plain pill — no icon (unlike Tag which includes a remove icon)
-const CategoryPill = ({ label }: { label: string }) => (
-  <Box
-    background="primary100"
-    hasRadius
-    paddingLeft={2}
-    paddingRight={2}
-    style={{ display: "inline-flex", alignItems: "center", height: 20 }}
-  >
-    <Typography variant="pi" fontWeight="semiBold" textColor="primary600">
-      {label}
-    </Typography>
-  </Box>
-);
 
 const CheckRow = ({
   label,
@@ -174,7 +177,6 @@ const CheckRow = ({
   );
 };
 
-// Horizontal label → value row used inside Plugin Info
 const InfoRow = ({
   label,
   value,
@@ -269,35 +271,54 @@ type TabId = "details" | "checks" | "readme";
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export const SubmissionDetail = () => {
-  const { documentId } = useParams<{ documentId: string }>();
+  const { plural, documentId } = useParams<{
+    plural: string;
+    documentId: string;
+  }>();
   const navigate = useNavigate();
   const { get } = useFetchClient();
   const { toggleNotification } = useNotification();
 
-  const [submission, setSubmission] = useState<PackageSubmissionDetail | null>(
-    null,
-  );
+  const [ctConfig, setCtConfig] = useState<ContentTypeConfig | null>(null);
+  const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("details");
 
-  const load = async () => {
-    setLoading(true);
+  const loadConfig = async () => {
+    const res = await get("/moderation/config");
+    const configs: ContentTypeConfig[] = res.data?.data ?? [];
+    const found = configs.find((c) => c.pluralName === plural);
+    setCtConfig(found ?? null);
+    return found;
+  };
+
+  const loadSubmission = async (cfg?: ContentTypeConfig | null) => {
+    const config = cfg ?? ctConfig;
+    if (!config || !plural || !documentId) return;
     try {
-      const res = await get(`/moderation/submissions/${documentId}`);
-      setSubmission(res.data.data);
+      const res = await get(`/moderation/${plural}/submissions/${documentId}`);
+      setSubmission(res.data?.data ?? null);
     } catch {
       toggleNotification({
         type: "danger",
         message: "Failed to load submission.",
       });
+    }
+  };
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const cfg = await loadConfig();
+      await loadSubmission(cfg);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (documentId) load();
-  }, [documentId]);
+    if (plural && documentId) load();
+  }, [plural, documentId]);
 
   if (loading) {
     return (
@@ -307,7 +328,7 @@ export const SubmissionDetail = () => {
     );
   }
 
-  if (!submission) {
+  if (!submission || !ctConfig) {
     return (
       <Box padding={8}>
         <Typography textColor="neutral600">Submission not found.</Typography>
@@ -315,6 +336,7 @@ export const SubmissionDetail = () => {
     );
   }
 
+  const businessReview = submission.business_review as BusinessReview | null;
   const securityReviews =
     (submission.security_reviews as SecurityReview[] | null) ?? [];
   const latestScan =
@@ -326,12 +348,8 @@ export const SubmissionDetail = () => {
         )
       : null;
 
-  const automatedChecks = (submission.business_review as BusinessReview | null)
-    ?.automated_check_results;
+  const automatedChecks = businessReview?.automated_check_results;
   const checks = automatedChecks?.checks ?? {};
-  const securityChecks =
-    (checks.security as Record<string, AutomatedCheckResult> | undefined) ?? {};
-  const businessCheckKeys = Object.keys(checks).filter((k) => k !== "security");
   const hasChecks = Boolean(automatedChecks);
   const hasReadme = Boolean(submission.readme);
 
@@ -341,9 +359,16 @@ export const SubmissionDetail = () => {
     ...(hasReadme ? [{ id: "readme" as TabId, label: "README" }] : []),
   ];
 
+  const securityStatus: "pending" | "approved" | "rejected" =
+    latestScan?.status === "completed"
+      ? "approved"
+      : latestScan?.status === "failed"
+        ? "rejected"
+        : "pending";
+
   return (
     <Box padding={8}>
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* Header */}
       <Flex alignItems="center" gap={3} marginBottom={1}>
         <Button
           variant="tertiary"
@@ -363,10 +388,9 @@ export const SubmissionDetail = () => {
         <StatusBadge status={submission.overall_status} />
       </Flex>
 
-      {/* Submitted date */}
       <Box marginBottom={6} paddingLeft={1}>
         <Typography variant="pi" textColor="neutral400">
-          Submitted{" "}
+          {ctConfig.label} · Submitted{" "}
           {new Date(submission.createdAt).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
@@ -375,7 +399,7 @@ export const SubmissionDetail = () => {
         </Typography>
       </Box>
 
-      {/* ── Two-column layout ──────────────────────────────────────────── */}
+      {/* Two-column layout */}
       <Flex gap={6} alignItems="flex-start">
         {/* Left column */}
         <Box style={{ flex: 1, minWidth: 0 }}>
@@ -393,26 +417,42 @@ export const SubmissionDetail = () => {
             ))}
           </Flex>
 
-          {/* ── Details tab ── */}
+          {/* Details tab */}
           {activeTab === "details" && (
             <Flex direction="column" alignItems="flex-start" gap={4}>
-              {/* Plugin Info */}
               <Box style={{ width: "100%" }}>
-                <Card title="Plugin Info">
+                <Card title="Submission Info">
                   <Box>
-                    <InfoRow label="Plugin Name" value={submission.name} />
-                    <Divider />
-                    <InfoRow
-                      label="Registry URL"
-                      value={submission.package_location ?? "—"}
-                    />
-                    <Divider />
-                    <InfoRow label="Package Type" value={submission.type} />
+                    <InfoRow label="Name" value={submission.name} />
+                    {submission.type && (
+                      <>
+                        <Divider />
+                        <InfoRow label="Type" value={submission.type} />
+                      </>
+                    )}
+                    {submission.package_location && (
+                      <>
+                        <Divider />
+                        <InfoRow
+                          label="Registry URL"
+                          value={submission.package_location}
+                        />
+                      </>
+                    )}
+                    {submission.preview_link && (
+                      <>
+                        <Divider />
+                        <InfoRow
+                          label="Demo URL"
+                          value={submission.preview_link}
+                        />
+                      </>
+                    )}
                     {submission.git_repository && (
                       <>
                         <Divider />
                         <InfoRow
-                          label="Repository URL"
+                          label="Repository"
                           value={
                             <a
                               href={submission.git_repository}
@@ -450,23 +490,24 @@ export const SubmissionDetail = () => {
                 </Card>
               </Box>
 
-              {/* Description + Owner side by side */}
               <Flex gap={4} alignItems="flex-start" style={{ width: "100%" }}>
-                <Box style={{ flex: 2, minWidth: 0 }}>
-                  <Card title="Description">
-                    <Typography
-                      textColor="neutral700"
-                      style={{
-                        lineHeight: 1.65,
-                        whiteSpace: "pre-wrap",
-                        display: "block",
-                        textAlign: "left",
-                      }}
-                    >
-                      {submission.description}
-                    </Typography>
-                  </Card>
-                </Box>
+                {submission.description && (
+                  <Box style={{ flex: 2, minWidth: 0 }}>
+                    <Card title="Description">
+                      <Typography
+                        textColor="neutral700"
+                        style={{
+                          lineHeight: 1.65,
+                          whiteSpace: "pre-wrap",
+                          display: "block",
+                          textAlign: "left",
+                        }}
+                      >
+                        {submission.description}
+                      </Typography>
+                    </Card>
+                  </Box>
+                )}
 
                 <Box style={{ flex: 1, minWidth: 0 }}>
                   <Card title="Owner">
@@ -489,9 +530,7 @@ export const SubmissionDetail = () => {
                             textColor="primary600"
                             variant="beta"
                           >
-                            {(
-                              submission.owner as { name?: string } | null
-                            )?.name
+                            {(submission.owner as { name?: string })?.name
                               ?.charAt(0)
                               .toUpperCase()}
                           </Typography>
@@ -532,7 +571,6 @@ export const SubmissionDetail = () => {
                 </Box>
               </Flex>
 
-              {/* Submitter Notes */}
               {submission.submission_notes && (
                 <Box style={{ width: "100%" }}>
                   <Card title="Submitter Notes">
@@ -552,7 +590,7 @@ export const SubmissionDetail = () => {
             </Flex>
           )}
 
-          {/* ── Automated Checks tab ── */}
+          {/* Checks tab */}
           {activeTab === "checks" && (
             <Flex
               direction="column"
@@ -576,72 +614,38 @@ export const SubmissionDetail = () => {
                   </Card>
                 </Box>
               ) : (
-                <>
-                  <Box style={{ width: "100%" }}>
-                    <Card title="Business Checks" noPadding>
-                      <Box paddingLeft={5} paddingRight={5}>
-                        {businessCheckKeys.length === 0 ? (
-                          <Box paddingTop={4} paddingBottom={4}>
-                            <Typography variant="pi" textColor="neutral500">
-                              No business checks recorded.
-                            </Typography>
+                <Box style={{ width: "100%" }}>
+                  <Card title="Automated Checks" noPadding>
+                    <Box paddingLeft={5} paddingRight={5}>
+                      {Object.keys(checks).length === 0 ? (
+                        <Box paddingTop={4} paddingBottom={4}>
+                          <Typography variant="pi" textColor="neutral500">
+                            No checks recorded.
+                          </Typography>
+                        </Box>
+                      ) : (
+                        Object.entries(checks).map(([key, result], i) => (
+                          <Box
+                            key={key}
+                            borderColor="neutral150"
+                            borderWidth={i > 0 ? "1px 0 0 0" : "0"}
+                            borderStyle="solid"
+                          >
+                            <CheckRow
+                              label={CHECK_LABELS[key] ?? key}
+                              result={result as AutomatedCheckResult}
+                            />
                           </Box>
-                        ) : (
-                          businessCheckKeys.map((key, i) => (
-                            <Box
-                              key={key}
-                              borderColor="neutral150"
-                              borderWidth={i > 0 ? "1px 0 0 0" : "0"}
-                              borderStyle="solid"
-                            >
-                              <CheckRow
-                                label={CHECK_LABELS[key] ?? key}
-                                result={checks[key] as AutomatedCheckResult}
-                              />
-                            </Box>
-                          ))
-                        )}
-                      </Box>
-                    </Card>
-                  </Box>
-
-                  <Box style={{ width: "100%" }}>
-                    <Card title="Security Checks" noPadding>
-                      <Box paddingLeft={5} paddingRight={5}>
-                        {Object.keys(securityChecks).length === 0 ? (
-                          <Box paddingTop={4} paddingBottom={4}>
-                            <Box background="neutral100" padding={4} hasRadius>
-                              <Typography variant="pi" textColor="neutral500">
-                                No security checks have run yet.
-                              </Typography>
-                            </Box>
-                          </Box>
-                        ) : (
-                          Object.entries(securityChecks).map(
-                            ([key, result], i) => (
-                              <Box
-                                key={key}
-                                borderColor="neutral150"
-                                borderWidth={i > 0 ? "1px 0 0 0" : "0"}
-                                borderStyle="solid"
-                              >
-                                <CheckRow
-                                  label={CHECK_LABELS[key] ?? key}
-                                  result={result}
-                                />
-                              </Box>
-                            ),
-                          )
-                        )}
-                      </Box>
-                    </Card>
-                  </Box>
-                </>
+                        ))
+                      )}
+                    </Box>
+                  </Card>
+                </Box>
               )}
             </Flex>
           )}
 
-          {/* ── README tab ── */}
+          {/* README tab */}
           {activeTab === "readme" && (
             <Box style={{ width: "100%" }}>
               <Card title="README Preview">
@@ -650,16 +654,13 @@ export const SubmissionDetail = () => {
                     background="neutral100"
                     padding={4}
                     hasRadius
-                    style={{
-                      maxHeight: 600,
-                      overflow: "auto",
-                    }}
+                    style={{ maxHeight: 600, overflow: "auto" }}
                   >
                     <pre
                       style={{
                         margin: 0,
                         fontFamily:
-                          "'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace",
+                          "'SF Mono', 'Fira Code', 'Roboto Mono', monospace",
                         fontSize: 12,
                         lineHeight: 1.75,
                         color: "#32324d",
@@ -680,7 +681,7 @@ export const SubmissionDetail = () => {
           )}
         </Box>
 
-        {/* Right column — sticky, offset to align with tab content */}
+        {/* Right column — sticky review panel */}
         <Box
           style={{
             width: 360,
@@ -692,29 +693,20 @@ export const SubmissionDetail = () => {
         >
           <ReviewPanel
             documentId={submission.documentId}
+            plural={plural!}
+            hasSecurityScan={ctConfig.hasSecurityScan}
             initialBusinessStatus={
-              ((submission.business_review as BusinessReview | null)?.status ??
-                "pending") as "pending" | "approved" | "rejected"
-            }
-            initialSecurityStatus={
-              (latestScan?.status === "completed"
+              (businessReview?.status === "approved"
                 ? "approved"
-                : latestScan?.status === "failed"
+                : businessReview?.status === "rejected"
                   ? "rejected"
                   : "pending") as "pending" | "approved" | "rejected"
             }
+            initialSecurityStatus={securityStatus}
             initialOverallStatus={submission.overall_status}
-            initialFeedback={
-              (submission.business_review as BusinessReview | null)
-                ?.reviewer_feedback || ""
-            }
-            initialRejectionReason={
-              (submission.business_review as BusinessReview | null)
-                ?.rejection_reason || ""
-            }
-            initialBusinessNotes={
-              (submission.business_review as BusinessReview | null)?.notes || ""
-            }
+            initialFeedback={businessReview?.reviewer_feedback || ""}
+            initialRejectionReason={businessReview?.rejection_reason || ""}
+            initialBusinessNotes={businessReview?.notes || ""}
             onSaved={load}
           />
         </Box>

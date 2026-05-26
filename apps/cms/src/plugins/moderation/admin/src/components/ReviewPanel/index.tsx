@@ -15,13 +15,14 @@ import { useMutation } from "react-query";
 
 interface Props {
   documentId: string;
+  plural: string;
+  hasSecurityScan?: boolean;
   initialBusinessStatus: "pending" | "approved" | "rejected";
-  initialSecurityStatus: "pending" | "approved" | "rejected";
+  initialSecurityStatus?: "pending" | "approved" | "rejected";
   initialOverallStatus: string;
   initialFeedback?: string;
   initialRejectionReason?: string;
   initialBusinessNotes?: string;
-  initialSecurityNotes?: string;
   onSaved: () => void;
 }
 
@@ -72,13 +73,14 @@ const StatusPill = ({ status }: { status: ReviewStatus }) => {
 
 export const ReviewPanel = ({
   documentId,
+  plural,
+  hasSecurityScan = false,
   initialBusinessStatus,
-  initialSecurityStatus,
+  initialSecurityStatus = "pending",
   initialOverallStatus,
-  initialFeedback,
-  initialRejectionReason,
-  initialBusinessNotes,
-  initialSecurityNotes,
+  initialFeedback = "",
+  initialRejectionReason = "",
+  initialBusinessNotes = "",
   onSaved,
 }: Props) => {
   const { put, post } = useFetchClient();
@@ -90,15 +92,10 @@ export const ReviewPanel = ({
   const [securityStatus, setSecurityStatus] = useState<ReviewStatus>(
     initialSecurityStatus,
   );
-  const [businessNotes, setBusinessNotes] = useState(
-    initialBusinessNotes || "",
-  );
-  const [securityNotes, setSecurityNotes] = useState(
-    initialSecurityNotes || "",
-  );
-  const [feedback, setFeedback] = useState(initialFeedback || "");
+  const [businessNotes, setBusinessNotes] = useState(initialBusinessNotes);
+  const [feedback, setFeedback] = useState(initialFeedback);
   const [rejectionReason, setRejectionReason] = useState(
-    initialRejectionReason || "",
+    initialRejectionReason,
   );
   const [openSection, setOpenSection] = useState<
     "business" | "security" | null
@@ -107,15 +104,19 @@ export const ReviewPanel = ({
   const toggleSection = (section: "business" | "security") =>
     setOpenSection((prev) => (prev === section ? null : section));
 
-  const bothApproved =
-    businessStatus === "approved" && securityStatus === "approved";
+  const canApprove = hasSecurityScan
+    ? businessStatus === "approved" && securityStatus === "approved"
+    : businessStatus === "approved";
+
   const isAlreadyApproved = initialOverallStatus === "approved";
   const isAlreadyRejected = initialOverallStatus === "rejected";
   const isLocked = isAlreadyApproved || isAlreadyRejected;
 
+  const base = `/moderation/${plural}/submissions/${documentId}`;
+
   const { mutate: saveReview, isLoading: saving } = useMutation(
     async () => {
-      await put(`/moderation/submissions/${documentId}/review`, {
+      await put(`${base}/review`, {
         data: {
           business_review_status: businessStatus,
           notes: businessNotes,
@@ -141,7 +142,7 @@ export const ReviewPanel = ({
 
   const { mutate: approve, isLoading: approving } = useMutation(
     async () => {
-      await put(`/moderation/submissions/${documentId}/review`, {
+      await put(`${base}/review`, {
         data: {
           business_review_status: businessStatus,
           notes: businessNotes,
@@ -166,22 +167,22 @@ export const ReviewPanel = ({
     },
   );
 
-  const { mutate: promote, isLoading: promoting } = useMutation(
+  const { mutate: publishEntry, isLoading: publishing } = useMutation(
     async () => {
-      await post(`/moderation/submissions/${documentId}/promote`, {});
+      await post(`${base}/publish`, {});
     },
     {
       onSuccess() {
         toggleNotification({
           type: "success",
-          message: "Package entry created. Open Content Manager to publish.",
+          message: "Published successfully.",
         });
         onSaved();
       },
       onError(err: unknown) {
         toggleNotification({
           type: "danger",
-          message: err instanceof Error ? err.message : "Promotion failed.",
+          message: err instanceof Error ? err.message : "Failed to publish.",
         });
       },
     },
@@ -189,7 +190,7 @@ export const ReviewPanel = ({
 
   const { mutate: reject, isLoading: rejecting } = useMutation(
     async () => {
-      await post(`/moderation/submissions/${documentId}/decide`, {
+      await post(`${base}/decide`, {
         data: { status: "rejected", reason: rejectionReason, feedback },
       });
     },
@@ -212,7 +213,7 @@ export const ReviewPanel = ({
 
   const { mutate: requestChanges, isLoading: requesting } = useMutation(
     async () => {
-      await post(`/moderation/submissions/${documentId}/decide`, {
+      await post(`${base}/decide`, {
         data: { status: "changes_requested", feedback },
       });
     },
@@ -226,6 +227,27 @@ export const ReviewPanel = ({
           type: "danger",
           message:
             err instanceof Error ? err.message : "Failed to request changes.",
+        });
+      },
+    },
+  );
+
+  const { mutate: runScan, isLoading: scanning } = useMutation(
+    async () => {
+      await post(`${base}/run-security-scan`, {});
+    },
+    {
+      onSuccess() {
+        toggleNotification({
+          type: "success",
+          message: "Security scan started.",
+        });
+        onSaved();
+      },
+      onError(err: unknown) {
+        toggleNotification({
+          type: "danger",
+          message: err instanceof Error ? err.message : "Failed to start scan.",
         });
       },
     },
@@ -266,7 +288,7 @@ export const ReviewPanel = ({
         </Flex>
       </Box>
 
-      {/* Business Review — accordion */}
+      {/* Business Review accordion */}
       <Box borderColor="neutral150" borderWidth="0 0 1px 0" borderStyle="solid">
         <button
           type="button"
@@ -352,7 +374,7 @@ export const ReviewPanel = ({
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                       setBusinessNotes(e.target.value)
                     }
-                    placeholder="Internal notes for the business review track…"
+                    placeholder="Internal notes for the business review…"
                     disabled={isLocked}
                   />
                 </Field.Root>
@@ -362,103 +384,97 @@ export const ReviewPanel = ({
         )}
       </Box>
 
-      {/* Security Review — accordion */}
-      <Box borderColor="neutral150" borderWidth="0 0 1px 0" borderStyle="solid">
-        <button
-          type="button"
-          onClick={() => toggleSection("security")}
-          style={{
-            width: "100%",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-            textAlign: "left",
-          }}
+      {/* Security Review accordion — only shown for content types with security scan */}
+      {hasSecurityScan && (
+        <Box
+          borderColor="neutral150"
+          borderWidth="0 0 1px 0"
+          borderStyle="solid"
         >
-          <Flex
-            justifyContent="space-between"
-            alignItems="center"
-            paddingLeft={6}
-            paddingRight={6}
-            paddingTop={5}
-            paddingBottom={5}
+          <button
+            type="button"
+            onClick={() => toggleSection("security")}
+            style={{
+              width: "100%",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              textAlign: "left",
+            }}
           >
-            <Flex gap={3} alignItems="center">
-              <Typography
-                variant="omega"
-                fontWeight="semiBold"
-                textColor="neutral800"
-              >
-                Security Review
-              </Typography>
-              <StatusPill status={securityStatus} />
-            </Flex>
-            <Box
-              style={{
-                color: "#8e8ea9",
-                display: "flex",
-                transform:
-                  openSection === "security"
-                    ? "rotate(180deg)"
-                    : "rotate(0deg)",
-                transition: "transform 0.15s ease",
-              }}
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingLeft={6}
+              paddingRight={6}
+              paddingTop={5}
+              paddingBottom={5}
             >
-              <ChevronDown aria-hidden />
-            </Box>
-          </Flex>
-        </button>
-
-        {openSection === "security" && (
-          <Box
-            paddingLeft={6}
-            paddingRight={6}
-            paddingBottom={5}
-            borderColor="neutral100"
-            borderWidth="1px 0 0 0"
-            borderStyle="solid"
-            background="neutral50"
-          >
-            <Box paddingTop={4}>
-              <Flex direction="column" alignItems="stretch" gap={4}>
-                <Field.Root name="securityReview" style={{ width: "100%" }}>
-                  <Field.Label>Status</Field.Label>
-                  <SingleSelect
-                    value={securityStatus}
-                    onChange={(val) => setSecurityStatus(val as ReviewStatus)}
-                    disabled={isLocked}
-                  >
-                    <SingleSelectOption value="pending">
-                      Pending
-                    </SingleSelectOption>
-                    <SingleSelectOption value="approved">
-                      Approved
-                    </SingleSelectOption>
-                    <SingleSelectOption value="rejected">
-                      Rejected
-                    </SingleSelectOption>
-                  </SingleSelect>
-                </Field.Root>
-
-                <Field.Root name="securityNotes" style={{ width: "100%" }}>
-                  <Field.Label>Internal Notes</Field.Label>
-                  <Textarea
-                    value={securityNotes}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setSecurityNotes(e.target.value)
-                    }
-                    placeholder="Internal notes for the security review track…"
-                    disabled={isLocked}
-                  />
-                </Field.Root>
+              <Flex gap={3} alignItems="center">
+                <Typography
+                  variant="omega"
+                  fontWeight="semiBold"
+                  textColor="neutral800"
+                >
+                  Security Review
+                </Typography>
+                <StatusPill status={securityStatus} />
               </Flex>
-            </Box>
-          </Box>
-        )}
-      </Box>
+              <Box
+                style={{
+                  color: "#8e8ea9",
+                  display: "flex",
+                  transform:
+                    openSection === "security"
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                  transition: "transform 0.15s ease",
+                }}
+              >
+                <ChevronDown aria-hidden />
+              </Box>
+            </Flex>
+          </button>
 
-      {/* Feedback */}
+          {openSection === "security" && (
+            <Box
+              paddingLeft={6}
+              paddingRight={6}
+              paddingBottom={5}
+              borderColor="neutral100"
+              borderWidth="1px 0 0 0"
+              borderStyle="solid"
+              background="neutral50"
+            >
+              <Box paddingTop={4}>
+                <Flex direction="column" alignItems="stretch" gap={4}>
+                  <Field.Root name="securityReview" style={{ width: "100%" }}>
+                    <Field.Label>Status</Field.Label>
+                    <SingleSelect
+                      value={securityStatus}
+                      onChange={(val) => setSecurityStatus(val as ReviewStatus)}
+                      disabled={isLocked}
+                    >
+                      <SingleSelectOption value="pending">
+                        Pending
+                      </SingleSelectOption>
+                      <SingleSelectOption value="approved">
+                        Approved
+                      </SingleSelectOption>
+                      <SingleSelectOption value="rejected">
+                        Rejected
+                      </SingleSelectOption>
+                    </SingleSelect>
+                  </Field.Root>
+                </Flex>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {/* Feedback & rejection reason */}
       <Box
         paddingLeft={6}
         paddingRight={6}
@@ -469,7 +485,6 @@ export const ReviewPanel = ({
         borderStyle="solid"
       >
         <Flex direction="column" alignItems="stretch" gap={4}>
-          {/* Feedback — shown while actively reviewing */}
           {!isAlreadyApproved && (
             <Field.Root name="feedback" style={{ width: "100%" }}>
               <Field.Label>Feedback to Submitter</Field.Label>
@@ -487,9 +502,8 @@ export const ReviewPanel = ({
             </Field.Root>
           )}
 
-          {/* Rejection reason — only when a track is rejected */}
           {(businessStatus === "rejected" ||
-            securityStatus === "rejected" ||
+            (hasSecurityScan && securityStatus === "rejected") ||
             isAlreadyRejected) && (
             <Field.Root name="rejectionReason" style={{ width: "100%" }}>
               <Field.Label>Rejection Reason</Field.Label>
@@ -524,11 +538,11 @@ export const ReviewPanel = ({
             </Box>
             <Button
               variant="default"
-              onClick={() => promote()}
-              loading={promoting}
+              onClick={() => publishEntry()}
+              loading={publishing}
               fullWidth
             >
-              Promote to Package
+              Publish
             </Button>
           </Flex>
         ) : isAlreadyRejected ? (
@@ -542,43 +556,52 @@ export const ReviewPanel = ({
             </Typography>
           </Box>
         ) : (
-          <>
-            {/* Decision buttons — two rows to avoid squashing */}
-            <Flex direction="column" alignItems="stretch" gap={3}>
-              <Flex gap={2} justifyContent="flex-end">
-                <Button
-                  variant="secondary"
-                  onClick={() => requestChanges()}
-                  loading={requesting}
-                  style={{ whiteSpace: "nowrap" }}
-                >
-                  Request Changes
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => reject()}
-                  loading={rejecting}
-                  style={{ whiteSpace: "nowrap" }}
-                >
-                  Reject
-                </Button>
-                <Button
-                  variant="success"
-                  onClick={() => approve()}
-                  loading={approving}
-                  disabled={!bothApproved}
-                  title={
-                    bothApproved
-                      ? undefined
-                      : "Both review tracks must be approved first"
-                  }
-                  style={{ whiteSpace: "nowrap" }}
-                >
-                  Approve
-                </Button>
-              </Flex>
+          <Flex direction="column" alignItems="stretch" gap={3}>
+            {hasSecurityScan && (
+              <Button
+                variant="tertiary"
+                onClick={() => runScan()}
+                loading={scanning}
+                fullWidth
+              >
+                Run Security Scan
+              </Button>
+            )}
+            <Flex gap={2} justifyContent="flex-end">
+              <Button
+                variant="secondary"
+                onClick={() => requestChanges()}
+                loading={requesting}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Request Changes
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => reject()}
+                loading={rejecting}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Reject
+              </Button>
+              <Button
+                variant="success"
+                onClick={() => approve()}
+                loading={approving}
+                disabled={!canApprove}
+                title={
+                  canApprove
+                    ? undefined
+                    : hasSecurityScan
+                      ? "Both review tracks must be approved first"
+                      : "Business review must be approved first"
+                }
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Approve
+              </Button>
             </Flex>
-          </>
+          </Flex>
         )}
       </Box>
     </Box>

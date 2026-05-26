@@ -1,7 +1,5 @@
-import pluginSubmission from "./plugin-submission";
-import templateSubmission from "./template-submission";
+import submission from "./submission";
 
 export default {
-  "plugin-submission": pluginSubmission,
-  "template-submission": templateSubmission,
+  submission,
 };

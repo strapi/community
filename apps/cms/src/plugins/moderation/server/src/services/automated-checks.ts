@@ -373,40 +373,65 @@ async function checkStrapiPeerDep(gitRepository, npmPackageName) {
 // Main entry point
 // ---------------------------------------------------------------------------
 
-async function runAutomatedChecks({ repository_url, package_location }) {
+type CheckFn = () => Promise<{
+  passed: boolean | null;
+  skipped?: boolean;
+  message: string;
+  detail?: unknown;
+}>;
+
+async function runAutomatedChecks({
+  repository_url,
+  package_location,
+  enabledChecks,
+}: {
+  repository_url?: string;
+  package_location?: string;
+  enabledChecks?: string[];
+}) {
   const npmPackageName = extractNpmNameFromLocation(package_location);
-  const [repoPublic, readmeExists, mitLicense, strapiPeerDep] =
-    await Promise.allSettled([
-      checkRepoPublic(repository_url),
-      checkReadmeExists(repository_url),
-      checkMitLicense(repository_url, npmPackageName),
-      checkStrapiPeerDep(repository_url, npmPackageName),
-    ]);
 
-  const resolve = (settled) =>
-    settled.status === "fulfilled"
-      ? settled.value
-      : { passed: null, message: settled.reason?.message || "Check error." };
+  const ALL_CHECKS: Record<string, CheckFn> = {
+    repo_public: () => checkRepoPublic(repository_url),
+    readme_exists: () => checkReadmeExists(repository_url),
+    mit_license: () => checkMitLicense(repository_url, npmPackageName),
+    strapi_peer_dep: () => checkStrapiPeerDep(repository_url, npmPackageName),
+    enterprise_competition: () =>
+      Promise.resolve({
+        passed: null as null,
+        skipped: true,
+        message: "Requires manual business review.",
+      }),
+  };
 
-  // Detect provider for the result metadata
+  const activeIds = enabledChecks
+    ? enabledChecks.filter((id) => id in ALL_CHECKS)
+    : Object.keys(ALL_CHECKS);
+
+  const settled = await Promise.allSettled(
+    activeIds.map((id) => ALL_CHECKS[id]()),
+  );
+
+  const resolve = (s: PromiseSettledResult<Awaited<ReturnType<CheckFn>>>) =>
+    s.status === "fulfilled"
+      ? s.value
+      : {
+          passed: null,
+          message: (s.reason as Error)?.message || "Check error.",
+        };
+
+  const checks: Record<string, ReturnType<typeof resolve>> = {};
+  activeIds.forEach((id, i) => {
+    checks[id] = resolve(settled[i]);
+  });
+
   const info = parseRepoInfo(repository_url);
   const provider = info?.provider ?? "unknown";
 
   return {
     runAt: new Date().toISOString(),
     provider,
-    checks: {
-      repo_public: resolve(repoPublic),
-      readme_exists: resolve(readmeExists),
-      mit_license: resolve(mitLicense),
-      strapi_peer_dep: resolve(strapiPeerDep),
-      // Enterprise competition requires human review regardless of provider.
-      enterprise_competition: {
-        passed: null,
-        skipped: true,
-        message: "Requires manual business review.",
-      },
-    },
+    checks,
   };
 }
 

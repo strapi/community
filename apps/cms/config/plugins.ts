@@ -40,6 +40,49 @@ export default ({ env }) => ({
   moderation: {
     enabled: true,
     resolve: "./src/plugins/moderation",
+    config: {
+      contentTypes: [
+        {
+          uid: "api::package.package",
+          singularName: "package",
+          pluralName: "packages",
+          label: "Plugins",
+          categoryUid: "api::package-category.package-category",
+          defaultFieldValues: {
+            labels: { official: false, featured: false, paid: false },
+          },
+          checks: [
+            "repo_public",
+            "readme_exists",
+            "mit_license",
+            "strapi_peer_dep",
+            "enterprise_competition",
+          ],
+          webhooks: {
+            submissionReceived: "strapi/plugin-submission-received",
+            approved: "strapi/plugin-approved",
+            declined: "strapi/plugin-declined",
+            changesRequested: "strapi/plugin-changes-requested",
+          },
+        },
+        {
+          uid: "api::template.template",
+          singularName: "template",
+          pluralName: "templates",
+          label: "Templates",
+          categoryUid: "api::template-category.template-category",
+          defaultFieldValues: {
+            labels: { official: false, featured: false, paid: false },
+          },
+          checks: ["repo_public", "readme_exists", "mit_license"],
+          webhooks: {
+            submissionReceived: "strapi/template-submission-received",
+            approved: "strapi/template-approved",
+            declined: "strapi/template-declined",
+          },
+        },
+      ],
+    },
   },
   "package-info": {
     enabled: true,

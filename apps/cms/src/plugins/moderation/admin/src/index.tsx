@@ -2,9 +2,7 @@ import type { StrapiApp } from "@strapi/strapi/admin";
 import { Route, Routes } from "react-router-dom";
 import { SubmissionDetail } from "./pages/SubmissionDetail";
 import { SubmissionList } from "./pages/SubmissionList";
-import { TemplateSubmissionDetail } from "./pages/TemplateSubmissionDetail";
 
-// Simple shield icon for the menu
 const ShieldIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -35,12 +33,8 @@ export default {
             <Routes>
               <Route index element={<SubmissionList />} />
               <Route
-                path="submissions/:documentId"
+                path=":plural/submissions/:documentId"
                 element={<SubmissionDetail />}
-              />
-              <Route
-                path="template-submissions/:documentId"
-                element={<TemplateSubmissionDetail />}
               />
             </Routes>
           ),
