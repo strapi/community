@@ -1,0 +1,271 @@
+{
+  "name": "template-submission-received",
+  "description": null,
+  "nodes": [
+    {
+      "id": "webhook-1",
+      "name": "Webhook: Submission Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "strapi/template-submission-received",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "Fired by the CMS moderation plugin after template-submission.createSubmission. Payload: flat { submissionId, template_name, owner_name, owner_email, repository_url, dashboard_link, ... }.",
+      "webhookId": "5d81dc37-06f1-44c7-a80b-df2d1e38ee1f"
+    },
+    {
+      "id": "extract-1",
+      "name": "Extract Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "package_id",
+              "type": "string",
+              "value": "={{ $json.body.submissionId }}"
+            },
+            {
+              "id": "a2",
+              "name": "package_name",
+              "type": "string",
+              "value": "={{ $json.body.template_name }}"
+            },
+            {
+              "id": "a3",
+              "name": "git_repository",
+              "type": "string",
+              "value": "={{ $json.body.repository_url }}"
+            },
+            {
+              "id": "a4",
+              "name": "author_email",
+              "type": "string",
+              "value": "={{ $json.body.owner_email }}"
+            },
+            {
+              "id": "a5",
+              "name": "author_name",
+              "type": "string",
+              "value": "={{ $json.body.owner_name }}"
+            },
+            {
+              "id": "a6",
+              "name": "dashboard_link",
+              "type": "string",
+              "value": "={{ $json.body.dashboard_link }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "build-email-1",
+      "name": "Build Email Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        200
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "template_key",
+              "type": "string",
+              "value": "template-submission-received"
+            },
+            {
+              "id": "b2",
+              "name": "to_email",
+              "type": "string",
+              "value": "={{ $json.author_email }}"
+            },
+            {
+              "id": "b3",
+              "name": "to_name",
+              "type": "string",
+              "value": "={{ $json.author_name }}"
+            },
+            {
+              "id": "b4",
+              "name": "variables",
+              "type": "object",
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, git_repository: $json.git_repository } }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "send-email-1",
+      "name": "Send Developer Email",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1MgLRIjI37T2Kd5W"
+        },
+        "mode": "once",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Calls render-email sub-workflow. TODO when n8n UI available: bump to typeVersion 1.3 and use resourceMapper for typed inputs."
+    },
+    {
+      "id": "build-slack-1",
+      "name": "Build Slack Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        400
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "text",
+              "type": "string",
+              "value": "=:clipboard: New *template* submission received: *{{ $json.package_name }}* by {{ $json.author_name }}\nRepo: {{ $json.git_repository }}\nReview: {{ $json.dashboard_link }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-1",
+      "name": "Notify #integration-marketplace",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "integration-marketplace"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {}
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "webhookId": "693a18d9-9d21-43bc-b24e-4397280404dd"
+    }
+  ],
+  "connections": {
+    "Webhook: Submission Received": {
+      "main": [
+        [
+          {
+            "node": "Extract Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payload": {
+      "main": [
+        [
+          {
+            "node": "Build Email Payload",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Payload": {
+      "main": [
+        [
+          {
+            "node": "Send Developer Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Notify #integration-marketplace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

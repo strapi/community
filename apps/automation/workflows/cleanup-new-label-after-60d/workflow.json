@@ -1,0 +1,222 @@
+{
+  "name": "cleanup-new-label-after-60d",
+  "description": null,
+  "nodes": [
+    {
+      "id": "sched-1",
+      "name": "Daily at 03:00 UTC",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "notes": "Runs once a day. Offset from package-info plugin's 02:00 stats sync so we don't hammer Strapi at the same time."
+    },
+    {
+      "id": "compute-cutoff-1",
+      "name": "Compute Cutoff Date",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "cutoff_iso",
+              "type": "string",
+              "value": "={{ $now.minus({days: 60}).toISO() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "notes": "60 days = 2 months per issue #21."
+    },
+    {
+      "id": "fetch-stale-1",
+      "name": "Fetch Stale 'New' Packages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/packages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters[labels][is_new][$eq]",
+              "value": "true"
+            },
+            {
+              "name": "filters[publishedAt][$lt]",
+              "value": "={{ $json.cutoff_iso }}"
+            },
+            {
+              "name": "fields[0]",
+              "value": "id"
+            },
+            {
+              "name": "fields[1]",
+              "value": "name"
+            },
+            {
+              "name": "fields[2]",
+              "value": "publishedAt"
+            },
+            {
+              "name": "populate[labels]",
+              "value": "true"
+            },
+            {
+              "name": "pagination[limit]",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "notes": "TODO: add pagination loop once we expect >100 stale packages. Depends on #21's 'is_new' field being added to the package 'labels' component (not yet present in the schema)."
+    },
+    {
+      "id": "split-1",
+      "name": "Split Into Items",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      }
+    },
+    {
+      "id": "patch-1",
+      "name": "Strip 'is_new' Label",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/packages/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"labels\": {\n      \"is_new\": false\n    }\n  }\n}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "onError": "continueRegularOutput",
+      "notes": "Continue on error so one bad entry doesn't block the rest of the batch."
+    }
+  ],
+  "connections": {
+    "Daily at 03:00 UTC": {
+      "main": [
+        [
+          {
+            "node": "Compute Cutoff Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Cutoff Date": {
+      "main": [
+        [
+          {
+            "node": "Fetch Stale 'New' Packages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Stale 'New' Packages": {
+      "main": [
+        [
+          {
+            "node": "Split Into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Items": {
+      "main": [
+        [
+          {
+            "node": "Strip 'is_new' Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

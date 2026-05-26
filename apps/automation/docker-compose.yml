@@ -1,16 +1,45 @@
+name: strapi-automation
+
 services:
   n8n:
     image: n8nio/n8n:latest
-    container_name: n8n
-    environment:
-      - GENERIC_TIMEZONE=Europe/Amsterdam
-      - NODE_ENV=production
-      - N8N_SECURE_COOKIE=false
+    restart: unless-stopped
     ports:
       - "5678:5678"
+    environment:
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-UTC}
+      TZ: ${GENERIC_TIMEZONE:-UTC}
+      NODE_ENV: production
+      N8N_SECURE_COOKIE: "false"
     volumes:
       - n8n_data:/home/node/.n8n
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  n8n-mcp:
+    image: ghcr.io/czlonkowski/n8n-mcp:latest
+    pull_policy: always
+    profiles:
+      - mcp
     restart: unless-stopped
+    depends_on:
+      n8n:
+        condition: service_healthy
+    ports:
+      - "3100:3000"
+    environment:
+      N8N_MODE: "true"
+      MCP_MODE: http
+      N8N_API_URL: http://n8n:5678
+      N8N_API_KEY: ${N8N_API_KEY}
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN}
+      AUTH_TOKEN: ${MCP_AUTH_TOKEN}
+      PORT: "3000"
+      LOG_LEVEL: info
 
 volumes:
   n8n_data:

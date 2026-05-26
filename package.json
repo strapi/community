@@ -2,6 +2,7 @@
   "name": "strapi-marketplace",
   "private": true,
   "scripts": {
+    "bootstrap": "./scripts/setup.sh",
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",

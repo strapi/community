@@ -1,0 +1,193 @@
+{
+  "name": "render-email (shared sub-workflow)",
+  "description": null,
+  "nodes": [
+    {
+      "id": "trig-1",
+      "name": "When Called by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "inputSource": "passthrough",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "template_key",
+              "type": "string"
+            },
+            {
+              "name": "to_email",
+              "type": "string"
+            },
+            {
+              "name": "to_name",
+              "type": "string"
+            },
+            {
+              "name": "variables",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fetch-1",
+      "name": "Fetch Template From Strapi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/email-templates",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters[key][$eq]",
+              "value": "={{ $json.template_key }}"
+            },
+            {
+              "name": "pagination[limit]",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "notes": "TODO: swap env-var auth for an n8n 'Strapi' credential once the CMS token is issued"
+    },
+    {
+      "id": "render-1",
+      "name": "Render Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const input = $('When Called by Another Workflow').first().json;\nconst response = $input.first().json;\nconst tpl = (response.data && response.data[0]) || null;\n\nif (!tpl) {\n  throw new Error(`No email-template found with key=${input.template_key}`);\n}\n\nconst attrs = tpl.attributes || tpl;\nconst vars = input.variables || {};\n\nfunction interpolate(str) {\n  if (typeof str !== 'string') return str;\n  return str.replace(/\\{\\{\\s*([\\w.]+)\\s*\\}\\}/g, (_, key) => {\n    const val = key.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), vars);\n    return val == null ? '' : String(val);\n  });\n}\n\nreturn [{\n  json: {\n    to_email: input.to_email,\n    to_name: input.to_name,\n    subject: interpolate(attrs.subject),\n    body: interpolate(typeof attrs.body === 'string' ? attrs.body : JSON.stringify(attrs.body)),\n    from_name: attrs.from_name || 'Strapi Community',\n    reply_to: attrs.reply_to || null,\n    template_key: input.template_key,\n  },\n}];"
+      }
+    },
+    {
+      "id": "wrap-1",
+      "name": "Wrap In Branded Shell",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\n\nconst shell = `<!doctype html>\n<html>\n<body style=\"font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#212134;max-width:600px;margin:0 auto;padding:24px;\">\n  <header style=\"border-bottom:1px solid #dcdce4;padding-bottom:16px;margin-bottom:24px;\">\n    <strong style=\"color:#4945ff;\">Strapi Community</strong>\n  </header>\n  <main>${item.body}</main>\n  <footer style=\"border-top:1px solid #dcdce4;margin-top:32px;padding-top:16px;font-size:12px;color:#666687;\">\n    You're receiving this because you interacted with the Strapi community hub.\n  </footer>\n</body>\n</html>`;\n\nreturn [{ json: { ...item, html_body: shell } }];"
+      }
+    },
+    {
+      "id": "send-1",
+      "name": "Send via SendGrid",
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "resource": "mail",
+        "operation": "send",
+        "fromEmail": "community@strapi.io",
+        "fromName": "={{ $json.from_name }}",
+        "toEmail": "={{ $json.to_email }}",
+        "subject": "={{ $json.subject }}",
+        "dynamicTemplate": false,
+        "contentType": "text/html",
+        "contentValue": "={{ $json.html_body }}",
+        "additionalFields": {
+          "replyToEmail": "={{ $json.reply_to }}"
+        }
+      },
+      "retryOnFail": true,
+      "notes": "Uses community@strapi.io sender. Requires SendGrid credential configured in n8n."
+    }
+  ],
+  "connections": {
+    "When Called by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Fetch Template From Strapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Template From Strapi": {
+      "main": [
+        [
+          {
+            "node": "Render Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Template": {
+      "main": [
+        [
+          {
+            "node": "Wrap In Branded Shell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrap In Branded Shell": {
+      "main": [
+        [
+          {
+            "node": "Send via SendGrid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 2,
+  "tags": [],
+  "activeVersion": null
+}

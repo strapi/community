@@ -2,9 +2,18 @@
   "name": "automation",
   "version": "0.0.0",
   "private": true,
-  "description": "Local n8n instance for workflow automation",
+  "description": "Local n8n instance and workflow version control for the Strapi community hub. Engine-agnostic (Docker or Podman).",
   "scripts": {
-    "dev": "docker-compose up",
-    "start": "docker-compose up"
+    "dev": "./scripts/compose.sh up -d",
+    "start": "./scripts/compose.sh up -d",
+    "n8n:up": "./scripts/compose.sh up -d",
+    "n8n:up:mcp": "./scripts/compose.sh --profile mcp up -d",
+    "n8n:down": "./scripts/compose.sh down",
+    "n8n:restart": "./scripts/compose.sh restart",
+    "n8n:restart:mcp": "./scripts/compose.sh --profile mcp restart",
+    "n8n:ps": "./scripts/compose.sh ps",
+    "n8n:logs": "./scripts/compose.sh logs -f",
+    "workflows:export": "node ./scripts/export-workflows.mjs",
+    "workflows:import": "node ./scripts/import-workflows.mjs"
   }
 }
