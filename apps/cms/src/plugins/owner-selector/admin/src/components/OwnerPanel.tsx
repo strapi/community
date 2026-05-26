@@ -8,11 +8,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { Pencil, Plus } from "@strapi/icons";
-import {
-  unstable_useDocument,
-  useFetchClient,
-  useNotification,
-} from "@strapi/strapi/admin";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { type CurrentOwner, OwnerModal, type OwnerType } from "./OwnerModal";
@@ -62,11 +58,20 @@ export const OwnerPanel = ({ model, documentId }: Props) => {
     },
   );
 
-  const { document } = unstable_useDocument({
-    model: ownerType,
-    collectionType: "collection-types",
-    documentId: selectedId,
-  });
+  const { data: ownerDoc, isLoading: ownerLoading } = useQuery(
+    ["owner-doc", ownerType, selectedId],
+    async () => {
+      if (!selectedId) return null;
+      const params = new URLSearchParams({
+        uid: ownerType,
+        "filters[documentId][$eq]": selectedId,
+        "pagination[pageSize]": "1",
+      });
+      const res = await get(`/better-auth-dashboard/db?${params}`);
+      return res.data.results?.[0] ?? null;
+    },
+    { enabled: !!selectedId },
+  );
 
   if (isLoading) {
     return (
@@ -103,7 +108,7 @@ export const OwnerPanel = ({ model, documentId }: Props) => {
         </TextButton>
       </Box>
 
-      {!document || isLoading ? (
+      {!ownerDoc || ownerLoading ? (
         <Flex justifyContent="center">
           <Loader />
         </Flex>
@@ -113,7 +118,7 @@ export const OwnerPanel = ({ model, documentId }: Props) => {
             <Link
               href={`${window.strapi.backendURL}/admin/content-manager/collection-types/${ownerType}/${selectedId}`}
             >
-              {document.name}
+              {ownerDoc.name}
             </Link>
           </Typography>
         </Flex>
