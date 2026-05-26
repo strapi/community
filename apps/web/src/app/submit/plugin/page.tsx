@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/layout/navigation";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { SubmitPluginForm } from "./SubmitPluginForm";
 
@@ -19,5 +20,10 @@ async function fetchCategories(): Promise<string[]> {
 
 export default async function SubmitPluginPage() {
   const categories = await fetchCategories();
-  return <SubmitPluginForm initialCategories={categories} />;
+  return (
+    <>
+      <Navigation theme="light" />
+      <SubmitPluginForm initialCategories={categories} />
+    </>
+  );
 }

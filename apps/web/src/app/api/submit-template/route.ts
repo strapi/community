@@ -1,103 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  isRecaptchaConfigured,
+  verifyRecaptcha,
+} from "@/features/submit/server/recaptcha";
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_LOGO_SIZE,
+  parseCategories,
+  str,
+  submitToStrapi,
+  uploadImageToStrapi,
+} from "@/features/submit/server/strapi";
 
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-const RECAPTCHA_PROJECT_ID = process.env.RECAPTCHA_PROJECT_ID;
-const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
-const RECAPTCHA_MIN_SCORE = 0.5;
-
-const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337";
-const CMS_BEARER_TOKEN = process.env.CMS_BEARER_TOKEN;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-interface EnterpriseAssessment {
-  tokenProperties?: { valid: boolean; action?: string; invalidReason?: string };
-  riskAnalysis?: { score: number; reasons?: string[] };
-}
-
-async function verifyRecaptcha(
-  token: string,
-  expectedAction: string,
-): Promise<{ success: boolean; score: number }> {
-  if (!RECAPTCHA_SITE_KEY || !RECAPTCHA_PROJECT_ID || !RECAPTCHA_API_KEY) {
-    console.warn(
-      "[submit-template] reCAPTCHA Enterprise not configured — skipping verification.",
-    );
-    return { success: true, score: 1 };
-  }
-
-  const url =
-    `https://recaptchaenterprise.googleapis.com/v1/projects/${RECAPTCHA_PROJECT_ID}` +
-    `/assessments?key=${RECAPTCHA_API_KEY}`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event: { token, siteKey: RECAPTCHA_SITE_KEY, expectedAction },
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`reCAPTCHA Enterprise API returned ${res.status}`);
-  }
-
-  const data = (await res.json()) as EnterpriseAssessment;
-
-  if (!data.tokenProperties?.valid) {
-    console.warn(
-      "[submit-template] reCAPTCHA token invalid:",
-      data.tokenProperties?.invalidReason,
-    );
-    return { success: false, score: 0 };
-  }
-
-  if (data.tokenProperties.action !== expectedAction) {
-    console.warn(
-      `[submit-template] reCAPTCHA action mismatch: expected "${expectedAction}", got "${data.tokenProperties.action}"`,
-    );
-    return { success: false, score: 0 };
-  }
-
-  const score = data.riskAnalysis?.score ?? 0;
-  return { success: score >= RECAPTCHA_MIN_SCORE, score };
-}
-
-function str(value: FormDataEntryValue | null): string | null {
-  if (!value || typeof value !== "string") return null;
-  const t = value.trim();
-  return t.length > 0 ? t : null;
-}
-
-async function uploadLogoToStrapi(file: File): Promise<string | null> {
-  const form = new FormData();
-  form.append("files", file, file.name);
-
-  try {
-    const res = await fetch(`${CMS_URL}/api/upload`, {
-      method: "POST",
-      headers: CMS_BEARER_TOKEN ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` } : {},
-      body: form,
-    });
-
-    if (!res.ok) {
-      console.error(`[submit-template] Logo upload failed: ${res.status}`);
-      return null;
-    }
-
-    const data = (await res.json()) as Array<{ documentId: string }>;
-    return data[0]?.documentId ?? null;
-  } catch (err) {
-    console.error("[submit-template] Logo upload error:", err);
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// POST /api/submit-template
-// ---------------------------------------------------------------------------
+const LOG = "submit-template";
 
 export async function POST(req: NextRequest) {
   let formData: FormData;
@@ -107,8 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid form data." }, { status: 400 });
   }
 
-  // --- reCAPTCHA Enterprise (skipped when env vars not configured) ---
-  if (RECAPTCHA_SITE_KEY && RECAPTCHA_PROJECT_ID && RECAPTCHA_API_KEY) {
+  if (isRecaptchaConfigured()) {
     const token = str(formData.get("recaptcha_token"));
     if (!token) {
       return NextResponse.json(
@@ -117,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
     try {
-      const { success } = await verifyRecaptcha(token, "submit_template");
+      const { success } = await verifyRecaptcha(token, "submit_template", LOG);
       if (!success) {
         return NextResponse.json(
           { error: "reCAPTCHA verification failed. Please try again." },
@@ -125,7 +39,7 @@ export async function POST(req: NextRequest) {
         );
       }
     } catch (err) {
-      console.error("[submit-template] reCAPTCHA error:", err);
+      console.error(`[${LOG}] reCAPTCHA error:`, err);
       return NextResponse.json(
         { error: "reCAPTCHA service unavailable. Please try again later." },
         { status: 503 },
@@ -133,7 +47,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // --- Extract + validate fields ---
   const template_name = str(formData.get("template_name"));
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
@@ -155,61 +68,37 @@ export async function POST(req: NextRequest) {
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(owner_email))
     errors.push("Contact email is not valid.");
   if (!agreed) errors.push("You must agree to the terms.");
+  if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
-  if (errors.length > 0) {
-    return NextResponse.json({ errors }, { status: 422 });
-  }
-
-  // --- Logo upload ---
   let logoDocumentId: string | null = null;
   const logoFile = formData.get("logo_file");
   if (logoFile instanceof File && logoFile.size > 0) {
-    if (
-      ![
-        "image/png",
-        "image/jpeg",
-        "image/svg+xml",
-        "image/webp",
-        "image/gif",
-      ].includes(logoFile.type)
-    ) {
+    if (!ALLOWED_IMAGE_TYPES.includes(logoFile.type)) {
       return NextResponse.json(
         { error: "Logo must be a PNG, JPEG, SVG, or WebP image." },
         { status: 422 },
       );
     }
-    if (logoFile.size > 2 * 1024 * 1024) {
+    if (logoFile.size > MAX_LOGO_SIZE) {
       return NextResponse.json(
         { error: "Logo file must be smaller than 2 MB." },
         { status: 422 },
       );
     }
-    logoDocumentId = await uploadLogoToStrapi(logoFile);
+    logoDocumentId = await uploadImageToStrapi(logoFile, LOG);
     if (!logoDocumentId) {
       console.warn(
-        "[submit-template] Logo upload failed — submission will proceed without logo.",
+        `[${LOG}] Logo upload failed — submission will proceed without logo.`,
       );
     }
   }
 
-  // --- Parse categories ---
-  let categories_list: string[] = [];
-  try {
-    const raw = formData.get("categories_list");
-    if (typeof raw === "string" && raw) {
-      categories_list = JSON.parse(raw);
-    }
-  } catch {
-    categories_list = [];
-  }
-
-  // --- Build submission payload ---
   const payload = {
     template_name,
     description,
     repository_url,
     demo_url,
-    categories_list,
+    categories_list: parseCategories(formData.get("categories_list")),
     owner_name,
     owner_email,
     maintainers_list: [],
@@ -218,27 +107,21 @@ export async function POST(req: NextRequest) {
     logo_documentId: logoDocumentId ?? null,
   };
 
-  // --- Proxy to Strapi ---
-  if (!CMS_BEARER_TOKEN) {
-    console.warn(
-      "[submit-template] CMS_BEARER_TOKEN not set — Strapi may reject the request.",
-    );
-  }
-
-  let strapiRes: Response;
   try {
-    strapiRes = await fetch(`${CMS_URL}/api/moderation/templates/submit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(CMS_BEARER_TOKEN
-          ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` }
-          : {}),
-      },
-      body: JSON.stringify({ data: payload }),
-    });
+    const { submissionId } = await submitToStrapi(
+      "/api/moderation/templates/submit",
+      payload,
+      LOG,
+    );
+    return NextResponse.json({ success: true, submissionId }, { status: 201 });
   } catch (err) {
-    console.error("[submit-template] Could not reach Strapi:", err);
+    if ((err as Error).message === "strapi_error") {
+      return NextResponse.json(
+        { error: "Submission failed. Please try again." },
+        { status: 500 },
+      );
+    }
+    console.error(`[${LOG}] Could not reach Strapi:`, err);
     return NextResponse.json(
       {
         error:
@@ -247,19 +130,4 @@ export async function POST(req: NextRequest) {
       { status: 503 },
     );
   }
-
-  if (!strapiRes.ok) {
-    const body = await strapiRes.text();
-    console.error(`[submit-template] Strapi ${strapiRes.status}: ${body}`);
-    return NextResponse.json(
-      { error: "Submission failed. Please try again." },
-      { status: 500 },
-    );
-  }
-
-  const result = (await strapiRes.json()) as { data: { documentId: string } };
-  return NextResponse.json(
-    { success: true, submissionId: result.data?.documentId },
-    { status: 201 },
-  );
 }
