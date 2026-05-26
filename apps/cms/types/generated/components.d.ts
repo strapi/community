@@ -27,6 +27,9 @@ export interface SectionsCardGridItem extends Struct.ComponentSchema {
     button: Schema.Attribute.Component<'shared.button', false> &
       Schema.Attribute.Required;
     content: Schema.Attribute.Text & Schema.Attribute.Required;
+    icon: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<'plugin::strapi-lucide-icons.icon'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
   };

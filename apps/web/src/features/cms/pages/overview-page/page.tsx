@@ -10,6 +10,15 @@ const query = {
   populate: {
     sections: {
       populate: "*",
+      on: {
+        "sections.card-grid": {
+          populate: {
+            items: {
+              populate: "*",
+            },
+          },
+        },
+      },
     },
     image: true,
   },
