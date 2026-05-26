@@ -18,6 +18,8 @@ const query = {
             },
           },
         },
+        "sections.search": true,
+        "sections.highlights": true,
       },
     },
     image: true,
