@@ -31,7 +31,7 @@
     },
     "sections": {
       "type": "dynamiczone",
-      "components": ["sections.card-grid"]
+      "components": ["sections.cta"]
     },
     "children": {
       "type": "relation",

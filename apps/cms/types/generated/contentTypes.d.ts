@@ -812,7 +812,7 @@ export interface ApiPackageCategoryPackageCategory
       'api::package-category.package-category'
     >;
     publishedAt: Schema.Attribute.DateTime;
-    sections: Schema.Attribute.DynamicZone<['sections.card-grid']>;
+    sections: Schema.Attribute.DynamicZone<['sections.cta']>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
