@@ -19,6 +19,7 @@ const query = {
           },
         },
         "sections.search": true,
+        "sections.cta": true,
         "sections.highlights": true,
       },
     },
