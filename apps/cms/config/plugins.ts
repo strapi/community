@@ -1,38 +1,13 @@
 export default ({ env }) => ({
   email: {
-    config:
-      env("NODE_ENV") === "production"
-        ? {
-            provider: "sendgrid",
-            providerOptions: {
-              apiKey: env("SENDGRID_API_KEY"),
-            },
-            settings: {
-              defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
-              defaultReplyTo: env(
-                "EMAIL_DEFAULT_REPLY_TO",
-                "community@strapi.io",
-              ),
-            },
-          }
-        : {
-            provider: "@piksail/strapi-provider-email-mailpit",
-            providerOptions: {
-              baseUrl: env("MAILPIT_BASE_URL", "http://localhost:8025"),
-            },
-            settings: {
-              defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
-              defaultReplyTo: env(
-                "EMAIL_DEFAULT_REPLY_TO",
-                "community@strapi.io",
-              ),
-            },
-          },
-  },
-  upload: {
     config: {
-      security: {
-        strictSsrf: true,
+      provider: "@piksail/strapi-provider-email-mailpit",
+      providerOptions: {
+        baseUrl: env("MAILPIT_BASE_URL", "http://localhost:8025"),
+      },
+      settings: {
+        defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
+        defaultReplyTo: env("EMAIL_DEFAULT_REPLY_TO", "community@strapi.io"),
       },
     },
   },
