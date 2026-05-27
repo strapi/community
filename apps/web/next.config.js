@@ -3,6 +3,9 @@ const IsDEV = CMS_URL.startsWith("http://localhost");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    authInterrupts: true,
+  },
   images: {
     dangerouslyAllowLocalIP: IsDEV,
     remotePatterns: [
