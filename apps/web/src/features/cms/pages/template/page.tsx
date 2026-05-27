@@ -9,7 +9,11 @@ const query = {
   populate: {
     preview_image: true,
     labels: true,
-    categories: true,
+    categories: {
+      populate: {
+        url_alias: true,
+      },
+    },
     owner: {
       populate: "*",
     },

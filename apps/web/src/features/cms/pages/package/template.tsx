@@ -21,6 +21,7 @@ const PackageTemplate = ({ document }: Props) => {
   const categories = (document.categories ?? []) as {
     documentId: string;
     name: string;
+    url_alias?: { url_path?: string }[];
   }[];
   const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
@@ -130,12 +131,13 @@ const PackageTemplate = ({ document }: Props) => {
                 <SidebarSection title="Categories">
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
-                      <span
+                      <Link
                         key={cat.documentId}
-                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700)"
+                        href={cat.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
                       >
                         {cat.name}
-                      </span>
+                      </Link>
                     ))}
                   </div>
                 </SidebarSection>
