@@ -18,9 +18,17 @@ async function findOrCreateUser(strapi, { email, name }) {
   });
   if (existing?.length > 0) return existing[0].id;
 
-  await auth.api.signUpEmail({
-    body: { email, name, password: crypto.randomUUID() },
-  });
+  try {
+    await auth.api.signUpEmail({
+      body: { email, name, password: crypto.randomUUID() },
+    });
+  } catch (err) {
+    // Email sending may fail in local dev (no email provider configured).
+    // Better Auth creates the user record before sending — check the DB anyway.
+    strapi.log.warn(
+      `[moderation] signUpEmail for ${email} failed (${(err as Error)?.message}) — checking if user was created`,
+    );
+  }
 
   const created = await strapi.documents("plugin::better-auth.user").findMany({
     filters: { email: { $eq: email } },

@@ -56,15 +56,17 @@ const PackageTemplate = ({ document }: Props) => {
                     {document.name}
                   </h1>
                 </div>
-                <p>
-                  By{" "}
-                  <Link
-                    href={owner.url_alias?.[0]?.url_path!}
-                    className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                  >
-                    {owner.name}
-                  </Link>
-                </p>
+                {owner && (
+                  <p>
+                    By{" "}
+                    <Link
+                      href={owner.url_alias?.[0]?.url_path ?? "#"}
+                      className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                    >
+                      {owner.name}
+                    </Link>
+                  </p>
+                )}
               </div>
             </div>
 

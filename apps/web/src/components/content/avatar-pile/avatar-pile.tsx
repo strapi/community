@@ -16,7 +16,7 @@ const AvatarLarge = ({
 }: {
   items: Data.ContentType<"plugin::better-auth.user">[];
 }) => {
-  const slots = items.slice(0, 5);
+  const slots = items.filter(Boolean).slice(0, 5);
   const centerIdx = Math.floor((slots.length - 1) / 2);
 
   return (
@@ -67,30 +67,34 @@ const AvatarPile = ({ items, size = "S" }: Props) => {
 
   return (
     <div className="flex items-center">
-      {items.slice(0, 5).map((m, i) => {
-        if (!m) return null;
-        const avatarUrl = m.image;
-        return avatarUrl ? (
-          <Image
-            key={m.documentId}
-            src={cmsImageUrl(avatarUrl)}
-            width={28}
-            height={28}
-            alt={m.name ?? ""}
-            className="rounded-full border-2 border-(--color-primary400) object-cover"
-            style={{ marginLeft: i === 0 ? 0 : -8 }}
-          />
-        ) : (
-          <div
-            key={m.documentId}
-            className="h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200)"
-            style={{ marginLeft: i === 0 ? 0 : -8 }}
-          >
-            {m.name?.[0]}
-          </div>
-        );
-      })}
-      {items.length === 1 && <span className="pl-2">{items?.[0]?.name}</span>}
+      {items
+        .filter(Boolean)
+        .slice(0, 5)
+        .map((m, i) => {
+          const avatarUrl = m.image;
+          return avatarUrl ? (
+            <Image
+              key={m.documentId}
+              src={cmsImageUrl(avatarUrl)}
+              width={28}
+              height={28}
+              alt={m.name ?? ""}
+              className="rounded-full border-2 border-(--color-primary400) object-cover"
+              style={{ marginLeft: i === 0 ? 0 : -8 }}
+            />
+          ) : (
+            <div
+              key={m.documentId}
+              className="h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200)"
+              style={{ marginLeft: i === 0 ? 0 : -8 }}
+            >
+              {m.name?.[0]}
+            </div>
+          );
+        })}
+      {items.filter(Boolean).length === 1 && (
+        <span className="pl-2">{items.find(Boolean)?.name}</span>
+      )}
     </div>
   );
 };

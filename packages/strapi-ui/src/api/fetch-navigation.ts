@@ -1,25 +1,27 @@
 import type { NavbarData } from "../types/navigation";
 
-const STRAPI_URL = process.env["STRAPI_UI_URL"] ?? "https://cms.strapi.io";
+const STRAPI_URL = process.env["STRAPI_UI_URL"];
 const STRAPI_TOKEN = process.env["STRAPI_UI_TOKEN"];
 
 export async function fetchNavigation(): Promise<NavbarData | null> {
+  if (!STRAPI_URL || !STRAPI_TOKEN) {
+    console.warn(
+      "[strapi-ui] STRAPI_UI_URL or STRAPI_UI_TOKEN is not set — skipping navigation fetch.",
+    );
+    return null;
+  }
+
   try {
     const url = `${STRAPI_URL}/api/header?locale=en&populateDynamicZone%5Bcontent%5D=true`;
 
-    const headers: Record<string, string> = {};
-    if (STRAPI_TOKEN) {
-      headers["Authorization"] = `Bearer ${STRAPI_TOKEN}`;
-    }
-
     const res = await fetch(url, {
-      headers,
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
       next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
       console.error(
-        `[strapi-ui] Failed to fetch navigation: ${url} ${res.status} ${res.statusText}`,
+        `[strapi-ui] Failed to fetch navigation: ${res.status} ${res.statusText}`,
       );
       return null;
     }

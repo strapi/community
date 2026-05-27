@@ -1,5 +1,3 @@
-"use server";
-
 import { Button, Container } from "@repo/strapi-ui";
 import { headers } from "next/headers";
 import Link from "next/link";
