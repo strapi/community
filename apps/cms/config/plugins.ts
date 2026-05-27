@@ -21,8 +21,11 @@ export default ({ env }) => ({
               baseUrl: env("MAILPIT_BASE_URL", "http://localhost:8025"),
             },
             settings: {
-              defaultFrom: env("EMAIL_FROM", "noreply@strapi.io"),
-              defaultReplyTo: env("EMAIL_FROM", "noreply@strapi.io"),
+              defaultFrom: env("EMAIL_DEFAULT_FROM", "community@strapi.io"),
+              defaultReplyTo: env(
+                "EMAIL_DEFAULT_REPLY_TO",
+                "community@strapi.io",
+              ),
             },
           },
   },
