@@ -42,19 +42,19 @@
               "id": "a1",
               "name": "package_id",
               "type": "string",
-              "value": "={{ $json.body.submissionId }}"
+              "value": "={{ $json.body.documentId }}"
             },
             {
               "id": "a2",
               "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.template_name }}"
+              "value": "={{ $json.body.name }}"
             },
             {
               "id": "a3",
               "name": "git_repository",
               "type": "string",
-              "value": "={{ $json.body.repository_url }}"
+              "value": "={{ $json.body.git_repository }}"
             },
             {
               "id": "a4",
