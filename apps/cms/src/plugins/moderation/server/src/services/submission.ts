@@ -44,6 +44,22 @@ function buildAdminLink(uid: string, documentId: string) {
   return `${adminBase}/admin/content-manager/collection-types/${uid}/${documentId}`;
 }
 
+/** Coarse submission kind used by n8n for labels/routing. */
+function kindForUid(uid: string) {
+  if (uid === PACKAGE_UID) return "plugin";
+  if (uid === "api::template.template") return "template";
+  return uid.split(".").pop() ?? uid;
+}
+
+/** Pull recipient contact off a populated `owner` relation (better-auth user). */
+function ownerContact(entity: Record<string, unknown>) {
+  const owner = entity.owner as { email?: string; name?: string } | null;
+  return {
+    owner_email: owner?.email ?? null,
+    owner_name: owner?.name ?? owner?.email ?? null,
+  };
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export default ({ strapi }) => {
@@ -168,9 +184,15 @@ export default ({ strapi }) => {
           {
             documentId: entity.documentId,
             contentType: uid,
+            kind: kindForUid(uid),
             name: entity.name,
-            dashboard_link: buildAdminLink(uid, entity.documentId),
             git_repository: entity.git_repository ?? null,
+            owner_email: (rawBody.owner_email as string) ?? null,
+            owner_name:
+              (rawBody.owner_name as string) ??
+              (rawBody.owner_email as string) ??
+              null,
+            dashboard_link: buildAdminLink(uid, entity.documentId),
           },
           { strapi },
         );
@@ -354,7 +376,7 @@ export default ({ strapi }) => {
 
       const entity = await strapi
         .documents(uid)
-        .findOne({ documentId, status: "draft" });
+        .findOne({ documentId, status: "draft", populate: ["owner"] });
       if (!entity) throw new Error("Submission not found.");
       if (entity.overall_status !== "approved") {
         throw new Error("Submission must be approved before publishing.");
@@ -368,8 +390,10 @@ export default ({ strapi }) => {
           {
             documentId,
             contentType: uid,
+            kind: kindForUid(uid),
             name: entity.name,
             slug: published.slug ?? null,
+            ...ownerContact(entity),
             dashboard_link: buildAdminLink(uid, documentId),
           },
           { strapi },
@@ -397,7 +421,7 @@ export default ({ strapi }) => {
       const entity = await strapi.documents(uid).findOne({
         documentId,
         status: "draft",
-        populate: ["business_review"],
+        populate: ["business_review", "owner"],
       });
       if (!entity) throw new Error("Submission not found.");
 
@@ -429,9 +453,11 @@ export default ({ strapi }) => {
           {
             documentId,
             contentType: uid,
+            kind: kindForUid(uid),
             name: entity.name,
             reason: reason ?? null,
             feedback: feedback ?? null,
+            ...ownerContact(entity),
             dashboard_link: buildAdminLink(uid, documentId),
           },
           { strapi },

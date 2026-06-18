@@ -70,7 +70,7 @@
               "id": "a3",
               "name": "plugin_name",
               "type": "string",
-              "value": "={{ $json.body.plugin_name }}"
+              "value": "={{ $json.body.name }}"
             },
             {
               "id": "a4",
@@ -82,7 +82,7 @@
               "id": "a5",
               "name": "repository_url",
               "type": "string",
-              "value": "={{ $json.body.repository_url }}"
+              "value": "={{ $json.body.git_repository }}"
             },
             {
               "id": "a6",
@@ -214,8 +214,8 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "genericCredentialType",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "none",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -223,6 +223,15 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
         "options": {
           "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            }
+          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -310,8 +319,8 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "genericCredentialType",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "none",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -319,6 +328,15 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
         "options": {
           "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            }
+          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -371,8 +389,8 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_API_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "genericCredentialType",
+        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "none",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -380,6 +398,15 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result, status: $json.status }) }}",
         "options": {
           "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
+            }
+          ]
         }
       },
       "onError": "continueRegularOutput",
