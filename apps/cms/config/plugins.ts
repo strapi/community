@@ -159,7 +159,7 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["profile", "url_alias"],
+          populate: ["profile", "profile.services", "url_alias"],
         },
         settings: {
           sortableAttributes: ["createdAt"],

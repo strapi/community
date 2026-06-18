@@ -59,13 +59,6 @@
   --color-card-grid-title: #2a2a5f;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   color: #212134;
   background: #ffffff;

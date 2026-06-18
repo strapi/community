@@ -1,10 +1,12 @@
 import type { Data } from "@strapi/types";
 import Image from "next/image";
+import Link from "next/link";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
   items: Data.ContentType<"plugin::better-auth.user">[];
   size?: "S" | "L";
+  clickable?: boolean;
 };
 
 // Percentage widths per slot (outer → center → outer), relative to the container.
@@ -58,12 +60,14 @@ const AvatarLarge = ({
   );
 };
 
-const AvatarPile = ({ items, size = "S" }: Props) => {
+const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
   if (!items?.length) return null;
 
   if (size === "L") {
     return <AvatarLarge items={items} />;
   }
+
+  const Wrapper = clickable ? Link : "div";
 
   return (
     <div className="flex items-center">
@@ -73,28 +77,41 @@ const AvatarPile = ({ items, size = "S" }: Props) => {
         .map((m, i) => {
           const avatarUrl = m.image;
           return avatarUrl ? (
-            <Image
+            <Wrapper
+              className="flex items-center"
+              href={m.url_alias?.[0]?.url_path!}
               key={m.documentId}
-              src={cmsImageUrl(avatarUrl)}
-              width={28}
-              height={28}
-              alt={m.name ?? ""}
-              className="rounded-full border-2 border-(--color-primary400) object-cover"
-              style={{ marginLeft: i === 0 ? 0 : -8 }}
-            />
-          ) : (
-            <div
-              key={m.documentId}
-              className="h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200)"
-              style={{ marginLeft: i === 0 ? 0 : -8 }}
             >
-              {m.name?.[0]}
-            </div>
+              <Image
+                src={cmsImageUrl(avatarUrl)}
+                width={28}
+                height={28}
+                alt={m.name ?? ""}
+                className="rounded-full border-2 border-(--color-primary400) object-cover"
+                style={{ marginLeft: i === 0 ? 0 : -8 }}
+              />
+              {items.filter(Boolean).length === 1 && (
+                <span className="pl-2">{items.find(Boolean)?.name}</span>
+              )}
+            </Wrapper>
+          ) : (
+            <Wrapper
+              className="flex items-center"
+              href={m.url_alias?.[0]?.url_path!}
+              key={m.documentId}
+            >
+              <div
+                className="h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200)"
+                style={{ marginLeft: i === 0 ? 0 : -8 }}
+              >
+                {m.name?.[0]}
+              </div>
+              {items.filter(Boolean).length === 1 && (
+                <span className="pl-2">{items.find(Boolean)?.name}</span>
+              )}
+            </Wrapper>
           );
         })}
-      {items.filter(Boolean).length === 1 && (
-        <span className="pl-2">{items.find(Boolean)?.name}</span>
-      )}
     </div>
   );
 };

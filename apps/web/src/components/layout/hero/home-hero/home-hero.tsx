@@ -204,15 +204,28 @@ const HomeHero = (props: Props) => {
       </HeroSection>
 
       {/* View More button */}
-      <div className="p-12 flex justify-center">
-        <Button
-          href="/templates"
-          variant="primary"
-          className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
-        >
-          View More Templates
-        </Button>
-      </div>
+      {activeTab === "templates" && (
+        <div className="p-12 flex justify-center">
+          <Button
+            href="/marketplace?tab=templates"
+            variant="primary"
+            className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
+          >
+            View More Templates
+          </Button>
+        </div>
+      )}
+      {activeTab === "packages" && (
+        <div className="p-12 flex justify-center">
+          <Button
+            href="/marketplace?tab=packages"
+            variant="primary"
+            className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
+          >
+            View More Packages
+          </Button>
+        </div>
+      )}
     </Hero>
   );
 };

@@ -14,7 +14,7 @@ const Hit = ({ hit }: Props) => {
     ? {
         src: cmsImageUrl(hit.logo),
         alt: hit.name ?? "",
-        size: "S" as const,
+        size: "M" as const,
       }
     : undefined;
 
