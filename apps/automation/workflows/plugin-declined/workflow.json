@@ -42,7 +42,7 @@
               "id": "a1",
               "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.plugin_name }}"
+              "value": "={{ $json.body.name }}"
             },
             {
               "id": "a2",

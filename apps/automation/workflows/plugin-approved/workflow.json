@@ -42,19 +42,19 @@
               "id": "a1",
               "name": "package_id",
               "type": "string",
-              "value": "={{ $json.body.package_id }}"
+              "value": "={{ $json.body.documentId }}"
             },
             {
               "id": "a2",
               "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.plugin_name }}"
+              "value": "={{ $json.body.name }}"
             },
             {
               "id": "a3",
               "name": "package_slug",
               "type": "string",
-              "value": "={{ $json.body.package_slug || '' }}"
+              "value": "={{ $json.body.slug || '' }}"
             },
             {
               "id": "a4",
@@ -72,7 +72,7 @@
               "id": "a6",
               "name": "marketplace_link",
               "type": "string",
-              "value": "={{ $json.body.marketplace_link || '' }}"
+              "value": "={{ $json.body.slug || '' }}"
             }
           ]
         },

@@ -42,13 +42,13 @@
               "id": "a1",
               "name": "package_id",
               "type": "string",
-              "value": "={{ $json.body.submissionId }}"
+              "value": "={{ $json.body.documentId }}"
             },
             {
               "id": "a2",
               "name": "package_name",
               "type": "string",
-              "value": "={{ $json.body.plugin_name }}"
+              "value": "={{ $json.body.name }}"
             },
             {
               "id": "a3",
