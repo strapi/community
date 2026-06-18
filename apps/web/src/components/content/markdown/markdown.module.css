@@ -1,33 +1,103 @@
 .markdown {
-  font-size: 150%;
+  color: var(--color-neutral700);
+  line-height: 1.7;
+  font-size: 0.9375rem; /* 15px */
 
-  * {
-    margin: revert;
-  }
-
-  img,
-  picture,
-  video,
-  canvas {
-    display: revert;
-    max-width: revert;
-  }
-
-  p,
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    overflow-wrap: revert;
-    font: revert;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.6em;
   }
 
-  ol,
-  ul {
-    list-style: revert;
-    padding: revert;
-    margin: revert;
+  h1 {
+    font-size: 1.625rem;
+  }
+  h2 {
+    font-size: 1.375rem;
+  }
+  h3 {
+    font-size: 1.125rem;
+  }
+  h4 {
+    font-size: 1rem;
+  }
+
+  p {
+    margin-bottom: 2em;
+  }
+
+  a {
+    color: var(--color-primary700);
+    display: inline-block;
+    text-decoration: underline;
+  }
+
+  strong {
+    color: var(--color-neutral800);
+    font-weight: 700;
+  }
+
+  ul,
+  ol {
+    list-style: initial;
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  li {
+    margin-bottom: 0.3em;
+  }
+
+  blockquote {
+    border-left: 3px solid var(--color-primary200);
+    padding-left: 1em;
+    color: var(--color-neutral500);
+    margin: 1em 0;
+  }
+
+  pre {
+    margin: 1.25em 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  code:not(pre code) {
+    background: var(--color-neutral100);
+    border: 1px solid var(--color-neutral200);
+    border-radius: 0.25rem;
+    padding: 0.1em 0.35em;
+    font-size: 0.875em;
+    color: var(--color-neutral800);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-neutral150);
+    margin: 2em 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 0.875rem;
+  }
+
+  th,
+  td {
+    border: 1px solid var(--color-neutral200);
+    padding: 0.5em 0.75em;
+    text-align: left;
+  }
+
+  th {
+    background: var(--color-neutral50, #f9fafb);
+    font-weight: 600;
+    color: var(--color-neutral800);
   }
 }

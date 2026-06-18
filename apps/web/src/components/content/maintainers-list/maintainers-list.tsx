@@ -1,11 +1,9 @@
 import type { Modules } from "@strapi/types";
 import Image from "next/image";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 
 type Props = {
-  maintainers: Modules.Documents.Result<
-    "plugin::better-auth.user",
-    { populate: ["profile.avatar"] }
-  >[];
+  maintainers: Modules.Documents.Result<"plugin::better-auth.user">[];
 };
 
 const MaintainersList = ({ maintainers }: Props) => {
@@ -14,13 +12,13 @@ const MaintainersList = ({ maintainers }: Props) => {
       <div className="flex items-center">
         <Image
           style={{ borderRadius: "50%" }}
-          src={`${process.env.NEXT_PUBLIC_CMS_URL}${maintainers?.[0]?.profile?.avatar.url}`}
+          src={cmsImageUrl(maintainers?.[0]?.image!)}
           width={32}
           height={32}
-          alt={maintainers?.[0]?.profile?.avatar.alternativeText}
+          alt={maintainers?.[0]?.name ?? ""}
         />
         <span className="ml-3 text-sm font-medium text-(--color-neutral800)">
-          {maintainers?.[0]?.profile?.full_name}
+          {maintainers?.[0]?.name}
         </span>
       </div>
     );
@@ -36,10 +34,10 @@ const MaintainersList = ({ maintainers }: Props) => {
             border: "2px solid white",
             marginLeft: index === 0 ? "0" : "-8px",
           }}
-          src={`${process.env.NEXT_PUBLIC_CMS_URL}${maintainer?.profile?.avatar.url}`}
+          src={cmsImageUrl(maintainer?.image!)}
           width={32}
           height={32}
-          alt={maintainer?.profile?.avatar.alternativeText || ""}
+          alt={maintainer?.name ?? ""}
         />
       ))}
     </div>

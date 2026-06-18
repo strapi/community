@@ -1,6 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { OverviewPageTemplate } from "@/features/cms/pages/overview-page";
 
 const contentType =
@@ -10,7 +10,20 @@ const query = {
   populate: {
     sections: {
       populate: "*",
+      on: {
+        "sections.card-grid": {
+          populate: {
+            items: {
+              populate: "*",
+            },
+          },
+        },
+        "sections.search": true,
+        "sections.cta": true,
+        "sections.highlights": true,
+      },
     },
+    image: true,
   },
 } satisfies GetQueryParams<typeof contentType>;
 
@@ -24,7 +37,7 @@ type Props = {
 };
 
 const OverviewPage = async ({ documentId }: Props) => {
-  const document = await client
+  const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
 

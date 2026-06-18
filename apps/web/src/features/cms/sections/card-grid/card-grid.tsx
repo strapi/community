@@ -1,7 +1,7 @@
+import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import Image from "next/image";
-import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
+import { cmsImageUrl, renderIcon } from "@/features/cms/lib/image-url";
 
 type Props = {
   section: Data.Component<"sections.card-grid">;
@@ -10,7 +10,7 @@ type Props = {
 const CardGridSection = ({ section }: Props) => {
   return (
     <Container>
-      <section>
+      <section className="border-(--color-neutral300) border-l border-r border-b px-6 py-10 pt-18">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {section.items?.map((item, index) => (
             <article
@@ -18,10 +18,19 @@ const CardGridSection = ({ section }: Props) => {
               className="relative min-h-62 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6"
             >
               <div className="relative z-10 max-w-[56%]">
-                <h3 className="flex items-center gap-2 text-[29px] font-semibold leading-9 text-(--color-card-grid-title)">
-                  <span className="text-base text-(--color-primary600)">⌁</span>
-                  {item.title}
-                </h3>
+                <div className="flex items-center">
+                  {item.icon && (
+                    <span className="mr-2">
+                      {renderIcon(item.icon, {
+                        size: 24,
+                        className: "text-(--color-primary700)",
+                      })}
+                    </span>
+                  )}
+                  <h3 className="flex items-center gap-2 text-[29px] font-semibold leading-9 text-(--color-card-grid-title)">
+                    {item.title}
+                  </h3>
+                </div>
                 <p className="mt-3 text-sm leading-6 text-(--color-neutral700)">
                   {item.content}
                 </p>
@@ -35,13 +44,11 @@ const CardGridSection = ({ section }: Props) => {
               </div>
               {item.image?.url && (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image.url}`}
+                  src={cmsImageUrl(item.image.url)}
                   alt={item.image.alternativeText || item.title || "Card image"}
                   width={290}
                   height={180}
-                  className={`pointer-events-none absolute -right-4 -bottom-6 z-0 h-auto w-[48%] object-contain ${
-                    index % 2 === 0 ? "rotate-[-11deg]" : "rotate-10"
-                  }`}
+                  className={`pointer-events-none absolute -right-4 -bottom-6 z-0 h-auto w-[48%] object-contain rotate-[-11deg]`}
                 />
               )}
             </article>

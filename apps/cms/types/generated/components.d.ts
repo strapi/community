@@ -27,6 +27,9 @@ export interface SectionsCardGridItem extends Struct.ComponentSchema {
     button: Schema.Attribute.Component<'shared.button', false> &
       Schema.Attribute.Required;
     content: Schema.Attribute.Text & Schema.Attribute.Required;
+    icon: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<'plugin::strapi-lucide-icons.icon'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
   };
@@ -94,7 +97,16 @@ export interface SectionsSearch extends Struct.ComponentSchema {
     displayName: 'Search';
   };
   attributes: {
-    index_name: Schema.Attribute.Enumeration<['generic_search']> &
+    index_name: Schema.Attribute.Enumeration<
+      [
+        'generic_search',
+        'marketplace',
+        'integrations',
+        'showcases',
+        'partners',
+        'members',
+      ]
+    > &
       Schema.Attribute.Required;
   };
 }
@@ -124,6 +136,7 @@ export interface SharedLabels extends Struct.ComponentSchema {
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     official: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     paid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    price: Schema.Attribute.String;
   };
 }
 
@@ -159,12 +172,7 @@ export interface SharedSeo extends Struct.ComponentSchema {
   attributes: {
     canonicalURL: Schema.Attribute.String;
     keywords: Schema.Attribute.Text;
-    metaDescription: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 160;
-        minLength: 50;
-      }>;
+    metaDescription: Schema.Attribute.String & Schema.Attribute.Required;
     metaImage: Schema.Attribute.Media<'images'>;
     metaRobots: Schema.Attribute.String;
     metaTitle: Schema.Attribute.String &
@@ -175,6 +183,19 @@ export interface SharedSeo extends Struct.ComponentSchema {
     metaViewport: Schema.Attribute.String;
     openGraph: Schema.Attribute.Component<'shared.open-graph', false>;
     structuredData: Schema.Attribute.JSON;
+  };
+}
+
+export interface SharedVersionInfo extends Struct.ComponentSchema {
+  collectionName: 'components_shared_version_info';
+  info: {
+    displayName: 'Version Info';
+    icon: 'information';
+  };
+  attributes: {
+    install_command: Schema.Attribute.String;
+    published_at: Schema.Attribute.DateTime;
+    version: Schema.Attribute.String;
   };
 }
 
@@ -190,6 +211,7 @@ declare module '@strapi/strapi' {
       'shared.labels': SharedLabels;
       'shared.open-graph': SharedOpenGraph;
       'shared.seo': SharedSeo;
+      'shared.version-info': SharedVersionInfo;
     }
   }
 }

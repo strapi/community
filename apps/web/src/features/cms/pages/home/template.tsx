@@ -1,21 +1,40 @@
-"use client";
-
-import { Container } from "@/components/layout/container";
-import { Header } from "@/components/layout/header";
-import type { HomePageData } from "@/features/cms/pages/home";
+import { HomeHero } from "@/components/layout/hero";
+import { Navigation } from "@/components/layout/navigation";
+import type {
+  HomePackages,
+  HomePageData,
+  HomeTemplates,
+} from "@/features/cms/pages/home";
+import { SectionsMapper } from "@/features/cms/sections/mapper";
 
 type Props = {
   document: HomePageData;
+  templates: HomeTemplates;
+  packages: HomePackages;
 };
 
-const HomeTemplate = ({ document }: Props) => {
+const HomeTemplate = async ({ document, templates, packages }: Props) => {
   return (
     <div>
-      <Header
-        title={document.title as string}
-        description={document.description as string}
+      <Navigation theme="dark" />
+      <HomeHero
+        title={document.title!}
+        subtitle={document.subtitle!}
+        ctaText={document.cta_text!}
+        ctaTitle={document.cta_title!}
+        ctaButtons={document.cta_buttons || []}
+        packages={packages}
+        templates={templates}
       />
-      <Container>test</Container>
+      {document.sections?.map((section) => {
+        return (
+          <SectionsMapper
+            key={section.id}
+            section={section}
+            id={section.__component}
+          />
+        );
+      })}
     </div>
   );
 };

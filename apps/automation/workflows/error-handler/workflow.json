@@ -1,0 +1,152 @@
+{
+  "name": "error-handler",
+  "description": null,
+  "nodes": [
+    {
+      "id": "sticky-1",
+      "name": "About",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        60
+      ],
+      "parameters": {
+        "content": "## Shared Error Handler — Community Hub Scope Only\n\n**Opt-in routing:** this workflow only fires for workflows that explicitly reference its id via `settings.errorWorkflow`. The Error Trigger node does NOT broadcast-receive from other workflows on the same n8n instance.\n\n**Defensive allowlist:** the `Scope Check` node additionally filters on workflow name against the community-hub allowlist below. Any failure from a workflow outside this list is silently dropped — so accidental or copy-paste wiring from unrelated workflows can't spam `#integration-marketplace`. Update the allowlist in the Scope Check node when adding new community-hub workflows.\n\n**Behaviour:** formats a concise Slack message with the failed workflow's name, the failing node, the error message, and a link to the execution in the n8n UI — then posts it to `#integration-marketplace`.\n\nStrapi side-effects (e.g. marking a stuck scan as failed) are handled by `scan-timeout-sweeper`, not here — keeps the error handler's dependencies minimal so it rarely fails itself.",
+        "height": 380,
+        "width": 760,
+        "color": 4
+      }
+    },
+    {
+      "id": "error-trigger-1",
+      "name": "On Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        160,
+        500
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "scope-check-1",
+      "name": "Scope Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        500
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Allowlist of community-hub workflow names. Keep in sync with apps/automation/workflows/*.\n// Failures from any workflow NOT in this list are silently dropped — defensive filter so\n// unrelated workflows on the same n8n instance can't accidentally alert into our channel.\nconst ALLOWLIST = new Set([\n  'security-scan',\n  'scan-timeout-sweeper',\n  'plugin-submission-received',\n  'plugin-approved',\n  'plugin-declined',\n  'plugin-changes-requested',\n  'template-submission-received',\n  'template-approved',\n  'template-declined',\n  'cleanup-new-label-after-60d',\n  'render-email (shared sub-workflow)',\n]);\n\nconst payload = $input.first().json;\nconst name = payload?.workflow?.name;\n\nif (!name || !ALLOWLIST.has(name)) {\n  // Silently drop — return no items, downstream nodes don't run.\n  return [];\n}\nreturn [{ json: payload }];"
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Allowlist filter. Update the ALLOWLIST when adding new workflows to the community-hub scope."
+    },
+    {
+      "id": "format-1",
+      "name": "Format Alert",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        600,
+        500
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "text",
+              "type": "string",
+              "value": "=:rotating_light: *Workflow failure*: `{{ $json.workflow.name }}`\nNode: `{{ $json.execution.lastNodeExecuted || 'unknown' }}`\nError: {{ $json.execution.error.message || 'no message' }}\nMode: {{ $json.execution.mode }}\nExecution: {{ $json.execution.url }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "slack-1",
+      "name": "Post to #integration-marketplace",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        820,
+        500
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "integration-marketplace"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {}
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "If Slack is down the alert is silently dropped — no cascading failures. Execution history in n8n still records the error.",
+      "webhookId": "c3a8e4f1-7d9b-4c2a-b510-6a2e3f5c8b0a"
+    }
+  ],
+  "connections": {
+    "On Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Scope Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scope Check": {
+      "main": [
+        [
+          {
+            "node": "Format Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert": {
+      "main": [
+        [
+          {
+            "node": "Post to #integration-marketplace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

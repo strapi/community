@@ -5,6 +5,11 @@
   },
   "options": {},
   "attributes": {
+    "icon": {
+      "type": "customField",
+      "customField": "plugin::strapi-lucide-icons.icon",
+      "required": true
+    },
     "title": {
       "type": "string",
       "required": true

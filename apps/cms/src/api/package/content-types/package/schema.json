@@ -51,36 +51,88 @@
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::category.category"
+      "target": "api::package-category.package-category"
     },
     "readme": {
       "type": "richtext"
     },
     "owner": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user"
+      "relation": "morphToOne",
+      "morphColumn": {
+        "typeColumn": {
+          "name": "owner_type"
+        },
+        "idColumn": {
+          "name": "owner_id",
+          "referencedColumn": "id"
+        }
+      }
     },
     "maintainers": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "plugin::better-auth.user",
-      "mappedBy": "packages"
+      "relation": "oneToMany",
+      "target": "plugin::better-auth.user"
     },
     "labels": {
       "type": "component",
       "component": "shared.labels",
-      "repeatable": false,
-      "required": true
+      "repeatable": false
     },
-    "install_command": {
+    "stars": {
+      "type": "integer"
+    },
+    "monthly_downloads": {
+      "type": "integer"
+    },
+    "version_info": {
+      "type": "component",
+      "component": "shared.version-info",
+      "repeatable": false
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::integration.integration",
+      "mappedBy": "packages"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true,
+      "regex": "^[A-Za-z0-9-_.~@]*$"
+    },
+    "business_review": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::moderation.business-review",
+      "inversedBy": "package"
+    },
+    "security_reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::moderation.security-review",
+      "mappedBy": "package"
+    },
+    "overall_status": {
+      "type": "enumeration",
+      "enum": [
+        "submitted",
+        "under_review",
+        "changes_requested",
+        "rejected",
+        "approved"
+      ]
+    },
+    "submitter_ip": {
       "type": "string"
     },
-    "github_stars": {
-      "type": "string"
+    "submitter_agreed_to_terms": {
+      "type": "boolean",
+      "default": false
     },
-    "npm_downloads": {
-      "type": "string"
+    "submission_notes": {
+      "type": "text"
     }
   }
 }

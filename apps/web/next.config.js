@@ -3,12 +3,21 @@ const IsDEV = CMS_URL.startsWith("http://localhost");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    authInterrupts: true,
+  },
   images: {
     dangerouslyAllowLocalIP: IsDEV,
     remotePatterns: [
+      // Local development
       {
-        protocol: IsDEV ? "http" : "https",
-        hostname: new URL(CMS_URL).hostname,
+        protocol: "http",
+        hostname: "localhost",
+      },
+      // Strapi Cloud
+      {
+        protocol: "https",
+        hostname: "**.strapiapp.com",
       },
     ],
   },

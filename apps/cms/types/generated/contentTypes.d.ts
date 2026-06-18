@@ -26,6 +26,11 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         minLength: 1;
       }>;
+    adminPermissions: Schema.Attribute.Relation<
+      'oneToMany',
+      'admin::permission'
+    >;
+    adminUserOwner: Schema.Attribute.Relation<'manyToOne', 'admin::user'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -39,6 +44,9 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
         minLength: 1;
       }>;
     expiresAt: Schema.Attribute.DateTime;
+    kind: Schema.Attribute.Enumeration<['content-api', 'admin']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'content-api'>;
     lastUsedAt: Schema.Attribute.DateTime;
     lifespan: Schema.Attribute.BigInteger;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -56,7 +64,6 @@ export interface AdminApiToken extends Struct.CollectionTypeSchema {
     >;
     publishedAt: Schema.Attribute.DateTime;
     type: Schema.Attribute.Enumeration<['read-only', 'full-access', 'custom']> &
-      Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'read-only'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -134,6 +141,7 @@ export interface AdminPermission extends Struct.CollectionTypeSchema {
         minLength: 1;
       }>;
     actionParameters: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<{}>;
+    apiToken: Schema.Attribute.Relation<'manyToOne', 'admin::api-token'>;
     conditions: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -385,6 +393,8 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    apiTokens: Schema.Attribute.Relation<'oneToMany', 'admin::api-token'> &
+      Schema.Attribute.Private;
     blocked: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;
@@ -433,42 +443,56 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
 export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   collectionName: 'categories';
   info: {
-    description: '';
-    displayName: 'Categories';
+    displayName: 'category';
     pluralName: 'categories';
     singularName: 'category';
   };
   options: {
-    draftAndPublish: true;
-  };
-  pluginOptions: {
-    webtools: {
-      enabled: true;
-    };
+    draftAndPublish: false;
   };
   attributes: {
-    children: Schema.Attribute.Relation<'oneToMany', 'api::category.category'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::category.category'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    parent: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>;
+    name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    url_alias: Schema.Attribute.Relation<
+  };
+}
+
+export interface ApiCountryCountry extends Struct.CollectionTypeSchema {
+  collectionName: 'countries';
+  info: {
+    displayName: 'Countries';
+    pluralName: 'countries';
+    singularName: 'country';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'plugin::webtools.url-alias'
+      'api::country.country'
     > &
-      Schema.Attribute.Unique;
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -489,12 +513,53 @@ export interface ApiCtaCta extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    illustration: Schema.Attribute.Enumeration<['image', 'community_members']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'image'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::cta.cta'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    size: Schema.Attribute.Enumeration<['L', 'S']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'L'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiEmailTemplateEmailTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'email_templates';
+  info: {
+    description: 'Templates rendered by n8n automation workflows (submission received, approved, declined, changes requested).';
+    displayName: 'Email Templates';
+    pluralName: 'email-templates';
+    singularName: 'email-template';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    body: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    from_name: Schema.Attribute.String;
+    key: Schema.Attribute.UID & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::email-template.email-template'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    reply_to: Schema.Attribute.Email;
+    subject: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -520,13 +585,19 @@ export interface ApiHomeHome extends Struct.SingleTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    cta_buttons: Schema.Attribute.Component<'shared.button', true>;
+    cta_text: Schema.Attribute.Text;
+    cta_title: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::home.home'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<
+      ['sections.highlights', 'sections.cta']
+    >;
     seo: Schema.Attribute.Component<'shared.seo', false> &
       Schema.Attribute.Required;
+    subtitle: Schema.Attribute.String & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -536,6 +607,120 @@ export interface ApiHomeHome extends Struct.SingleTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiIntegrationCategoryIntegrationCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'integration_categories';
+  info: {
+    displayName: 'Integration categories';
+    pluralName: 'integration-categories';
+    singularName: 'integration-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration-category.integration-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiIntegrationIntegration extends Struct.CollectionTypeSchema {
+  collectionName: 'integrations';
+  info: {
+    displayName: 'Integrations';
+    pluralName: 'integrations';
+    singularName: 'integration';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    categories: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration-category.integration-category'
+    >;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration.integration'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    packages: Schema.Attribute.Relation<'manyToMany', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'shared.seo', false>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    templates: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::template.template'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiNavigationNavigation extends Struct.SingleTypeSchema {
+  collectionName: 'navigations';
+  info: {
+    displayName: 'Navigation';
+    pluralName: 'navigations';
+    singularName: 'navigation';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    cta_links: Schema.Attribute.Component<'shared.button', true>;
+    home_link: Schema.Attribute.Component<'shared.button', false> &
+      Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::navigation.navigation'
+    > &
+      Schema.Attribute.Private;
+    nav_links: Schema.Attribute.Component<'shared.button', true> &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -560,6 +745,7 @@ export interface ApiOverviewPageOverviewPage
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    image: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -576,7 +762,58 @@ export interface ApiOverviewPageOverviewPage
       ]
     >;
     seo: Schema.Attribute.Component<'shared.seo', false>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiPackageCategoryPackageCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'package_categories';
+  info: {
+    displayName: 'Package categories';
+    pluralName: 'package-categories';
+    singularName: 'package-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    children: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::package-category.package-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::package-category.package-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    parent: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::package-category.package-category'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<['sections.cta']>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -605,20 +842,25 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    business_review: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::moderation.business-review'
+    >;
     categories: Schema.Attribute.Relation<
       'oneToMany',
-      'api::category.category'
+      'api::package-category.package-category'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
     git_repository: Schema.Attribute.String;
-    github_stars: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    install_command: Schema.Attribute.String;
-    labels: Schema.Attribute.Component<'shared.labels', false> &
-      Schema.Attribute.Required;
+    integrations: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::integration.integration'
+    >;
+    labels: Schema.Attribute.Component<'shared.labels', false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -626,15 +868,28 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
+    monthly_downloads: Schema.Attribute.Integer;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    npm_downloads: Schema.Attribute.String;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    security_reviews: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    >;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    stars: Schema.Attribute.Integer;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -646,6 +901,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
+    version_info: Schema.Attribute.Component<'shared.version-info', false>;
   };
 }
 
@@ -659,26 +915,270 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: false;
   };
+  pluginOptions: {
+    'content-manager': {
+      visible: true;
+    };
+    'content-type-builder': {
+      visible: true;
+    };
+  };
   attributes: {
-    avatar: Schema.Attribute.Media<'images'>;
     bio: Schema.Attribute.Text;
+    countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    full_name: Schema.Attribute.String & Schema.Attribute.Required;
-    headline: Schema.Attribute.String;
+    email: Schema.Attribute.String;
+    github: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::profile.profile'
     > &
       Schema.Attribute.Private;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    readme: Schema.Attribute.RichText;
+    services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
+    subtitle: Schema.Attribute.String;
+    tech_stacks: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tech-stack.tech-stack'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     website: Schema.Attribute.String;
+  };
+}
+
+export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
+  collectionName: 'recipes';
+  info: {
+    displayName: 'Recipes';
+    pluralName: 'recipes';
+    singularName: 'recipe';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'>;
+    integrations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration.integration'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::recipe.recipe'
+    > &
+      Schema.Attribute.Private;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiServiceService extends Struct.CollectionTypeSchema {
+  collectionName: 'services';
+  info: {
+    displayName: 'Services';
+    pluralName: 'services';
+    singularName: 'service';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::service.service'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiShowcaseCategoryShowcaseCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'showcase_categories';
+  info: {
+    displayName: 'Showcase categories';
+    pluralName: 'showcase-categories';
+    singularName: 'showcase-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase-category.showcase-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
+  collectionName: 'showcases';
+  info: {
+    displayName: 'Showcases';
+    pluralName: 'showcases';
+    singularName: 'showcase';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: false;
+    };
+  };
+  attributes: {
+    categories: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase-category.showcase-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::showcase.showcase'
+    > &
+      Schema.Attribute.Private;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    tech_stacks: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tech-stack.tech-stack'
+    >;
+    template: Schema.Attribute.Relation<'oneToOne', 'api::template.template'>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiTechStackTechStack extends Struct.CollectionTypeSchema {
+  collectionName: 'tech_stacks';
+  info: {
+    displayName: 'Tech stacks';
+    pluralName: 'tech-stacks';
+    singularName: 'tech-stack';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tech-stack.tech-stack'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTemplateCategoryTemplateCategory
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'template_categories';
+  info: {
+    displayName: 'Template categories';
+    pluralName: 'template-categories';
+    singularName: 'template-category';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    children: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::template-category.template-category'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::template-category.template-category'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    parent: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::template-category.template-category'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<['sections.cta']>;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
   };
 }
 
@@ -698,15 +1198,23 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    business_review: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::moderation.business-review'
+    >;
     categories: Schema.Attribute.Relation<
       'oneToMany',
-      'api::category.category'
+      'api::template-category.template-category'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
     git_repository: Schema.Attribute.String;
+    integrations: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::integration.integration'
+    >;
     labels: Schema.Attribute.Component<'shared.labels', false> &
       Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -716,14 +1224,29 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     maintainers: Schema.Attribute.Relation<
-      'manyToMany',
+      'oneToMany',
       'plugin::better-auth.user'
     >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    owner: Schema.Attribute.Relation<'oneToOne', 'plugin::better-auth.user'>;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
+    owner: Schema.Attribute.Relation<'morphToOne'>;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
+    preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    security_reviews: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    >;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    stars: Schema.Attribute.Integer;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -736,7 +1259,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
 }
 
 export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_accounts';
+  collectionName: 'ba_account';
   info: {
     description: 'Better Auth account';
     displayName: 'Accounts';
@@ -755,255 +1278,92 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    accessToken: Schema.Attribute.Text;
-    accessTokenExpiresAt: Schema.Attribute.DateTime;
-    accountId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    accessToken: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    accessTokenExpiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    accountId: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    idToken: Schema.Attribute.Text;
+    idToken: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::better-auth.account'
     > &
       Schema.Attribute.Private;
-    password: Schema.Attribute.String;
-    providerId: Schema.Attribute.String & Schema.Attribute.Required;
-    publishedAt: Schema.Attribute.DateTime;
-    refreshToken: Schema.Attribute.Text;
-    refreshTokenExpiresAt: Schema.Attribute.DateTime;
-    scope: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer & Schema.Attribute.Required;
-  };
-}
-
-export interface PluginBetterAuthJwk extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_jwks';
-  info: {
-    description: 'Better Auth JSON Web Keys';
-    displayName: 'JWKs';
-    pluralName: 'jwks';
-    singularName: 'jwk';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::better-auth.jwk'
-    > &
-      Schema.Attribute.Private;
-    privateKey: Schema.Attribute.Text & Schema.Attribute.Required;
-    publicKey: Schema.Attribute.Text & Schema.Attribute.Required;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
-export interface PluginBetterAuthOauthAccessToken
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_oauth_access_tokens';
-  info: {
-    description: 'Better Auth OAuth access tokens';
-    displayName: 'OAuth Access Tokens';
-    pluralName: 'oauth-access-tokens';
-    singularName: 'oauth-access-token';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    accessToken: Schema.Attribute.String & Schema.Attribute.Unique;
-    accessTokenExpiresAt: Schema.Attribute.DateTime;
-    clientId: Schema.Attribute.String;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::better-auth.oauth-access-token'
-    > &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    refreshToken: Schema.Attribute.String & Schema.Attribute.Unique;
-    refreshTokenExpiresAt: Schema.Attribute.DateTime;
-    scopes: Schema.Attribute.Text;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer;
-  };
-}
-
-export interface PluginBetterAuthOauthApplication
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_oauth_applications';
-  info: {
-    description: 'Better Auth OAuth applications';
-    displayName: 'OAuth Applications';
-    pluralName: 'oauth-applications';
-    singularName: 'oauth-application';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    clientId: Schema.Attribute.String & Schema.Attribute.Unique;
-    clientSecret: Schema.Attribute.String;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    disabled: Schema.Attribute.Boolean;
-    icon: Schema.Attribute.String;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::better-auth.oauth-application'
-    > &
-      Schema.Attribute.Private;
-    metadata: Schema.Attribute.Text;
-    name: Schema.Attribute.String;
-    publishedAt: Schema.Attribute.DateTime;
-    redirectURLs: Schema.Attribute.Text;
-    type: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer;
-  };
-}
-
-export interface PluginBetterAuthOauthConsent
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_oauth_consents';
-  info: {
-    description: 'Better Auth OAuth user consents';
-    displayName: 'OAuth Consents';
-    pluralName: 'oauth-consents';
-    singularName: 'oauth-consent';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    clientId: Schema.Attribute.String;
-    consentGiven: Schema.Attribute.Boolean;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::better-auth.oauth-consent'
-    > &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    scopes: Schema.Attribute.Text;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer;
-  };
-}
-
-export interface PluginBetterAuthPasskey extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_passkeys';
-  info: {
-    description: 'Better Auth passkey authentication';
-    displayName: 'Passkeys';
-    pluralName: 'passkeys';
-    singularName: 'passkey';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  pluginOptions: {
-    'content-manager': {
-      visible: false;
-    };
-    'content-type-builder': {
-      visible: false;
-    };
-  };
-  attributes: {
-    aaguid: Schema.Attribute.String;
-    backedUp: Schema.Attribute.Boolean & Schema.Attribute.Required;
-    counter: Schema.Attribute.Integer & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    credentialID: Schema.Attribute.String &
+    password: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    providerId: Schema.Attribute.String &
       Schema.Attribute.Required &
-      Schema.Attribute.Unique;
-    deviceType: Schema.Attribute.String & Schema.Attribute.Required;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'plugin::better-auth.passkey'
-    > &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String;
-    publicKey: Schema.Attribute.String & Schema.Attribute.Required;
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     publishedAt: Schema.Attribute.DateTime;
-    transports: Schema.Attribute.String;
+    refreshToken: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    refreshTokenExpiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    scope: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    userId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
   };
 }
 
-export interface PluginBetterAuthRateLimit extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_rate_limits';
+export interface PluginBetterAuthInvitation
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'ba_invitation';
   info: {
-    description: 'Better Auth rate limiting';
-    displayName: 'Rate Limits';
-    pluralName: 'rate-limits';
-    singularName: 'rate-limit';
+    displayName: 'Invitations';
+    pluralName: 'invitations';
+    singularName: 'invitation';
   };
   options: {
     draftAndPublish: false;
@@ -1017,27 +1377,254 @@ export interface PluginBetterAuthRateLimit extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    count: Schema.Attribute.Integer;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    key: Schema.Attribute.String & Schema.Attribute.Unique;
-    lastRequest: Schema.Attribute.BigInteger;
+    email: Schema.Attribute.Email &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    expiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    inviterId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'plugin::better-auth.rate-limit'
+      'plugin::better-auth.invitation'
     > &
       Schema.Attribute.Private;
+    organizationId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    status: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginBetterAuthJwks extends Struct.CollectionTypeSchema {
+  collectionName: 'ba_jwks';
+  info: {
+    displayName: 'Jwks';
+    pluralName: 'jwks';
+    singularName: 'jwks';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    expiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::better-auth.jwks'
+    > &
+      Schema.Attribute.Private;
+    privateKey: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    publicKey: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface PluginBetterAuthMember extends Struct.CollectionTypeSchema {
+  collectionName: 'ba_member';
+  info: {
+    displayName: 'Members';
+    pluralName: 'members';
+    singularName: 'member';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::better-auth.member'
+    > &
+      Schema.Attribute.Private;
+    organizationId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'member'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+  };
+}
+
+export interface PluginBetterAuthOrganization
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'ba_organization';
+  info: {
+    displayName: 'Organizations';
+    pluralName: 'organizations';
+    singularName: 'organization';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: true;
+    };
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::better-auth.organization'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    metadata: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    name: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    partner: Schema.Attribute.Boolean;
+    partner_level: Schema.Attribute.Enumeration<
+      ['Enterprise', 'Business', 'Community']
+    >;
+    profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
   };
 }
 
 export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_sessions';
+  collectionName: 'ba_session';
   info: {
     description: 'Better Auth session';
     displayName: 'Sessions';
@@ -1056,11 +1643,28 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    activeOrganizationId: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    expiresAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
-    ipAddress: Schema.Attribute.String;
+    expiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    ipAddress: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1068,21 +1672,36 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    token: Schema.Attribute.String &
+    token: Schema.Attribute.Text &
       Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    userAgent: Schema.Attribute.String;
-    userId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    userAgent: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    userId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
   };
 }
 
 export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_two_factor';
+  collectionName: 'ba_two_factor';
   info: {
-    description: 'Better Auth two factor authentication';
     displayName: 'Two Factors';
     pluralName: 'two-factors';
     singularName: 'two-factor';
@@ -1099,7 +1718,13 @@ export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    backupCodes: Schema.Attribute.String & Schema.Attribute.Required;
+    backupCodes: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1110,19 +1735,38 @@ export interface PluginBetterAuthTwoFactor extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    secret: Schema.Attribute.String & Schema.Attribute.Required;
+    secret: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    userId: Schema.Attribute.Integer & Schema.Attribute.Required;
+    userId: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    verified: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<true>;
   };
 }
 
 export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_users';
+  collectionName: 'ba_user';
   info: {
     description: 'Better Auth user';
-    displayName: 'User';
+    displayName: 'Users';
     pluralName: 'users';
     singularName: 'user';
   };
@@ -1131,7 +1775,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
   };
   pluginOptions: {
     'content-manager': {
-      visible: true;
+      visible: false;
     };
     'content-type-builder': {
       visible: true;
@@ -1144,30 +1788,50 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    displayUsername: Schema.Attribute.String;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
-      Schema.Attribute.Unique;
-    emailVerified: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    image: Schema.Attribute.String;
-    isAnonymous: Schema.Attribute.Boolean;
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    emailVerified: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
+    image: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::better-auth.user'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.String;
-    packages: Schema.Attribute.Relation<'manyToMany', 'api::package.package'>;
-    phoneNumber: Schema.Attribute.String & Schema.Attribute.Unique;
-    phoneNumberVerified: Schema.Attribute.Boolean;
+    name: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
-    templates: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::template.template'
-    >;
-    twoFactorEnabled: Schema.Attribute.Boolean;
+    twoFactorEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1176,13 +1840,12 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       'plugin::webtools.url-alias'
     > &
       Schema.Attribute.Unique;
-    username: Schema.Attribute.String & Schema.Attribute.Unique;
   };
 }
 
 export interface PluginBetterAuthVerification
   extends Struct.CollectionTypeSchema {
-  collectionName: 'better_auth_verifications';
+  collectionName: 'ba_verification';
   info: {
     description: 'Better Auth verification';
     displayName: 'Verifications';
@@ -1204,8 +1867,20 @@ export interface PluginBetterAuthVerification
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    expiresAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
-    identifier: Schema.Attribute.String & Schema.Attribute.Required;
+    expiresAt: Schema.Attribute.DateTime &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    identifier: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1216,7 +1891,13 @@ export interface PluginBetterAuthVerification
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    value: Schema.Attribute.String & Schema.Attribute.Required;
+    value: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
   };
 }
 
@@ -1359,6 +2040,81 @@ export interface PluginI18NLocale extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface PluginModerationBusinessReview
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'business_reviews';
+  info: {
+    displayName: 'Business Review';
+    pluralName: 'business-reviews';
+    singularName: 'business-review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    automated_check_results: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.business-review'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    package: Schema.Attribute.Relation<'oneToOne', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    rejection_reason: Schema.Attribute.Text;
+    reviewer_feedback: Schema.Attribute.Text;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected', 'changes_requested']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginModerationSecurityReview
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'security_reviews';
+  info: {
+    displayName: 'Security Review';
+    pluralName: 'security-reviews';
+    singularName: 'security-review';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    ai_analysis: Schema.Attribute.JSON;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dependencies: Schema.Attribute.JSON;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::moderation.security-review'
+    > &
+      Schema.Attribute.Private;
+    package: Schema.Attribute.Relation<'manyToOne', 'api::package.package'>;
+    publishedAt: Schema.Attribute.DateTime;
+    run_at: Schema.Attribute.DateTime;
+    started_at: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'running', 'completed', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    summary: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginReviewWorkflowsWorkflow
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_workflows';
@@ -1483,6 +2239,7 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     ext: Schema.Attribute.String;
+    focalPoint: Schema.Attribute.JSON;
     folder: Schema.Attribute.Relation<'manyToOne', 'plugin::upload.folder'> &
       Schema.Attribute.Private;
     folderPath: Schema.Attribute.String &
@@ -1671,19 +2428,29 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::category.category': ApiCategoryCategory;
+      'api::country.country': ApiCountryCountry;
       'api::cta.cta': ApiCtaCta;
+      'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
       'api::home.home': ApiHomeHome;
+      'api::integration-category.integration-category': ApiIntegrationCategoryIntegrationCategory;
+      'api::integration.integration': ApiIntegrationIntegration;
+      'api::navigation.navigation': ApiNavigationNavigation;
       'api::overview-page.overview-page': ApiOverviewPageOverviewPage;
+      'api::package-category.package-category': ApiPackageCategoryPackageCategory;
       'api::package.package': ApiPackagePackage;
       'api::profile.profile': ApiProfileProfile;
+      'api::recipe.recipe': ApiRecipeRecipe;
+      'api::service.service': ApiServiceService;
+      'api::showcase-category.showcase-category': ApiShowcaseCategoryShowcaseCategory;
+      'api::showcase.showcase': ApiShowcaseShowcase;
+      'api::tech-stack.tech-stack': ApiTechStackTechStack;
+      'api::template-category.template-category': ApiTemplateCategoryTemplateCategory;
       'api::template.template': ApiTemplateTemplate;
       'plugin::better-auth.account': PluginBetterAuthAccount;
-      'plugin::better-auth.jwk': PluginBetterAuthJwk;
-      'plugin::better-auth.oauth-access-token': PluginBetterAuthOauthAccessToken;
-      'plugin::better-auth.oauth-application': PluginBetterAuthOauthApplication;
-      'plugin::better-auth.oauth-consent': PluginBetterAuthOauthConsent;
-      'plugin::better-auth.passkey': PluginBetterAuthPasskey;
-      'plugin::better-auth.rate-limit': PluginBetterAuthRateLimit;
+      'plugin::better-auth.invitation': PluginBetterAuthInvitation;
+      'plugin::better-auth.jwks': PluginBetterAuthJwks;
+      'plugin::better-auth.member': PluginBetterAuthMember;
+      'plugin::better-auth.organization': PluginBetterAuthOrganization;
       'plugin::better-auth.session': PluginBetterAuthSession;
       'plugin::better-auth.two-factor': PluginBetterAuthTwoFactor;
       'plugin::better-auth.user': PluginBetterAuthUser;
@@ -1691,6 +2458,8 @@ declare module '@strapi/strapi' {
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
+      'plugin::moderation.business-review': PluginModerationBusinessReview;
+      'plugin::moderation.security-review': PluginModerationSecurityReview;
       'plugin::review-workflows.workflow': PluginReviewWorkflowsWorkflow;
       'plugin::review-workflows.workflow-stage': PluginReviewWorkflowsWorkflowStage;
       'plugin::upload.file': PluginUploadFile;

@@ -1,0 +1,15 @@
+{
+  "name": "package-info",
+  "version": "0.0.0",
+  "strapi": {
+    "name": "package-info",
+    "displayName": "Package Info",
+    "description": "Fetches live package metadata from registries and exposes it via API",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "../../../dist/src/plugins/package-info/server/src/index.js"
+    }
+  }
+}

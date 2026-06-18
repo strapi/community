@@ -1,165 +1,183 @@
-"use client";
-
+import { Button, Container } from "@repo/strapi-ui";
+import { Download, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import TimeAgo from "react-timeago";
+import { AvatarPile } from "@/components/content/avatar-pile";
+import { GitProviderLogo } from "@/components/content/git-provider-logo";
 import { Markdown } from "@/components/content/markdown";
-import { Container } from "@/components/layout/container";
+import { RegistryLogo } from "@/components/content/registry-logo";
+import { SidebarSection } from "@/components/content/sidebar-section";
+import { VersionSecurityBadge } from "@/components/content/version-info";
+import { Navigation } from "@/components/layout/navigation";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { PackagePageData } from "@/features/cms/pages/package";
-import styles from "./page.module.css";
+import type { Owner } from "@/utils/types";
 
 type Props = {
   document: PackagePageData;
 };
 
 const PackageTemplate = ({ document }: Props) => {
-  const { owner } = document;
+  const categories = (document.categories ?? []) as {
+    documentId: string;
+    name: string;
+    url_alias?: { url_path?: string }[];
+  }[];
+  const owner = document.owner as Owner;
+  const maintainers = document.maintainers ?? [];
+  const githubStars = document.stars;
+  const npmDownloads = document.monthly_downloads;
 
   return (
-    <Container maxWidth="1120px">
-      <div className="w-full">
-        <nav className="flex items-center gap-2 py-6 text-base">
-          <Link className="text-(--color-primary700)" href="/">
-            Marketplace
-          </Link>
-          <span className="text-(--color-divider-muted)">/</span>
-          <Link className="text-(--color-primary700)" href="/plugins">
-            Tools & Plugins
-          </Link>
-          <span className="text-(--color-divider-muted)">/</span>
-          <span className="text-(--color-neutral800)">{document.name}</span>
-        </nav>
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <section className="lg:col-span-8">
-          <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
-            <div className="flex w-full items-start justify-start gap-6">
-              <Image
-                src={
-                  document.icon
-                    ? `${process.env.NEXT_PUBLIC_CMS_URL}${document.icon.url}`
-                    : "/logo-plugin.png"
-                }
-                width={100}
-                height={100}
-                alt={document.name || ""}
-              />
-              <div className="flex w-full flex-col items-start">
-                <h1 className={styles.pluginTitle}>{document.name} </h1>
-                <p className={styles.plugingShortDescription}>
-                  {document.description}
-                </p>
+    <>
+      <Navigation theme="light" />
+      <Container>
+        <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-12 mt-10">
+          {/* ── Left column ── */}
+          <section className="lg:col-span-8 space-y-8">
+            {/* Header */}
+            <div className="flex items-center gap-5">
+              <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
+                <Image
+                  src={
+                    document.icon
+                      ? cmsImageUrl(document.icon.url)
+                      : "/package-fallback-icon.png"
+                  }
+                  width={64}
+                  height={64}
+                  alt={document.name ?? ""}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-3xl font-bold text-(--color-primary700)">
+                    {document.name}
+                  </h1>
+                </div>
+                {owner && (
+                  <p>
+                    By{" "}
+                    <Link
+                      href={owner.url_alias?.[0]?.url_path ?? "#"}
+                      className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                    >
+                      {owner.name}
+                    </Link>
+                  </p>
+                )}
               </div>
             </div>
-            <div className="markdown">
-              {document.readme && <Markdown markdown={document.readme} />}
-            </div>
-          </div>
-        </section>
-        <aside className="lg:col-span-4">
-          <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
-            Details
-          </h3>
-          <div className="flex w-full flex-col">
-            <div
-              className={`${styles.listItem} flex w-full items-center justify-between`}
-            >
-              <p>Downloads</p>
-              <span className="flex items-center gap-1">
-                {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
-                <p className={styles.valueItem}>
-                  {document.npm_downloads?.toLocaleString()}
-                </p>
-              </span>
-            </div>
-            <div
-              className={`${styles.listItem} flex w-full items-center justify-between`}
-            >
-              <p>GitHub stars</p>
-              <span className="flex items-center gap-1">
-                <Image
-                  src="/logo-github.svg"
-                  width={12}
-                  height={12}
-                  alt="Logo GitHub"
-                />
-                {/* <Star width={12} height={12} color={"var(--color-warning500)"} /> */}
-                <p className={styles.valueItem}>
-                  {document.github_stars?.toLocaleString()}
-                </p>
-              </span>
-            </div>
-            <div
-              className={`${styles.listItem} flex w-full items-center justify-between`}
-            >
-              <p>Author</p>
-              {owner?.username && owner.url_alias?.[0]?.url_path ? (
-                <Link
-                  href={owner.url_alias?.[0]?.url_path}
-                  className={`${styles.valueItem} ${styles.authorName}`}
+
+            {document.description && (
+              <p className="text-lg text-(--color-neutral700)">
+                {document.description}
+              </p>
+            )}
+
+            {/* Latest version & security check */}
+            <h3 className="mb-2 font-semibold">Latest version</h3>
+            <VersionSecurityBadge
+              version={document.version_info?.version!}
+              checkedAt={document.version_info?.published_at!}
+              status="pending"
+              command={document.version_info?.install_command!}
+            />
+
+            {/* README */}
+            {document.readme && <Markdown markdown={document.readme} />}
+          </section>
+
+          {/* ── Sidebar ── */}
+          <aside className="lg:col-span-4">
+            <div className="sticky top-20">
+              {/* Stats */}
+              {(githubStars != null || npmDownloads != null) && (
+                <SidebarSection title="Stats">
+                  <div className="space-y-2 text-sm text-(--color-neutral700)">
+                    {githubStars != null && (
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0" />
+                        <span>{githubStars.toLocaleString()} GitHub stars</span>
+                      </div>
+                    )}
+                    {npmDownloads != null && (
+                      <div className="flex items-center gap-2">
+                        <Download className="h-4 w-4 shrink-0 text-(--color-neutral500)" />
+                        <span>
+                          {npmDownloads.toLocaleString()} monthly downloads
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Useful links */}
+              {(document.package_location || document.git_repository) && (
+                <SidebarSection title="Useful Links">
+                  <div className="space-y-2 flex flex-col">
+                    {document.package_location && (
+                      <RegistryLogo url={document.package_location} />
+                    )}
+                    {document.git_repository && (
+                      <GitProviderLogo url={document.git_repository} />
+                    )}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Categories */}
+              {categories.length > 0 && (
+                <SidebarSection title="Categories">
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.documentId}
+                        href={cat.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Maintainers */}
+              {maintainers.length > 0 && (
+                <SidebarSection title="Maintainers">
+                  <div className="space-y-3">
+                    {maintainers.map((m) => (
+                      <AvatarPile key={m.documentId} items={[m]} />
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Report an issue */}
+              {document.git_repository && (
+                <Button
+                  asChild
+                  variant="secondary"
+                  size="lg"
+                  className="mt-2 w-full justify-center"
                 >
-                  {owner.username}
-                </Link>
-              ) : (
-                <p className={`${styles.valueItem} ${styles.authorName}`}>
-                  Unknown
-                </p>
+                  <Link
+                    href={`${document.git_repository}/issues`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Report an issue
+                  </Link>
+                </Button>
               )}
             </div>
-            {document.updatedAt && (
-              <div
-                className={`${styles.listItem} flex w-full items-center justify-between`}
-              >
-                <p>Last update</p>
-                <p className={styles.valueItem}>
-                  <TimeAgo date={document.updatedAt} />
-                </p>
-              </div>
-            )}
-            {document.package_location && (
-              <div
-                className={`${styles.listItem} flex w-full items-center justify-between`}
-              >
-                <p>Package location</p>
-                <p className={styles.valueItem}>
-                  <Link
-                    className={styles.linkDetail}
-                    href={document.package_location}
-                  >
-                    See{" "}
-                    {/* <ExternalLink
-                      className={styles.actionCardIcon}
-                      width={"12px"}
-                      height={"12px"}
-                    /> */}
-                  </Link>
-                </p>
-              </div>
-            )}
-            {document.git_repository && (
-              <div
-                className={`${styles.listItem} flex w-full items-center justify-between`}
-              >
-                <p>Repository</p>
-                <p className={styles.valueItem}>
-                  <Link
-                    className={styles.linkDetail}
-                    href={document.git_repository}
-                  >
-                    See{" "}
-                    {/* <ExternalLink
-                      className={styles.actionCardIcon}
-                      width={"12px"}
-                      height={"12px"}
-                    /> */}
-                  </Link>
-                </p>
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
-    </Container>
+          </aside>
+        </div>
+      </Container>
+    </>
   );
 };
 

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "lib": ["ES2020"],
+    "lib": ["ES2021"],
     "target": "ES2019",
     "strict": false,
     "skipLibCheck": true,
@@ -37,7 +37,7 @@
     "src/admin/",
     // Do not include test files
     "**/*.test.*",
-    // Do not include plugins in the server compilation
-    "src/plugins/**"
+    // Do not include plugins admin code in the server compilation
+    "src/plugins/**/admin"
   ]
 }

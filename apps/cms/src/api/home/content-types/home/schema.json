@@ -25,13 +25,30 @@
       "type": "string",
       "required": true
     },
-    "description": {
-      "type": "text"
-    },
     "seo": {
       "type": "component",
       "component": "shared.seo",
       "repeatable": false,
+      "required": true
+    },
+    "cta_title": {
+      "type": "string",
+      "required": true
+    },
+    "cta_text": {
+      "type": "text"
+    },
+    "cta_buttons": {
+      "type": "component",
+      "component": "shared.button",
+      "repeatable": true
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["sections.highlights", "sections.cta"]
+    },
+    "subtitle": {
+      "type": "string",
       "required": true
     }
   }

@@ -1,0 +1,140 @@
+"use client";
+
+import { ListIcon, XIcon } from "@phosphor-icons/react/ssr";
+import { useState } from "react";
+
+import type { NavbarData } from "../../types/navigation";
+import { cn } from "../../utils/cn";
+import { NavLinkImageComponent } from "../../utils/image";
+import { NavLink } from "../../utils/link";
+import { Button } from "../ui/button";
+import { DirectNavItem } from "./DirectNavItem";
+import { NavMenuLink } from "./NavMenuLink";
+
+interface MobileNavbarProps extends React.ComponentProps<"div"> {
+  readonly data: NavbarData;
+  readonly className?: string;
+}
+
+const logoClassName =
+  "flex shrink-0 items-center p-0 [&_img]:!h-6 [&_img]:!w-auto";
+
+export function MobileNavbar({
+  data,
+  className,
+  ...restProps
+}: MobileNavbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { navItems, logoImage, logoImageLight, bottomLinks } = data;
+
+  if (!Array.isArray(navItems) || !navItems.length) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn("relative flex justify-between lg:hidden", className)}
+      {...restProps}
+    >
+      <div className="flex shrink-0 items-center">
+        <div className="relative">
+          {logoImage && (
+            <NavLinkImageComponent
+              component={logoImage}
+              imageMode="responsive"
+              transparentPlaceholder
+              sizes="120px"
+              className={cn(
+                logoClassName,
+                "opacity-[var(--nav-logo-default-opacity)] transition-opacity duration-300",
+              )}
+            />
+          )}
+          {logoImageLight && (
+            <NavLinkImageComponent
+              component={logoImageLight}
+              imageMode="responsive"
+              transparentPlaceholder
+              sizes="120px"
+              className={cn(
+                logoClassName,
+                "absolute inset-0 opacity-[var(--nav-logo-light-opacity)] transition-opacity duration-300",
+              )}
+            />
+          )}
+        </div>
+      </div>
+
+      <Button variant="secondary" size="icon" onClick={() => setIsOpen(true)}>
+        <ListIcon weight="bold" />
+      </Button>
+
+      {isOpen && (
+        <>
+          {/* Overlay: click to close */}
+          <div
+            className="animate-in fade-in fixed inset-0 z-40 bg-black/25 duration-200"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="bg-background rounded-strapi-lg absolute z-50 flex max-h-[calc(100vh-40px)] w-full origin-top-right animate-[mobile-menu-open_200ms_ease-out] flex-col drop-shadow-2xl">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              className="absolute top-5 right-5 z-1"
+              onClick={() => setIsOpen(false)}
+            >
+              <XIcon weight="bold" className="text-strapi-purple-500 size-6" />
+            </Button>
+
+            <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5">
+              {navItems.map((item, index) => {
+                const { sections } = item;
+
+                return (
+                  <div key={item.id ?? index}>
+                    <DirectNavItem
+                      className="animate-spring-sm w-full justify-start text-lg font-semibold"
+                      item={item}
+                    />
+                    {Array.isArray(sections) && (
+                      <div className="mt-3 flex flex-col sm:gap-2">
+                        {sections
+                          .flatMap((section) => section?.items ?? [])
+                          .map((menuItem, i) => (
+                            <NavMenuLink
+                              key={menuItem.id ?? i}
+                              component={menuItem}
+                            />
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {bottomLinks?.length ? (
+              <div className="border-strapi-neutral-200 border-t p-2">
+                <div className="flex flex-wrap items-center">
+                  {bottomLinks.map((link, index) => (
+                    <NavLink
+                      key={link.id ?? index}
+                      href={link.href}
+                      target={link.target}
+                      label={link.label}
+                      decorations={link.decorations}
+                      adornmentClassName="size-5"
+                      className="text-strapi-neutral-800 hover:text-strapi-blue-600 flex items-center gap-1.5 px-3 py-2 text-sm font-normal"
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

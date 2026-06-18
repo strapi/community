@@ -9,31 +9,50 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
   "attributes": {
-    "full_name": {
-      "type": "string",
-      "required": true
-    },
-    "headline": {
-      "type": "string"
-    },
     "bio": {
       "type": "text"
+    },
+    "subtitle": {
+      "type": "string"
     },
     "website": {
       "type": "string"
     },
-    "avatar": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": ["images"]
+    "github": {
+      "type": "string"
     },
-    "owner": {
+    "location": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "readme": {
+      "type": "richtext"
+    },
+    "countries": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user",
-      "inversedBy": "profile"
+      "relation": "oneToMany",
+      "target": "api::country.country"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service"
+    },
+    "tech_stacks": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tech-stack.tech-stack"
     }
   }
 }

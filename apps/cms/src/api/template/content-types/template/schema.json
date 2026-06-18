@@ -37,18 +37,25 @@
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::category.category"
+      "target": "api::template-category.template-category"
     },
     "owner": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::better-auth.user"
+      "relation": "morphToOne",
+      "morphColumn": {
+        "typeColumn": {
+          "name": "owner_type"
+        },
+        "idColumn": {
+          "name": "owner_id",
+          "referencedColumn": "id"
+        }
+      }
     },
     "maintainers": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "plugin::better-auth.user",
-      "mappedBy": "templates"
+      "relation": "oneToMany",
+      "target": "plugin::better-auth.user"
     },
     "readme": {
       "type": "richtext"
@@ -58,6 +65,61 @@
       "component": "shared.labels",
       "repeatable": false,
       "required": true
+    },
+    "preview_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "stars": {
+      "type": "integer"
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::package.package"
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::integration.integration",
+      "mappedBy": "templates"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true,
+      "regex": "^[A-Za-z0-9-_.~@]*$"
+    },
+    "business_review": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::moderation.business-review"
+    },
+    "security_reviews": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::moderation.security-review"
+    },
+    "overall_status": {
+      "type": "enumeration",
+      "enum": [
+        "submitted",
+        "under_review",
+        "changes_requested",
+        "rejected",
+        "approved"
+      ]
+    },
+    "submitter_ip": {
+      "type": "string"
+    },
+    "submitter_agreed_to_terms": {
+      "type": "boolean",
+      "default": false
+    },
+    "submission_notes": {
+      "type": "text"
     }
   }
 }

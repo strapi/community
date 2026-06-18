@@ -1,0 +1,87 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ba_organization",
+  "info": {
+    "singularName": "organization",
+    "pluralName": "organizations",
+    "displayName": "Organizations"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": true
+    },
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true
+    },
+    "slug": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "required": true,
+      "unique": true
+    },
+    "logo": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
+    },
+    "metadata": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
+    },
+    "partner": {
+      "type": "boolean",
+      "required": false
+    },
+    "partner_level": {
+      "type": "enumeration",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "partner"
+            },
+            true
+          ]
+        }
+      },
+      "enum": ["Enterprise", "Business", "Community"]
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile"
+    }
+  }
+}

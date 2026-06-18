@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "integration_categories",
+  "info": {
+    "singularName": "integration-category",
+    "pluralName": "integration-categories",
+    "displayName": "Integration categories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

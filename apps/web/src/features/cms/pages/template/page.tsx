@@ -1,11 +1,30 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { TemplateTemplate } from "@/features/cms/pages/template";
 
 const contentType = "api::template.template" satisfies UID.ContentType;
 
-const query = {} satisfies GetQueryParams<typeof contentType>;
+const query = {
+  populate: {
+    preview_image: true,
+    labels: true,
+    categories: {
+      populate: {
+        url_alias: true,
+      },
+    },
+    owner: {
+      populate: "*",
+    },
+    maintainers: {
+      populate: {
+        profile: true,
+        url_alias: true,
+      },
+    },
+  },
+} satisfies GetQueryParams<typeof contentType>;
 
 export type TemplatePageData = Modules.Documents.Result<
   typeof contentType,
@@ -17,7 +36,7 @@ type Props = {
 };
 
 const TemplatePage = async ({ documentId }: Props) => {
-  const document = await client
+  const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
 

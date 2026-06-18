@@ -1,20 +1,13 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { UserTemplate } from "@/features/cms/pages/user";
+import type { RelatedContentItems } from "@/utils/types";
 
 const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
 
 const query = {
-  populate: {
-    profile: true,
-    packages: {
-      populate: {
-        url_alias: true,
-        icon: true,
-      },
-    },
-  },
+  populate: ["profile"],
 } satisfies GetQueryParams<typeof contentType>;
 
 export type UserPageData = Modules.Documents.Result<
@@ -23,15 +16,19 @@ export type UserPageData = Modules.Documents.Result<
 >;
 
 type Props = {
-  id: number;
+  documentId: string;
 };
 
-const UserPage = async ({ id }: Props) => {
-  const document = await client
+const UserPage = async ({ documentId }: Props) => {
+  const document = await cmsClient
     .collection(contentType)
-    .findOne(String(id), query);
+    .findOne(documentId, query);
 
-  return <UserTemplate document={document.data} />;
+  const content: RelatedContentItems = await cmsClient
+    .fetch(`/users/${document.data.id}/related-content?populate=*`)
+    .then((res) => res.json());
+
+  return <UserTemplate document={document.data} relatedContent={content} />;
 };
 
 export { UserPage };

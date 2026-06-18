@@ -1,93 +1,231 @@
-"use client";
-
+import { Container } from "@repo/strapi-ui";
+import {
+  AppWindow,
+  CalendarDays,
+  ExternalLink,
+  Github,
+  Globe,
+  LayoutGrid,
+  MapPin,
+} from "lucide-react";
 import Image from "next/image";
-import TimeAgo from "react-timeago";
-
-import styles from "./page.module.css";
-
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-
-import type { UserPageData } from "@/features/cms/pages/user";
+import Link from "next/link";
+import { ContentCard } from "@/components/content/card";
+import { Hero, HeroSection } from "@/components/layout/hero";
+import { Navigation } from "@/components/layout/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import type { UserPageData } from "@/features/cms/pages/user/page";
+import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: UserPageData;
+  relatedContent: RelatedContentItems;
 };
 
-const UserTemplate = ({ document }: Props) => {
-  const { profile } = document;
-
-  const packages = (document.packages || []).filter(
-    (pkg) => pkg.publishedAt != null,
-  );
-
-  const aggregatedDownloads = packages
-    .map((pkg) => pkg.npm_downloads)
-    .reduce((sum, downloads) => sum + parseInt(String(downloads), 10), 0);
-
-  const mostRecentItem = packages.reduce((latest, current) => {
-    return new Date(current.updatedAt || "") > new Date(latest?.updatedAt || "")
-      ? current
-      : latest;
-  }, packages[0]);
+const UserTemplate = ({ document, relatedContent }: Props) => {
+  const { templates, packages } = relatedContent;
+  const noRelatedContent = templates.length === 0 && packages.length === 0;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      <section className="lg:col-span-9">
-        <div className={`${styles.leftSection} flex w-full flex-col gap-8`}>
-          <div className="flex w-full items-start justify-start gap-6">
-            <Image
-              src="/logo-plugin.png"
-              width={60}
-              height={60}
-              alt="Logo plugin"
-            />
-            <div className="flex w-full flex-col items-start">
-              <h1 className={styles.pluginTitle}>{profile?.full_name} </h1>
-              <p className={styles.plugingShortDescription}>
-                {profile?.headline}
-              </p>
+    <>
+      <Navigation theme="dark" />
+      <Hero>
+        <HeroSection>
+          <div className="px-14 py-26">
+            {/* Logo + Name */}
+            <div className="mb-6 sm:flex items-center gap-5">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-(--color-primary600) bg-white">
+                {document.image ? (
+                  <Image
+                    src={cmsImageUrl(document.image)}
+                    width={118}
+                    height={118}
+                    alt={document.name ?? ""}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-(--color-neutral900)">
+                    {document.name?.[0]?.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
+                  {document.name}
+                </h1>
+                {document.profile?.subtitle && (
+                  <p className="mt-1 text-[19px] text-(--color-hero-muted)">
+                    {document.profile.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div>
+              {/* Description */}
+              {document.profile?.bio && (
+                <p className="mb-6 max-w-xl text-md leading-6 text-(--color-hero-muted)">
+                  {document.profile.bio}
+                </p>
+              )}
+            </div>
+            <div>
+              {/* Metadata */}
+              <div className="mb-8 md:flex flex-wrap items-center gap-6 text-md text-(--color-hero-nav-muted)">
+                {document.createdAt && (
+                  <span className="flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4" />
+                    Joined:{" "}
+                    {new Date(document.createdAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                )}
+                {document.profile?.location && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    {document.profile.location}
+                  </span>
+                )}
+                {document.profile?.github && (
+                  <Link
+                    href={document.profile.github}
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </Link>
+                )}
+                {document.profile?.website && (
+                  <Link
+                    href={document.profile.website}
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Globe className="h-4 w-4" />
+                    Visit Website
+                  </Link>
+                )}
+              </div>
+
+              {/* Contact button */}
+              {document.profile?.email && (
+                <Link
+                  href={`mailto:${document.profile.email}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-5 py-2.5 text-md font-semibold text-white transition-colors hover:bg-(--color-hero-bg)"
+                >
+                  Contact {document.name}
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           </div>
-        </div>
-        <div>content</div>
-      </section>
-      <aside className="lg:col-span-3">
-        <h3 className={`${styles.detailsTitle} ${styles.rightSection}`}>
-          Details
-        </h3>
-        <div className="flex w-full flex-col">
-          <div
-            className={`${styles.listItem} flex w-full items-center justify-between`}
+        </HeroSection>
+      </Hero>
+
+      <Container>
+        <Tabs
+          defaultValue={noRelatedContent ? "about" : "content"}
+          className="w-full"
+        >
+          <TabsList className="border-(--color-neutral300) border-l border-r border-b px-16 py-10">
+            {!noRelatedContent && (
+              <TabsTrigger
+                value="content"
+                icon={<LayoutGrid className="h-4 w-4" />}
+              >
+                Published Content
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
+              About
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="content">
+            {templates.length > 0 && (
+              <section className="border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
+                <h2 className="mb-14 text-[21px] font-semibold text-(--color-primary600)">
+                  Templates
+                </h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {templates.map((template) => (
+                    <ContentCard
+                      key={template.documentId}
+                      image={{
+                        src: template.preview_image
+                          ? cmsImageUrl(template.preview_image.url)
+                          : "/template-fallback-preview.png",
+                        alt: template.preview_image?.alternativeText ?? "",
+                        size: "L",
+                      }}
+                      description={template.description ?? ""}
+                      link={template.url_alias?.[0]?.url_path!}
+                      badge="Template"
+                      name={template.name!}
+                      owner={template.owner!}
+                      labels={template.labels!}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {packages.length > 0 && (
+              <section className="border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
+                <h2 className="mb-14 text-[21px] font-semibold text-(--color-primary600)">
+                  Packages
+                </h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {packages.map((pkg) => (
+                    <ContentCard
+                      key={pkg.documentId}
+                      image={{
+                        src: pkg.icon
+                          ? cmsImageUrl(pkg.icon.url)
+                          : "/package-fallback-icon.png",
+                        alt: pkg.icon?.alternativeText ?? "",
+                        size: "S",
+                      }}
+                      description={pkg.description ?? ""}
+                      link={pkg.url_alias?.[0]?.url_path!}
+                      badge="Package"
+                      name={pkg.name!}
+                      owner={pkg.owner!}
+                      labels={pkg.labels!}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </TabsContent>
+
+          <TabsContent
+            value="about"
+            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18"
           >
-            <p>Cumulated downloads</p>
-            <span className="flex items-center gap-1">
-              {/* <Download width={12} height={12} color={"var(--color-neutral600)"} /> */}
-              <p className={styles.valueItem}>
-                {aggregatedDownloads.toLocaleString()}
+            <h2 className="mb-14 text-[21px] font-semibold text-(--color-neutral900)">
+              About {document.name}
+            </h2>
+            {document.profile?.readme ? (
+              <p className="text-md leading-7 text-(--color-neutral700)">
+                {document.profile.readme}
               </p>
-            </span>
-          </div>
-          <div
-            className={`${styles.listItem} flex w-full items-center justify-between`}
-          >
-            <p>Published packages</p>
-            <p className={styles.valueItem}>{packages.length}</p>
-          </div>
-          {mostRecentItem?.updatedAt && (
-            <div
-              className={`${styles.listItem} flex w-full items-center justify-between`}
-            >
-              <p>Last update</p>
-              <p className={styles.valueItem}>
-                <TimeAgo date={mostRecentItem?.updatedAt} />
+            ) : (
+              <p className="text-md text-(--color-neutral600)">
+                No description provided.
               </p>
-            </div>
-          )}
-        </div>
-      </aside>
-    </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </Container>
+    </>
   );
 };
 

@@ -1,10 +1,13 @@
 @import "tailwindcss";
+@import "@repo/strapi-ui/styles.css";
+@import "@daveyplate/better-auth-ui/css";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --color-neutral100: #f6f6f9;
   --color-neutral150: #eaeaef;
+  --color-neutral300: #dcdce4;
   --color-neutral600: #666687;
   --color-neutral700: #4a4a6a;
   --color-neutral800: #32324d;
@@ -12,26 +15,38 @@
   --color-neutral1000: #181826;
   --color-primary100: #f0f0ff;
   --color-primary200: #d9d8ff;
+  --color-primary300: #ebe8ff;
+  --color-primary400: #c7c5ff;
   --color-primary500: #7b79ff;
   --color-primary600: #4945ff;
   --color-primary700: #271fe0;
+  --color-primary800: #171693;
+  --color-blue800: #292875;
+  --color-grey700: #364153;
   --color-success100: #eafbe7;
   --color-success200: #c6f0c2;
   --color-danger100: #fcecea;
   --color-danger200: #f5c0b8;
   --color-warning100: #fff4d8;
   --color-warning500: #e4a33f;
+  --color-warning600: #e4a33f;
   --color-warning700: #b36b00;
+  --color-success600: #399b39;
   --color-success700: #2f7a2f;
-  --color-hero-bg: #060a1a;
+  --color-hero-bg: #030712;
   --color-hero-border: #202445;
-  --color-hero-muted: #a5afcc;
+  --color-hero-muted: #99a1af;
   --color-hero-nav-muted: #b8bfd6;
   --color-hero-button-border: #3a416d;
   --color-hero-button-hover: #111633;
   --bg-dotted-pattern-image: radial-gradient(
     circle at center,
     rgba(53, 65, 123, 0.35) 1px,
+    transparent 1px
+  );
+  --bg-dotted-pattern-image-light: radial-gradient(
+    circle at center,
+    rgb(229, 229, 229) 1px,
     transparent 1px
   );
   --bg-dotted-pattern-size: 8px 8px;
@@ -54,11 +69,19 @@
 body {
   color: #212134;
   background: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Poppins, Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: var(--color-blue800);
 }

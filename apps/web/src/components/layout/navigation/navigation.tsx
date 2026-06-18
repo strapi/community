@@ -1,100 +1,75 @@
+import { Button, Container } from "@repo/strapi-ui";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
+import { AuthNavigation } from "@/features/auth/components/auth-navigation";
+import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
+import { cmsClient } from "@/features/cms/lib/strapi";
 
-const Navigation = () => {
+type Props = {
+  theme: "light" | "dark";
+};
+
+const Navigation = async ({ theme }: Props) => {
+  const data = await cmsClient.single("api::navigation.navigation").find({
+    populate: "*",
+  });
+
+  const headersList = await headers();
+  const path = new URL(headersList.get("x-url")!).pathname;
+
   return (
-    <nav className="border-b border-(--color-hero-border) bg-(--color-hero-bg)">
-      <Container className="flex h-18 items-center justify-between gap-8">
-        <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="rounded-sm bg-(--color-primary600) px-2 py-1 text-[10px] font-semibold tracking-[0.08em] text-white uppercase"
-          >
-            Marketplace
-          </Link>
-          <ul className="hidden items-center gap-6 text-sm text-(--color-hero-nav-muted) lg:flex">
-            <li>
-              <Link href="/" className="transition-colors hover:text-white">
-                Packages
-              </Link>
-            </li>
-            <li>
+    <nav
+      className={`sticky z-11 top-0 border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"}`}
+      style={{
+        backgroundImage: `${theme === "light" ? "var(--bg-dotted-pattern-image-light)" : "var(--bg-dotted-pattern-image)"}`,
+        backgroundSize: "var(--bg-dotted-pattern-size)",
+      }}
+    >
+      <Container>
+        <div
+          className={`${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"} flex h-18 items-center justify-between gap-8 border-x ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} px-4`}
+        >
+          <div className="flex items-center gap-8">
+            {data.data.home_link && (
               <Link
-                href="/templates"
-                className="transition-colors hover:text-white"
+                href={data.data.home_link.link!}
+                className="rounded-sm bg-(--color-primary600) px-2 py-1 text-[13px] font-bold tracking-[0.08em] text-white uppercase"
               >
-                Templates
+                {data.data.home_link.label}
               </Link>
-            </li>
-            <li>
-              <Link
-                href="/showcases"
-                className="transition-colors hover:text-white"
-              >
-                Showcases
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/recipes"
-                className="transition-colors hover:text-white"
-              >
-                Recipes
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/community"
-                className="transition-colors hover:text-white"
-              >
-                Community
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/help"
-                className="font-semibold text-white transition-colors"
-              >
-                Help
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="small"
-            aria-label="Search"
-            className="h-10 w-10 rounded-md border-(--color-hero-button-border) bg-(--color-hero-button-hover) p-0 text-white hover:border-(--color-hero-button-border) hover:bg-(--color-hero-button-hover) hover:text-white"
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+            )}
+            <ul
+              className={`hidden items-center gap-6 font-medium text-[15px] ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-muted)"} lg:flex`}
             >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-          </Button>
-          <Button
-            href="/login"
-            variant="secondary"
-            className="h-10 rounded-md border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-6 text-sm font-semibold text-white hover:border-(--color-hero-button-border) hover:bg-(--color-hero-button-hover) hover:text-white"
-          >
-            Login
-          </Button>
-          <Button
-            href="/signup"
-            variant="primary"
-            className="h-10 rounded-md bg-(--color-primary600) px-6 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
-          >
-            Signup
-          </Button>
+              {data.data.nav_links?.map((link) => {
+                const isActive =
+                  path === link.link || path.startsWith(`${link.link}/`);
+
+                return (
+                  <li key={link.id}>
+                    <Link
+                      href={link.link!}
+                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? "text-white" : ""}`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isAuthEnabled ? (
+              <AuthNavigation theme={theme} />
+            ) : (
+              data.data.cta_links?.map((link) => (
+                <Button key={link.id} asChild>
+                  <Link href={link.link!}>{link.label}</Link>
+                </Button>
+              ))
+            )}
+          </div>
         </div>
       </Container>
     </nav>

@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "email_templates",
+  "info": {
+    "singularName": "email-template",
+    "pluralName": "email-templates",
+    "displayName": "Email Templates",
+    "description": "Templates rendered by n8n automation workflows (submission received, approved, declined, changes requested)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "key": {
+      "type": "uid",
+      "required": true
+    },
+    "subject": {
+      "type": "string",
+      "required": true
+    },
+    "body": {
+      "type": "richtext",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "from_name": {
+      "type": "string"
+    },
+    "reply_to": {
+      "type": "email"
+    }
+  }
+}

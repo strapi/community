@@ -8,7 +8,14 @@
     "index_name": {
       "type": "enumeration",
       "required": true,
-      "enum": ["generic_search"]
+      "enum": [
+        "generic_search",
+        "marketplace",
+        "integrations",
+        "showcases",
+        "partners",
+        "members"
+      ]
     }
   },
   "config": {}

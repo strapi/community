@@ -1,6 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
-import { client } from "@/features/cms/lib/strapi";
+import { cmsClient } from "@/features/cms/lib/strapi";
 import { PackageTemplate } from "@/features/cms/pages/package";
 
 const contentType = "api::package.package" satisfies UID.ContentType;
@@ -8,8 +8,19 @@ const contentType = "api::package.package" satisfies UID.ContentType;
 const query = {
   populate: {
     icon: true,
-    owner: {
+    labels: true,
+    categories: {
       populate: {
+        url_alias: true,
+      },
+    },
+    version_info: true,
+    owner: {
+      populate: "*",
+    },
+    maintainers: {
+      populate: {
+        profile: true,
         url_alias: true,
       },
     },
@@ -26,10 +37,13 @@ type Props = {
 };
 
 const PackagePage = async ({ documentId }: Props) => {
-  const document = await client
+  const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
 
+  /**
+   * @todo Check for any existing security scans on the latest version.
+   */
   return <PackageTemplate document={document.data} />;
 };
 

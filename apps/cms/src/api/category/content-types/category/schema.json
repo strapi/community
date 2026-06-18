@@ -4,42 +4,15 @@
   "info": {
     "singularName": "category",
     "pluralName": "categories",
-    "displayName": "Categories",
-    "description": ""
+    "displayName": "category"
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
-  "pluginOptions": {
-    "webtools": {
-      "enabled": true
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
-    "url_alias": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::webtools.url-alias",
-      "configurable": false
-    },
     "name": {
-      "type": "string",
-      "required": true
-    },
-    "description": {
-      "type": "text"
-    },
-    "parent": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::category.category",
-      "inversedBy": "children"
-    },
-    "children": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::category.category",
-      "mappedBy": "parent"
+      "type": "string"
     }
   }
 }
