@@ -91,7 +91,9 @@ const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
                 style={{ marginLeft: i === 0 ? 0 : -8 }}
               />
               {items.filter(Boolean).length === 1 && (
-                <span className="pl-2">{items.find(Boolean)?.name}</span>
+                <span className="pl-2 text-white">
+                  {items.find(Boolean)?.name}
+                </span>
               )}
             </Wrapper>
           ) : (
@@ -107,7 +109,9 @@ const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
                 {m.name?.[0]}
               </div>
               {items.filter(Boolean).length === 1 && (
-                <span className="pl-2">{items.find(Boolean)?.name}</span>
+                <span className="pl-2 text-white">
+                  {items.find(Boolean)?.name}
+                </span>
               )}
             </Wrapper>
           );

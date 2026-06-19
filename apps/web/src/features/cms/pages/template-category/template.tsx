@@ -71,7 +71,10 @@ const TemplateCategoryTemplate = ({ document }: Props) => {
       </Hero>
       <Container>
         <div className="border-x border-(--color-neutral300) px-8 sm:px-16 py-12">
-          <TemplatesSearch categoryFilter={document.name!} />
+          <TemplatesSearch
+            categoryFilter={document.name!}
+            showFilters={false}
+          />
         </div>
       </Container>
       {document.sections?.map((section) => (

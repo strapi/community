@@ -120,6 +120,7 @@ export default ({ env }) => ({
           filterableAttributes: [
             "type",
             "categories",
+            "integrations",
             "labels.featured",
             "labels.official",
             "labels.paid",
@@ -162,8 +163,8 @@ export default ({ env }) => ({
           populate: ["profile", "profile.services", "url_alias"],
         },
         settings: {
-          sortableAttributes: ["createdAt"],
-          filterableAttributes: ["profile.services.name"],
+          sortableAttributes: ["createdAt", "community_star"],
+          filterableAttributes: ["profile.services.name", "community_star"],
         },
       },
       organization: {

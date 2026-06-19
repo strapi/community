@@ -1785,6 +1785,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    community_star: Schema.Attribute.Boolean;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

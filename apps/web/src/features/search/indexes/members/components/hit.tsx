@@ -7,13 +7,13 @@ type Props = {
 };
 
 const Hit = ({ hit }: Props) => {
-  console.log("hit", hit);
   return (
     <UserCard
       profileUrl={hit.url_alias?.[0]?.url_path!}
       name={hit.name!}
       bio={hit.profile?.bio!}
       avatarUrl={hit.image ? cmsImageUrl(hit.image) : undefined}
+      communityStar={hit.community_star === true}
     />
   );
 };
