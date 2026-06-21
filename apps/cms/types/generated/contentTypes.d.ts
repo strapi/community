@@ -1133,7 +1133,7 @@ export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
     singularName: 'showcase';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   pluginOptions: {
     webtools: {
@@ -1141,6 +1141,10 @@ export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    business_review: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::moderation.business-review'
+    >;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::showcase-category.showcase-category'
@@ -1156,9 +1160,16 @@ export interface ApiShowcaseShowcase extends Struct.CollectionTypeSchema {
       'api::showcase.showcase'
     > &
       Schema.Attribute.Private;
+    overall_status: Schema.Attribute.Enumeration<
+      ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
+    >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     publishedAt: Schema.Attribute.DateTime;
+    submission_notes: Schema.Attribute.Text;
+    submitter_agreed_to_terms: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    submitter_ip: Schema.Attribute.String;
     tech_stacks: Schema.Attribute.Relation<
       'oneToMany',
       'api::tech-stack.tech-stack'

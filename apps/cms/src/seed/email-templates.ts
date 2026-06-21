@@ -11,7 +11,7 @@ type SeedTemplate = {
 
 const seeds: SeedTemplate[] = [
   {
-    key: "plugin-submission-received",
+    key: "package-submission-received",
     subject: "We've received your submission: {{ package_name }}",
     description:
       "Sent by n8n when a package is submitted to the community marketplace. Variables: package_name, author_name, git_repository.",
@@ -26,8 +26,8 @@ In the meantime, you can keep iterating on the repository; the review looks at t
 — The Strapi Community team`,
   },
   {
-    key: "plugin-approved",
-    subject: "Your plugin is live: {{ package_name }}",
+    key: "package-approved",
+    subject: "Your package is live: {{ package_name }}",
     description:
       "Sent by n8n when both business and security review reach 'approved' and the package is published. Variables: package_name, author_name, marketplace_link.",
     body: `Hi {{ author_name }},
@@ -41,7 +41,7 @@ Share it, celebrate, and thanks for contributing to the ecosystem.
 — The Strapi Community team`,
   },
   {
-    key: "plugin-declined",
+    key: "package-declined",
     subject: "Update on your submission: {{ package_name }}",
     description:
       "Sent by n8n when business review state becomes 'declined'. Variables: package_name, author_name, decline_reason.",
@@ -49,7 +49,7 @@ Share it, celebrate, and thanks for contributing to the ecosystem.
 
 Thanks again for submitting **{{ package_name }}** to the Strapi community marketplace.
 
-After review we've decided not to list this plugin at this time. Here's the specific feedback from the reviewer:
+After review we've decided not to list this package at this time. Here's the specific feedback from the reviewer:
 
 > {{ decline_reason }}
 
@@ -58,7 +58,7 @@ If you'd like to discuss the decision or address the points raised, reply to thi
 — The Strapi Community team`,
   },
   {
-    key: "plugin-changes-requested",
+    key: "package-changes-requested",
     subject: "Changes requested for {{ package_name }}",
     description:
       "Sent by n8n when business review state becomes 'changes_requested'. Variables: package_name, author_name, reviewer_feedback. Note: the dashboard_link variable is internal (Strapi admin) and must never appear in this developer-facing email body.",
@@ -69,6 +69,49 @@ Thanks for submitting **{{ package_name }}**. Before we can publish it, the revi
 > {{ reviewer_feedback }}
 
 Once you've addressed the feedback, update the repository and reply to this email — we'll re-review.
+
+— The Strapi Community team`,
+  },
+  {
+    key: "showcase-submission-received",
+    subject: "We've received your showcase: {{ package_name }}",
+    description:
+      "Sent by n8n when a showcase is submitted to the community marketplace. Variables: package_name, author_name, showcase_url.",
+    body: `Hi {{ author_name }},
+
+Thanks for submitting **{{ package_name }}** to the Strapi community showcase.
+
+We've received your submission and it's now queued for review. You'll hear from us once a moderator approves it — typically within a few business days.
+
+— The Strapi Community team`,
+  },
+  {
+    key: "showcase-approved",
+    subject: "Your showcase is live: {{ package_name }}",
+    description:
+      "Sent by n8n when a showcase submission is approved. Variables: package_name, author_name.",
+    body: `Hi {{ author_name }},
+
+Great news — **{{ package_name }}** has been approved and is now live in the Strapi community showcase gallery.
+
+Thanks for sharing what you've built with Strapi!
+
+— The Strapi Community team`,
+  },
+  {
+    key: "showcase-declined",
+    subject: "Update on your showcase submission: {{ package_name }}",
+    description:
+      "Sent by n8n when a showcase submission is declined. Variables: package_name, author_name, decline_reason.",
+    body: `Hi {{ author_name }},
+
+Thanks for submitting **{{ package_name }}** to the Strapi community showcase.
+
+After review we've decided not to list this showcase at this time. Here's the specific feedback from the reviewer:
+
+> {{ decline_reason }}
+
+If you'd like to discuss the decision or address the points raised, reply to this email and we'll be in touch.
 
 — The Strapi Community team`,
   },

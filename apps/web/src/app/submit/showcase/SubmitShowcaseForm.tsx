@@ -17,34 +17,29 @@ import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import { EMAIL_RE, URL_RE } from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
 
-interface PluginFormFields extends BaseFormFields {
-  plugin_name: string;
-  package_location: string;
-  readme: string;
+interface ShowcaseFormFields extends BaseFormFields {
+  showcase_name: string;
+  url: string;
 }
 
-const INITIAL: PluginFormFields = {
-  plugin_name: "",
-  package_location: "",
-  repository_url: "",
+const INITIAL: ShowcaseFormFields = {
+  showcase_name: "",
+  url: "",
   description: "",
   logo_file: null,
   categories_list: [],
-  readme: "",
   submission_notes: "",
   owner_name: "",
   owner_email: "",
   agreed: false,
 };
 
-function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
-  const e: FieldErrors<PluginFormFields> = {};
-  if (!f.plugin_name.trim()) e.plugin_name = "Plugin name is required.";
+function validate(f: ShowcaseFormFields): FieldErrors<ShowcaseFormFields> {
+  const e: FieldErrors<ShowcaseFormFields> = {};
+  if (!f.showcase_name.trim()) e.showcase_name = "Showcase name is required.";
+  if (!f.url.trim()) e.url = "Live URL is required.";
+  else if (!URL_RE.test(f.url.trim())) e.url = "Must be a valid https:// URL.";
   if (!f.description.trim()) e.description = "Description is required.";
-  if (!f.repository_url.trim())
-    e.repository_url = "Repository URL is required.";
-  else if (!URL_RE.test(f.repository_url.trim()))
-    e.repository_url = "Must be a valid https:// URL.";
   if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
   if (!f.owner_email.trim()) e.owner_email = "Contact email is required.";
   else if (!EMAIL_RE.test(f.owner_email.trim()))
@@ -54,15 +49,13 @@ function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
 }
 
 function buildFormData(
-  fields: PluginFormFields,
+  fields: ShowcaseFormFields,
   recaptchaToken: string,
 ): FormData {
   const form = new FormData();
-  form.append("plugin_name", fields.plugin_name.trim());
-  form.append("package_location", fields.package_location.trim());
-  form.append("repository_url", fields.repository_url.trim());
+  form.append("showcase_name", fields.showcase_name.trim());
+  form.append("url", fields.url.trim());
   form.append("description", fields.description.trim());
-  form.append("readme", fields.readme.trim());
   form.append("submission_notes", fields.submission_notes.trim());
   form.append("owner_name", fields.owner_name.trim());
   form.append("owner_email", fields.owner_email.trim());
@@ -76,16 +69,16 @@ function buildFormData(
 
 const REVIEW_STEPS = [
   {
-    title: "Business review",
-    body: "We check your repo is public, MIT-licensed, has a README, and lists Strapi as a peer dependency.",
+    title: "Quick review",
+    body: "We check that it's a real Strapi project with a working live URL and a brief description.",
   },
   {
-    title: "Security review",
-    body: "We scan dependencies for known vulnerabilities and flag security concerns before listing.",
+    title: "Get discovered",
+    body: "Approved showcases are listed in the community showcase gallery for everyone to explore.",
   },
 ];
 
-export function SubmitPluginForm({
+export function SubmitShowcaseForm({
   initialCategories,
 }: {
   initialCategories: string[];
@@ -102,19 +95,19 @@ export function SubmitPluginForm({
   } = useSubmitForm({
     initial: INITIAL,
     validate,
-    apiEndpoint: "/api/submit-plugin",
-    recaptchaAction: "submit_plugin",
+    apiEndpoint: "/api/submit-showcase",
+    recaptchaAction: "submit_showcase",
     buildFormData,
   });
 
   return (
     <SubmitFormShell
-      title="Submit a Plugin"
+      title="Submit a Showcase"
       subtitle={
         <>
-          Share your Strapi plugin with the community. All submissions go
-          through a business and security review before being listed in the
-          marketplace. We&rsquo;ll reach out if we need more information.{" "}
+          Share something you&rsquo;ve built with Strapi. All submissions go
+          through a quick review before appearing in the community showcase
+          gallery. We&rsquo;ll reach out if we need more information.{" "}
           <Link
             href="/community"
             className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -124,68 +117,53 @@ export function SubmitPluginForm({
         </>
       }
       reviewSteps={REVIEW_STEPS}
-      contentType="plugin"
+      contentType="showcase"
       success={success}
       submitting={submitting}
-      submitLabel="Submit Plugin"
+      submitLabel="Submit Showcase"
       formError={errors._form}
       onSubmit={handleSubmit}
     >
       <div className="mb-5">
-        <Label htmlFor="plugin_name" required>
-          Plugin Name
+        <Label htmlFor="showcase_name" required>
+          Project Name
         </Label>
         <Input
-          id="plugin_name"
-          value={fields.plugin_name}
-          onChange={(e) => set("plugin_name", e.target.value)}
-          placeholder="e.g. Strapi Plugin SEO"
-          className={errors.plugin_name ? "border-red-400" : ""}
+          id="showcase_name"
+          value={fields.showcase_name}
+          onChange={(e) => set("showcase_name", e.target.value)}
+          placeholder="e.g. My Strapi Blog"
+          className={errors.showcase_name ? "border-red-400" : ""}
           autoComplete="off"
         />
-        <FieldError message={errors.plugin_name} />
+        <FieldError message={errors.showcase_name} />
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="package_location">Registry URL</Label>
-        <Input
-          id="package_location"
-          value={fields.package_location}
-          onChange={(e) => set("package_location", e.target.value)}
-          placeholder="https://www.npmjs.com/package/your-plugin"
-          autoComplete="off"
-        />
-        <Hint>
-          Full URL to your published package on npm, Packagist, PyPI, RubyGems,
-          or NuGet. Leave blank if not yet published.
-        </Hint>
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="repository_url" required>
-          Repository URL
+        <Label htmlFor="url" required>
+          Live URL
         </Label>
         <Input
-          id="repository_url"
+          id="url"
           type="url"
-          value={fields.repository_url}
-          onChange={(e) => set("repository_url", e.target.value)}
-          placeholder="https://github.com/org/repo or https://gitlab.com/org/repo"
-          className={errors.repository_url ? "border-red-400" : ""}
+          value={fields.url}
+          onChange={(e) => set("url", e.target.value)}
+          placeholder="https://my-strapi-project.com"
+          className={errors.url ? "border-red-400" : ""}
         />
-        <FieldError message={errors.repository_url} />
-        <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
+        <FieldError message={errors.url} />
+        <Hint>The publicly accessible URL of your project.</Hint>
       </div>
 
       <div className="mb-5">
         <Label htmlFor="description" required>
-          Plugin Description
+          Description
         </Label>
         <Textarea
           id="description"
           value={fields.description}
           onChange={(v) => set("description", v)}
-          placeholder="Tell us about your plugin — what it does and why it's useful."
+          placeholder="Tell us about your project — what it does, how Strapi powers it, and what makes it interesting."
           rows={4}
           hasError={!!errors.description}
         />
@@ -193,13 +171,14 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="logo_file">Plugin Logo / Icon</Label>
+        <Label htmlFor="logo_file">Screenshot</Label>
         <ImageUpload
           file={fields.logo_file}
           onChange={(f) => set("logo_file", f)}
           hasError={!!errors.logo_file}
         />
         <FieldError message={errors.logo_file as string} />
+        <Hint>A screenshot or hero image of your project.</Hint>
       </div>
 
       <div className="mb-5">
@@ -209,17 +188,6 @@ export function SubmitPluginForm({
           selected={fields.categories_list}
           onAdd={addCategory}
           onRemove={removeCategory}
-        />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="readme">README / Documentation</Label>
-        <Textarea
-          id="readme"
-          value={fields.readme}
-          onChange={(v) => set("readme", v)}
-          placeholder="Paste your plugin's README or any additional documentation here."
-          rows={6}
         />
       </div>
 
@@ -270,8 +238,8 @@ export function SubmitPluginForm({
 
       <div className="mb-6">
         <label
-          className="flex cursor-pointer items-start gap-3"
           htmlFor="agreed"
+          className="flex cursor-pointer items-start gap-3"
         >
           <Checkbox
             id="agreed"
@@ -280,8 +248,7 @@ export function SubmitPluginForm({
             className={errors.agreed ? "border-red-400" : ""}
           />
           <span className="text-sm leading-relaxed text-(--color-neutral700)">
-            I confirm this plugin is open-source, MIT-licensed, and compliant
-            with the{" "}
+            I confirm this project is mine to submit and compliant with the{" "}
             <Link
               href="/community"
               className="underline underline-offset-2 hover:text-(--color-primary600)"

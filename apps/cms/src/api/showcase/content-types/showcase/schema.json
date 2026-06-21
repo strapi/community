@@ -7,7 +7,7 @@
     "displayName": "Showcases"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {
     "webtools": {

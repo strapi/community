@@ -1,10 +1,10 @@
 {
-  "name": "plugin-approved",
+  "name": "showcase-submission-received",
   "description": null,
   "nodes": [
     {
       "id": "webhook-1",
-      "name": "Webhook: Package Approved",
+      "name": "Webhook: Submission Received",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
@@ -13,7 +13,7 @@
       ],
       "parameters": {
         "httpMethod": "POST",
-        "path": "strapi/plugin-approved",
+        "path": "strapi/showcase-submission-received",
         "authentication": "headerAuth",
         "responseMode": "onReceived",
         "responseData": "noData",
@@ -21,8 +21,8 @@
       },
       "onError": "continueRegularOutput",
       "alwaysOutputData": true,
-      "notes": "Fired by the CMS moderation plugin after plugin-submission.promoteToPackage. Payload includes package_id + package_slug (may be null).",
-      "webhookId": "5b4adc60-df90-4ca1-aca8-c2ea4ca513d7"
+      "notes": "Fired by the CMS moderation plugin after showcase-submission.createSubmission. Payload: flat { documentId, kind, name, owner_name, owner_email, dashboard_link, ... }.",
+      "webhookId": "c3a17f2e-4b8d-4e9c-a5f1-6d7e8f9a0b1c"
     },
     {
       "id": "extract-1",
@@ -40,7 +40,7 @@
           "assignments": [
             {
               "id": "a1",
-              "name": "package_id",
+              "name": "showcase_id",
               "type": "string",
               "value": "={{ $json.body.documentId }}"
             },
@@ -52,27 +52,21 @@
             },
             {
               "id": "a3",
-              "name": "package_slug",
-              "type": "string",
-              "value": "={{ $json.body.slug || '' }}"
-            },
-            {
-              "id": "a4",
               "name": "author_email",
               "type": "string",
               "value": "={{ $json.body.owner_email }}"
             },
             {
-              "id": "a5",
+              "id": "a4",
               "name": "author_name",
               "type": "string",
               "value": "={{ $json.body.owner_name }}"
             },
             {
-              "id": "a6",
-              "name": "marketplace_link",
+              "id": "a5",
+              "name": "dashboard_link",
               "type": "string",
-              "value": "={{ $json.body.slug || '' }}"
+              "value": "={{ $json.body.dashboard_link }}"
             }
           ]
         },
@@ -98,7 +92,7 @@
               "id": "b1",
               "name": "template_key",
               "type": "string",
-              "value": "plugin-approved"
+              "value": "showcase-submission-received"
             },
             {
               "id": "b2",
@@ -116,7 +110,7 @@
               "id": "b4",
               "name": "variables",
               "type": "object",
-              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, marketplace_link: $json.marketplace_link } }}"
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name } }}"
             }
           ]
         },
@@ -165,7 +159,7 @@
               "id": "s1",
               "name": "text",
               "type": "string",
-              "value": "=:white_check_mark: *Plugin* approved & published: *{{ $json.package_name }}* by {{ $json.author_name }}\nLive: {{ $json.marketplace_link }}"
+              "value": "=:frame_with_picture: New *showcase* submission received: *{{ $json.package_name }}* by {{ $json.author_name }}\nReview: {{ $json.dashboard_link }}"
             }
           ]
         },
@@ -198,11 +192,11 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
-      "webhookId": "8d87996f-de91-4a91-b61c-cefe6cc3bb1c"
+      "webhookId": "d4b28a3f-5c9e-4f0d-b6a2-7e8f9b0c1d2e"
     }
   ],
   "connections": {
-    "Webhook: Package Approved": {
+    "Webhook: Submission Received": {
       "main": [
         [
           {

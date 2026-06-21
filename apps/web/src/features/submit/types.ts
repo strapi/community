@@ -1,5 +1,5 @@
 export interface BaseFormFields {
-  repository_url: string;
+  repository_url?: string;
   description: string;
   logo_file: File | null;
   categories_list: string[];

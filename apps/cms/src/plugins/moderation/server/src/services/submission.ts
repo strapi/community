@@ -46,9 +46,19 @@ function buildAdminLink(uid: string, documentId: string) {
 
 /** Coarse submission kind used by n8n for labels/routing. */
 function kindForUid(uid: string) {
-  if (uid === PACKAGE_UID) return "plugin";
+  if (uid === PACKAGE_UID) return "package";
   if (uid === "api::template.template") return "template";
+  if (uid === "api::showcase.showcase") return "showcase";
   return uid.split(".").pop() ?? uid;
+}
+
+/** Read the human-readable name from an entity, respecting per-CT nameField config. */
+function getEntityName(
+  entity: Record<string, unknown>,
+  ctConfig: ModerationContentTypeConfig,
+): string | null {
+  const field = ctConfig.nameField ?? "name";
+  return (entity[field] as string) ?? null;
 }
 
 /** Pull recipient contact off a populated `owner` relation (better-auth user). */
@@ -185,7 +195,7 @@ export default ({ strapi }) => {
             documentId: entity.documentId,
             contentType: uid,
             kind: kindForUid(uid),
-            name: entity.name,
+            name: getEntityName(entity, ctConfig),
             git_repository: entity.git_repository ?? null,
             owner_email: (rawBody.owner_email as string) ?? null,
             owner_name:
@@ -391,7 +401,7 @@ export default ({ strapi }) => {
             documentId,
             contentType: uid,
             kind: kindForUid(uid),
-            name: entity.name,
+            name: getEntityName(entity, ctConfig),
             slug: published.slug ?? null,
             ...ownerContact(entity),
             dashboard_link: buildAdminLink(uid, documentId),
@@ -454,7 +464,7 @@ export default ({ strapi }) => {
             documentId,
             contentType: uid,
             kind: kindForUid(uid),
-            name: entity.name,
+            name: getEntityName(entity, ctConfig),
             reason: reason ?? null,
             feedback: feedback ?? null,
             ...ownerContact(entity),
