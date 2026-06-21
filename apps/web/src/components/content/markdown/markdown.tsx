@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import MarkdownRender from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/content/code-block";
 import styles from "./markdown.module.css";
@@ -37,7 +38,8 @@ const Markdown = (props: Props) => {
   return (
     <div className={styles.markdown}>
       <MarkdownRender
-        rehypePlugins={[rehypeRaw, remarkGfm]}
+        rehypePlugins={[rehypeRaw, rehypeSlug]}
+        remarkPlugins={[remarkGfm]}
         components={{
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noopener noreferrer" />

@@ -147,6 +147,18 @@ export default ({ env }) => ({
           filterableAttributes: [],
         },
       },
+      "help-page": {
+        indexName: env("MEILISEARCH_HELP_PAGES_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["image", "url_alias", "parent"],
+        },
+        filterEntry: ({ entry }) => !entry.parent,
+        settings: {
+          sortableAttributes: ["createdAt"],
+          searchableAttributes: ["title", "description"],
+          filterableAttributes: [],
+        },
+      },
       integration: {
         indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
         entriesQuery: {

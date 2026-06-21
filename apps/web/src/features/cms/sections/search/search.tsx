@@ -1,5 +1,6 @@
 import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
+import { HelpPagesSearch } from "@/features/search/indexes/help-pages";
 import { IntegrationsSearch } from "@/features/search/indexes/integrations";
 import { MarketplaceSearch } from "@/features/search/indexes/marketplace/marketplace";
 import { MembersSearch } from "@/features/search/indexes/members/members";
@@ -24,6 +25,8 @@ const SearchIndex = ({ section }: Props) => {
       return <IntegrationsSearch />;
     case "showcases":
       return <ShowcasesSearch />;
+    case "help_pages":
+      return <HelpPagesSearch />;
     default:
       return <div>No index found with name {index_name}</div>;
   }

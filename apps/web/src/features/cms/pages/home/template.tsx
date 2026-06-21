@@ -19,7 +19,6 @@ const HomeTemplate = async ({ document, templates, packages }: Props) => {
       <Navigation theme="dark" />
       <HomeHero
         title={document.title!}
-        subtitle={document.subtitle!}
         ctaText={document.cta_text!}
         ctaTitle={document.cta_title!}
         ctaButtons={document.cta_buttons || []}

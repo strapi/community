@@ -14,6 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
 import { Markdown } from "@/components/content/markdown";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +38,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
       <Hero>
         <HeroSection>
           <div className="px-14 py-26">
+            <div className="mb-6">
+              <Breadcrumbs />
+            </div>
             {/* Logo + Name */}
             <div className="mb-6 sm:flex items-center gap-5">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-(--color-primary600) bg-white">

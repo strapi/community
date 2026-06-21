@@ -566,6 +566,54 @@ export interface ApiEmailTemplateEmailTemplate
   };
 }
 
+export interface ApiHelpPageHelpPage extends Struct.CollectionTypeSchema {
+  collectionName: 'help_pages';
+  info: {
+    displayName: 'Help Pages';
+    pluralName: 'help-pages';
+    singularName: 'help-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
+  attributes: {
+    children: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::help-page.help-page'
+    >;
+    content: Schema.Attribute.RichText;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    image: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::help-page.help-page'
+    > &
+      Schema.Attribute.Private;
+    parent: Schema.Attribute.Relation<'manyToOne', 'api::help-page.help-page'>;
+    publishedAt: Schema.Attribute.DateTime;
+    sections: Schema.Attribute.DynamicZone<['sections.cta']>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
+  };
+}
+
 export interface ApiHomeHome extends Struct.SingleTypeSchema {
   collectionName: 'homes';
   info: {
@@ -597,7 +645,6 @@ export interface ApiHomeHome extends Struct.SingleTypeSchema {
     >;
     seo: Schema.Attribute.Component<'shared.seo', false> &
       Schema.Attribute.Required;
-    subtitle: Schema.Attribute.String & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -2432,6 +2479,7 @@ declare module '@strapi/strapi' {
       'api::country.country': ApiCountryCountry;
       'api::cta.cta': ApiCtaCta;
       'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
+      'api::help-page.help-page': ApiHelpPageHelpPage;
       'api::home.home': ApiHomeHome;
       'api::integration-category.integration-category': ApiIntegrationCategoryIntegrationCategory;
       'api::integration.integration': ApiIntegrationIntegration;

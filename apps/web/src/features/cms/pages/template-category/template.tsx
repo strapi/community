@@ -1,4 +1,5 @@
 import { Button, Container } from "@repo/strapi-ui";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { SectionsMapper } from "@/features/cms/sections/mapper";
@@ -44,6 +45,9 @@ const TemplateCategoryTemplate = ({ document }: Props) => {
       <Hero>
         <HeroSection>
           <div className="px-14 py-26 max-w-250">
+            <div className="mb-5">
+              <Breadcrumbs />
+            </div>
             <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
               {document.name}
             </h1>
