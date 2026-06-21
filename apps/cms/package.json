@@ -34,6 +34,7 @@
     "airtable": "^0.12.2",
     "better-auth": "catalog:better-auth",
     "better-sqlite3": "12.4.1",
+    "passport-google-oauth2": "^0.2.0",
     "pg": "^8.21.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
