@@ -13,7 +13,7 @@ const idx = process.env.NEXT_PUBLIC_MEILISEARCH_TEMPLATES_INDEX_NAME!;
 
 const TemplatesSearch = ({
   categoryFilter,
-  showFilters,
+  showFilters = true,
 }: TemplatesSearchProps) => (
   <SearchIndex indexName={`${idx}:stars:desc`} useNextSearch={false}>
     <SearchIndex.Layout>
