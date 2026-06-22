@@ -33,6 +33,13 @@ export type HomePageData = Modules.Documents.Result<
 
 const packagesQuery = {
   populate: ["icon", "owner", "url_alias"],
+  filters: {
+    labels: {
+      featured: {
+        $eq: true,
+      },
+    },
+  },
   // @ts-expect-error - issue in the strapi-client
   pagination: {
     limit: 3,
@@ -45,6 +52,13 @@ export type HomePackages = Modules.Documents.Result<
 
 const templatesQuery = {
   populate: ["preview_image", "owner", "url_alias"],
+  filters: {
+    labels: {
+      featured: {
+        $eq: true,
+      },
+    },
+  },
   // @ts-expect-error - issue in the strapi-client
   pagination: {
     limit: 3,

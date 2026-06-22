@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
+import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const integrationMetadata = async (
@@ -8,47 +10,74 @@ export const integrationMetadata = async (
   const document = await cmsClient
     .collection("api::integration.integration")
     .findOne(documentId, {
-      fields: ["documentId"],
+      fields: ["name", "description"],
       populate: {
         seo: {
           populate: {
             openGraph: true,
           },
         },
+        logo: true,
+        url_alias: true,
       },
     });
 
-  const { seo: metadata } = document.data;
+  const { name, description, seo: metadata } = document.data;
+  const logo = (document.data as Record<string, unknown>).logo as
+    | { url?: string }
+    | null
+    | undefined;
+  const urlAlias = (document.data as Record<string, unknown>).url_alias as
+    | { url_path?: string }[]
+    | null
+    | undefined;
 
-  if (!metadata) {
-    return {};
-  }
+  const webUrl =
+    process.env.NEXT_PUBLIC_WEB_URL ?? "https://community.strapi.io";
+  const pageUrl = urlAlias?.[0]?.url_path
+    ? `${webUrl}${urlAlias[0].url_path}`
+    : undefined;
+  const pageTitle = metadata?.metaTitle ?? name;
+  const pageDescription = metadata?.metaDescription ?? description ?? undefined;
+  const logoUrl = logo?.url ? cmsImageUrl(logo.url) : undefined;
+  const ogImageUrl = buildOgImageUrl(webUrl, {
+    name: pageTitle ?? "",
+    type: "Integration",
+    icon: logoUrl,
+    description: pageDescription,
+  });
 
   return {
-    metadataBase: process.env.NEXT_PUBLIC_CMS_URL,
-    title: metadata.metaTitle,
-    description: metadata.metaDescription,
-    keywords: metadata.keywords,
-    viewport: metadata.metaViewport,
-    robots: metadata.metaRobots,
+    title: pageTitle,
+    description: pageDescription,
+    keywords: metadata?.keywords,
+    viewport: metadata?.metaViewport,
+    robots: metadata?.metaRobots,
     alternates: {
-      canonical: metadata.canonicalURL,
+      canonical: pageUrl ?? metadata?.canonicalURL,
     },
-    openGraph: metadata.openGraph
+    openGraph: metadata?.openGraph
       ? {
-          title: metadata.openGraph.ogTitle || "",
-          description: metadata.openGraph.ogDescription || "",
-          url: metadata.openGraph.ogUrl || "",
+          title: metadata.openGraph.ogTitle || pageTitle || "",
+          description:
+            metadata.openGraph.ogDescription || pageDescription || "",
+          url: pageUrl ?? (metadata.openGraph.ogUrl || ""),
           type: (metadata.openGraph.ogType as OpenGraphType) || "website",
-          images: metadata.openGraph.ogImage
-            ? [
-                {
-                  url: metadata.openGraph.ogImage.url,
-                  alt: metadata.openGraph.ogImage.alternativeText,
-                },
-              ]
-            : undefined,
+          images: [
+            { url: ogImageUrl, width: 1200, height: 630, alt: pageTitle ?? "" },
+          ],
         }
-      : {},
+      : {
+          images: [
+            { url: ogImageUrl, width: 1200, height: 630, alt: pageTitle ?? "" },
+          ],
+        },
+    twitter: {
+      card: "summary_large_image",
+      title: metadata?.openGraph?.ogTitle || pageTitle || undefined,
+      description:
+        metadata?.openGraph?.ogDescription || pageDescription || undefined,
+      images: [ogImageUrl],
+    },
   };
 };

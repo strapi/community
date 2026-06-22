@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
+import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const overviewPageMetadata = async (
@@ -8,7 +9,7 @@ export const overviewPageMetadata = async (
   const document = await cmsClient
     .collection("api::overview-page.overview-page")
     .findOne(documentId, {
-      fields: ["documentId"],
+      fields: ["title", "description"],
       populate: {
         seo: {
           populate: {
@@ -18,37 +19,49 @@ export const overviewPageMetadata = async (
       },
     });
 
-  const { seo: metadata } = document.data;
+  const { title, description, seo: metadata } = document.data;
 
-  if (!metadata) {
-    return {};
-  }
+  const webUrl =
+    process.env.NEXT_PUBLIC_WEB_URL ?? "https://community.strapi.io";
+  const pageTitle = metadata?.metaTitle ?? title;
+  const pageDescription = metadata?.metaDescription ?? description ?? undefined;
+  const ogImageUrl = buildOgImageUrl(webUrl, {
+    name: pageTitle ?? "",
+    type: "Strapi",
+    description: pageDescription,
+  });
 
   return {
-    metadataBase: process.env.NEXT_PUBLIC_CMS_URL,
-    title: metadata.metaTitle,
-    description: metadata.metaDescription,
-    keywords: metadata.keywords,
-    viewport: metadata.metaViewport,
-    robots: metadata.metaRobots,
+    title: pageTitle,
+    description: pageDescription,
+    keywords: metadata?.keywords,
+    viewport: metadata?.metaViewport,
+    robots: metadata?.metaRobots,
     alternates: {
-      canonical: metadata.canonicalURL,
+      canonical: metadata?.canonicalURL,
     },
-    openGraph: metadata.openGraph
+    openGraph: metadata?.openGraph
       ? {
-          title: metadata.openGraph.ogTitle || "",
-          description: metadata.openGraph.ogDescription || "",
+          title: metadata.openGraph.ogTitle || pageTitle || "",
+          description:
+            metadata.openGraph.ogDescription || pageDescription || "",
           url: metadata.openGraph.ogUrl || "",
           type: (metadata.openGraph.ogType as OpenGraphType) || "website",
-          images: metadata.openGraph.ogImage
-            ? [
-                {
-                  url: metadata.openGraph.ogImage.url,
-                  alt: metadata.openGraph.ogImage.alternativeText,
-                },
-              ]
-            : undefined,
+          images: [
+            { url: ogImageUrl, width: 1200, height: 630, alt: pageTitle ?? "" },
+          ],
         }
-      : {},
+      : {
+          images: [
+            { url: ogImageUrl, width: 1200, height: 630, alt: pageTitle ?? "" },
+          ],
+        },
+    twitter: {
+      card: "summary_large_image",
+      title: metadata?.openGraph?.ogTitle || pageTitle || undefined,
+      description:
+        metadata?.openGraph?.ogDescription || pageDescription || undefined,
+      images: [ogImageUrl],
+    },
   };
 };
