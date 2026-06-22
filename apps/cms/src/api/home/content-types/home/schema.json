@@ -46,10 +46,6 @@
     "sections": {
       "type": "dynamiczone",
       "components": ["sections.highlights", "sections.cta"]
-    },
-    "subtitle": {
-      "type": "string",
-      "required": true
     }
   }
 }

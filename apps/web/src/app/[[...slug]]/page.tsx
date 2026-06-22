@@ -1,5 +1,6 @@
 import type { Metadata, NextPage } from "next";
 import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
+import { HelpPagePage, helpPageMetadata } from "@/features/cms/pages/help-page";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
 import { integrationMetadata } from "@/features/cms/pages/integrations/metadata";
 import { IntegrationPage } from "@/features/cms/pages/integrations/page";
@@ -63,6 +64,9 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     }
     case "api::package-category.package-category": {
       return <PackageCategoryPage documentId={page.documentId} />;
+    }
+    case "api::help-page.help-page": {
+      return <HelpPagePage documentId={page.documentId} />;
     }
     case "api::home.home": {
       return <HomePage />;
@@ -129,6 +133,9 @@ export const generateMetadata = async ({
     }
     case "api::package-category.package-category": {
       return packageCategoryMetadata(page.documentId);
+    }
+    case "api::help-page.help-page": {
+      return helpPageMetadata(page.documentId);
     }
     case "api::home.home": {
       return homeMetadata();

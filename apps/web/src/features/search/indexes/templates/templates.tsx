@@ -1,18 +1,32 @@
 "use client";
 
+import { RefinementList } from "react-instantsearch";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
 interface TemplatesSearchProps {
   categoryFilter?: string;
+  showFilters?: boolean;
 }
 
 const idx = process.env.NEXT_PUBLIC_MEILISEARCH_TEMPLATES_INDEX_NAME!;
 
-const TemplatesSearch = ({ categoryFilter }: TemplatesSearchProps) => (
+const TemplatesSearch = ({
+  categoryFilter,
+  showFilters = true,
+}: TemplatesSearchProps) => (
   <SearchIndex indexName={`${idx}:stars:desc`} useNextSearch={false}>
     <SearchIndex.Layout>
-      <SearchIndex.Sidebar />
+      {showFilters && (
+        <SearchIndex.Sidebar>
+          <SearchIndex.FilterGroup label="Categories">
+            <RefinementList sortBy={["count"]} attribute="categories.name" />
+          </SearchIndex.FilterGroup>
+          <SearchIndex.FilterGroup label="Integrations">
+            <RefinementList sortBy={["count"]} attribute="integrations.name" />
+          </SearchIndex.FilterGroup>
+        </SearchIndex.Sidebar>
+      )}
       <SearchIndex.Content>
         <SearchIndex.SearchBox />
         <SearchIndex.Toolbar>

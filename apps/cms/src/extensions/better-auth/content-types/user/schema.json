@@ -77,6 +77,20 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::profile.profile"
+    },
+    "community_star": {
+      "type": "boolean"
+    },
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "writable": true,
+      "configurable": false,
+      "editable": false,
+      "visible": false,
+      "default": null,
+      "unique": true
     }
   }
 }

@@ -25,7 +25,9 @@ const UserPage = async ({ documentId }: Props) => {
     .findOne(documentId, query);
 
   const content: RelatedContentItems = await cmsClient
-    .fetch(`/users/${document.data.id}/related-content?populate=*`)
+    .fetch(
+      `/users/${document.data.id}/related-content?populate=*&status=published`,
+    )
     .then((res) => res.json());
 
   return <UserTemplate document={document.data} relatedContent={content} />;

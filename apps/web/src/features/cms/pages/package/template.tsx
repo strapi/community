@@ -150,7 +150,7 @@ const PackageTemplate = ({ document }: Props) => {
                 <SidebarSection title="Maintainers">
                   <div className="space-y-3">
                     {maintainers.map((m) => (
-                      <AvatarPile key={m.documentId} items={[m]} />
+                      <AvatarPile clickable key={m.documentId} items={[m]} />
                     ))}
                   </div>
                 </SidebarSection>

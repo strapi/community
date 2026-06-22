@@ -120,6 +120,7 @@ export default ({ env }) => ({
           filterableAttributes: [
             "type",
             "categories",
+            "integrations",
             "labels.featured",
             "labels.official",
             "labels.paid",
@@ -146,6 +147,18 @@ export default ({ env }) => ({
           filterableAttributes: [],
         },
       },
+      "help-page": {
+        indexName: env("MEILISEARCH_HELP_PAGES_INDEX_NAME"),
+        entriesQuery: {
+          populate: ["image", "url_alias", "parent"],
+        },
+        filterEntry: ({ entry }) => !entry.parent,
+        settings: {
+          sortableAttributes: ["createdAt"],
+          searchableAttributes: ["title", "description"],
+          filterableAttributes: [],
+        },
+      },
       integration: {
         indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
         entriesQuery: {
@@ -159,11 +172,11 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["profile", "url_alias"],
+          populate: ["profile", "profile.services", "url_alias"],
         },
         settings: {
-          sortableAttributes: ["createdAt"],
-          filterableAttributes: ["profile.services.name"],
+          sortableAttributes: ["createdAt", "community_star"],
+          filterableAttributes: ["profile.services.name", "community_star"],
         },
       },
       organization: {

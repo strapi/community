@@ -18,7 +18,7 @@ const ToggleRefinement = (props: ToggleRefinementProps) => {
       <Checkbox
         id={id}
         checked={value.isRefined}
-        onCheckedChange={(checked) => refine({ isRefined: Boolean(checked) })}
+        onCheckedChange={() => refine(value)}
       />
       <span className="leading-6">{props.label}</span>
       <span className="ml-auto text-sm text-(--color-neutral600)">

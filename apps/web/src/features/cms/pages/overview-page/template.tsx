@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
@@ -10,6 +11,7 @@ type Props = {
 };
 
 const OverviewPageTemplate = ({ document }: Props) => {
+  console.log(document.sections);
   return (
     <div>
       <Navigation theme="dark" />
@@ -17,6 +19,9 @@ const OverviewPageTemplate = ({ document }: Props) => {
         <HeroSection>
           <div className="flex">
             <div className="px-14 py-26 max-w-150">
+              <div className="mb-5">
+                <Breadcrumbs />
+              </div>
               <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
                 {document.title}
               </h1>

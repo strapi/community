@@ -26,9 +26,12 @@ const OrganizationPage = async ({ documentId }: Props) => {
     .findOne(documentId, query);
 
   const content: RelatedContentItems = await cmsClient
-    .fetch(`/organizations/${document.data.id}/related-content?populate=*`, {
-      method: "GET",
-    })
+    .fetch(
+      `/organizations/${document.data.id}/related-content?populate=*&status=published`,
+      {
+        method: "GET",
+      },
+    )
     .then((res) => res.json());
 
   const members: Data.ContentType<"plugin::better-auth.user">[] =

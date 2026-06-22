@@ -105,6 +105,7 @@ export interface SectionsSearch extends Struct.ComponentSchema {
         'showcases',
         'partners',
         'members',
+        'help_pages',
       ]
     > &
       Schema.Attribute.Required;

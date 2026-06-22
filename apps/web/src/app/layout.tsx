@@ -18,6 +18,7 @@ export default function RootLayout({
     <>
       <StrapiNavbar />
       {children}
+      <div className="border-t border-(--color-neutral300)" />
       <StrapiFooter />
     </>
   );

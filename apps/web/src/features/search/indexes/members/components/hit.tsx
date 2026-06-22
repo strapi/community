@@ -13,6 +13,7 @@ const Hit = ({ hit }: Props) => {
       name={hit.name!}
       bio={hit.profile?.bio!}
       avatarUrl={hit.image ? cmsImageUrl(hit.image) : undefined}
+      communityStar={hit.community_star === true}
     />
   );
 };

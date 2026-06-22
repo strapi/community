@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { AvatarPile } from "@/components/content/avatar-pile";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero/hero";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { HomePackages, HomeTemplates } from "@/features/cms/pages/home";
@@ -39,7 +40,6 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 type Props = {
   title: string;
-  subtitle: string;
   ctaText: string;
   ctaTitle: string;
   ctaButtons: Data.Component<"shared.button">[];
@@ -48,15 +48,7 @@ type Props = {
 };
 
 const HomeHero = (props: Props) => {
-  const {
-    title,
-    subtitle,
-    ctaText,
-    ctaTitle,
-    ctaButtons,
-    packages,
-    templates,
-  } = props;
+  const { title, ctaText, ctaTitle, ctaButtons, packages, templates } = props;
 
   const [activeTab, setActiveTab] = useState<Tab>("packages");
 
@@ -66,9 +58,9 @@ const HomeHero = (props: Props) => {
         <div className="flex min-h-[360px]">
           {/* Left: Main heading & search */}
           <div className="flex flex-1 flex-col justify-center border-r border-(--color-grey700) px-12 py-14">
-            <p className="mb-5 text-sm font-semibold text-(--color-primary500)">
-              {subtitle}
-            </p>
+            <div className="mb-5">
+              <Breadcrumbs />
+            </div>
             <h1 className="text-[48px] max-w-lg text-5xl font-semibold leading-[1.1] tracking-tight text-white!">
               {title}
             </h1>
@@ -204,15 +196,28 @@ const HomeHero = (props: Props) => {
       </HeroSection>
 
       {/* View More button */}
-      <div className="p-12 flex justify-center">
-        <Button
-          href="/templates"
-          variant="primary"
-          className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
-        >
-          View More Templates
-        </Button>
-      </div>
+      {activeTab === "templates" && (
+        <div className="p-12 flex justify-center">
+          <Button
+            href="/marketplace?tab=templates"
+            variant="primary"
+            className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
+          >
+            View More Templates
+          </Button>
+        </div>
+      )}
+      {activeTab === "packages" && (
+        <div className="p-12 flex justify-center">
+          <Button
+            href="/marketplace?tab=packages"
+            variant="primary"
+            className="bg-(--color-primary600) px-8 text-sm font-semibold text-white hover:bg-(--color-cta-button-hover)"
+          >
+            View More Packages
+          </Button>
+        </div>
+      )}
     </Hero>
   );
 };
