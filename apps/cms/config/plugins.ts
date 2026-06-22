@@ -162,10 +162,10 @@ export default ({ env }) => ({
       integration: {
         indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["logo", "categories", "url_alias"],
+          populate: ["logo", "labels", "categories", "url_alias"],
         },
         settings: {
-          sortableAttributes: ["createdAt"],
+          sortableAttributes: ["labels.featured"],
           filterableAttributes: ["categories"],
         },
       },
