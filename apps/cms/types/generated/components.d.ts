@@ -133,11 +133,8 @@ export interface SharedLabels extends Struct.ComponentSchema {
     icon: 'check';
   };
   attributes: {
-    buy_link: Schema.Attribute.String;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     official: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    paid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    price: Schema.Attribute.String;
   };
 }
 

@@ -18,14 +18,6 @@ const ShowcasesSearch = () => (
         <SearchIndex.SearchBox />
         <SearchIndex.Toolbar>
           <SearchIndex.Stats />
-          <SearchIndex.SortBy
-            items={[
-              {
-                value: `${idx}:createdAt:desc`,
-                label: "Sort by: Popular",
-              },
-            ]}
-          />
         </SearchIndex.Toolbar>
         <SearchIndex.Hits hitComponent={Hit} />
         <SearchIndex.Configure hitsPerPage={24} />

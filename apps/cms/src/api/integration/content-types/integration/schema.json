@@ -71,6 +71,11 @@
       "targetField": "name",
       "required": true,
       "regex": "^[A-Za-z0-9-_.~@]*$"
+    },
+    "labels": {
+      "type": "component",
+      "component": "shared.labels",
+      "repeatable": true
     }
   }
 }
