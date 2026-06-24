@@ -39,7 +39,7 @@
       "id": "fetch-1",
       "name": "Fetch Template From Strapi",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.2,
       "position": [
         460,
         300

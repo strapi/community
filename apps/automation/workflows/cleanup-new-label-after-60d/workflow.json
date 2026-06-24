@@ -54,7 +54,7 @@
       "id": "fetch-stale-1",
       "name": "Fetch Stale 'New' Packages",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.2,
       "position": [
         680,
         300
@@ -127,7 +127,7 @@
       "id": "patch-1",
       "name": "Strip 'is_new' Label",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.2,
       "position": [
         1120,
         300
