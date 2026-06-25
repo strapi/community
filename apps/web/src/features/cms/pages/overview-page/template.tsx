@@ -35,7 +35,7 @@ const OverviewPageTemplate = ({ document }: Props) => {
                 alt={document.title!}
                 width={480}
                 height={480}
-                className="mt-10 rounded-lg object-cover ml-auto"
+                className="rounded-lg object-cover ml-auto"
               />
             )}
           </div>

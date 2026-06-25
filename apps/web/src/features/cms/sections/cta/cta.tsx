@@ -60,16 +60,7 @@ const sharedWrapperStyle: React.CSSProperties = {
 };
 
 const CTASection = async ({ section }: Props) => {
-  const { cta } = section;
-
-  const isCommunity = cta?.illustration === "community_members";
-
-  const users = isCommunity
-    ? await cmsClient.collection("plugin::better-auth.user").find({
-        limit: 5,
-        populate: ["profile"],
-      })
-    : null;
+  const cta = section.cta!;
 
   if (cta?.size === "S") {
     return (
@@ -77,15 +68,15 @@ const CTASection = async ({ section }: Props) => {
         <Container>
           <section>
             <div
-              className="relative rounded-lg border border-(--color-cta-border) px-8 py-10 text-white!"
+              className="relative overflow-hidden rounded-lg border border-(--color-cta-border) text-white!"
               style={sharedWrapperStyle}
             >
-              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div className="lg:w-[40%]">
-                  <h3 className="text-[43px] font-bold leading-tight text-white">
+              <div className="relative z-10 flex flex-col md:flex-row md:items-stretch md:justify-between gap-6">
+                <div className="md:w-[90%] min-w-75 px-8 py-10">
+                  <h3 className="font-bold leading-tight text-white!">
                     {cta.title}
                   </h3>
-                  <p className="mt-2 text-[16px] leading-5 text-(--color-cta-muted)">
+                  <p className="mt-4 text-[16px] leading-5 text-(--color-cta-muted)">
                     {cta.content}
                   </p>
                   {cta.button?.link && (
@@ -99,22 +90,24 @@ const CTASection = async ({ section }: Props) => {
                   )}
                 </div>
 
-                <div className="w-full lg:w-[55%] flex justify-start lg:justify-end align-center">
-                  {isCommunity && users?.data && users.data.length > 0 ? (
-                    <CommunityPile users={users.data} />
-                  ) : (
-                    cta.image?.url && (
-                      <Image
-                        src={cmsImageUrl(cta.image.url)}
-                        alt={
-                          cta.image.alternativeText || cta.title || "CTA image"
-                        }
-                        width={260}
-                        height={160}
-                        className="pointer-events-none h-auto object-contain"
-                      />
-                    )
-                  )}
+                <div className="w-full flex justify-start md:justify-end items-center md:items-stretch">
+                  <Image
+                    src={cmsImageUrl(cta.image.url)}
+                    alt={cta.image.alternativeText || cta.title || "CTA image"}
+                    width={600}
+                    height={300}
+                    className="md:hidden pointer-events-none w-full h-auto object-contain"
+                  />
+                  <div className="hidden md:block relative w-full">
+                    <Image
+                      src={cmsImageUrl(cta.image.url)}
+                      alt={
+                        cta.image.alternativeText || cta.title || "CTA image"
+                      }
+                      fill
+                      className="pointer-events-none object-contain object-right"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -129,10 +122,10 @@ const CTASection = async ({ section }: Props) => {
       <Container>
         <section>
           <div
-            className="relative overflow-hidden rounded-lg border border-(--color-cta-border) px-6 py-8 sm:px-12 sm:py-16 lg:px-20 lg:py-29 text-white flex flex-col items-center md:flex-row md:items-center"
+            className="relative overflow-hidden rounded-lg border border-(--color-cta-border) text-white flex flex-col md:flex-row md:items-stretch"
             style={sharedWrapperStyle}
           >
-            <div className="relative z-10 w-full md:w-[55%]">
+            <div className="relative z-10 w-full md:w-[55%] px-6 py-8 sm:px-12 sm:py-16 lg:px-20 lg:py-29">
               <h3 className="text-[43px] font-bold leading-tight text-white!">
                 {cta?.title}
               </h3>
@@ -149,22 +142,23 @@ const CTASection = async ({ section }: Props) => {
                 </Button>
               )}
             </div>
-
-            {isCommunity && users?.data && users.data.length > 0 ? (
-              <div className="mt-6 md:mt-0 md:absolute md:right-8 md:top-1/2 md:-translate-y-1/2 md:w-[360px]">
-                <CommunityPile users={users.data} />
-              </div>
-            ) : (
-              cta?.image?.url && (
+            <div className="w-full md:w-[45%] flex items-center md:items-stretch">
+              <Image
+                src={cmsImageUrl(cta.image.url)}
+                alt={cta.image.alternativeText || cta?.title || "CTA image"}
+                width={600}
+                height={300}
+                className="md:hidden pointer-events-none w-full h-auto object-contain mt-6"
+              />
+              <div className="hidden md:block relative w-full">
                 <Image
                   src={cmsImageUrl(cta.image.url)}
                   alt={cta.image.alternativeText || cta?.title || "CTA image"}
-                  width={420}
-                  height={220}
-                  className="pointer-events-none h-auto w-[70%] md:w-[40%] object-contain mt-6 md:mt-0 md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2"
+                  fill
+                  className="pointer-events-none object-contain object-right"
                 />
-              )
-            )}
+              </div>
+            </div>
           </div>
         </section>
       </Container>
