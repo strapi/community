@@ -17,12 +17,12 @@ const OverviewPageTemplate = ({ document }: Props) => {
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="flex">
-            <div className="px-14 py-26 max-w-150">
+          <div className="flex flex-col md:flex-row">
+            <div className="px-14 py-14 md:py-26 max-w-150">
               <div className="mb-5">
                 <Breadcrumbs />
               </div>
-              <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
+              <h1 className="text-[48px] mt-2 md:mt-0 font-semibold text-white!">
                 {document.title}
               </h1>
               <p className="text-[17px] text-(--color-hero-muted)">
@@ -35,7 +35,7 @@ const OverviewPageTemplate = ({ document }: Props) => {
                 alt={document.title!}
                 width={480}
                 height={480}
-                className="rounded-lg object-cover ml-auto"
+                className="rounded-lg object-cover ml-auto md:ml-auto w-full max-w-120 md:max-w-120 md:min-w-0 md:shrink max-h-130"
               />
             )}
           </div>

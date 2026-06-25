@@ -14,7 +14,7 @@ const SortBy = (props: SortByProps) => {
 
   return (
     <Select value={currentRefinement} onValueChange={refine}>
-      <SelectTrigger>
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>
       <SelectContent>
