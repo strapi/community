@@ -7,13 +7,13 @@ type Props = {
 };
 
 const Hit = ({ hit }: Props) => {
-  const image = hit.preview_image
-    ? {
-        src: cmsImageUrl(hit.preview_image.url),
-        alt: hit.preview_image.alternativeText ?? hit.name ?? "",
-        size: "L" as const,
-      }
-    : undefined;
+  const image = {
+    src: hit.preview_image
+      ? cmsImageUrl(hit.preview_image.url)
+      : "/template-fallback-preview.png",
+    alt: hit.preview_image?.alternativeText ?? hit.name ?? "",
+    size: "L" as const,
+  };
 
   return (
     <ContentCard

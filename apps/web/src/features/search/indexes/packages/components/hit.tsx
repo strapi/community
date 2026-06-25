@@ -7,13 +7,11 @@ type Props = {
 };
 
 const Hit = ({ hit }: Props) => {
-  const image = hit.icon
-    ? {
-        src: cmsImageUrl(hit.icon.url),
-        alt: hit.icon.alternativeText ?? hit.name ?? "",
-        size: "S" as const,
-      }
-    : undefined;
+  const image = {
+    src: hit.icon ? cmsImageUrl(hit.icon.url) : "/package-fallback-icon.png",
+    alt: hit.icon?.alternativeText ?? hit.name ?? "",
+    size: "S" as const,
+  };
 
   return (
     <ContentCard
