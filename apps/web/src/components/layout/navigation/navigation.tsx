@@ -49,7 +49,7 @@ const Navigation = async ({ theme }: Props) => {
                   <li key={link.id}>
                     <Link
                       href={link.link!}
-                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? "text-white" : ""}`}
+                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? (theme === "light" ? "text-(--color-primary900)" : "text-white") : ""}`}
                     >
                       {link.label}
                     </Link>
