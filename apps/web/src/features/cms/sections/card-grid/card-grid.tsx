@@ -15,23 +15,23 @@ const CardGridSection = ({ section }: Props) => {
           {section.items?.map((item, index) => (
             <article
               key={item.id}
-              className="relative min-h-62 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6"
+              className="relative flex flex-col gap-6 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6 lg:block lg:min-h-62"
             >
-              <div className="relative z-10 max-w-[56%]">
-                <div className="flex items-center">
-                  {item.icon && (
-                    <span className="mr-2">
-                      {renderIcon(item.icon, {
-                        size: 24,
-                        className: "text-(--color-primary700)",
-                      })}
-                    </span>
-                  )}
-                  <h3 className="flex items-center gap-2 text-[29px] font-semibold leading-9 text-(--color-card-grid-title)">
-                    {item.title}
-                  </h3>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-(--color-neutral700)">
+              <div className="flex items-center">
+                {item.icon && (
+                  <span className="mr-2">
+                    {renderIcon(item.icon, {
+                      size: 24,
+                      className: "text-(--color-primary700)",
+                    })}
+                  </span>
+                )}
+                <h3 className="flex items-center gap-2 text-[21px] font-semibold leading-9 text-(--color-card-grid-title)">
+                  {item.title}
+                </h3>
+              </div>
+              <div className="relative z-10 lg:max-w-[60%]">
+                <p className="mt-3 text-sm leading-6 text-[15px] text-(--color-neutral700)">
                   {item.content}
                 </p>
                 <Button
@@ -48,7 +48,7 @@ const CardGridSection = ({ section }: Props) => {
                   alt={item.image.alternativeText || item.title || "Card image"}
                   width={290}
                   height={180}
-                  className={`pointer-events-none absolute -right-4 -bottom-6 z-0 h-auto w-[48%] object-contain rotate-[-11deg]`}
+                  className="pointer-events-none absolute -right-20 -bottom-6 z-0 hidden h-auto w-[48%] object-contain rotate-[-11deg] lg:block"
                 />
               )}
             </article>

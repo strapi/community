@@ -7,6 +7,7 @@ type Props = {
   items: Data.ContentType<"plugin::better-auth.user">[];
   size?: "S" | "L";
   clickable?: boolean;
+  white?: boolean;
 };
 
 // Percentage widths per slot (outer → center → outer), relative to the container.
@@ -60,7 +61,7 @@ const AvatarLarge = ({
   );
 };
 
-const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
+const AvatarPile = ({ items, clickable, size = "S", white = false }: Props) => {
   if (!items?.length) return null;
 
   if (size === "L") {
@@ -91,9 +92,7 @@ const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
                 style={{ marginLeft: i === 0 ? 0 : -8 }}
               />
               {items.filter(Boolean).length === 1 && (
-                <span className="pl-2 text-white">
-                  {items.find(Boolean)?.name}
-                </span>
+                <span className="pl-2">{items.find(Boolean)?.name}</span>
               )}
             </Wrapper>
           ) : (
@@ -109,7 +108,7 @@ const AvatarPile = ({ items, clickable, size = "S" }: Props) => {
                 {m.name?.[0]}
               </div>
               {items.filter(Boolean).length === 1 && (
-                <span className="pl-2 text-white">
+                <span className={`pl-2 ${white ? "text-white" : ""}`}>
                   {items.find(Boolean)?.name}
                 </span>
               )}

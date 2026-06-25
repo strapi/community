@@ -153,7 +153,7 @@ const HomeHero = (props: Props) => {
                   </p>
                   {/* Avatar pile */}
                   <div className="mt-4 flex">
-                    <AvatarPile items={[pkg.owner!]} />
+                    <AvatarPile white items={[pkg.owner!]} />
                   </div>
                 </Link>
               </div>
@@ -163,7 +163,7 @@ const HomeHero = (props: Props) => {
               <div key={template.id} className="p-14">
                 <Link href={template.url_alias?.[0]?.url_path!}>
                   {/* Preview placeholder */}
-                  <div className={`mb-5 relative aspect-video object-cover`}>
+                  <div className={`mb-5 relative aspect-video`}>
                     <Image
                       src={
                         template.preview_image
@@ -176,7 +176,7 @@ const HomeHero = (props: Props) => {
                         template.name ??
                         ""
                       }
-                      className="rounded-lg border border-(--color-grey700)"
+                      className="rounded-lg border border-(--color-grey700) object-cover"
                     />
                   </div>
                   <h3 className="text-base font-bold text-white!">
@@ -187,7 +187,7 @@ const HomeHero = (props: Props) => {
                   </p>
                   {/* Avatar pile */}
                   <div className="mt-4 flex">
-                    <AvatarPile items={[template.owner!]} />
+                    <AvatarPile white items={[template.owner!]} />
                   </div>
                 </Link>
               </div>
