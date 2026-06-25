@@ -14,6 +14,7 @@
     "n8n:ps": "./scripts/compose.sh ps",
     "n8n:logs": "./scripts/compose.sh logs -f",
     "workflows:export": "node ./scripts/export-workflows.mjs",
-    "workflows:import": "node ./scripts/import-workflows.mjs"
+    "workflows:import": "node ./scripts/import-workflows.mjs",
+    "workflows:deploy": "node ./scripts/deploy-workflows.mjs"
   }
 }
