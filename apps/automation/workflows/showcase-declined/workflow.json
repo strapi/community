@@ -1,10 +1,10 @@
 {
-  "name": "plugin-changes-requested",
+  "name": "showcase-declined",
   "description": null,
   "nodes": [
     {
       "id": "webhook-1",
-      "name": "Webhook: Changes Requested",
+      "name": "Webhook: Showcase Declined",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
@@ -13,7 +13,7 @@
       ],
       "parameters": {
         "httpMethod": "POST",
-        "path": "strapi/plugin-changes-requested",
+        "path": "strapi/showcase-declined",
         "authentication": "headerAuth",
         "responseMode": "onReceived",
         "responseData": "noData",
@@ -21,8 +21,8 @@
       },
       "onError": "continueRegularOutput",
       "alwaysOutputData": true,
-      "notes": "Fired by the CMS moderation plugin after plugin-submission.rejectOrRequestChanges with status='changes_requested'. Payload: flat { submissionId, plugin_name, owner_email, reason, feedback, dashboard_link, ... }.",
-      "webhookId": "2f6e1cec-6e97-4e6d-b9f6-8b3fbda1e310"
+      "notes": "Fired by the CMS moderation plugin after showcase-submission.decide with status='rejected'. Payload: flat { documentId, kind, name, owner_email, owner_name, reason, feedback, ... }.",
+      "webhookId": "a7e51d6c-8f2b-4c3a-e9d5-0b1c2d3e4f5a"
     },
     {
       "id": "extract-1",
@@ -40,39 +40,27 @@
           "assignments": [
             {
               "id": "a1",
-              "name": "package_id",
-              "type": "string",
-              "value": "={{ $json.body.documentId }}"
-            },
-            {
-              "id": "a2",
               "name": "package_name",
               "type": "string",
               "value": "={{ $json.body.name }}"
             },
             {
-              "id": "a3",
+              "id": "a2",
               "name": "author_email",
               "type": "string",
               "value": "={{ $json.body.owner_email }}"
             },
             {
-              "id": "a4",
+              "id": "a3",
               "name": "author_name",
               "type": "string",
               "value": "={{ $json.body.owner_name }}"
             },
             {
-              "id": "a5",
-              "name": "reviewer_feedback",
+              "id": "a4",
+              "name": "decline_reason",
               "type": "string",
-              "value": "={{ $json.body.feedback || $json.body.reason || '' }}"
-            },
-            {
-              "id": "a6",
-              "name": "dashboard_link",
-              "type": "string",
-              "value": "={{ $json.body.dashboard_link }}"
+              "value": "={{ $json.body.reason || $json.body.feedback || '' }}"
             }
           ]
         },
@@ -98,7 +86,7 @@
               "id": "b1",
               "name": "template_key",
               "type": "string",
-              "value": "plugin-changes-requested"
+              "value": "showcase-declined"
             },
             {
               "id": "b2",
@@ -116,7 +104,7 @@
               "id": "b4",
               "name": "variables",
               "type": "object",
-              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, reviewer_feedback: $json.reviewer_feedback } }}"
+              "value": "={{ { package_name: $json.package_name, author_name: $json.author_name, decline_reason: $json.decline_reason } }}"
             }
           ]
         },
@@ -149,7 +137,7 @@
     }
   ],
   "connections": {
-    "Webhook: Changes Requested": {
+    "Webhook: Showcase Declined": {
       "main": [
         [
           {

@@ -13,7 +13,7 @@ import {
   uploadImageToStrapi,
 } from "@/features/submit/server/strapi";
 
-const LOG = "submit-plugin";
+const LOG = "submit-package";
 
 export async function POST(req: NextRequest) {
   let formData: FormData;
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
     try {
-      const { success } = await verifyRecaptcha(token, "submit_plugin", LOG);
+      const { success } = await verifyRecaptcha(token, "submit_package", LOG);
       if (!success) {
         return NextResponse.json(
           { error: "reCAPTCHA verification failed. Please try again." },
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const plugin_name = str(formData.get("plugin_name"));
+  const package_name = str(formData.get("package_name"));
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
   const owner_name = str(formData.get("owner_name"));
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
 
   const errors: string[] = [];
-  if (!plugin_name) errors.push("Plugin name is required.");
+  if (!package_name) errors.push("Package name is required.");
   if (!description) errors.push("Description is required.");
   if (!repository_url) errors.push("Repository URL is required.");
   else if (!/^https?:\/\//i.test(repository_url))
@@ -92,12 +92,12 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = {
-    name: plugin_name,
-    slug: slugify(plugin_name!),
+    name: package_name,
+    slug: slugify(package_name!),
     description,
     git_repository: repository_url,
     package_location: str(formData.get("package_location")),
-    type: str(formData.get("package_type")) || "plugin",
+    type: str(formData.get("package_type")) || "package",
     categories_list: parseCategories(formData.get("categories_list")),
     owner_name,
     owner_email,
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Could not submit your plugin at this time. Please try again later.",
+          "Could not submit your package at this time. Please try again later.",
       },
       { status: 503 },
     );

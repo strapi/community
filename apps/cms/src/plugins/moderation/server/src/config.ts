@@ -11,6 +11,8 @@ export interface ModerationContentTypeConfig {
   pluralName: string;
   /** Label shown in the admin UI tab */
   label?: string;
+  /** Schema field used as the human-readable name (defaults to "name") */
+  nameField?: string;
   /** UID of the category content type used to resolve categories_list strings */
   categoryUid?: string;
   /** Default entity field values set on every new submission */

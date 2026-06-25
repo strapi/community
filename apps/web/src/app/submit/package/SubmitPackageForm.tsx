@@ -17,35 +17,35 @@ import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import { EMAIL_RE, URL_RE } from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
 
-interface TemplateFormFields extends BaseFormFields {
+interface PackageFormFields extends BaseFormFields {
   repository_url: string;
-  template_name: string;
-  demo_url: string;
+  package_name: string;
+  package_location: string;
+  readme: string;
 }
 
-const INITIAL: TemplateFormFields = {
-  template_name: "",
+const INITIAL: PackageFormFields = {
+  package_name: "",
+  package_location: "",
   repository_url: "",
-  demo_url: "",
   description: "",
   logo_file: null,
   categories_list: [],
+  readme: "",
   submission_notes: "",
   owner_name: "",
   owner_email: "",
   agreed: false,
 };
 
-function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
-  const e: FieldErrors<TemplateFormFields> = {};
-  if (!f.template_name.trim()) e.template_name = "Template name is required.";
+function validate(f: PackageFormFields): FieldErrors<PackageFormFields> {
+  const e: FieldErrors<PackageFormFields> = {};
+  if (!f.package_name.trim()) e.package_name = "Package name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
     e.repository_url = "Must be a valid https:// URL.";
-  if (f.demo_url.trim() && !URL_RE.test(f.demo_url.trim()))
-    e.demo_url = "Must be a valid https:// URL.";
   if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
   if (!f.owner_email.trim()) e.owner_email = "Contact email is required.";
   else if (!EMAIL_RE.test(f.owner_email.trim()))
@@ -55,14 +55,15 @@ function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
 }
 
 function buildFormData(
-  fields: TemplateFormFields,
+  fields: PackageFormFields,
   recaptchaToken: string,
 ): FormData {
   const form = new FormData();
-  form.append("template_name", fields.template_name.trim());
+  form.append("package_name", fields.package_name.trim());
+  form.append("package_location", fields.package_location.trim());
   form.append("repository_url", fields.repository_url.trim());
-  form.append("demo_url", fields.demo_url.trim());
   form.append("description", fields.description.trim());
+  form.append("readme", fields.readme.trim());
   form.append("submission_notes", fields.submission_notes.trim());
   form.append("owner_name", fields.owner_name.trim());
   form.append("owner_email", fields.owner_email.trim());
@@ -76,16 +77,16 @@ function buildFormData(
 
 const REVIEW_STEPS = [
   {
-    title: "Quick review",
-    body: "Templates go through a simplified review process — no automated checks, just a manual approval.",
+    title: "Business review",
+    body: "We check your repo is public, MIT-licensed, has a README, and lists Strapi as a peer dependency.",
   },
   {
-    title: "Get discovered",
-    body: "Approved templates are listed in the marketplace and discoverable by the Strapi community.",
+    title: "Security review",
+    body: "We scan dependencies for known vulnerabilities and flag security concerns before listing.",
   },
 ];
 
-export function SubmitTemplateForm({
+export function SubmitPackageForm({
   initialCategories,
 }: {
   initialCategories: string[];
@@ -102,19 +103,19 @@ export function SubmitTemplateForm({
   } = useSubmitForm({
     initial: INITIAL,
     validate,
-    apiEndpoint: "/api/submit-template",
-    recaptchaAction: "submit_template",
+    apiEndpoint: "/api/submit-package",
+    recaptchaAction: "submit_package",
     buildFormData,
   });
 
   return (
     <SubmitFormShell
-      title="Submit a Template"
+      title="Submit a Package"
       subtitle={
         <>
-          Share your Strapi starter template with the community. All submissions
-          are reviewed before being listed in the marketplace. We&rsquo;ll reach
-          out if we need more information.{" "}
+          Share your Strapi package with the community. All submissions go
+          through a business and security review before being listed in the
+          marketplace. We&rsquo;ll reach out if we need more information.{" "}
           <Link
             href="/community"
             className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -124,26 +125,41 @@ export function SubmitTemplateForm({
         </>
       }
       reviewSteps={REVIEW_STEPS}
-      contentType="template"
+      contentType="package"
       success={success}
       submitting={submitting}
-      submitLabel="Submit Template"
+      submitLabel="Submit Package"
       formError={errors._form}
       onSubmit={handleSubmit}
     >
       <div className="mb-5">
-        <Label htmlFor="template_name" required>
-          Template Name
+        <Label htmlFor="package_name" required>
+          Package Name
         </Label>
         <Input
-          id="template_name"
-          value={fields.template_name}
-          onChange={(e) => set("template_name", e.target.value)}
-          placeholder="e.g. Strapi Blog Starter"
-          className={errors.template_name ? "border-red-400" : ""}
+          id="package_name"
+          value={fields.package_name}
+          onChange={(e) => set("package_name", e.target.value)}
+          placeholder="e.g. Strapi Package SEO"
+          className={errors.package_name ? "border-red-400" : ""}
           autoComplete="off"
         />
-        <FieldError message={errors.template_name} />
+        <FieldError message={errors.package_name} />
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="package_location">Registry URL</Label>
+        <Input
+          id="package_location"
+          value={fields.package_location}
+          onChange={(e) => set("package_location", e.target.value)}
+          placeholder="https://www.npmjs.com/package/your-package"
+          autoComplete="off"
+        />
+        <Hint>
+          Full URL to your published package on npm, Packagist, PyPI, RubyGems,
+          or NuGet. Leave blank if not yet published.
+        </Hint>
       </div>
 
       <div className="mb-5">
@@ -155,7 +171,7 @@ export function SubmitTemplateForm({
           type="url"
           value={fields.repository_url}
           onChange={(e) => set("repository_url", e.target.value)}
-          placeholder="https://github.com/org/repo"
+          placeholder="https://github.com/org/repo or https://gitlab.com/org/repo"
           className={errors.repository_url ? "border-red-400" : ""}
         />
         <FieldError message={errors.repository_url} />
@@ -163,28 +179,14 @@ export function SubmitTemplateForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="demo_url">Live Demo URL</Label>
-        <Input
-          id="demo_url"
-          type="url"
-          value={fields.demo_url}
-          onChange={(e) => set("demo_url", e.target.value)}
-          placeholder="https://my-template-demo.com"
-          className={errors.demo_url ? "border-red-400" : ""}
-        />
-        <FieldError message={errors.demo_url} />
-        <Hint>A live preview URL, if available.</Hint>
-      </div>
-
-      <div className="mb-5">
         <Label htmlFor="description" required>
-          Template Description
+          Package Description
         </Label>
         <Textarea
           id="description"
           value={fields.description}
           onChange={(v) => set("description", v)}
-          placeholder="Tell us about your template — what it includes and what use cases it covers."
+          placeholder="Tell us about your package — what it does and why it's useful."
           rows={4}
           hasError={!!errors.description}
         />
@@ -192,7 +194,7 @@ export function SubmitTemplateForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="logo_file">Template Logo / Screenshot</Label>
+        <Label htmlFor="logo_file">Package Logo / Icon</Label>
         <ImageUpload
           file={fields.logo_file}
           onChange={(f) => set("logo_file", f)}
@@ -208,6 +210,17 @@ export function SubmitTemplateForm({
           selected={fields.categories_list}
           onAdd={addCategory}
           onRemove={removeCategory}
+        />
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="readme">README / Documentation</Label>
+        <Textarea
+          id="readme"
+          value={fields.readme}
+          onChange={(v) => set("readme", v)}
+          placeholder="Paste your package's README or any additional documentation here."
+          rows={6}
         />
       </div>
 
@@ -258,8 +271,8 @@ export function SubmitTemplateForm({
 
       <div className="mb-6">
         <label
-          htmlFor="agreed"
           className="flex cursor-pointer items-start gap-3"
+          htmlFor="agreed"
         >
           <Checkbox
             id="agreed"
@@ -268,7 +281,8 @@ export function SubmitTemplateForm({
             className={errors.agreed ? "border-red-400" : ""}
           />
           <span className="text-sm leading-relaxed text-(--color-neutral700)">
-            I confirm this template is open-source and compliant with the{" "}
+            I confirm this package is open-source, MIT-licensed, and compliant
+            with the{" "}
             <Link
               href="/community"
               className="underline underline-offset-2 hover:text-(--color-primary600)"

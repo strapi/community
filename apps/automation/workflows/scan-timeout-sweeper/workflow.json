@@ -12,7 +12,7 @@
         60
       ],
       "parameters": {
-        "content": "## Scan Timeout Sweeper\n\nRuns every 15 minutes. Finds submissions whose `security_scan_status='running'` with `updatedAt` older than 30 minutes \u2014 assumes they're stuck (workflow killed mid-run, n8n container restart, unrecoverable crash) \u2014 and PATCHes each to `security_scan_status='failed'` via the moderation content-api write-back route.\n\nHandles both plugin-submissions and template-submissions. Posts a Slack summary to `#integration-marketplace` when any stuck scans are swept, silent otherwise.\n\n**Required n8n env vars:**\n- `STRAPI_API_URL`\n\n**Required credentials:**\n- `httpHeaderAuth` \u2014 Strapi API token (shared with security-scan)",
+        "content": "## Scan Timeout Sweeper\n\nRuns every 15 minutes. Finds submissions whose `security_scan_status='running'` with `updatedAt` older than 30 minutes \u2014 assumes they're stuck (workflow killed mid-run, n8n container restart, unrecoverable crash) \u2014 and PATCHes each to `security_scan_status='failed'` via the moderation content-api write-back route.\n\nHandles both package-submissions and template-submissions. Posts a Slack summary to `#integration-marketplace` when any stuck scans are swept, silent otherwise.\n\n**Required n8n env vars:**\n- `STRAPI_API_URL`\n\n**Required credentials:**\n- `httpHeaderAuth` \u2014 Strapi API token (shared with security-scan)",
         "height": 300,
         "width": 760,
         "color": 6
@@ -54,8 +54,8 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "fetch-plugins-1",
-      "name": "Find Stale Plugin Scans",
+      "id": "fetch-packages-1",
+      "name": "Find Stale Package Scans",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -159,7 +159,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "try {\n  const pluginRes = $('Find Stale Plugin Scans').first().json || {};\n  const templateRes = $('Find Stale Template Scans').first().json || {};\n\n  function extract(res, kind) {\n    const items = Array.isArray(res?.data) ? res.data : [];\n    return items\n      .map((item) => ({\n        kind,\n        documentId: item.documentId || item.id,\n        name: item.plugin_name || item.template_name || 'unknown',\n        started_at: item.security_scan_started_at || null,\n      }))\n      .filter((x) => x.documentId);\n  }\n\n  const stuck = [\n    ...extract(pluginRes, 'plugin'),\n    ...extract(templateRes, 'template'),\n  ];\n\n  if (stuck.length === 0) return [];\n  return stuck.map((s) => ({ json: s }));\n} catch (err) {\n  return [{ json: { _node_error: err.message || String(err) } }];\n}"
+        "jsCode": "try {\n  const pluginRes = $('Find Stale Package Scans').first().json || {};\n  const templateRes = $('Find Stale Template Scans').first().json || {};\n\n  function extract(res, kind) {\n    const items = Array.isArray(res?.data) ? res.data : [];\n    return items\n      .map((item) => ({\n        kind,\n        documentId: item.documentId || item.id,\n        name: item.name || item.template_name || 'unknown',\n        started_at: item.security_scan_started_at || null,\n      }))\n      .filter((x) => x.documentId);\n  }\n\n  const stuck = [\n    ...extract(pluginRes, 'package'),\n    ...extract(templateRes, 'template'),\n  ];\n\n  if (stuck.length === 0) return [];\n  return stuck.map((s) => ({ json: s }));\n} catch (err) {\n  return [{ json: { _node_error: err.message || String(err) } }];\n}"
       },
       "onError": "continueRegularOutput",
       "notes": "Returns one item per stuck submission so downstream runs once per. Returns [] (no items) when everything's healthy \u2014 downstream branches short-circuit."
@@ -258,7 +258,7 @@
       "main": [
         [
           {
-            "node": "Find Stale Plugin Scans",
+            "node": "Find Stale Package Scans",
             "type": "main",
             "index": 0
           },
@@ -270,7 +270,7 @@
         ]
       ]
     },
-    "Find Stale Plugin Scans": {
+    "Find Stale Package Scans": {
       "main": [
         [
           {

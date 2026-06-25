@@ -1,11 +1,11 @@
 import { Navigation } from "@/components/layout/navigation";
 import { cmsClient } from "@/features/cms/lib/strapi";
-import { SubmitPluginForm } from "./SubmitPluginForm";
+import { SubmitShowcaseForm } from "./SubmitShowcaseForm";
 
 async function fetchCategories(): Promise<string[]> {
   try {
     const res = await cmsClient
-      .collection("api::package-category.package-category")
+      .collection("api::showcase-category.showcase-category")
       .find({
         pagination: { pageSize: 100 },
         sort: ["name:asc"],
@@ -18,12 +18,12 @@ async function fetchCategories(): Promise<string[]> {
   }
 }
 
-export default async function SubmitPluginPage() {
+export default async function SubmitShowcasePage() {
   const categories = await fetchCategories();
   return (
     <>
       <Navigation theme="light" />
-      <SubmitPluginForm initialCategories={categories} />
+      <SubmitShowcaseForm initialCategories={categories} />
     </>
   );
 }
