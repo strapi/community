@@ -122,7 +122,7 @@
       "id": "deps-fetch-1",
       "name": "Fetch Repo package.json",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         820,
         480
@@ -166,7 +166,7 @@
       "id": "osv-http-1",
       "name": "OSV.dev Batch Query",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1260,
         480
@@ -207,15 +207,15 @@
       "id": "deps-patch-1",
       "name": "PATCH Scan Result",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1700,
         480
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -223,15 +223,6 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
         "options": {
           "timeout": 15000
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -260,7 +251,7 @@
       "id": "ai-http-1",
       "name": "Claude Haiku Security Analysis",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1040,
         800
@@ -268,8 +259,7 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -285,7 +275,8 @@
         "jsonBody": "={{ JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 1024, system: 'You are a security auditor reviewing a Strapi community submission. You are given package metadata, install-time scripts, the README, and ACTUAL SOURCE FILES from the published package (or source repo for templates). Read the source files carefully \u2014 runtime exfiltration, credential theft, obfuscation, and suspicious network calls often hide in main entry files or bin scripts, not the README. Prioritise supply-chain signals: install-time scripts, typosquatting, mismatches between the published artifact and its source repo, obfuscated or minified code, dynamic eval / Function constructor use, network calls to unknown hosts, filesystem writes outside package dir. Respond ONLY with valid JSON matching this schema: {\"risk_level\":\"low|medium|high\",\"summary\":\"<one-sentence verdict>\",\"concerns\":[\"<concern>\",...],\"red_flags\":[\"<flag>\",...],\"recommendation\":\"approve|request_changes|reject\"}. Do not include explanation text outside the JSON.', messages: [{ role: 'user', content: `Submission kind: ${$json.submission_kind}\\nName: ${$json.plugin_name}\\npackage_location: ${$json.package_location || '(none \u2014 template or no registry URL)'}\\nregistry: ${$json.package_info?.registry || 'n/a'}\\nregistry_available: ${$json.package_info?.available ? 'yes' : 'no'}${$json.package_info?.notImplemented ? ' (deep scan not yet implemented for this registry)' : ''}\\nVersion: ${$json.package_info?.version || 'n/a'}\\nSubmitted repo: ${$json.repository_url}\\nDeclared repo on published artifact: ${$json.package_info?.declaredRepository || '(none declared)'}\\n\\nInstall-time scripts on the published artifact (immediate red flag if any are non-trivial):\\n${JSON.stringify($json.package_info?.installScripts || {}, null, 2)}\\n\\nSource files scanned: ${$json.files_scanned} of ${$json.files_available} (${$json.bytes_scanned} bytes, source: ${$json.scan_source || 'none'}).\\n\\nREADME:\\n---\\n${(($json.package_info?.readme || $json.readme) || '(no README available)').toString().slice(0, 8000)}\\n---\\n\\nSOURCE FILES (truncated per-file + overall):\\n---\\n${$json.package_code || '(no source files could be fetched)'}\\n---\\n\\nReview the code above against the schema. Output JSON only.` }] }) }}",
         "options": {
           "timeout": 45000
-        }
+        },
+        "nodeCredentialType": "anthropicApi"
       },
       "onError": "continueRegularOutput",
       "retryOnFail": true,
@@ -312,15 +303,15 @@
       "id": "ai-patch-1",
       "name": "PATCH AI Result",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1480,
         800
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -328,15 +319,6 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result }) }}",
         "options": {
           "timeout": 15000
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -382,15 +364,15 @@
       "id": "summary-patch-1",
       "name": "PATCH Summary + Complete",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         2360,
         640
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/packages/{{ $('Extract Payload').item.json.packageId }}/security-scan-result",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -398,15 +380,6 @@
         "jsonBody": "={{ JSON.stringify({ stage: $json.stage, result: $json.result, status: $json.status }) }}",
         "options": {
           "timeout": 15000
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",
