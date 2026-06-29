@@ -92,7 +92,9 @@ const AvatarPile = ({ items, clickable, size = "S", white = false }: Props) => {
                 style={{ marginLeft: i === 0 ? 0 : -8 }}
               />
               {items.filter(Boolean).length === 1 && (
-                <span className="pl-2">{items.find(Boolean)?.name}</span>
+                <span className={`pl-2 ${white ? "text-white" : ""}`}>
+                  {items.find(Boolean)?.name}
+                </span>
               )}
             </Wrapper>
           ) : (
