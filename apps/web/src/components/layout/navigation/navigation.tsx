@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AuthNavigation } from "@/features/auth/components/auth-navigation";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsClient } from "@/features/cms/lib/strapi";
+import { MobileNav } from "./mobile-nav";
 
 type Props = {
   theme: "light" | "dark";
@@ -49,7 +50,7 @@ const Navigation = async ({ theme }: Props) => {
                   <li key={link.id}>
                     <Link
                       href={link.link!}
-                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? "text-white" : ""}`}
+                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? (theme === "light" ? "text-(--color-primary900)" : "text-white") : ""}`}
                     >
                       {link.label}
                     </Link>
@@ -60,15 +61,23 @@ const Navigation = async ({ theme }: Props) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {isAuthEnabled ? (
-              <AuthNavigation theme={theme} />
-            ) : (
-              data.data.cta_links?.map((link) => (
-                <Button key={link.id} asChild>
-                  <Link href={link.link!}>{link.label}</Link>
-                </Button>
-              ))
-            )}
+            <div className="hidden items-center gap-2 lg:flex">
+              {isAuthEnabled ? (
+                <AuthNavigation theme={theme} />
+              ) : (
+                data.data.cta_links?.map((link) => (
+                  <Button key={link.id} asChild>
+                    <Link href={link.link!}>{link.label}</Link>
+                  </Button>
+                ))
+              )}
+            </div>
+            <MobileNav
+              navLinks={data.data.nav_links ?? []}
+              ctaLinks={data.data.cta_links ?? []}
+              theme={theme}
+              currentPath={path}
+            />
           </div>
         </div>
       </Container>

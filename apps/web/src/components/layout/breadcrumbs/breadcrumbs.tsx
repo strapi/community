@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -29,7 +29,6 @@ const Breadcrumbs = ({ variant = "full" }: BreadcrumbsProps) => {
     })),
   ];
 
-  // "short" variant: home + direct parent + current (skip intermediate segments)
   const crumbs =
     variant === "short" && allCrumbs.length > 3
       ? [
@@ -39,35 +38,51 @@ const Breadcrumbs = ({ variant = "full" }: BreadcrumbsProps) => {
         ]
       : allCrumbs;
 
+  const parent = crumbs.length > 1 ? crumbs[crumbs.length - 2] : null;
+
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 text-sm font-semibold text-(--color-primary500)"
+      className="text-sm font-semibold text-(--color-primary500)"
     >
-      {crumbs.map((crumb, index) => {
-        const isLast = index === crumbs.length - 1;
-        if (!crumb) return null;
-        return (
-          <span key={crumb.href} className="flex items-center gap-1.5">
-            {index > 0 && (
-              <ChevronRight
-                className="h-3.5 w-3.5 opacity-50"
-                aria-hidden="true"
-              />
-            )}
-            {isLast ? (
-              <span>{crumb.label}</span>
-            ) : (
-              <Link
-                href={crumb.href}
-                className="transition-colors hover:text-white"
-              >
-                {crumb.label}
-              </Link>
-            )}
-          </span>
-        );
-      })}
+      {/* Mobile: back link to parent */}
+      {parent && (
+        <Link
+          href={parent.href}
+          className="flex items-center gap-1 transition-colors hover:text-white md:hidden"
+        >
+          <ChevronLeft className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
+          {parent.label}
+        </Link>
+      )}
+
+      {/* Desktop: full trail */}
+      <div className="hidden items-center gap-1.5 md:flex">
+        {crumbs.map((crumb, index) => {
+          const isLast = index === crumbs.length - 1;
+          if (!crumb) return null;
+          return (
+            <span key={crumb.href} className="flex items-center gap-1.5">
+              {index > 0 && (
+                <ChevronRight
+                  className="h-3.5 w-3.5 opacity-50"
+                  aria-hidden="true"
+                />
+              )}
+              {isLast ? (
+                <span>{crumb.label}</span>
+              ) : (
+                <Link
+                  href={crumb.href}
+                  className="transition-colors hover:text-white"
+                >
+                  {crumb.label}
+                </Link>
+              )}
+            </span>
+          );
+        })}
+      </div>
     </nav>
   );
 };

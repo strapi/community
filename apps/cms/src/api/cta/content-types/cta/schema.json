@@ -36,12 +36,6 @@
       "component": "shared.button",
       "repeatable": false,
       "required": true
-    },
-    "illustration": {
-      "type": "enumeration",
-      "required": true,
-      "default": "image",
-      "enum": ["image", "community_members"]
     }
   }
 }

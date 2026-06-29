@@ -87,9 +87,53 @@ type TabsListProps = {
   className?: string;
 };
 
-const TabsList = ({ children, className }: TabsListProps) => (
-  <div className={cn("flex items-center gap-2", className)}>{children}</div>
-);
+const TabsList = ({ children, className }: TabsListProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => {
+      setCanScrollLeft(el.scrollLeft > 4);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className={cn("relative", className)}>
+      <div
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-(--background) to-transparent transition-opacity duration-200",
+          canScrollLeft ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        ref={scrollRef}
+        className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {children}
+      </div>
+      <div
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-(--background) to-transparent transition-opacity duration-200",
+          canScrollRight ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </div>
+  );
+};
 
 // ─── TabsTrigger ────────────────────────────────────────────────────────────
 
@@ -116,7 +160,7 @@ const TabsTrigger = ({
       aria-selected={isActive}
       onClick={() => setActiveTab(value)}
       className={cn(
-        "cursor-pointer font-semibold inline-flex items-center gap-2 rounded-full px-4 py-3 text-[15px] transition-colors",
+        "shrink-0 cursor-pointer font-semibold inline-flex items-center gap-2 rounded-full px-4 py-3 text-[15px] transition-colors",
         isActive
           ? "bg-(--color-primary600) text-white"
           : "bg-(--color-neutral100) text-(--color-neutral700) hover:bg-(--color-neutral150)",

@@ -513,9 +513,6 @@ export interface ApiCtaCta extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    illustration: Schema.Attribute.Enumeration<['image', 'community_members']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'image'>;
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::cta.cta'> &
@@ -1522,10 +1519,10 @@ export interface PluginBetterAuthJwks extends Struct.CollectionTypeSchema {
   };
   pluginOptions: {
     'content-manager': {
-      visible: false;
+      visible: true;
     };
     'content-type-builder': {
-      visible: false;
+      visible: true;
     };
   };
   attributes: {

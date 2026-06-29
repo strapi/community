@@ -10,28 +10,28 @@ type Props = {
 const CardGridSection = ({ section }: Props) => {
   return (
     <Container>
-      <section className="border-(--color-neutral300) border-l border-r border-b px-6 py-10 pt-18">
+      <section className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-6 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {section.items?.map((item, index) => (
             <article
               key={item.id}
-              className="relative min-h-62 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6"
+              className="relative flex flex-col gap-6 overflow-hidden rounded-md border border-(--color-neutral150) bg-(--color-primary100) p-6 lg:block lg:min-h-62"
             >
-              <div className="relative z-10 max-w-[56%]">
-                <div className="flex items-center">
-                  {item.icon && (
-                    <span className="mr-2">
-                      {renderIcon(item.icon, {
-                        size: 24,
-                        className: "text-(--color-primary700)",
-                      })}
-                    </span>
-                  )}
-                  <h3 className="flex items-center gap-2 text-[29px] font-semibold leading-9 text-(--color-card-grid-title)">
-                    {item.title}
-                  </h3>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-(--color-neutral700)">
+              <div className="flex items-center">
+                {item.icon && (
+                  <span className="mr-2">
+                    {renderIcon(item.icon, {
+                      size: 24,
+                      className: "text-(--color-primary700)",
+                    })}
+                  </span>
+                )}
+                <h3 className="flex items-center gap-2 text-[21px] font-semibold leading-9 text-(--color-card-grid-title)">
+                  {item.title}
+                </h3>
+              </div>
+              <div className="relative z-10 lg:max-w-[60%]">
+                <p className="mt-3 text-sm leading-6 text-[15px] text-(--color-neutral700)">
                   {item.content}
                 </p>
                 <Button
@@ -48,7 +48,7 @@ const CardGridSection = ({ section }: Props) => {
                   alt={item.image.alternativeText || item.title || "Card image"}
                   width={290}
                   height={180}
-                  className={`pointer-events-none absolute -right-4 -bottom-6 z-0 h-auto w-[48%] object-contain rotate-[-11deg]`}
+                  className="pointer-events-none absolute -right-20 -bottom-6 z-0 hidden h-auto w-[48%] object-contain rotate-[-11deg] lg:block"
                 />
               )}
             </article>

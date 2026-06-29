@@ -29,9 +29,9 @@ const TemplateTemplate = ({ document }: Props) => {
     <>
       <Navigation theme="light" />
       <Container>
-        <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-12 mt-10">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 pb-8 sm:pb-12 lg:pb-16 lg:grid-cols-12 mt-6 sm:mt-10">
           {/* ── Left column ── */}
-          <section className="lg:col-span-8 space-y-8">
+          <section className="lg:col-span-8 space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex items-center gap-5">
               <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">

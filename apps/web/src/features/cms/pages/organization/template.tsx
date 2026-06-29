@@ -37,7 +37,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="px-14 py-26">
+          <div className="px-4 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26">
             <div className="mb-6">
               <Breadcrumbs />
             </div>
@@ -132,7 +132,7 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
           defaultValue={noRelatedContent ? "about" : "content"}
           className="w-full"
         >
-          <TabsList className="border-(--color-neutral300) border-l border-r border-b px-16 py-10">
+          <TabsList className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-4 sm:py-6 lg:py-10">
             {!noRelatedContent && (
               <TabsTrigger
                 value="content"
@@ -153,8 +153,8 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
           <TabsContent value="content">
             {templates.length > 0 && (
-              <section className="border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
-                <h2 className="mb-14 text-[21px] font-semibold text-(--color-primary600)">
+              <section className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
+                <h2 className="mb-6 sm:mb-10 lg:mb-14 text-[21px] font-semibold text-(--color-primary600)">
                   Templates
                 </h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -181,8 +181,8 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
             )}
 
             {packages.length > 0 && (
-              <section className="border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18">
-                <h2 className="mb-14 text-[21px] font-semibold text-(--color-primary600)">
+              <section className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
+                <h2 className="mb-6 sm:mb-10 lg:mb-14 text-[21px] font-semibold text-(--color-primary600)">
                   Packages
                 </h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -211,9 +211,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
           <TabsContent
             value="about"
-            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18"
+            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18"
           >
-            <h2 className="mb-14 text-[21px] font-semibold text-(--color-neutral900)">
+            <h2 className="mb-6 sm:mb-10 lg:mb-14 text-[21px] font-semibold text-(--color-neutral900)">
               About {document.name}
             </h2>
             {document.profile?.readme ? (
@@ -227,9 +227,9 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
 
           <TabsContent
             value="people"
-            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-16 py-10 pt-18"
+            className="overflow-hidden border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18"
           >
-            <h2 className="mb-14 text-[21px] font-semibold text-(--color-neutral900)">
+            <h2 className="mb-6 sm:mb-10 lg:mb-14 text-[21px] font-semibold text-(--color-neutral900)">
               People
             </h2>
             {members.length > 0 ? (
