@@ -1,3 +1,8 @@
+// n8n webhook path namespace. Each Strapi instance posts to "<namespace>/<event>",
+// so duplicate workflow sets sharing one n8n instance (e.g. staging vs production)
+// listen on distinct paths and never collide. Defaults to "strapi" (production).
+const N8N_WEBHOOK_NS = process.env.N8N_WEBHOOK_NAMESPACE || "strapi";
+
 export default ({ env }) => ({
   email: {
     config: {
@@ -37,10 +42,10 @@ export default ({ env }) => ({
             "enterprise_competition",
           ],
           webhooks: {
-            submissionReceived: "strapi/plugin-submission-received",
-            approved: "strapi/plugin-approved",
-            declined: "strapi/plugin-declined",
-            changesRequested: "strapi/plugin-changes-requested",
+            submissionReceived: `${N8N_WEBHOOK_NS}/plugin-submission-received`,
+            approved: `${N8N_WEBHOOK_NS}/plugin-approved`,
+            declined: `${N8N_WEBHOOK_NS}/plugin-declined`,
+            changesRequested: `${N8N_WEBHOOK_NS}/plugin-changes-requested`,
           },
         },
         {
@@ -54,9 +59,9 @@ export default ({ env }) => ({
           },
           checks: ["repo_public", "readme_exists", "mit_license"],
           webhooks: {
-            submissionReceived: "strapi/template-submission-received",
-            approved: "strapi/template-approved",
-            declined: "strapi/template-declined",
+            submissionReceived: `${N8N_WEBHOOK_NS}/template-submission-received`,
+            approved: `${N8N_WEBHOOK_NS}/template-approved`,
+            declined: `${N8N_WEBHOOK_NS}/template-declined`,
           },
         },
       ],
