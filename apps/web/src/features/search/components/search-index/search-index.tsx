@@ -2,6 +2,7 @@
 
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import { SlidersHorizontal, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Configure, InstantSearch } from "react-instantsearch";
@@ -47,12 +48,19 @@ const SearchIndexRoot = ({
   useNextSearch = true,
   children,
 }: SearchIndexRootProps) => {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("query") ?? undefined;
+  const initialUiState = initialQuery
+    ? { [indexName]: { query: initialQuery } }
+    : undefined;
+
   if (useNextSearch) {
     return (
       <InstantSearchNext
         routing
         indexName={indexName}
         searchClient={searchClient}
+        initialUiState={initialUiState}
       >
         {children}
       </InstantSearchNext>
@@ -60,7 +68,12 @@ const SearchIndexRoot = ({
   }
 
   return (
-    <InstantSearch routing indexName={indexName} searchClient={searchClient}>
+    <InstantSearch
+      routing
+      indexName={indexName}
+      searchClient={searchClient}
+      initialUiState={initialUiState}
+    >
       {children}
     </InstantSearch>
   );

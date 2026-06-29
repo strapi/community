@@ -10,7 +10,7 @@ type Props = {
 const CardGridSection = ({ section }: Props) => {
   return (
     <Container>
-      <section className="border-(--color-neutral300) border-l border-r border-b px-6 py-10 pt-18">
+      <section className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-6 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {section.items?.map((item, index) => (
             <article

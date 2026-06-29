@@ -64,7 +64,7 @@ const CTASection = async ({ section }: Props) => {
 
   if (cta?.size === "S") {
     return (
-      <div className="py-16 border-y border-(--color-neutral300)">
+      <div className="py-8 sm:py-12 lg:py-16 border-y border-(--color-neutral300)">
         <Container>
           <section>
             <div
@@ -72,7 +72,7 @@ const CTASection = async ({ section }: Props) => {
               style={sharedWrapperStyle}
             >
               <div className="relative z-10 flex flex-col md:flex-row md:items-stretch md:justify-between gap-6">
-                <div className="md:w-[90%] min-w-75 px-8 py-10">
+                <div className="md:w-[90%] min-w-75 px-5 sm:px-8 py-6 sm:py-10">
                   <h3 className="font-bold leading-tight text-white!">
                     {cta.title}
                   </h3>
@@ -118,7 +118,7 @@ const CTASection = async ({ section }: Props) => {
   }
 
   return (
-    <div className="py-16 border-y border-(--color-neutral300)">
+    <div className="py-8 sm:py-12 lg:py-16 border-y border-(--color-neutral300)">
       <Container>
         <section>
           <div
