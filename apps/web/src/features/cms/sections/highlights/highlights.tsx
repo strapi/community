@@ -50,6 +50,22 @@ async function fetchItems(query: string, amount: number) {
     return { type: "template" as const, items: res.data ?? [] };
   }
 
+  if (query.startsWith("integrations_")) {
+    const res = await cmsClient
+      .collection("api::integration.integration")
+      .find({
+        ...featuredFilter,
+        sort: ["createdAt:desc"],
+        pagination: { limit: amount },
+        populate: {
+          logo: true,
+          url_alias: true,
+          labels: true,
+        },
+      });
+    return { type: "integration" as const, items: res.data ?? [] };
+  }
+
   if (query.startsWith("community_")) {
     const res = await cmsClient.collection("plugin::better-auth.user").find({
       sort: [query === "community_newest" ? "createdAt:desc" : "name:asc"],
@@ -132,6 +148,27 @@ const HighlightsSection = async ({ section }: Props) => {
                     description={tpl.description ?? ""}
                     owner={tpl.owner!}
                     labels={tpl.labels!}
+                  />
+                ),
+              )}
+
+            {type === "integration" &&
+              (items as Data.ContentType<"api::integration.integration">[]).map(
+                (integration) => (
+                  <ContentCard
+                    key={integration.documentId}
+                    image={{
+                      src: integration.logo
+                        ? cmsImageUrl(integration.logo.url)
+                        : "/logo-plugin.png",
+                      alt: integration.logo?.alternativeText ?? "",
+                      size: "S",
+                    }}
+                    link={integration.url_alias?.[0]?.url_path ?? "#"}
+                    badge="Integration"
+                    name={integration.name!}
+                    description={integration.description ?? ""}
+                    labels={integration.labels?.[0]}
                   />
                 ),
               )}

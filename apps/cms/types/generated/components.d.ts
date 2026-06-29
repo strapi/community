@@ -78,6 +78,8 @@ export interface SectionsHighlights extends Struct.ComponentSchema {
         'packages_newest',
         'templates_highlighted',
         'templates_newest',
+        'integrations_highlighted',
+        'integrations_newest',
         'recipes_highlighted',
         'recipes_newest',
         'showcases_highlighted',
