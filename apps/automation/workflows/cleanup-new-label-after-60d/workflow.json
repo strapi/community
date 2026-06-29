@@ -61,7 +61,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/packages",
+        "url": "=http://localhost:1337/api/packages",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -95,16 +95,9 @@
             }
           ]
         },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
-        },
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "retryOnFail": true,
       "notes": "TODO: add pagination loop once we expect >100 stale packages. Depends on #21's 'is_new' field being added to the package 'labels' component (not yet present in the schema)."
@@ -134,14 +127,10 @@
       ],
       "parameters": {
         "method": "PUT",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/packages/{{ $json.id }}",
+        "url": "=http://localhost:1337/api/packages/{{ $json.id }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"
@@ -151,7 +140,9 @@
         "sendBody": true,
         "contentType": "json",
         "jsonBody": "={\n  \"data\": {\n    \"labels\": {\n      \"is_new\": false\n    }\n  }\n}",
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "retryOnFail": true,
       "onError": "continueRegularOutput",

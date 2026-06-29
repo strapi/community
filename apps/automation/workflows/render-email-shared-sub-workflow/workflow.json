@@ -46,7 +46,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/email-templates",
+        "url": "=http://localhost:1337/api/email-templates",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -60,16 +60,9 @@
             }
           ]
         },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
-        },
-        "options": {}
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
       },
       "retryOnFail": true,
       "notes": "TODO: swap env-var auth for an n8n 'Strapi' credential once the CMS token is issued"

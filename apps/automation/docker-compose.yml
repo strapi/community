@@ -2,7 +2,7 @@ name: strapi-automation
 
 services:
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.27.4
     restart: unless-stopped
     ports:
       - "5678:5678"
@@ -11,14 +11,6 @@ services:
       TZ: ${GENERIC_TIMEZONE:-UTC}
       NODE_ENV: production
       N8N_SECURE_COOKIE: "false"
-      # Allow workflow expressions to read process env ($env.*). n8n blocks this by
-      # default; our workflows resolve the Strapi base URL + token from env.
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
-      # Strapi connection used by workflows ($env.STRAPI_BASE_URL / $env.STRAPI_API_TOKEN).
-      # Default targets the host Strapi via the podman host-gateway alias.
-      STRAPI_BASE_URL: ${STRAPI_BASE_URL:-http://host.containers.internal:1337}
-      STRAPI_API_URL: ${STRAPI_API_URL:-http://host.containers.internal:1337}
-      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN:-}
     volumes:
       - n8n_data:/home/node/.n8n
     healthcheck:

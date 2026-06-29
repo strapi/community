@@ -57,15 +57,15 @@
       "id": "fetch-plugins-1",
       "name": "Find Stale Plugin Scans",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         600,
         360
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/packages/stale-scans",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/packages/stale-scans",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
         "queryParameters": {
@@ -84,15 +84,6 @@
               "responseFormat": "json"
             }
           }
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -105,15 +96,15 @@
       "id": "fetch-templates-1",
       "name": "Find Stale Template Scans",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         600,
         560
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/templates/stale-scans",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/templates/stale-scans",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
         "queryParameters": {
@@ -132,15 +123,6 @@
               "responseFormat": "json"
             }
           }
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",
@@ -168,15 +150,15 @@
       "id": "mark-failed-1",
       "name": "Mark Failed in Strapi",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1040,
         460
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.STRAPI_BASE_URL }}/api/moderation/{{ $json.kind === 'template' ? 'templates' : 'packages' }}/{{ $json.documentId }}/security-scan-result",
-        "authentication": "none",
+        "url": "=http://localhost:1337/api/moderation/{{ $json.kind === 'template' ? 'templates' : 'packages' }}/{{ $json.documentId }}/security-scan-result",
+        "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
@@ -184,15 +166,6 @@
         "jsonBody": "={{ JSON.stringify({ stage: 'summary', status: 'failed', result: { runAt: new Date().toISOString(), error: 'Scan exceeded the 30-minute timeout and was reaped by scan-timeout-sweeper.', passed: false, reaped_at: new Date().toISOString(), started_at: $json.started_at } }) }}",
         "options": {
           "timeout": 15000
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.STRAPI_API_TOKEN }}"
-            }
-          ]
         }
       },
       "onError": "continueRegularOutput",

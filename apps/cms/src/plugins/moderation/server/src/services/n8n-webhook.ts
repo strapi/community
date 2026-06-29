@@ -3,15 +3,19 @@
  *
  * Accepts webhook paths directly (e.g. "strapi/plugin-submission-received").
  * Paths come from the plugin config's `webhooks` object per content type.
- * The SECURITY_SCAN_PATH constant is hardcoded because security scanning is
- * not configurable — it always applies to api::package.package.
+ * The security-scan path is fixed per namespace (security scanning is not a
+ * configurable content-type webhook — it always applies to api::package.package),
+ * but shares the N8N_WEBHOOK_NAMESPACE prefix so duplicate workflow sets on a
+ * shared n8n instance (e.g. staging vs production) don't collide.
  *
  * Flipping N8N_WEBHOOK_MODE between 'production' and 'test' toggles all
  * webhooks between n8n's always-on prod URL (/webhook/<path>) and the
  * developer-only test URL (/webhook-test/<path>).
  */
 
-export const SECURITY_SCAN_PATH = "strapi/security-scan";
+const N8N_WEBHOOK_NS = process.env.N8N_WEBHOOK_NAMESPACE || "strapi";
+
+export const SECURITY_SCAN_PATH = `${N8N_WEBHOOK_NS}/security-scan`;
 
 function getWebhookUrl(path: string) {
   const base = process.env.N8N_WEBHOOK_BASE_URL;
