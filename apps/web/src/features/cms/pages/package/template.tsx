@@ -1,4 +1,5 @@
 import { Button, Container } from "@repo/strapi-ui";
+import type { Data } from "@strapi/types";
 import { Download, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,15 +10,18 @@ import { RegistryLogo } from "@/components/content/registry-logo";
 import { SidebarSection } from "@/components/content/sidebar-section";
 import { VersionSecurityBadge } from "@/components/content/version-info";
 import { Navigation } from "@/components/layout/navigation";
+import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { PackagePageData } from "@/features/cms/pages/package";
+import { CTASection } from "@/features/cms/sections/cta/cta";
 import type { Owner } from "@/utils/types";
 
 type Props = {
   document: PackagePageData;
+  communityCta?: CommunityCTAData | null;
 };
 
-const PackageTemplate = ({ document }: Props) => {
+const PackageTemplate = ({ document, communityCta }: Props) => {
   const categories = (document.categories ?? []) as {
     documentId: string;
     name: string;
@@ -177,6 +181,13 @@ const PackageTemplate = ({ document }: Props) => {
           </aside>
         </div>
       </Container>
+      {communityCta && (
+        <CTASection
+          section={
+            { cta: communityCta } as unknown as Data.Component<"sections.cta">
+          }
+        />
+      )}
     </>
   );
 };

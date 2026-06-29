@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { PackageTemplate } from "@/features/cms/pages/package";
 
@@ -37,14 +38,17 @@ type Props = {
 };
 
 const PackagePage = async ({ documentId }: Props) => {
-  const document = await cmsClient
-    .collection(contentType)
-    .findOne(documentId, query);
+  const [document, communityCta] = await Promise.all([
+    cmsClient.collection(contentType).findOne(documentId, query),
+    fetchCommunityCTA(),
+  ]);
 
   /**
    * @todo Check for any existing security scans on the latest version.
    */
-  return <PackageTemplate document={document.data} />;
+  return (
+    <PackageTemplate document={document.data} communityCta={communityCta} />
+  );
 };
 
 export { PackagePage };
