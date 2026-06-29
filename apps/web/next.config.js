@@ -6,6 +6,7 @@ const nextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  productionBrowserSourceMaps: true,
   images: {
     dangerouslyAllowLocalIP: IsDEV,
     remotePatterns: [

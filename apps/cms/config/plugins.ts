@@ -112,6 +112,7 @@ export default ({ env }) => ({
             "preview_image",
             "labels",
             "url_alias",
+            "integrations",
             "categories",
           ],
         },

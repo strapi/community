@@ -13,7 +13,7 @@ export const templateMetadata = async (
       populate: {
         preview_image: true,
         url_alias: true,
-        owner: { fields: ["name"] },
+        owner: true,
       },
     });
 

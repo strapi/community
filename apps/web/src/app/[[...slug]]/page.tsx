@@ -18,6 +18,10 @@ import {
   packageCategoryMetadata,
 } from "@/features/cms/pages/package-category";
 import { TemplatePage, templateMetadata } from "@/features/cms/pages/template";
+import {
+  TemplateCategoryPage,
+  templateCategoryMetadata,
+} from "@/features/cms/pages/template-category";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
 // Regenerate static pages periodically.
@@ -64,6 +68,9 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     }
     case "api::package-category.package-category": {
       return <PackageCategoryPage documentId={page.documentId} />;
+    }
+    case "api::template-category.template-category": {
+      return <TemplateCategoryPage documentId={page.documentId} />;
     }
     case "api::help-page.help-page": {
       return <HelpPagePage documentId={page.documentId} />;
@@ -133,6 +140,9 @@ export const generateMetadata = async ({
     }
     case "api::package-category.package-category": {
       return packageCategoryMetadata(page.documentId);
+    }
+    case "api::template-category.template-category": {
+      return templateCategoryMetadata(page.documentId);
     }
     case "api::help-page.help-page": {
       return helpPageMetadata(page.documentId);

@@ -1,6 +1,6 @@
 "use client";
 
-import { RefinementList } from "react-instantsearch";
+import { RefinementList } from "@/features/search/components/refinement-list/refinement-list";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { Hit } from "./components";
 
