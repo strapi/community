@@ -1,4 +1,5 @@
 import { Container } from "@repo/strapi-ui";
+import type { Data } from "@strapi/types";
 import {
   AppWindow,
   CalendarDays,
@@ -15,16 +16,19 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { UserPageData } from "@/features/cms/pages/user/page";
+import { CTASection } from "@/features/cms/sections/cta/cta";
 import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: UserPageData;
   relatedContent: RelatedContentItems;
+  communityCta?: CommunityCTAData | null;
 };
 
-const UserTemplate = ({ document, relatedContent }: Props) => {
+const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
   const { templates, packages } = relatedContent;
   const noRelatedContent = templates.length === 0 && packages.length === 0;
 
@@ -229,6 +233,13 @@ const UserTemplate = ({ document, relatedContent }: Props) => {
           </TabsContent>
         </Tabs>
       </Container>
+      {communityCta && (
+        <CTASection
+          section={
+            { cta: communityCta } as unknown as Data.Component<"sections.cta">
+          }
+        />
+      )}
     </>
   );
 };

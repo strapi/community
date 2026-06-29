@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { UserTemplate } from "@/features/cms/pages/user";
 import type { RelatedContentItems } from "@/utils/types";
@@ -20,9 +21,10 @@ type Props = {
 };
 
 const UserPage = async ({ documentId }: Props) => {
-  const document = await cmsClient
-    .collection(contentType)
-    .findOne(documentId, query);
+  const [document, communityCta] = await Promise.all([
+    cmsClient.collection(contentType).findOne(documentId, query),
+    fetchCommunityCTA(),
+  ]);
 
   const content: RelatedContentItems = await cmsClient
     .fetch(
@@ -30,7 +32,13 @@ const UserPage = async ({ documentId }: Props) => {
     )
     .then((res) => res.json());
 
-  return <UserTemplate document={document.data} relatedContent={content} />;
+  return (
+    <UserTemplate
+      document={document.data}
+      relatedContent={content}
+      communityCta={communityCta}
+    />
+  );
 };
 
 export { UserPage };

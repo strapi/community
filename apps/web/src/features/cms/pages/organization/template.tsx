@@ -18,17 +18,25 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
+import { CTASection } from "@/features/cms/sections/cta/cta";
 import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: OrganizationPageData;
   relatedContent: RelatedContentItems;
   members: Data.ContentType<"plugin::better-auth.user">[];
+  communityCta?: CommunityCTAData | null;
 };
 
-const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
+const OrganizationTemplate = ({
+  document,
+  members,
+  relatedContent,
+  communityCta,
+}: Props) => {
   const { templates, packages } = relatedContent;
   const noRelatedContent = templates.length === 0 && packages.length === 0;
 
@@ -274,6 +282,13 @@ const OrganizationTemplate = ({ document, members, relatedContent }: Props) => {
           </TabsContent>
         </Tabs>
       </Container>
+      {communityCta && (
+        <CTASection
+          section={
+            { cta: communityCta } as unknown as Data.Component<"sections.cta">
+          }
+        />
+      )}
     </>
   );
 };
