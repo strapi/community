@@ -2,9 +2,10 @@ import type { Data } from "@strapi/types";
 import Image from "next/image";
 import Link from "next/link";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import type { Owner } from "@/utils/types";
 
 type Props = {
-  items: Data.ContentType<"plugin::better-auth.user">[];
+  items: Owner[];
   size?: "S" | "L";
   clickable?: boolean;
   white?: boolean;
@@ -14,11 +15,7 @@ type Props = {
 // 5 slots: 18 + 24 + 32 + 24 + 18 = 116%; 4 overlaps × 6% = 24% → net ≈ 92%.
 const SLOT_WIDTHS = ["18%", "24%", "32%", "24%", "18%"];
 
-const AvatarLarge = ({
-  items,
-}: {
-  items: Data.ContentType<"plugin::better-auth.user">[];
-}) => {
+const AvatarLarge = ({ items }: { items: Owner[] }) => {
   const slots = items.filter(Boolean).slice(0, 5);
   const centerIdx = Math.floor((slots.length - 1) / 2);
 
@@ -29,7 +26,9 @@ const AvatarLarge = ({
         const configIdx = 2 + distFromCenter;
         const width = SLOT_WIDTHS[configIdx] ?? "18%";
         const zIndex = 10 - Math.abs(distFromCenter);
-        const avatarUrl = m.image;
+        const imageUrl = "image" in m ? m.image : undefined;
+        const logoUrl = "logo" in m ? m.logo : undefined;
+        const avatarUrl = (imageUrl || logoUrl) as string;
 
         return (
           <div
@@ -76,7 +75,10 @@ const AvatarPile = ({ items, clickable, size = "S", white = false }: Props) => {
         .filter(Boolean)
         .slice(0, 5)
         .map((m, i) => {
-          const avatarUrl = m.image;
+          const imageUrl = "image" in m ? m.image : undefined;
+          const logoUrl = "logo" in m ? m.logo : undefined;
+          const avatarUrl = (imageUrl || logoUrl) as string;
+
           return avatarUrl ? (
             <Wrapper
               className="flex items-center"
