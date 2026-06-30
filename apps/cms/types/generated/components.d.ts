@@ -137,6 +137,7 @@ export interface SharedLabels extends Struct.ComponentSchema {
   attributes: {
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     official: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    recommended: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
   };
 }
 
