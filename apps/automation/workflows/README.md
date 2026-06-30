@@ -90,8 +90,17 @@ pnpm --filter automation run workflows:deploy
 
 It (1) rewrites every HTTP node's base URL from the committed `http://localhost:1337`
 placeholder to `STRAPI_BASE_URL`, (2) rewrites webhook paths to
-`<namespace>/<event>`, and (3) re-points `executeWorkflow → render-email` and
-`Settings → Error Workflow → error-handler` to the target instance's ids.
+`<namespace>/<event>`, (3) re-points `executeWorkflow → render-email` and
+`Settings → Error Workflow → error-handler` to the target instance's ids, and
+(4) tags every workflow `community-hub` + the environment tag (`staging`, or
+`production` when the namespace is `strapi`), creating the tags if missing.
+
+> **Sets are keyed by the environment tag, not by name.** The staging and production
+> sets carry identical workflow names, so the deploy decides "create vs update" by the
+> **env tag** (`staging`/`production`), never by name. A production deploy only ever
+> updates `production`-tagged workflows — it creates a fresh set on first run and leaves
+> the staging set untouched. (The two coexist by tag + folder; n8n allows duplicate
+> names.) This is why the tags matter operationally — don't strip them.
 
 > **Plain `workflows:import`** is the no-substitution variant (local dev): matches by
 > name, updates in place, but leaves the `localhost` base URL and `strapi/` paths and
