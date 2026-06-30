@@ -139,6 +139,33 @@ async function listWorkflows() {
   return all;
 }
 
+// Resolve tag names to ids on the target instance, creating any that are missing.
+async function resolveTags(names) {
+  const all = [];
+  let cursor;
+  do {
+    const url = new URL(`${N8N_URL}/api/v1/tags`);
+    url.searchParams.set('limit', '100');
+    if (cursor) url.searchParams.set('cursor', cursor);
+    const r = await fetch(url, { headers });
+    if (!r.ok) throw new Error(`list tags failed: ${r.status} ${await r.text()}`);
+    const b = await r.json();
+    all.push(...(b.data ?? []));
+    cursor = b.nextCursor;
+  } while (cursor);
+  const byName = new Map(all.map((t) => [t.name, t.id]));
+  const out = new Map();
+  for (const n of names) {
+    if (byName.has(n)) out.set(n, byName.get(n));
+    else {
+      const res = await api('POST', '/api/v1/tags', { name: n });
+      out.set(n, res.id);
+      console.log(`  created tag ${n}`);
+    }
+  }
+  return out;
+}
+
 function loadLocal() {
   const out = [];
   for (const entry of readdirSync(WORKFLOWS_DIR, { withFileTypes: true })) {
@@ -175,18 +202,32 @@ async function main() {
     for (const n of wf.nodes ?? []) if (byName.has(n.name)) n.credentials = byName.get(n.name);
   }
 
-  // Pass 1: create/update by name (preserving existing credential bindings).
+  // Create/update each workflow, re-linking by-id references to the target's ids
+  // BEFORE the PUT. n8n refuses to publish an active workflow whose executeWorkflow
+  // target isn't published, so the reference must already be the target's id at write
+  // time. Push referenced sub-workflows first (error-handler, render-email) so their
+  // ids are known; seed `ids` from existing so re-deploys resolve every ref up front.
   const existing = new Map((await listWorkflows()).map((w) => [w.name, w.id]));
-  const ids = new Map();
+  const ids = new Map(existing);
+  const byName = new Map(local.map((w) => [w.name, w]));
   let created = 0, updated = 0, failed = 0;
+
+  const order = [];
+  for (const nm of [ERROR_HANDLER_NAME, RENDER_EMAIL_NAME]) {
+    if (byName.has(nm)) order.push(byName.get(nm));
+  }
   for (const wf of local) {
+    if (wf.name !== ERROR_HANDLER_NAME && wf.name !== RENDER_EMAIL_NAME) order.push(wf);
+  }
+
+  for (const wf of order) {
     try {
+      relink(wf, ids.get(RENDER_EMAIL_NAME), ids.get(ERROR_HANDLER_NAME));
       if (existing.has(wf.name)) {
-        const id = existing.get(wf.name);
+        const id = ids.get(wf.name);
         const current = await api('GET', `/api/v1/workflows/${id}`);
         preserveCreds(wf, current);
         await api('PUT', `/api/v1/workflows/${id}`, sanitize(wf));
-        ids.set(wf.name, id);
         updated++; console.log(`  updated  ${wf.name}`);
       } else {
         const res = await api('POST', '/api/v1/workflows', sanitize(wf));
@@ -198,23 +239,28 @@ async function main() {
     }
   }
 
-  // Pass 2: re-link by-id references to the target instance's ids.
-  const renderId = ids.get(RENDER_EMAIL_NAME);
-  const errorId = ids.get(ERROR_HANDLER_NAME);
-  let relinked = 0;
-  for (const wf of local) {
-    if (!ids.has(wf.name)) continue;
-    if (relink(wf, renderId, errorId)) {
+  // Pass 3: tag every deployed workflow with community-hub + the environment tag.
+  const envTag = NAMESPACE === 'strapi' ? 'production' : NAMESPACE;
+  let tagged = 0;
+  try {
+    const tagIds = await resolveTags(['community-hub', envTag]);
+    const body = [{ id: tagIds.get('community-hub') }, { id: tagIds.get(envTag) }];
+    for (const wf of order) {            // only the workflows we deployed, never pre-existing ones
+      const id = ids.get(wf.name);
+      if (!id) continue;
       try {
-        await api('PUT', `/api/v1/workflows/${ids.get(wf.name)}`, sanitize(wf));
-        relinked++;
+        await api('PUT', `/api/v1/workflows/${id}/tags`, body);
+        tagged++;
       } catch (e) {
-        console.error(`  relink failed ${wf.name}: ${e.message}`);
+        console.error(`  tag failed   ${wf.name}: ${e.message}`);
       }
     }
+    console.log(`  tagged ${tagged} workflows: community-hub + ${envTag}`);
+  } catch (e) {
+    console.error(`  tagging skipped: ${e.message}`);
   }
 
-  console.log(`\nSummary: ${created} created, ${updated} updated, ${relinked} re-linked, ${failed} failed.`);
+  console.log(`\nSummary: ${created} created, ${updated} updated, ${tagged} tagged, ${failed} failed.`);
   console.log('Imported INACTIVE. Next: bind credentials in the n8n UI (see README), then activate.');
   if (failed > 0) process.exit(1);
 }

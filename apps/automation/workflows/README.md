@@ -90,8 +90,10 @@ pnpm --filter automation run workflows:deploy
 
 It (1) rewrites every HTTP node's base URL from the committed `http://localhost:1337`
 placeholder to `STRAPI_BASE_URL`, (2) rewrites webhook paths to
-`<namespace>/<event>`, and (3) re-points `executeWorkflow → render-email` and
-`Settings → Error Workflow → error-handler` to the target instance's ids.
+`<namespace>/<event>`, (3) re-points `executeWorkflow → render-email` and
+`Settings → Error Workflow → error-handler` to the target instance's ids, and
+(4) tags every workflow `community-hub` + the environment tag (`staging`, or
+`production` when the namespace is `strapi`), creating the tags if missing.
 
 > **Plain `workflows:import`** is the no-substitution variant (local dev): matches by
 > name, updates in place, but leaves the `localhost` base URL and `strapi/` paths and
