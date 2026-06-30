@@ -139,6 +139,33 @@ async function listWorkflows() {
   return all;
 }
 
+// Resolve tag names to ids on the target instance, creating any that are missing.
+async function resolveTags(names) {
+  const all = [];
+  let cursor;
+  do {
+    const url = new URL(`${N8N_URL}/api/v1/tags`);
+    url.searchParams.set('limit', '100');
+    if (cursor) url.searchParams.set('cursor', cursor);
+    const r = await fetch(url, { headers });
+    if (!r.ok) throw new Error(`list tags failed: ${r.status} ${await r.text()}`);
+    const b = await r.json();
+    all.push(...(b.data ?? []));
+    cursor = b.nextCursor;
+  } while (cursor);
+  const byName = new Map(all.map((t) => [t.name, t.id]));
+  const out = new Map();
+  for (const n of names) {
+    if (byName.has(n)) out.set(n, byName.get(n));
+    else {
+      const res = await api('POST', '/api/v1/tags', { name: n });
+      out.set(n, res.id);
+      console.log(`  created tag ${n}`);
+    }
+  }
+  return out;
+}
+
 function loadLocal() {
   const out = [];
   for (const entry of readdirSync(WORKFLOWS_DIR, { withFileTypes: true })) {
@@ -214,7 +241,26 @@ async function main() {
     }
   }
 
-  console.log(`\nSummary: ${created} created, ${updated} updated, ${relinked} re-linked, ${failed} failed.`);
+  // Pass 3: tag every deployed workflow with community-hub + the environment tag.
+  const envTag = NAMESPACE === 'strapi' ? 'production' : NAMESPACE;
+  let tagged = 0;
+  try {
+    const tagIds = await resolveTags(['community-hub', envTag]);
+    const body = [{ id: tagIds.get('community-hub') }, { id: tagIds.get(envTag) }];
+    for (const [name, id] of ids) {
+      try {
+        await api('PUT', `/api/v1/workflows/${id}/tags`, body);
+        tagged++;
+      } catch (e) {
+        console.error(`  tag failed   ${name}: ${e.message}`);
+      }
+    }
+    console.log(`  tagged ${tagged} workflows: community-hub + ${envTag}`);
+  } catch (e) {
+    console.error(`  tagging skipped: ${e.message}`);
+  }
+
+  console.log(`\nSummary: ${created} created, ${updated} updated, ${relinked} re-linked, ${tagged} tagged, ${failed} failed.`);
   console.log('Imported INACTIVE. Next: bind credentials in the n8n UI (see README), then activate.');
   if (failed > 0) process.exit(1);
 }
