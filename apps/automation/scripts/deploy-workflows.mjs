@@ -48,6 +48,10 @@ const N8N_URL = (process.env.N8N_URL || 'http://localhost:5678').replace(/\/$/, 
 const API_KEY = process.env.N8N_API_KEY;
 const STRAPI_BASE_URL = (process.env.STRAPI_BASE_URL || '').replace(/\/$/, '');
 const NAMESPACE = process.env.N8N_WEBHOOK_NAMESPACE || 'strapi';
+// The environment tag identifies this deploy's workflow set on the shared instance.
+// Matching is scoped to it so staging and production sets (same names, different tags)
+// never collide: a production deploy only ever updates production-tagged workflows.
+const ENV_TAG = NAMESPACE === 'strapi' ? 'production' : NAMESPACE;
 
 if (!API_KEY) {
   console.error('Error: N8N_API_KEY is not set (target instance key).');
@@ -207,7 +211,17 @@ async function main() {
   // target isn't published, so the reference must already be the target's id at write
   // time. Push referenced sub-workflows first (error-handler, render-email) so their
   // ids are known; seed `ids` from existing so re-deploys resolve every ref up front.
-  const existing = new Map((await listWorkflows()).map((w) => [w.name, w.id]));
+  // Scope existing-workflow matching to THIS environment's tag, so duplicate sets on
+  // one instance (same names, different env tag) stay independent. On a first deploy to
+  // a new environment this is empty -> every workflow is created fresh; on a re-deploy it
+  // matches only this env's set -> updates in place and leaves the other set untouched.
+  const remote = await listWorkflows();
+  const inEnv = remote.filter((w) => (w.tags ?? []).some((t) => t.name === ENV_TAG));
+  console.log(
+    `  found ${inEnv.length} existing '${ENV_TAG}'-tagged workflow(s) on target ` +
+    `(${remote.length} total on instance)\n`,
+  );
+  const existing = new Map(inEnv.map((w) => [w.name, w.id]));
   const ids = new Map(existing);
   const byName = new Map(local.map((w) => [w.name, w]));
   let created = 0, updated = 0, failed = 0;
@@ -240,11 +254,10 @@ async function main() {
   }
 
   // Pass 3: tag every deployed workflow with community-hub + the environment tag.
-  const envTag = NAMESPACE === 'strapi' ? 'production' : NAMESPACE;
   let tagged = 0;
   try {
-    const tagIds = await resolveTags(['community-hub', envTag]);
-    const body = [{ id: tagIds.get('community-hub') }, { id: tagIds.get(envTag) }];
+    const tagIds = await resolveTags(['community-hub', ENV_TAG]);
+    const body = [{ id: tagIds.get('community-hub') }, { id: tagIds.get(ENV_TAG) }];
     for (const wf of order) {            // only the workflows we deployed, never pre-existing ones
       const id = ids.get(wf.name);
       if (!id) continue;
@@ -255,7 +268,7 @@ async function main() {
         console.error(`  tag failed   ${wf.name}: ${e.message}`);
       }
     }
-    console.log(`  tagged ${tagged} workflows: community-hub + ${envTag}`);
+    console.log(`  tagged ${tagged} workflows: community-hub + ${ENV_TAG}`);
   } catch (e) {
     console.error(`  tagging skipped: ${e.message}`);
   }
