@@ -84,7 +84,33 @@ async function fetchItems(query: string, amount: number) {
 const HighlightsSection = async ({ section }: Props) => {
   const { title, query, amount, grid, button } = section;
 
-  const { type, items } = await fetchItems(query!, amount!);
+  let result: Awaited<ReturnType<typeof fetchItems>>;
+
+  if (query === "packages_selection") {
+    result = {
+      type: "package" as const,
+      items:
+        (section.packages as Data.ContentType<"api::package.package">[]) ?? [],
+    };
+  } else if (query === "templates_selection") {
+    result = {
+      type: "template" as const,
+      items:
+        (section.templates as Data.ContentType<"api::template.template">[]) ??
+        [],
+    };
+  } else if (query === "integrations_selection") {
+    result = {
+      type: "integration" as const,
+      items:
+        (section.integrations as Data.ContentType<"api::integration.integration">[]) ??
+        [],
+    };
+  } else {
+    result = await fetchItems(query!, amount!);
+  }
+
+  const { type, items } = result;
 
   const gridCols = gridColsMap[grid!] ?? gridColsMap[2];
 

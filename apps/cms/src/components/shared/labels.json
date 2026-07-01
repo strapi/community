@@ -13,6 +13,10 @@
     "featured": {
       "type": "boolean",
       "default": false
+    },
+    "recommended": {
+      "type": "boolean",
+      "default": false
     }
   },
   "config": {}

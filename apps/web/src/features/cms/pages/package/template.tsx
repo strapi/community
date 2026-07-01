@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { GitProviderLogo } from "@/components/content/git-provider-logo";
+import { ContentLabels } from "@/components/content/label-icons";
 import { Markdown } from "@/components/content/markdown";
 import { RegistryLogo } from "@/components/content/registry-logo";
 import { SidebarSection } from "@/components/content/sidebar-section";
@@ -59,6 +60,7 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                   <h1 className="text-3xl font-bold text-(--color-primary700)">
                     {document.name}
                   </h1>
+                  <ContentLabels labels={document.labels} />
                 </div>
                 {owner && (
                   <p>

@@ -1,8 +1,9 @@
 import type { Data } from "@strapi/types";
-import { BadgeCheck, Download, Github, Star } from "lucide-react";
+import { Download, Github, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
+import { ContentLabels } from "@/components/content/label-icons";
 import type { Owner } from "@/utils/types";
 
 type Props = {
@@ -44,19 +45,21 @@ const ContentCard = (props: Props) => {
 
   return (
     <Link href={link} className="block no-underline h-full">
-      <article className="h-full overflow-hidden rounded-md border border-(--color-neutral150) bg-white shadow-sm">
+      <article className="h-full rounded-md border border-(--color-neutral150) bg-white shadow-sm">
         {/* Preview area */}
         <div
-          className={`relative aspect-video bg-gradient-to-br from-white to-violet-100 ${isLarge ? "" : "flex items-center justify-center"}`}
+          className={`relative aspect-video bg-linear-to-br from-white to-violet-100 ${isLarge ? "" : "flex items-center justify-center"}`}
         >
           {image ? (
             isLarge ? (
-              <Image
-                src={image.src}
-                fill
-                alt={image.alt ?? name}
-                className="object-cover pl-[8%] pr-[8%] pt-[8%] border-b border-(--color-neutral150)"
-              />
+              <div className="absolute inset-0 overflow-hidden rounded-t-md">
+                <Image
+                  src={image.src}
+                  fill
+                  alt={image.alt ?? name}
+                  className="object-cover pl-[8%] pr-[8%] pt-[8%] border-b border-(--color-neutral150)"
+                />
+              </div>
             ) : (
               <Image
                 src={image.src}
@@ -100,9 +103,7 @@ const ContentCard = (props: Props) => {
             <p className="text-base font-bold text-(--color-neutral800)">
               {name}
             </p>
-            {labels?.official && (
-              <BadgeCheck className="h-5 w-5 shrink-0 text-green-500" />
-            )}
+            <ContentLabels labels={labels} size="sm" />
           </div>
 
           {/* Description */}
