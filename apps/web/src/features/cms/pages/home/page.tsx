@@ -21,7 +21,30 @@ const query = {
             },
           },
         },
-        "sections.highlights": true,
+        "sections.highlights": {
+          populate: {
+            button: true,
+            packages: {
+              populate: {
+                icon: true,
+                url_alias: true,
+                labels: true,
+                owner: true,
+              },
+            },
+            templates: {
+              populate: {
+                preview_image: true,
+                url_alias: true,
+                labels: true,
+                owner: true,
+              },
+            },
+            integrations: {
+              populate: { logo: true, url_alias: true, labels: true },
+            },
+          },
+        },
       },
     },
   },

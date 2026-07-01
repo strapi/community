@@ -20,10 +20,13 @@
       "enum": [
         "packages_highlighted",
         "packages_newest",
+        "packages_selection",
         "templates_highlighted",
         "templates_newest",
+        "templates_selection",
         "integrations_highlighted",
         "integrations_newest",
+        "integrations_selection",
         "recipes_highlighted",
         "recipes_newest",
         "showcases_highlighted",
@@ -37,7 +40,16 @@
       "required": true,
       "default": 2,
       "min": 2,
-      "max": 6
+      "max": 6,
+      "conditions": {
+        "visible": {
+          "and": [
+            { "!=": [{ "var": "query" }, "packages_selection"] },
+            { "!=": [{ "var": "query" }, "templates_selection"] },
+            { "!=": [{ "var": "query" }, "integrations_selection"] }
+          ]
+        }
+      }
     },
     "grid": {
       "type": "integer",
@@ -45,6 +57,36 @@
       "default": 2,
       "min": 2,
       "max": 4
+    },
+    "packages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::package.package",
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "query" }, "packages_selection"]
+        }
+      }
+    },
+    "templates": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::template.template",
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "query" }, "templates_selection"]
+        }
+      }
+    },
+    "integrations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::integration.integration",
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "query" }, "integrations_selection"]
+        }
+      }
     }
   },
   "config": {}

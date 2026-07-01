@@ -72,14 +72,22 @@ export interface SectionsHighlights extends Struct.ComponentSchema {
         number
       > &
       Schema.Attribute.DefaultTo<2>;
+    integrations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::integration.integration'
+    >;
+    packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     query: Schema.Attribute.Enumeration<
       [
         'packages_highlighted',
         'packages_newest',
+        'packages_selection',
         'templates_highlighted',
         'templates_newest',
+        'templates_selection',
         'integrations_highlighted',
         'integrations_newest',
+        'integrations_selection',
         'recipes_highlighted',
         'recipes_newest',
         'showcases_highlighted',
@@ -89,6 +97,7 @@ export interface SectionsHighlights extends Struct.ComponentSchema {
       ]
     > &
       Schema.Attribute.Required;
+    templates: Schema.Attribute.Relation<'oneToMany', 'api::template.template'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
