@@ -76,6 +76,11 @@
       "type": "component",
       "component": "shared.labels",
       "repeatable": true
+    },
+    "faq_items_section": {
+      "type": "component",
+      "component": "sections.faq-items",
+      "repeatable": false
     }
   }
 }

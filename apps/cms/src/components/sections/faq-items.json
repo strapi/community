@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_sections_faq_items",
+  "info": {
+    "displayName": "FAQ Items"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::faq-item.faq-item"
+    }
+  }
+}

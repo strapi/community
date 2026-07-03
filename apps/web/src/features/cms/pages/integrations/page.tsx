@@ -21,6 +21,11 @@ const query = {
         icon: true,
       },
     },
+    faq_items_section: {
+      populate: {
+        items: true,
+      },
+    },
   },
 } satisfies GetQueryParams<typeof contentType>;
 

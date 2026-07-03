@@ -2,6 +2,7 @@ import { Button, Container } from "@repo/strapi-ui";
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card/card";
+import { Faq } from "@/components/content/faq";
 import { Markdown } from "@/components/content/markdown";
 import { PageNav } from "@/components/content/page-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
@@ -138,6 +139,30 @@ const IntegrationTemplate = ({ document }: Props) => {
           </div>
         </div>
       </Container>
+      {(document.faq_items_section?.items?.length ?? 0) > 0 && (
+        <div className="border-t border-(--color-neutral150)">
+          <Container>
+            <div className="py-12 px-8 sm:px-16">
+              <Faq
+                className="max-w-3xl mx-auto"
+                title={document.faq_items_section?.title}
+                items={(document.faq_items_section?.items ?? []).flatMap(
+                  (item) =>
+                    item.question && item.answer
+                      ? [
+                          {
+                            id: item.documentId,
+                            question: item.question,
+                            answer: item.answer,
+                          },
+                        ]
+                      : [],
+                )}
+              />
+            </div>
+          </Container>
+        </div>
+      )}
     </div>
   );
 };
