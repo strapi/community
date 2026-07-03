@@ -97,7 +97,7 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
 
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
-            <div className="sticky top-20">
+            <div className="sticky top-28">
               {/* Stats */}
               {(githubStars != null || npmDownloads != null) && (
                 <SidebarSection title="Stats">

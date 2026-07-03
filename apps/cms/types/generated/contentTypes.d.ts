@@ -563,6 +563,35 @@ export interface ApiEmailTemplateEmailTemplate
   };
 }
 
+export interface ApiFaqItemFaqItem extends Struct.CollectionTypeSchema {
+  collectionName: 'faq_items';
+  info: {
+    displayName: 'FAQ Items';
+    pluralName: 'faq-items';
+    singularName: 'faq-item';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    answer: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::faq-item.faq-item'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    question: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiHelpPageHelpPage extends Struct.CollectionTypeSchema {
   collectionName: 'help_pages';
   info: {
@@ -714,6 +743,7 @@ export interface ApiIntegrationIntegration extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text & Schema.Attribute.Required;
+    faq_items_section: Schema.Attribute.Component<'sections.faq-items', false>;
     image: Schema.Attribute.Media<'images'>;
     labels: Schema.Attribute.Component<'shared.labels', true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -2554,6 +2584,7 @@ declare module '@strapi/strapi' {
       'api::country.country': ApiCountryCountry;
       'api::cta.cta': ApiCtaCta;
       'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
+      'api::faq-item.faq-item': ApiFaqItemFaqItem;
       'api::help-page.help-page': ApiHelpPageHelpPage;
       'api::home.home': ApiHomeHome;
       'api::integration-category.integration-category': ApiIntegrationCategoryIntegrationCategory;

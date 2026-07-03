@@ -45,6 +45,17 @@ export interface SectionsCta extends Struct.ComponentSchema {
   };
 }
 
+export interface SectionsFaqItems extends Struct.ComponentSchema {
+  collectionName: 'components_sections_faq_items';
+  info: {
+    displayName: 'FAQ Items';
+  };
+  attributes: {
+    items: Schema.Attribute.Relation<'oneToMany', 'api::faq-item.faq-item'>;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface SectionsHighlights extends Struct.ComponentSchema {
   collectionName: 'components_sections_highlights';
   info: {
@@ -215,6 +226,7 @@ declare module '@strapi/strapi' {
       'sections.card-grid': SectionsCardGrid;
       'sections.card-grid-item': SectionsCardGridItem;
       'sections.cta': SectionsCta;
+      'sections.faq-items': SectionsFaqItems;
       'sections.highlights': SectionsHighlights;
       'sections.search': SectionsSearch;
       'shared.button': SharedButton;

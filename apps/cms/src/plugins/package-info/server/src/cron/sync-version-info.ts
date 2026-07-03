@@ -6,7 +6,8 @@ export async function syncVersionInfo(): Promise<{
 }> {
   const packages = await strapi.documents("api::package.package").findMany({
     status: "published",
-    fields: ["documentId", "package_location", "git_repository"],
+    fields: ["documentId", "package_location", "git_repository", "readme"],
+    populate: { version_info: true },
     pagination: { pageSize: 500 },
   });
 
@@ -23,15 +24,28 @@ export async function syncVersionInfo(): Promise<{
       );
       if (!info) continue;
 
+      const newReadme = info.readme ?? null;
+      const newVersion = info.version ?? null;
+      const newPublishedAt = info.publishedAt ?? null;
+      const newInstallCommand = info.installCommand ?? null;
+
+      if (
+        newReadme === pkg.readme &&
+        newVersion === (pkg.version_info?.version ?? null) &&
+        newPublishedAt === (pkg.version_info?.published_at ?? null) &&
+        newInstallCommand === (pkg.version_info?.install_command ?? null)
+      )
+        continue;
+
       await strapi.documents("api::package.package").update({
         status: "published",
         documentId: pkg.documentId,
         data: {
-          readme: info.readme ?? null,
+          readme: newReadme,
           version_info: {
-            version: info.version ?? null,
-            published_at: info.publishedAt ?? null,
-            install_command: info.installCommand ?? null,
+            version: newVersion,
+            published_at: newPublishedAt,
+            install_command: newInstallCommand,
           },
         },
       });

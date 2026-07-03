@@ -9,12 +9,18 @@ export async function syncStats(): Promise<{
   const [packages, templates] = await Promise.all([
     strapi.documents("api::package.package").findMany({
       status: "published",
-      fields: ["documentId", "package_location", "git_repository"],
+      fields: [
+        "documentId",
+        "package_location",
+        "git_repository",
+        "stars",
+        "monthly_downloads",
+      ],
       pagination: { pageSize: 500 },
     }),
     strapi.documents("api::template.template").findMany({
       status: "published",
-      fields: ["documentId", "git_repository"],
+      fields: ["documentId", "git_repository", "stars", "readme"],
       pagination: { pageSize: 500 },
     }),
   ]);
@@ -33,8 +39,12 @@ export async function syncStats(): Promise<{
       if (!info) continue;
 
       const patch: Record<string, unknown> = {};
-      if (info.stars !== null) patch.stars = info.stars;
-      if (info.downloads?.monthly !== null)
+      if (info.stars !== null && info.stars !== pkg.stars)
+        patch.stars = info.stars;
+      if (
+        info.downloads?.monthly !== null &&
+        info.downloads?.monthly !== pkg.monthly_downloads
+      )
         patch.monthly_downloads = info.downloads?.monthly ?? null;
 
       if (Object.keys(patch).length === 0) continue;
@@ -64,8 +74,8 @@ export async function syncStats(): Promise<{
       ]);
 
       const patch: Record<string, unknown> = {};
-      if (stars !== null) patch.stars = stars;
-      if (readme !== null) patch.readme = readme;
+      if (stars !== null && stars !== template.stars) patch.stars = stars;
+      if (readme !== null && readme !== template.readme) patch.readme = readme;
 
       if (Object.keys(patch).length === 0) continue;
 

@@ -4,7 +4,7 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Configure, InstantSearch } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 import { GridHits } from "@/features/search/components/grid-hits";
@@ -54,10 +54,28 @@ const SearchIndexRoot = ({
     ? { [indexName]: { query: initialQuery } }
     : undefined;
 
+  // Strip `page` from the URL so that "load more" doesn't pollute the URL.
+  // Filters (query, refinementList, sortBy, etc.) are still persisted — this
+  // is what makes them sticky across refreshes and shared links.
+  const routing = useMemo(
+    () => ({
+      stateMapping: {
+        stateToRoute(uiState: Record<string, Record<string, unknown>>) {
+          const { page: _page, ...rest } = uiState[indexName] ?? {};
+          return rest;
+        },
+        routeToState(routeState: Record<string, unknown>) {
+          return { [indexName]: routeState };
+        },
+      },
+    }),
+    [indexName],
+  );
+
   if (useNextSearch) {
     return (
       <InstantSearchNext
-        routing
+        routing={routing}
         indexName={indexName}
         searchClient={searchClient}
         initialUiState={initialUiState}
@@ -69,7 +87,7 @@ const SearchIndexRoot = ({
 
   return (
     <InstantSearch
-      routing
+      routing={routing}
       indexName={indexName}
       searchClient={searchClient}
       initialUiState={initialUiState}
@@ -124,7 +142,7 @@ const SearchIndexSidebar = ({ children }: { children?: ReactNode }) => {
   return (
     <aside
       className={cn(
-        "lg:col-span-3 lg:sticky lg:top-25",
+        "lg:col-span-3 lg:sticky lg:top-25 lg:self-start",
         isFilterModalOpen
           ? "fixed inset-0 z-50 flex flex-col overflow-hidden bg-white lg:inset-auto lg:z-auto lg:block lg:overflow-visible lg:bg-transparent"
           : "hidden lg:block",
