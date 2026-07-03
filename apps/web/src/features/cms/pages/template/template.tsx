@@ -97,7 +97,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
 
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
-            <div className="sticky top-25">
+            <div className="sticky top-28">
               {/* Preview link */}
               {document.preview_link && (
                 <Button

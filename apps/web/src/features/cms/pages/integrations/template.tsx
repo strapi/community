@@ -1,4 +1,5 @@
 import { Button, Container } from "@repo/strapi-ui";
+import { BookOpen, Puzzle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card/card";
@@ -8,6 +9,7 @@ import { PageNav } from "@/components/content/page-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { IntegrationPageData } from "@/features/cms/pages/integrations";
 
@@ -18,14 +20,16 @@ type Props = {
 const IntegrationTemplate = ({ document }: Props) => {
   const hasPackages = (document.packages?.length ?? 0) > 0;
   const hasTemplates = (document.templates?.length ?? 0) > 0;
+  const hasExtensions = hasPackages || hasTemplates;
+  const hasContent = !!document.content;
 
   return (
     <div>
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="flex items-center">
-            <div className="px-14 py-26 max-w-150">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 px-6 sm:px-14 py-12 sm:py-26">
+            <div className="max-w-150">
               <div className="mb-5">
                 <Breadcrumbs />
               </div>
@@ -42,103 +46,142 @@ const IntegrationTemplate = ({ document }: Props) => {
                 alt={document.name!}
                 width={150}
                 height={150}
-                className="mt-10 mr-14 h-fit rounded-lg object-cover ml-auto"
+                className="sm:ml-auto shrink-0 rounded-lg object-cover"
               />
             )}
           </div>
         </HeroSection>
       </Hero>
-      <Container>
-        <div className="border-x border-(--color-neutral150)">
-          {hasPackages && (
-            <div
-              id="packages"
-              className="border-(--color-neutral150) border-b px-8 sm:px-16 py-12"
-            >
-              <div className="flex items-center justify-between mb-10">
-                <h2 className="text-[21px] font-semibold text-(--color-neutral900)">
-                  Packages built for {document.name}
-                </h2>
-                <Button asChild>
-                  <Link
-                    href={`/marketplace?packages:monthly_downloads:desc[refinementList][integrations.name][0]=${document.name}&tab=packages`}
-                    className="text-(--color-primary600)"
-                  >
-                    See more
-                  </Link>
-                </Button>
-              </div>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-                {document.packages?.map((pkg) => (
-                  <ContentCard
-                    key={pkg.documentId}
-                    image={{
-                      src: pkg.icon
-                        ? cmsImageUrl(pkg.icon.url)
-                        : "/package-fallback-icon.png",
-                      alt: pkg.icon?.alternativeText ?? "",
-                      size: "S",
-                    }}
-                    link={pkg.url_alias?.[0]?.url_path ?? "#"}
-                    badge="Package"
-                    name={pkg.name!}
-                    description={pkg.description ?? ""}
-                    githubStars={pkg.stars || undefined}
-                    npmDownloads={pkg.monthly_downloads || undefined}
-                    owner={pkg.owner!}
-                    labels={pkg.labels!}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          {hasTemplates && (
-            <div
-              id="templates"
-              className="border-(--color-neutral150) border-b px-8 sm:px-16 py-12"
-            >
-              <h2 className="mb-10 text-[21px] font-semibold text-(--color-neutral900)">
-                Templates built with {document.name}
-              </h2>
-              <div className="grid gap-4 grid-cols-3">
-                {document.templates?.map((tpl) => (
-                  <ContentCard
-                    key={tpl.documentId}
-                    image={{
-                      src: tpl.preview_image
-                        ? cmsImageUrl(tpl.preview_image.url)
-                        : "/template-fallback-preview.png",
-                      alt: tpl.preview_image?.alternativeText ?? "",
-                      size: "L",
-                    }}
-                    link={tpl.url_alias?.[0]?.url_path ?? "#"}
-                    badge="Template"
-                    name={tpl.name!}
-                    description={tpl.description ?? ""}
-                    owner={tpl.owner!}
-                    labels={tpl.labels!}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="border-x border-(--color-neutral150) px-8 sm:px-16 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            <div id="integration-content" className="lg:col-span-8">
-              {document.content && (
-                <div id="overview">
-                  <Markdown markdown={document.content} />
-                </div>
-              )}
-            </div>
 
-            <aside className="lg:col-span-4">
-              <PageNav contentId="integration-content" title="On this page" />
-            </aside>
+      <Container>
+        {hasExtensions ? (
+          <Tabs
+            defaultValue={hasContent ? "guide" : "extensions"}
+            className="w-full"
+          >
+            <TabsList className="border-(--color-neutral150) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-4 sm:py-6 lg:py-10">
+              {hasContent && (
+                <TabsTrigger
+                  value="guide"
+                  icon={<BookOpen className="h-4 w-4" />}
+                >
+                  Guide
+                </TabsTrigger>
+              )}
+              <TabsTrigger
+                value="extensions"
+                icon={<Puzzle className="h-4 w-4" />}
+              >
+                Extensions
+              </TabsTrigger>
+            </TabsList>
+
+            {hasContent && (
+              <TabsContent value="guide">
+                <div className="border-(--color-neutral150) border-l border-r border-b px-8 sm:px-16 py-12">
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+                    <div id="integration-content" className="lg:col-span-8">
+                      <div id="overview">
+                        <Markdown markdown={document.content!} />
+                      </div>
+                    </div>
+                    <aside className="lg:col-span-4">
+                      <PageNav
+                        contentId="integration-content"
+                        title="On this page"
+                      />
+                    </aside>
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+
+            <TabsContent value="extensions">
+              {hasPackages && (
+                <section className="border-(--color-neutral150) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
+                  <div className="flex items-center justify-between mb-6 sm:mb-10">
+                    <h2 className="text-[21px] font-semibold text-(--color-neutral900)">
+                      Packages built for {document.name}
+                    </h2>
+                    <Button asChild>
+                      <Link
+                        href={`/marketplace?packages:monthly_downloads:desc[refinementList][integrations.name][0]=${document.name}&tab=packages`}
+                        className="text-(--color-primary600)"
+                      >
+                        See more
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {document.packages?.map((pkg) => (
+                      <ContentCard
+                        key={pkg.documentId}
+                        image={{
+                          src: pkg.icon
+                            ? cmsImageUrl(pkg.icon.url)
+                            : "/package-fallback-icon.png",
+                          alt: pkg.icon?.alternativeText ?? "",
+                          size: "S",
+                        }}
+                        link={pkg.url_alias?.[0]?.url_path ?? "#"}
+                        badge="Package"
+                        name={pkg.name!}
+                        description={pkg.description ?? ""}
+                        githubStars={pkg.stars || undefined}
+                        npmDownloads={pkg.monthly_downloads || undefined}
+                        owner={pkg.owner!}
+                        labels={pkg.labels!}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {hasTemplates && (
+                <section className="border-(--color-neutral150) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
+                  <h2 className="mb-6 sm:mb-10 text-[21px] font-semibold text-(--color-neutral900)">
+                    Templates built with {document.name}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {document.templates?.map((tpl) => (
+                      <ContentCard
+                        key={tpl.documentId}
+                        image={{
+                          src: tpl.preview_image
+                            ? cmsImageUrl(tpl.preview_image.url)
+                            : "/template-fallback-preview.png",
+                          alt: tpl.preview_image?.alternativeText ?? "",
+                          size: "L",
+                        }}
+                        link={tpl.url_alias?.[0]?.url_path ?? "#"}
+                        badge="Template"
+                        name={tpl.name!}
+                        description={tpl.description ?? ""}
+                        owner={tpl.owner!}
+                        labels={tpl.labels!}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </TabsContent>
+          </Tabs>
+        ) : hasContent ? (
+          <div className="border-(--color-neutral150) border-l border-r border-b px-8 sm:px-16 py-12">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+              <div id="integration-content" className="lg:col-span-8">
+                <div id="overview">
+                  <Markdown markdown={document.content!} />
+                </div>
+              </div>
+              <aside className="lg:col-span-4">
+                <PageNav contentId="integration-content" title="On this page" />
+              </aside>
+            </div>
           </div>
-        </div>
+        ) : null}
       </Container>
+
       {(document.faq_items_section?.items?.length ?? 0) > 0 && (
         <div className="border-t border-(--color-neutral150)">
           <Container>

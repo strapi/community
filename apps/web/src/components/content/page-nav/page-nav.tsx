@@ -79,19 +79,24 @@ const PageNav = ({
     return () => observerRef.current?.disconnect();
   }, [navItems]);
 
+  const NAVBAR_HEIGHT = 96;
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
-    document
-      .getElementById(id)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(id);
+    if (el) {
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - NAVBAR_HEIGHT;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
     setActiveId(id);
   };
 
   if (!navItems.length) return null;
 
   return (
-    <div className="sticky top-20">
-      <div className="rounded-md mb-2 bg-(--color-neutral100) border border-(--color-neutral150) px-5 py-4">
+    <div className="hidden lg:block sticky top-28">
+      <div className="rounded-md mb-2 bg-(--color-neutral100) border border-(--color-neutral150) px-5 py-4 max-h-[50vh] overflow-y-auto">
         <p className="mb-3 text-[13px] font-bold uppercase tracking-wider text-(--color-grey700)">
           {title}
         </p>
