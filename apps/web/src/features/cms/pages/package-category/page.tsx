@@ -10,6 +10,18 @@ const query = {
   populate: {
     sections: {
       populate: "*",
+      on: {
+        "sections.cta": {
+          populate: {
+            cta: {
+              populate: {
+                image: true,
+                button: true,
+              },
+            },
+          },
+        },
+      },
     },
     children: {
       populate: { url_alias: true },
