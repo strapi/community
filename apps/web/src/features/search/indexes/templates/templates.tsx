@@ -27,7 +27,7 @@ const TemplatesSearch = ({
           </SearchIndex.FilterGroup>
         </SearchIndex.Sidebar>
       )}
-      <SearchIndex.Content>
+      <SearchIndex.Content fullWidth={!showFilters}>
         <SearchIndex.SearchBox />
         <SearchIndex.Toolbar>
           <SearchIndex.Stats />
