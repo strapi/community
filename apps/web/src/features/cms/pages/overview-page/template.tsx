@@ -1,3 +1,4 @@
+import { Button } from "@repo/strapi-ui";
 import Image from "next/image";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
@@ -28,6 +29,19 @@ const OverviewPageTemplate = ({ document }: Props) => {
               <p className="text-[17px] text-(--color-hero-muted)">
                 {document.description}
               </p>
+              {document.cta_buttons && document.cta_buttons.length > 0 && (
+                <div className="mt-7 flex items-center gap-3">
+                  {document.cta_buttons.map((button) => (
+                    <Button
+                      key={button.id}
+                      href={button.link!}
+                      variant={button.type}
+                    >
+                      {button.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
             {document.image && (
               <Image

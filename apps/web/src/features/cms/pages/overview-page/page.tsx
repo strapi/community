@@ -33,6 +33,7 @@ const query = {
       },
     },
     image: true,
+    cta_buttons: true,
   },
 } satisfies GetQueryParams<typeof contentType>;
 

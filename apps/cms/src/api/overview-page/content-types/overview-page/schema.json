@@ -33,6 +33,11 @@
       "multiple": false,
       "allowedTypes": ["images"]
     },
+    "cta_buttons": {
+      "type": "component",
+      "component": "shared.button",
+      "repeatable": true
+    },
     "seo": {
       "type": "component",
       "component": "shared.seo",
