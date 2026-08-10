@@ -33,12 +33,18 @@ export const auth = betterAuth({
   ],
   emailVerification: {
     sendOnSignIn: true,
+    autoSignInAfterVerification: true,
   },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await sendResetPasswordEmail(user.email, url);
+    },
+    onExistingUserSignUp: async ({ user }) => {
+      await auth.api.sendVerificationOTP({
+        body: { email: user.email, type: "email-verification" },
+      });
     },
   },
   database: strapiAdapter({
