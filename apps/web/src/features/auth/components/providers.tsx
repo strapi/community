@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import { cn } from "@/lib/utils";
+import { deleteAvatar, uploadAvatar } from "../lib/avatar";
 import { authClient } from "../lib/client";
 
 export function AuthProviders({ children }: { children: React.ReactNode }) {
@@ -20,15 +22,22 @@ export function AuthProviders({ children }: { children: React.ReactNode }) {
       baseURL={process.env.NEXT_PUBLIC_WEB_URL}
       account
       avatar={{
-        Image: ({ src, alt, ...props }) => (
-          <Image
-            src={cmsImageUrl(src)}
-            alt={alt}
-            width={32}
-            height={32}
-            {...props}
-          />
-        ),
+        upload: uploadAvatar,
+        delete: deleteAvatar,
+        Image: ({ src, alt, className, ...props }) => {
+          if (!src) return null;
+
+          return (
+            <Image
+              src={cmsImageUrl(src)}
+              alt={alt}
+              fill
+              sizes="128px"
+              className={cn("object-cover", className)}
+              {...props}
+            />
+          );
+        },
       }}
       emailOTP
       passkey

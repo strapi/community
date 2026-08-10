@@ -5,7 +5,49 @@
 import { factories, type Modules, type UID } from "@strapi/strapi";
 import { extractContentTypeName } from "../utils";
 
+const avatarFileName = (userId: string | number) => `avatar-${userId}`;
+
 export default factories.createCoreService("plugin::better-auth.user", () => ({
+  /** Uploads an avatar image to the media library, scoped to a given user. */
+  async uploadAvatar({
+    userId,
+    file,
+  }: {
+    userId: string | number;
+    file: unknown;
+  }) {
+    const [uploaded] = await strapi
+      .plugin("upload")
+      .service("upload")
+      .upload({
+        data: { fileInfo: { name: avatarFileName(userId) } },
+        files: file,
+      });
+
+    return uploaded as { url: string };
+  },
+
+  /**
+   * Removes a previously uploaded avatar from the media library, but only
+   * if it was tagged as this user's own avatar upload.
+   */
+  async deleteAvatar({
+    userId,
+    url,
+  }: {
+    userId: string | number;
+    url: string;
+  }) {
+    const existing = await strapi.db
+      .query("plugin::upload.file")
+      .findOne({ where: { url, name: avatarFileName(userId) } });
+
+    if (!existing) return false;
+
+    await strapi.plugin("upload").service("upload").remove(existing);
+    return true;
+  },
+
   async getRelatedContent<UID extends UID.ContentType>({
     organizationId,
     uid,
