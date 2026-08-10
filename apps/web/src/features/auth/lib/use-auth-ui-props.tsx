@@ -9,6 +9,10 @@ import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import { cn } from "@/lib/utils";
 import { deleteAvatar, uploadAvatar } from "./avatar";
 import { authClient } from "./client";
+import {
+  deleteOrganizationLogo,
+  uploadOrganizationLogo,
+} from "./organization-logo";
 
 /**
  * The shared <AuthUIProvider> config, factored out so a route that needs
@@ -66,6 +70,10 @@ export function useAuthUIProviderProps(): Omit<
       basePath: "/org",
       pathMode: "slug",
       personalPath: "/account",
+      logo: {
+        upload: uploadOrganizationLogo,
+        delete: deleteOrganizationLogo,
+      },
     },
   };
 }

@@ -22,3 +22,17 @@ export const communityContentTypes: UID.ContentType[] = [
   "api::package.package",
   "api::template.template",
 ];
+
+/**
+ * `api::profile.profile` fields an org owner/admin may edit through the
+ * organization "Profile" tab — scoped to exactly what the public
+ * organization page renders (bio/subtitle/website/github/location/readme).
+ */
+export const organizationProfileFields = [
+  "bio",
+  "subtitle",
+  "website",
+  "github",
+  "location",
+  "readme",
+] as const;

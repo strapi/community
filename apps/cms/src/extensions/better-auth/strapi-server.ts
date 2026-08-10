@@ -1,6 +1,7 @@
 import organizationController from "./controllers/organization";
 import userController from "./controllers/user";
 import isAuthenticated from "./policies/is-authenticated";
+import isOrganizationOwner from "./policies/is-organization-owner";
 import organizationRoutes from "./routes/organization";
 import userRoutes from "./routes/user";
 import organizationService from "./services/organization";
@@ -16,6 +17,7 @@ export default (plugin) => {
 
   if (!plugin.policies) plugin.policies = {};
   plugin.policies["is-authenticated"] = isAuthenticated;
+  plugin.policies["is-organization-owner"] = isOrganizationOwner;
 
   plugin.routes["content-api"] = {
     type: "content-api",

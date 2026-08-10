@@ -5,9 +5,58 @@
 import { factories, type Modules, type UID } from "@strapi/strapi";
 import { extractContentTypeName } from "../utils";
 
+const logoFileName = (userId: string | number) => `logo-${userId}`;
+
 export default factories.createCoreService(
   "plugin::better-auth.organization",
   () => ({
+    /**
+     * Uploads a logo image to the media library, tagged by the uploading
+     * user rather than a specific organization — better-auth-ui's
+     * `organization.logo.upload` config has no way to pass which org the
+     * logo is for (it's set on the org afterwards via better-auth's own
+     * `organization.update`, which already enforces the
+     * owner/admin-only `organization:update` permission for that org).
+     */
+    async uploadLogo({
+      userId,
+      file,
+    }: {
+      userId: string | number;
+      file: unknown;
+    }) {
+      const [uploaded] = await strapi
+        .plugin("upload")
+        .service("upload")
+        .upload({
+          data: { fileInfo: { name: logoFileName(userId) } },
+          files: file,
+        });
+
+      return uploaded as { url: string };
+    },
+
+    /**
+     * Removes a previously uploaded logo from the media library, but only
+     * if it was tagged as this user's own logo upload.
+     */
+    async deleteLogo({
+      userId,
+      url,
+    }: {
+      userId: string | number;
+      url: string;
+    }) {
+      const existing = await strapi.db
+        .query("plugin::upload.file")
+        .findOne({ where: { url, name: logoFileName(userId) } });
+
+      if (!existing) return false;
+
+      await strapi.plugin("upload").service("upload").remove(existing);
+      return true;
+    },
+
     async getRelatedContent<UID extends UID.ContentType>({
       organizationId,
       uid,
@@ -69,6 +118,47 @@ export default factories.createCoreService(
         });
 
       return users;
+    },
+
+    /**
+     * Upserts the `api::profile.profile` linked to an organization —
+     * most organizations won't have one yet, since nothing creates it
+     * automatically when an org is created.
+     */
+    async updateProfile({
+      organizationId,
+      data,
+    }: {
+      organizationId: string;
+      data: Record<string, unknown>;
+    }) {
+      const [organization] = await strapi
+        .documents("plugin::better-auth.organization")
+        .findMany({
+          filters: { id: organizationId },
+          fields: ["documentId"],
+          populate: { profile: { fields: ["documentId"] } },
+        });
+
+      if (!organization) return null;
+
+      if (organization.profile) {
+        return strapi.documents("api::profile.profile").update({
+          documentId: organization.profile.documentId,
+          data,
+        });
+      }
+
+      const profile = await strapi.documents("api::profile.profile").create({
+        data,
+      });
+
+      await strapi.documents("plugin::better-auth.organization").update({
+        documentId: organization.documentId,
+        data: { profile: profile.documentId },
+      });
+
+      return profile;
     },
   }),
 );
