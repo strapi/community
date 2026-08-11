@@ -3,6 +3,7 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { fromNodeHeaders } from "better-auth/node";
 import { getPluginService, organizationProfileFields } from "../utils";
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024;
@@ -110,6 +111,7 @@ export default factories.createCoreController(
       const deleted = await getPluginService("organization").deleteLogo({
         userId: session.user.id,
         url,
+        headers: fromNodeHeaders(ctx.request.headers),
       });
       if (!deleted) return ctx.notFound();
 

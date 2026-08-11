@@ -3,6 +3,7 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { fromNodeHeaders } from "better-auth/node";
 import { getPluginService } from "../utils";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
@@ -71,6 +72,7 @@ export default factories.createCoreController(
       const deleted = await getPluginService("user").deleteAvatar({
         userId: session.user.id,
         url,
+        headers: fromNodeHeaders(ctx.request.headers),
       });
       if (!deleted) return ctx.notFound();
 

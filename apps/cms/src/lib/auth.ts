@@ -32,6 +32,39 @@ function absolutizeMediaUrl(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `${STRAPI_URL}${url}`;
 }
 
+/**
+ * Re-links an uploaded logo file's `related` (the native polymorphic
+ * field on `plugin::upload.file`) to the organization it now belongs to.
+ *
+ * At upload time (`uploadOwnedFile` in the better-auth extension), the
+ * file can only be tagged to the *uploading user* — better-auth-ui's
+ * `organization.logo.upload` callback has no organization id, since the
+ * logo isn't attached to an org until this very update call. Once it is,
+ * this re-tags the file so it's correctly related to the organization
+ * instead. Runs on every organization update (not just logo changes),
+ * which is harmless — it's a no-op when there's no logo, and idempotent
+ * when the logo didn't change.
+ */
+async function relinkOrganizationLogo(organization: {
+  id: string | number;
+  logo?: string | null;
+}) {
+  if (!organization.logo) return;
+
+  await strapi.db.query("plugin::upload.file").update({
+    where: { url: organization.logo },
+    data: {
+      related: [
+        {
+          id: organization.id,
+          __type: "plugin::better-auth.organization",
+          __pivot: { field: "logo" },
+        },
+      ],
+    },
+  });
+}
+
 export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
@@ -55,6 +88,12 @@ export const auth = betterAuth({
           role: data.role,
           expirationHours,
         });
+      },
+      organizationHooks: {
+        afterUpdateOrganization: async ({ organization }) => {
+          if (!organization) return;
+          await relinkOrganizationLogo(organization);
+        },
       },
     }),
     twoFactor({

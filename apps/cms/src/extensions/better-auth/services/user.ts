@@ -3,12 +3,14 @@
  */
 
 import { factories, type Modules, type UID } from "@strapi/strapi";
-import { extractContentTypeName } from "../utils";
-
-const avatarFileName = (userId: string | number) => `avatar-${userId}`;
+import {
+  deleteOwnedFile,
+  extractContentTypeName,
+  uploadOwnedFile,
+} from "../utils";
 
 export default factories.createCoreService("plugin::better-auth.user", () => ({
-  /** Uploads an avatar image to the media library, scoped to a given user. */
+  /** Uploads an avatar image to the media library, linked to its owning user. */
   async uploadAvatar({
     userId,
     file,
@@ -16,36 +18,28 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
     userId: string | number;
     file: unknown;
   }) {
-    const [uploaded] = await strapi
-      .plugin("upload")
-      .service("upload")
-      .upload({
-        data: { fileInfo: { name: avatarFileName(userId) } },
-        files: file,
-      });
-
-    return uploaded as { url: string };
+    return uploadOwnedFile({
+      userId,
+      file,
+      field: "avatar",
+      name: `avatar-${userId}`,
+    });
   },
 
   /**
    * Removes a previously uploaded avatar from the media library, but only
-   * if it was tagged as this user's own avatar upload.
+   * if it belongs to this user.
    */
   async deleteAvatar({
     userId,
     url,
+    headers,
   }: {
     userId: string | number;
     url: string;
+    headers: Headers;
   }) {
-    const existing = await strapi.db
-      .query("plugin::upload.file")
-      .findOne({ where: { url, name: avatarFileName(userId) } });
-
-    if (!existing) return false;
-
-    await strapi.plugin("upload").service("upload").remove(existing);
-    return true;
+    return deleteOwnedFile({ userId, url, headers });
   },
 
   async getRelatedContent<UID extends UID.ContentType>({

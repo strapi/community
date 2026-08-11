@@ -3,15 +3,17 @@
  */
 
 import { factories, type Modules, type UID } from "@strapi/strapi";
-import { extractContentTypeName } from "../utils";
-
-const logoFileName = (userId: string | number) => `logo-${userId}`;
+import {
+  deleteOwnedFile,
+  extractContentTypeName,
+  uploadOwnedFile,
+} from "../utils";
 
 export default factories.createCoreService(
   "plugin::better-auth.organization",
   () => ({
     /**
-     * Uploads a logo image to the media library, tagged by the uploading
+     * Uploads a logo image to the media library, linked to the uploading
      * user rather than a specific organization — better-auth-ui's
      * `organization.logo.upload` config has no way to pass which org the
      * logo is for (it's set on the org afterwards via better-auth's own
@@ -25,36 +27,28 @@ export default factories.createCoreService(
       userId: string | number;
       file: unknown;
     }) {
-      const [uploaded] = await strapi
-        .plugin("upload")
-        .service("upload")
-        .upload({
-          data: { fileInfo: { name: logoFileName(userId) } },
-          files: file,
-        });
-
-      return uploaded as { url: string };
+      return uploadOwnedFile({
+        userId,
+        file,
+        field: "logo",
+        name: `logo-${userId}`,
+      });
     },
 
     /**
      * Removes a previously uploaded logo from the media library, but only
-     * if it was tagged as this user's own logo upload.
+     * if the caller is allowed to — see `deleteOwnedFile`.
      */
     async deleteLogo({
       userId,
       url,
+      headers,
     }: {
       userId: string | number;
       url: string;
+      headers: Headers;
     }) {
-      const existing = await strapi.db
-        .query("plugin::upload.file")
-        .findOne({ where: { url, name: logoFileName(userId) } });
-
-      if (!existing) return false;
-
-      await strapi.plugin("upload").service("upload").remove(existing);
-      return true;
+      return deleteOwnedFile({ userId, url, headers });
     },
 
     async getRelatedContent<UID extends UID.ContentType>({
