@@ -112,7 +112,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                     href={document.profile.website}
                     className="flex items-center gap-1.5 transition-colors hover:text-white"
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener"
                   >
                     <Globe className="h-4 w-4" />
                     Visit Website

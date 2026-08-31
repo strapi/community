@@ -123,7 +123,7 @@ const OrganizationTemplate = ({
                   <Link
                     href={document.profile.website}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener"
                   >
                     Visit website
                     <ExternalLink className="h-4 w-4" />
