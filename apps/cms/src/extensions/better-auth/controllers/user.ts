@@ -4,7 +4,11 @@
 
 import { factories } from "@strapi/strapi";
 import { fromNodeHeaders } from "better-auth/node";
-import { getPluginService, userProfileFields } from "../utils";
+import {
+  getPluginService,
+  userProfileFields,
+  validateProfileData,
+} from "../utils";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
@@ -59,6 +63,9 @@ export default factories.createCoreController(
           .filter((field) => field in body)
           .map((field) => [field, body[field]]),
       );
+
+      const errors = validateProfileData(data);
+      if (errors.length > 0) return ctx.badRequest(errors.join(" "));
 
       const profile = await getPluginService("user").updateProfile({
         userId: session.user.id,

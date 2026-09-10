@@ -4,7 +4,11 @@
 
 import { factories } from "@strapi/strapi";
 import { fromNodeHeaders } from "better-auth/node";
-import { getPluginService, organizationProfileFields } from "../utils";
+import {
+  getPluginService,
+  organizationProfileFields,
+  validateProfileData,
+} from "../utils";
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024;
 
@@ -58,6 +62,9 @@ export default factories.createCoreController(
           .filter((field) => field in body)
           .map((field) => [field, body[field]]),
       );
+
+      const errors = validateProfileData(data);
+      if (errors.length > 0) return ctx.badRequest(errors.join(" "));
 
       const service = getPluginService("organization");
 

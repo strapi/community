@@ -2,6 +2,8 @@ import type { UID } from "@strapi/strapi";
 import { auth } from "../../../lib/auth";
 import type services from "../services";
 
+export { validateProfileData } from "./profile-validation";
+
 export const extractContentTypeName = (uid: UID.ContentType) =>
   uid.split(".")[1];
 
