@@ -39,6 +39,23 @@ export const organizationProfileFields = [
 ] as const;
 
 /**
+ * `api::profile.profile` fields a user may edit through their personal
+ * "Profile" tab — scoped to exactly what the public user page renders
+ * (bio/subtitle/website/github/location/email/readme). Includes `email`
+ * (a public contact address), unlike `organizationProfileFields` — an
+ * organization has no equivalent distinct-from-account address.
+ */
+export const userProfileFields = [
+  "bio",
+  "subtitle",
+  "website",
+  "github",
+  "location",
+  "email",
+  "readme",
+] as const;
+
+/**
  * Uploads a file to the media library, linked to the uploading user via
  * the native `related` morph field on `plugin::upload.file` — the same
  * mechanism Strapi's own upload plugin uses internally for

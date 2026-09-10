@@ -4,7 +4,7 @@
 
 import { factories } from "@strapi/strapi";
 import { fromNodeHeaders } from "better-auth/node";
-import { getPluginService } from "../utils";
+import { getPluginService, userProfileFields } from "../utils";
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
@@ -30,6 +30,42 @@ export default factories.createCoreController(
       ]);
 
       ctx.body = { packages, templates };
+    },
+
+    /**
+     * GET /users/me/profile — used by the web app's personal "Profile"
+     * tab. Gated by the `is-authenticated` policy.
+     */
+    async getProfile(ctx) {
+      const session = ctx.state.betterAuthSession;
+
+      const profile = await getPluginService("user").getProfile({
+        userId: session.user.id,
+      });
+
+      ctx.body = profile ?? {};
+    },
+
+    /**
+     * PUT /users/me/profile — used by the web app's personal "Profile"
+     * tab. Gated by the `is-authenticated` policy.
+     */
+    async updateProfile(ctx) {
+      const session = ctx.state.betterAuthSession;
+      const body = ctx.request.body ?? {};
+
+      const data = Object.fromEntries(
+        userProfileFields
+          .filter((field) => field in body)
+          .map((field) => [field, body[field]]),
+      );
+
+      const profile = await getPluginService("user").updateProfile({
+        userId: session.user.id,
+        data,
+      });
+
+      ctx.body = profile;
     },
 
     /**
