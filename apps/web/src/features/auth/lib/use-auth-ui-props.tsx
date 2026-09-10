@@ -43,9 +43,10 @@ export function useAuthUIProviderProps(): Omit<
     additionalFields: {
       slug: {
         label: "Slug URL",
-        description: "This is your organization's URL namespace.",
+        description: "This is your profile's URL namespace.",
         placeholder: "your-name",
         required: true,
+        instructions: "Changing this will update your profile URL.",
         type: "string",
         validate: async (value) =>
           value.length >= 3 &&
