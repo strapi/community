@@ -1,25 +1,40 @@
+import { getPluginService } from "../extensions/better-auth/utils";
 import { getGithubOwnerAvatarUrl, uploadFromUrl } from "./utils";
 
-const PACKAGE_UID = "api::package.package";
-const TEMPLATE_UID = "api::template.template";
+const findLatestSubmission = async (userId: string) => {
+  const userService = getPluginService("user");
 
-const findLatestPackage = (userDocumentId: string) =>
-  strapi.documents(PACKAGE_UID).findFirst({
-    fields: ["git_repository", "createdAt"],
-    filters: {
-      maintainers: { documentId: { $eq: userDocumentId } },
-    },
-    sort: { createdAt: "desc" },
-  });
+  const [packages, templates] = await Promise.all([
+    userService.getRelatedContent({
+      organizationId: userId,
+      uid: "api::package.package",
+      query: {
+        fields: ["git_repository", "createdAt"],
+        sort: { createdAt: "desc" },
+      },
+    }),
+    userService.getRelatedContent({
+      organizationId: userId,
+      uid: "api::template.template",
+      query: {
+        fields: ["git_repository", "createdAt"],
+        sort: { createdAt: "desc" },
+      },
+    }),
+  ]);
 
-const findLatestTemplate = (userDocumentId: string) =>
-  strapi.documents(TEMPLATE_UID).findFirst({
-    fields: ["git_repository", "createdAt"],
-    filters: {
-      maintainers: { documentId: { $eq: userDocumentId } },
-    },
-    sort: { createdAt: "desc" },
-  });
+  return (
+    [...packages, ...templates] as {
+      git_repository?: string;
+      createdAt: string;
+    }[]
+  )
+    .filter((item) => item.git_repository)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0];
+};
 
 export const migrateUserProfilePictures = async () => {
   strapi.log.info("Starting user profile pictures migration...");
@@ -28,7 +43,7 @@ export const migrateUserProfilePictures = async () => {
   let failed = 0;
 
   const users = await strapi.documents("plugin::better-auth.user").findMany({
-    fields: ["documentId", "image"],
+    fields: ["id", "documentId", "image"],
     filters: {
       $or: [{ image: { $null: true } }, { image: { $eq: "" } }],
     },
@@ -36,17 +51,7 @@ export const migrateUserProfilePictures = async () => {
 
   for (const user of users) {
     try {
-      const [latestPackage, latestTemplate] = await Promise.all([
-        findLatestPackage(user.documentId),
-        findLatestTemplate(user.documentId),
-      ]);
-
-      const latestSubmission = [latestPackage, latestTemplate]
-        .filter(Boolean)
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )[0];
+      const latestSubmission = await findLatestSubmission(String(user.id));
 
       const avatar = latestSubmission?.git_repository
         ? getGithubOwnerAvatarUrl(latestSubmission.git_repository)
