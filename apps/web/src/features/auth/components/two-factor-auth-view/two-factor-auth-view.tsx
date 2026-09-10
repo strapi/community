@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthUIProvider, AuthView } from "@daveyplate/better-auth-ui";
-import { useAuthUIProviderProps } from "../lib/use-auth-ui-props";
+import { useAuthUIProviderProps } from "../../lib/use-auth-ui-props";
 
 /**
  * AuthView's social-buttons section only excludes the RESET_PASSWORD and

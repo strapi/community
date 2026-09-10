@@ -14,7 +14,7 @@ import {
 import { MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { UserProfileCard } from "./user-profile-card";
+import { ProfileView } from "../profile-view";
 
 type View = "SETTINGS" | "PROFILE" | "SECURITY" | "API_KEYS" | "ORGANIZATIONS";
 
@@ -30,7 +30,7 @@ type Props = {
  * component's comment) for the same reason: the library's own component
  * has no slot for an extra tab, so adding a personal "Profile" tab means
  * reproducing its nav + view switching ourselves. Everything used below
- * besides `UserProfileCard` is a public export of the package; the nav
+ * besides `ProfileView` is a public export of the package; the nav
  * layout (sidebar on desktop, a collapsible list on mobile) mirrors the
  * library's own two-column `AccountView`, just built with this app's own
  * Tailwind tokens instead of better-auth-ui's internal Button/Drawer
@@ -138,7 +138,7 @@ export function AccountView({ pathname }: Props) {
       <div className="flex w-full flex-col gap-4 md:gap-6">
         {view === "SETTINGS" && <AccountSettingsCards />}
 
-        {view === "PROFILE" && <UserProfileCard />}
+        {view === "PROFILE" && <ProfileView variant="user" />}
 
         {view === "SECURITY" && <SecuritySettingsCards />}
 

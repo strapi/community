@@ -15,8 +15,8 @@ import {
 import { MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { OrganizationProfile } from "../lib/organization-profile";
-import { OrganizationProfileCard } from "./organization-profile-card";
+import type { OrganizationProfile } from "../../lib/organization-profile";
+import { ProfileView } from "../profile-view";
 
 type View = "SETTINGS" | "PROFILE" | "MEMBERS" | "TEAMS" | "API_KEYS";
 
@@ -34,8 +34,8 @@ type Props = {
  * `OrganizationView` — that component has no slot/children/extra-tab prop
  * (confirmed against its v3.4.0 source), so adding a real "Profile" tab
  * means reproducing its nav + view switching ourselves. Everything used
- * below besides `OrganizationProfileCard` is a public export of the
- * package; the nav layout (sidebar on desktop, a collapsible list on
+ * below besides `ProfileView` is a public export of the package; the nav
+ * layout (sidebar on desktop, a collapsible list on
  * mobile) mirrors the library's own two-column `OrganizationView`, just
  * built with this app's own Tailwind tokens instead of better-auth-ui's
  * internal Button/Drawer primitives, which aren't exported.
@@ -193,7 +193,8 @@ export function OrganizationView({
         )}
 
         {view === "PROFILE" && (
-          <OrganizationProfileCard
+          <ProfileView
+            variant="organization"
             organizationId={organizationId}
             initialProfile={initialProfile}
           />

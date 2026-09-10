@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthUIProvider, AuthView } from "@daveyplate/better-auth-ui";
-import { useAuthUIProviderProps } from "../lib/use-auth-ui-props";
+import { useAuthUIProviderProps } from "../../lib/use-auth-ui-props";
 
 /**
  * AuthUIProvider's `magicLink` (like `credentials`/`emailOTP`/etc.) is a
