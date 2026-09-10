@@ -108,7 +108,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                   <Link
                     href={document.preview_link}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener"
                   >
                     Preview Template
                     <ExternalLink className="h-4 w-4" />

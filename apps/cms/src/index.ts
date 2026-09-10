@@ -1,8 +1,5 @@
 import type { Core } from "@strapi/strapi";
-import { migrateIntegrations } from "./migration/integrations";
-import { migratePartners } from "./migration/partners";
-import { migratePlugins } from "./migration/plugins";
-import { migrateProviders } from "./migration/providers";
+import { migrateUserProfilePictures } from "./migration/user-profile-pictures";
 import { seedEmailTemplates } from "./seed/email-templates";
 
 export default {
@@ -15,9 +12,6 @@ export default {
       return;
     }
 
-    await migratePartners();
-    await migrateIntegrations();
-    await migratePlugins();
-    await migrateProviders();
+    await migrateUserProfilePictures();
   },
 };

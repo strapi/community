@@ -5,6 +5,28 @@ export function extractNpmPackageName(pathname: string): string | null {
   return match?.[1] ?? null;
 }
 
+const README_FILENAMES = ["README.md", "readme.md", "README", "Readme.md"];
+
+async function fetchReadme(
+  packageName: string,
+  version: string,
+): Promise<string | null> {
+  for (const filename of README_FILENAMES) {
+    try {
+      const res = await fetch(
+        `https://cdn.jsdelivr.net/npm/${packageName}@${version}/${filename}`,
+      );
+      if (res.ok) {
+        const text = await res.text();
+        if (text.trim().length > 0) return text;
+      }
+    } catch {
+      // try next filename
+    }
+  }
+  return null;
+}
+
 export async function getNpmPackageInfo(
   packageName: string,
 ): Promise<RegistryInfo> {
@@ -27,6 +49,7 @@ export async function getNpmPackageInfo(
 
   const weeklyData: any = weeklyRes.ok ? await weeklyRes.json() : null;
   const monthlyData: any = monthlyRes.ok ? await monthlyRes.json() : null;
+  const readme = latest ? await fetchReadme(packageName, latest) : null;
 
   return {
     registry: "npm",
@@ -40,7 +63,7 @@ export async function getNpmPackageInfo(
       monthly: monthlyData?.downloads ?? null,
       total: null,
     },
-    readme: data.readme ?? null,
+    readme,
     stars: null,
   };
 }
