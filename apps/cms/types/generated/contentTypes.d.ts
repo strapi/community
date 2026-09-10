@@ -1938,6 +1938,13 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     sitemap_exclude: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;
+    slug: Schema.Attribute.Text &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     twoFactorEnabled: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {

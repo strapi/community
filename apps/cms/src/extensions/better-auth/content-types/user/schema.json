@@ -81,6 +81,16 @@
     "community_star": {
       "type": "boolean"
     },
+    "slug": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "unique": true
+    },
     "url_alias": {
       "type": "relation",
       "relation": "oneToMany",

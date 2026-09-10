@@ -1,7 +1,13 @@
 import { dash } from "@better-auth/infra";
 import { strapiAdapter } from "@strapi-community/plugin-better-auth";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { jwt, magicLink, organization, twoFactor } from "better-auth/plugins";
+import {
+  generateUniqueUserSlug,
+  isSlugTaken,
+  validateSlug,
+} from "../utils/slugify";
 import {
   sendChangeEmailConfirmationEmail,
   sendEmailChangedEmail,
@@ -149,10 +155,51 @@ export const auth = betterAuth({
         );
       },
     },
+    additionalFields: {
+      /**
+       * Determines the user's public profile URL (via the
+       * `strapi-plugin-webtools` `/[slug]` pattern) independently of
+       * `name` — see the account settings' "Profile URL" field
+       * (apps/web/src/features/auth/lib/use-auth-ui-props.tsx). Not
+       * `required` here, since that would also force it onto every
+       * sign-up flow (social/magic link included) — it's populated by
+       * `databaseHooks.user.create.before` below instead, and backfilled
+       * for existing users by `migrateUserSlugs`.
+       */
+      slug: {
+        type: "string",
+        required: false,
+        unique: true,
+        input: true,
+      },
+    },
   },
   databaseHooks: {
     user: {
+      create: {
+        before: async (user) => ({
+          data: { slug: await generateUniqueUserSlug(user.name) },
+        }),
+      },
       update: {
+        before: async (data, context) => {
+          if (typeof data.slug !== "string") return;
+
+          const slug = data.slug.trim();
+          const formatError = validateSlug(slug);
+          if (formatError) {
+            throw new APIError("BAD_REQUEST", { message: formatError });
+          }
+
+          const currentUserId = context?.context?.session?.user?.id;
+          if (await isSlugTaken(slug, { excludeUserId: currentUserId })) {
+            throw new APIError("BAD_REQUEST", {
+              message: "That profile URL is already taken.",
+            });
+          }
+
+          return { data: { ...data, slug } };
+        },
         after: async (updated) => {
           const oldEmail = pendingEmailChanges.get(updated.email);
           if (!oldEmail || !updated.emailVerified) return;

@@ -32,7 +32,32 @@ export function useAuthUIProviderProps(): Omit<
     Link: ({ href, ...props }) => <Link href={href ?? "#"} {...props} />,
     basePath: "/auth",
     baseURL: process.env.NEXT_PUBLIC_WEB_URL,
-    account: true,
+    // `slug` renders as an extra "Profile URL" card in the Settings tab,
+    // right after the built-in avatar/name/email cards (better-auth-ui's
+    // `AccountSettingsCards` always renders those first, then walks
+    // `account.fields` for anything else matching `additionalFields`
+    // below) — mirrors how an organization's own `slug` already shows up
+    // in its management section, just via a custom field instead of a
+    // native better-auth one.
+    account: { fields: ["image", "name", "slug"] },
+    additionalFields: {
+      slug: {
+        label: "Slug URL",
+        description: "This is your organization's URL namespace.",
+        placeholder: "your-name",
+        required: true,
+        type: "string",
+        validate: async (value) =>
+          value.length >= 3 &&
+          value.length <= 60 &&
+          /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value),
+        errorMessage: {
+          required: "Slug URL is required",
+          validate:
+            "Only lowercase letters, numbers, and hyphens (3–60 characters).",
+        },
+      },
+    },
     avatar: {
       upload: uploadAvatar,
       delete: deleteAvatar,
