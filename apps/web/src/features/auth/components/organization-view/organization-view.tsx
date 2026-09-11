@@ -5,6 +5,7 @@ import {
   AuthUIContext,
   getViewByPath,
   OrganizationInvitationsCard,
+  OrganizationLogo,
   OrganizationMembersCard,
   OrganizationSettingsCards,
   organizationViewPaths,
@@ -12,11 +13,12 @@ import {
   useAuthenticate,
   useCurrentOrganization,
 } from "@daveyplate/better-auth-ui";
-import { MenuIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { OrganizationProfile } from "../../lib/organization-profile";
 import { ProfileView } from "../profile-view";
+import { SettingsContextSwitcher } from "../settings-context-switcher";
 
 type View = "SETTINGS" | "PROFILE" | "MEMBERS" | "TEAMS" | "API_KEYS";
 
@@ -53,6 +55,7 @@ export function OrganizationView({
     teams: teamOptions,
     organization: organizationOptions,
     account: accountOptions,
+    localization,
     Link,
     replace,
   } = useContext(AuthUIContext);
@@ -122,85 +125,142 @@ export function OrganizationView({
         : "text-(--color-neutral700) hover:bg-(--color-neutral100)",
     );
 
-  return (
-    <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
-      {/* Mobile: current view label + toggle for the nav list below it. */}
-      <div className="flex items-center justify-between gap-2 md:hidden">
-        <span className="font-semibold text-base">
-          {navItems.find((item) => item.view === view)?.label}
+  const organizationName = organization?.name || localization?.ORGANIZATION;
+
+  // A hand-rolled stand-in for `OrganizationCellView` — same logo + name
+  // layout, but with the "View profile" link where it would otherwise
+  // hardcode the organization's slug as the subtitle (no prop overrides
+  // that).
+  const identity = (size: "default" | "lg") => (
+    <div className="flex items-center gap-2">
+      <OrganizationLogo
+        organization={organization}
+        isPending={organizationPending}
+        size={size}
+      />
+      <div className="flex flex-col truncate text-left leading-tight">
+        <span
+          className={cn(
+            "truncate font-semibold",
+            size === "lg" ? "text-base" : "text-sm",
+          )}
+        >
+          {organizationName}
         </span>
 
-        <button
-          type="button"
-          aria-expanded={mobileNavOpen}
-          onClick={() => setMobileNavOpen((open) => !open)}
-          className="rounded-md border border-(--color-neutral150) p-2 text-(--color-neutral700)"
+        <Link
+          href={`/${slug}`}
+          className="inline-flex items-center gap-1 truncate text-xs font-medium text-(--color-primary600) hover:underline"
         >
-          {mobileNavOpen ? (
-            <XIcon className="size-4" />
-          ) : (
-            <MenuIcon className="size-4" />
+          View profile
+          <ArrowUpRightIcon className="size-3 shrink-0" />
+        </Link>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {/*
+       * "Settings context" switcher — makes it obvious which organization
+       * is being edited (as opposed to the signed-in user's own settings)
+       * and doubles as the way back to personal settings or across to
+       * another organization. On mobile (no room for a header bar) it
+       * stands alone, full-width (below its own identity + "View profile"
+       * row, kept separate so its label stays legible on narrow screens);
+       * on desktop it sits in its own bar above the sidebar + content
+       * row, aligned with both: identity and the profile link on the
+       * left, the switch itself on the far right.
+       */}
+      <div className="md:hidden">{identity("default")}</div>
+
+      <SettingsContextSwitcher slug={slug} className="md:hidden" />
+
+      <div className="hidden items-center justify-between gap-4 md:flex">
+        {identity("lg")}
+
+        <SettingsContextSwitcher slug={slug} />
+      </div>
+
+      <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
+        {/* Mobile: current view label + toggle for the nav list below it. */}
+        <div className="flex items-center justify-between gap-2 md:hidden">
+          <span className="font-semibold text-base">
+            {navItems.find((item) => item.view === view)?.label}
+          </span>
+
+          <button
+            type="button"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((open) => !open)}
+            className="rounded-md border border-(--color-neutral150) p-2 text-(--color-neutral700)"
+          >
+            {mobileNavOpen ? (
+              <XIcon className="size-4" />
+            ) : (
+              <MenuIcon className="size-4" />
+            )}
+          </button>
+        </div>
+
+        {mobileNavOpen && (
+          <div className="flex flex-col gap-1 md:hidden">
+            {navItems.map((item) => (
+              <Link
+                key={item.view}
+                href={navHref(item)}
+                className={navItemClassName(item)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Desktop: a persistent sidebar, like better-auth-ui's own layout. */}
+        <div className="hidden md:block">
+          <div className="flex w-48 flex-col gap-1 lg:w-60">
+            {navItems.map((item) => (
+              <Link
+                key={item.view}
+                href={navHref(item)}
+                className={navItemClassName(item)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-4 md:gap-6">
+          {view === "MEMBERS" && (
+            <>
+              <OrganizationMembersCard slug={slug} />
+              <OrganizationInvitationsCard slug={slug} />
+            </>
           )}
-        </button>
-      </div>
 
-      {mobileNavOpen && (
-        <div className="flex flex-col gap-1 md:hidden">
-          {navItems.map((item) => (
-            <Link
-              key={item.view}
-              href={navHref(item)}
-              className={navItemClassName(item)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {view === "TEAMS" && organization?.id && teamsEnabled && (
+            <TeamsCard organizationId={organization.id} />
+          )}
+
+          {view === "API_KEYS" && (
+            <ApiKeysCard
+              isPending={organizationPending}
+              organizationId={organization?.id}
+            />
+          )}
+
+          {view === "PROFILE" && (
+            <ProfileView
+              variant="organization"
+              organizationId={organizationId}
+              initialProfile={initialProfile}
+            />
+          )}
+
+          {view === "SETTINGS" && <OrganizationSettingsCards slug={slug} />}
         </div>
-      )}
-
-      {/* Desktop: a persistent sidebar, like better-auth-ui's own layout. */}
-      <div className="hidden md:block">
-        <div className="flex w-48 flex-col gap-1 lg:w-60">
-          {navItems.map((item) => (
-            <Link
-              key={item.view}
-              href={navHref(item)}
-              className={navItemClassName(item)}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex w-full flex-col gap-4 md:gap-6">
-        {view === "MEMBERS" && (
-          <>
-            <OrganizationMembersCard slug={slug} />
-            <OrganizationInvitationsCard slug={slug} />
-          </>
-        )}
-
-        {view === "TEAMS" && organization?.id && teamsEnabled && (
-          <TeamsCard organizationId={organization.id} />
-        )}
-
-        {view === "API_KEYS" && (
-          <ApiKeysCard
-            isPending={organizationPending}
-            organizationId={organization?.id}
-          />
-        )}
-
-        {view === "PROFILE" && (
-          <ProfileView
-            variant="organization"
-            organizationId={organizationId}
-            initialProfile={initialProfile}
-          />
-        )}
-
-        {view === "SETTINGS" && <OrganizationSettingsCards slug={slug} />}
       </div>
     </div>
   );

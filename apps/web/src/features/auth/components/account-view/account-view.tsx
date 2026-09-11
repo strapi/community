@@ -8,13 +8,15 @@ import {
   getViewByPath,
   OrganizationsCard,
   SecuritySettingsCards,
+  UserAvatar,
   UserInvitationsCard,
   useAuthenticate,
 } from "@daveyplate/better-auth-ui";
-import { MenuIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ProfileView } from "../profile-view";
+import { SettingsContextSwitcher } from "../settings-context-switcher";
 
 type View = "SETTINGS" | "PROFILE" | "SECURITY" | "API_KEYS" | "ORGANIZATIONS";
 
@@ -43,12 +45,21 @@ export function AccountView({ pathname }: Props) {
   const {
     apiKey,
     organization: organizationOptions,
+    localization,
     Link,
+    hooks: { useSession },
   } = useContext(AuthUIContext);
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useAuthenticate();
+
+  const { data: sessionData, isPending: sessionPending } = useSession();
+
+  // `slug` is a custom `additionalFields` entry (see use-auth-ui-props.tsx)
+  // not present on better-auth-ui's own `User` type — see the same cast
+  // in auth-navigation.tsx, which links to this same public profile URL.
+  const userSlug = (sessionData?.user as { slug?: string } | undefined)?.slug;
 
   const path = pathname?.split("/").pop();
   const view =
@@ -84,72 +95,135 @@ export function AccountView({ pathname }: Props) {
         : "text-(--color-neutral700) hover:bg-(--color-neutral100)",
     );
 
-  return (
-    <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
-      {/* Mobile: current view label + toggle for the nav list below it. */}
-      <div className="flex items-center justify-between gap-2 md:hidden">
-        <span className="font-semibold text-base">
-          {navItems.find((item) => item.view === view)?.label}
+  const userName =
+    sessionData?.user?.name || sessionData?.user?.email || localization?.USER;
+
+  // A hand-rolled stand-in for `UserView` — same avatar + name layout,
+  // but with the "View profile" link where `UserView` would otherwise
+  // hardcode the user's email as the subtitle (no prop overrides that).
+  const identity = (size: "default" | "lg") => (
+    <div className="flex items-center gap-2">
+      <UserAvatar
+        user={sessionData?.user}
+        isPending={sessionPending}
+        size={size}
+      />
+      <div className="flex flex-col truncate text-left leading-tight">
+        <span
+          className={cn(
+            "truncate font-semibold",
+            size === "lg" ? "text-base" : "text-sm",
+          )}
+        >
+          {userName}
         </span>
 
-        <button
-          type="button"
-          aria-expanded={mobileNavOpen}
-          onClick={() => setMobileNavOpen((open) => !open)}
-          className="rounded-md border border-(--color-neutral150) p-2 text-(--color-neutral700)"
-        >
-          {mobileNavOpen ? (
-            <XIcon className="size-4" />
-          ) : (
-            <MenuIcon className="size-4" />
-          )}
-        </button>
+        {userSlug && (
+          <Link
+            href={`/${userSlug}`}
+            className="inline-flex items-center gap-1 truncate text-xs font-medium text-(--color-primary600) hover:underline"
+          >
+            View profile
+            <ArrowUpRightIcon className="size-3 shrink-0" />
+          </Link>
+        )}
       </div>
+    </div>
+  );
 
-      {mobileNavOpen && (
-        <div className="flex flex-col gap-1 md:hidden">
-          {navItems.map((item) => (
-            <Link
-              key={item.view}
-              href={navHref(item)}
-              className={navItemClassName(item)}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {/*
+       * "Settings context" switcher — with no active organization here,
+       * it renders as "Personal Account", making it obvious this is the
+       * top-level context, while still offering a one-click jump into any
+       * of the user's organizations. On mobile it stands alone, full-width
+       * (below its own identity + "View profile" row, kept separate so
+       * its label stays legible on narrow screens); on desktop it sits in
+       * its own bar above the sidebar + content row, aligned with both
+       * (see that same choice, and why, on `OrganizationView`): identity
+       * and the profile link on the left, the switch on the far right.
+       */}
+      {organizationOptions && (
+        <>
+          <div className="md:hidden">{identity("default")}</div>
+
+          <SettingsContextSwitcher className="md:hidden" />
+
+          <div className="hidden items-center justify-between gap-4 md:flex">
+            {identity("lg")}
+
+            <SettingsContextSwitcher />
+          </div>
+        </>
       )}
 
-      {/* Desktop: a persistent sidebar, like better-auth-ui's own layout. */}
-      <div className="hidden md:block">
-        <div className="flex w-48 flex-col gap-1 lg:w-60">
-          {navItems.map((item) => (
-            <Link
-              key={item.view}
-              href={navHref(item)}
-              className={navItemClassName(item)}
-            >
-              {item.label}
-            </Link>
-          ))}
+      <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
+        {/* Mobile: current view label + toggle for the nav list below it. */}
+        <div className="flex items-center justify-between gap-2 md:hidden">
+          <span className="font-semibold text-base">
+            {navItems.find((item) => item.view === view)?.label}
+          </span>
+
+          <button
+            type="button"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((open) => !open)}
+            className="rounded-md border border-(--color-neutral150) p-2 text-(--color-neutral700)"
+          >
+            {mobileNavOpen ? (
+              <XIcon className="size-4" />
+            ) : (
+              <MenuIcon className="size-4" />
+            )}
+          </button>
         </div>
-      </div>
 
-      <div className="flex w-full flex-col gap-4 md:gap-6">
-        {view === "SETTINGS" && <AccountSettingsCards />}
-
-        {view === "PROFILE" && <ProfileView variant="user" />}
-
-        {view === "SECURITY" && <SecuritySettingsCards />}
-
-        {view === "API_KEYS" && apiKey && <ApiKeysCard />}
-
-        {view === "ORGANIZATIONS" && organizationOptions && (
-          <div className="grid w-full gap-4 md:gap-6">
-            <OrganizationsCard />
-            <UserInvitationsCard />
+        {mobileNavOpen && (
+          <div className="flex flex-col gap-1 md:hidden">
+            {navItems.map((item) => (
+              <Link
+                key={item.view}
+                href={navHref(item)}
+                className={navItemClassName(item)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         )}
+
+        {/* Desktop: a persistent sidebar, like better-auth-ui's own layout. */}
+        <div className="hidden md:block">
+          <div className="flex w-48 flex-col gap-1 lg:w-60">
+            {navItems.map((item) => (
+              <Link
+                key={item.view}
+                href={navHref(item)}
+                className={navItemClassName(item)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-4 md:gap-6">
+          {view === "SETTINGS" && <AccountSettingsCards />}
+
+          {view === "PROFILE" && <ProfileView variant="user" />}
+
+          {view === "SECURITY" && <SecuritySettingsCards />}
+
+          {view === "API_KEYS" && apiKey && <ApiKeysCard />}
+
+          {view === "ORGANIZATIONS" && organizationOptions && (
+            <div className="grid w-full gap-4 md:gap-6">
+              <OrganizationsCard />
+              <UserInvitationsCard />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
