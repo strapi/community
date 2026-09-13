@@ -1,0 +1,164 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 4a3f015fc32847cfcd6a6eb38aad1d096e5e4011..791599bb93e88046908f476fb1a04a1541290d9d 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -2325,17 +2325,28 @@ function UpdateAvatarCard({
+   const handleAvatarChange = async (file) => {
+     if (!sessionData || !avatar) return;
+     setLoading(true);
+-    const resizedFile = await resizeAndCropImage(
+-      file,
+-      crypto.randomUUID(),
+-      avatar.size,
+-      avatar.extension
+-    );
++    let resizedFile;
+     let image;
+-    if (avatar.upload) {
+-      image = await avatar.upload(resizedFile);
+-    } else {
+-      image = await fileToBase64(resizedFile);
++    try {
++      resizedFile = await resizeAndCropImage(
++        file,
++        crypto.randomUUID(),
++        avatar.size,
++        avatar.extension
++      );
++      if (avatar.upload) {
++        image = await avatar.upload(resizedFile);
++      } else {
++        image = await fileToBase64(resizedFile);
++      }
++    } catch (error) {
++      console.error(error);
++      setLoading(false);
++      toast({
++        variant: "error",
++        message: "This file couldn't be used as an avatar. Please choose a JPG, PNG, GIF, or WEBP image."
++      });
++      return;
+     }
+     if (!image) {
+       setLoading(false);
+@@ -11512,17 +11523,28 @@ function OrganizationLogoForm({
+   const handleLogoChange = async (file) => {
+     if (!(organizationOptions == null ? void 0 : organizationOptions.logo) || !(hasPermission == null ? void 0 : hasPermission.success)) return;
+     setLoading(true);
+-    const resizedFile = await resizeAndCropImage(
+-      file,
+-      crypto.randomUUID(),
+-      organizationOptions.logo.size,
+-      organizationOptions.logo.extension
+-    );
++    let resizedFile;
+     let image;
+-    if (organizationOptions.logo.upload) {
+-      image = await organizationOptions.logo.upload(resizedFile);
+-    } else {
+-      image = await fileToBase64(resizedFile);
++    try {
++      resizedFile = await resizeAndCropImage(
++        file,
++        crypto.randomUUID(),
++        organizationOptions.logo.size,
++        organizationOptions.logo.extension
++      );
++      if (organizationOptions.logo.upload) {
++        image = await organizationOptions.logo.upload(resizedFile);
++      } else {
++        image = await fileToBase64(resizedFile);
++      }
++    } catch (error) {
++      console.error(error);
++      setLoading(false);
++      toast({
++        variant: "error",
++        message: "This file couldn't be used as a logo. Please choose a JPG, PNG, GIF, or WEBP image."
++      });
++      return;
+     }
+     if (!image) {
+       setLoading(false);
+diff --git a/dist/index.js b/dist/index.js
+index 135cbffb51236e54eb3d17b2e8a9a26ff151b91c..62a4aee6106e59230fc89bd4f59b66ca0e2075f4 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2325,17 +2325,28 @@ function UpdateAvatarCard({
+   const handleAvatarChange = async (file) => {
+     if (!sessionData || !avatar) return;
+     setLoading(true);
+-    const resizedFile = await resizeAndCropImage(
+-      file,
+-      crypto.randomUUID(),
+-      avatar.size,
+-      avatar.extension
+-    );
++    let resizedFile;
+     let image;
+-    if (avatar.upload) {
+-      image = await avatar.upload(resizedFile);
+-    } else {
+-      image = await fileToBase64(resizedFile);
++    try {
++      resizedFile = await resizeAndCropImage(
++        file,
++        crypto.randomUUID(),
++        avatar.size,
++        avatar.extension
++      );
++      if (avatar.upload) {
++        image = await avatar.upload(resizedFile);
++      } else {
++        image = await fileToBase64(resizedFile);
++      }
++    } catch (error) {
++      console.error(error);
++      setLoading(false);
++      toast({
++        variant: "error",
++        message: "This file couldn't be used as an avatar. Please choose a JPG, PNG, GIF, or WEBP image."
++      });
++      return;
+     }
+     if (!image) {
+       setLoading(false);
+@@ -11512,17 +11523,28 @@ function OrganizationLogoForm({
+   const handleLogoChange = async (file) => {
+     if (!(organizationOptions == null ? void 0 : organizationOptions.logo) || !(hasPermission == null ? void 0 : hasPermission.success)) return;
+     setLoading(true);
+-    const resizedFile = await resizeAndCropImage(
+-      file,
+-      crypto.randomUUID(),
+-      organizationOptions.logo.size,
+-      organizationOptions.logo.extension
+-    );
++    let resizedFile;
+     let image;
+-    if (organizationOptions.logo.upload) {
+-      image = await organizationOptions.logo.upload(resizedFile);
+-    } else {
+-      image = await fileToBase64(resizedFile);
++    try {
++      resizedFile = await resizeAndCropImage(
++        file,
++        crypto.randomUUID(),
++        organizationOptions.logo.size,
++        organizationOptions.logo.extension
++      );
++      if (organizationOptions.logo.upload) {
++        image = await organizationOptions.logo.upload(resizedFile);
++      } else {
++        image = await fileToBase64(resizedFile);
++      }
++    } catch (error) {
++      console.error(error);
++      setLoading(false);
++      toast({
++        variant: "error",
++        message: "This file couldn't be used as a logo. Please choose a JPG, PNG, GIF, or WEBP image."
++      });
++      return;
+     }
+     if (!image) {
+       setLoading(false);
