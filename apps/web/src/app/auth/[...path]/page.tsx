@@ -1,7 +1,9 @@
+import { LogInIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Navigation } from "@/components/layout/navigation";
+import { AuthNotice } from "@/features/auth/components/auth-notice";
 import { AuthView } from "@/features/auth/components/auth-view";
 import { SignUpAuthView } from "@/features/auth/components/sign-up-auth-view";
 import { TwoFactorAuthView } from "@/features/auth/components/two-factor-auth-view";
@@ -10,6 +12,7 @@ import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 
 type Props = {
   params: Promise<{ path: string[] }>;
+  searchParams: Promise<{ redirectTo?: string }>;
 };
 
 // Keyed by `@daveyplate/better-auth-ui`'s default `authViewPaths` segments
@@ -40,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: (view && TITLES[view]) || TITLES["sign-in"] };
 }
 
-export default async function AuthPage({ params }: Props) {
+export default async function AuthPage({ params, searchParams }: Props) {
   if (!isAuthEnabled) notFound();
 
   const { path } = await params;
@@ -59,17 +62,37 @@ export default async function AuthPage({ params }: Props) {
     if (session) redirect("/account");
   }
 
+  // better-auth-ui's `useAuthenticate()` bounces a logged-out visitor from
+  // `/auth/accept-invitation` to this view with `redirectTo` pointing back
+  // at the invitation, but does so silently — there's no visual sign of
+  // *why* they landed here. Surface that context so it doesn't read like a
+  // dead end.
+  const { redirectTo } = await searchParams;
+  const isAcceptingInvitation =
+    redirectTo?.startsWith("/auth/accept-invitation") ?? false;
+
   return (
     <>
       <Navigation theme="light" />
       <main className="flex items-center justify-center px-4 py-12">
-        {view === "sign-up" ? (
-          <SignUpAuthView pathname={pathname} />
-        ) : view === "two-factor" ? (
-          <TwoFactorAuthView pathname={pathname} />
-        ) : (
-          <AuthView pathname={pathname} />
-        )}
+        {/* Shared `max-w-sm` wrapper — rather than each having its own, so
+            the notice always lines up with the auth card's width (the
+            card's own `max-w-sm` becomes a no-op inside an equally-wide
+            parent) instead of the two drifting apart independently. */}
+        <div className="flex w-full max-w-sm flex-col gap-4">
+          {isAcceptingInvitation && (
+            <AuthNotice icon={LogInIcon}>
+              Sign in or create an account to accept your invitation.
+            </AuthNotice>
+          )}
+          {view === "sign-up" ? (
+            <SignUpAuthView pathname={pathname} />
+          ) : view === "two-factor" ? (
+            <TwoFactorAuthView pathname={pathname} />
+          ) : (
+            <AuthView pathname={pathname} />
+          )}
+        </div>
       </main>
     </>
   );
