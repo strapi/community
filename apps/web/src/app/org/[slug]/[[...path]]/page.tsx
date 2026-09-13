@@ -1,4 +1,5 @@
 import type { GetQueryParams } from "@repo/strapi-client";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Navigation } from "@/components/layout/navigation";
 import { OrganizationView } from "@/features/auth/components/organization-view";
@@ -10,6 +11,36 @@ const contentType = "plugin::better-auth.organization" as const;
 type Props = {
   params: Promise<{ slug: string; path?: string[] }>;
 };
+
+// Keyed by organization-view.tsx's own `viewPaths` (`@daveyplate/better-auth-ui`'s
+// default `organizationViewPaths` segments plus its custom "profile" tab).
+// Not imported directly — that package's entry file is a "use client"
+// boundary, so its exports can't be pulled into this server-only
+// generateMetadata. organization-view.tsx doesn't override `viewPaths`
+// either, so these literal segments stay in sync with what it actually
+// renders at.
+const TITLES: Record<string, string> = {
+  settings: "Settings",
+  profile: "Profile",
+  members: "Members",
+  teams: "Teams",
+  "api-keys": "API keys",
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug, path } = await params;
+  const view = path?.at(-1);
+  const label = (view && TITLES[view]) || TITLES.settings;
+
+  const { data } = await cmsClient.collection(contentType).find({
+    filters: { slug: { $eq: slug } },
+    fields: ["name"],
+  } satisfies GetQueryParams<typeof contentType>);
+
+  const organizationName = data[0]?.name;
+
+  return { title: organizationName ? `${label} · ${organizationName}` : label };
+}
 
 export default async function OrgPage({ params }: Props) {
   if (!isAuthEnabled) notFound();
