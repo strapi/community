@@ -12,7 +12,6 @@ type Props = {
 };
 
 const OverviewPageTemplate = ({ document }: Props) => {
-  console.log(document.sections);
   return (
     <div>
       <Navigation theme="dark" />

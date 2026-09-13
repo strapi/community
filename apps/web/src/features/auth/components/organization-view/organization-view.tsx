@@ -259,7 +259,27 @@ export function OrganizationView({
             />
           )}
 
-          {view === "SETTINGS" && <OrganizationSettingsCards slug={slug} />}
+          {view === "SETTINGS" && (
+            <OrganizationSettingsCards
+              slug={slug}
+              classNames={{
+                // Shared across every card here (logo/name/slug/delete —
+                // `classNames.card` is broadcast to all of them, and the
+                // delete card in turn shares it between its always-visible
+                // settings-card blurb and its confirmation dialog), but
+                // scoping on `data-slot` keeps this out of every other card
+                // and out of the settings-card blurb — only the dialog's
+                // own description (rendered via `DialogDescription`, whose
+                // `data-slot` differs from the card's `CardDescription`)
+                // picks up the warning-box styling. Mirrors the same trick
+                // in `account-view.tsx`'s `<DeleteAccountCard>`.
+                card: {
+                  description:
+                    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
+                },
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

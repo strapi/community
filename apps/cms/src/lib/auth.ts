@@ -4,6 +4,10 @@ import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { jwt, magicLink, organization, twoFactor } from "better-auth/plugins";
 import {
+  cascadeDeleteOrganization,
+  cascadeDeleteUser,
+} from "../extensions/better-auth/utils/cascade-delete";
+import {
   generateUniqueUserSlug,
   isSlugTaken,
   validateSlug,
@@ -100,6 +104,15 @@ export const auth = betterAuth({
           if (!organization) return;
           await relinkOrganizationLogo(organization);
         },
+        /**
+         * Cascade-deletes everything the organization owns (packages,
+         * templates, showcases, its profile, its logo — see
+         * `cascade-delete.ts`) before better-auth deletes the org's own
+         * `member`/`invitation` rows and the organization itself.
+         */
+        beforeDeleteOrganization: async ({ organization }) => {
+          await cascadeDeleteOrganization(organization.id);
+        },
       },
     }),
     twoFactor({
@@ -143,6 +156,19 @@ export const auth = betterAuth({
     },
   },
   user: {
+    deleteUser: {
+      enabled: true,
+      /**
+       * Cascade-deletes everything the user owns (packages, templates,
+       * showcases, their profile, their avatar — see `cascade-delete.ts`),
+       * removes their membership from every organization, and fully
+       * cascade-deletes any organization they own — before better-auth
+       * deletes the user's own `session`/`account`/`user` rows.
+       */
+      beforeDelete: async (user) => {
+        await cascadeDeleteUser(user.id);
+      },
+    },
     changeEmail: {
       enabled: true,
       sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {

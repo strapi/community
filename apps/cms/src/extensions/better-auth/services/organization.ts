@@ -5,7 +5,7 @@
 import { factories, type Modules, type UID } from "@strapi/strapi";
 import {
   deleteOwnedFile,
-  extractContentTypeName,
+  findOwnedContentIds,
   uploadOwnedFile,
 } from "../utils";
 
@@ -60,24 +60,18 @@ export default factories.createCoreService(
       uid: UID;
       query?: Modules.Documents.ServiceParams<UID>["findMany"];
     }) {
-      const contentTypeName = extractContentTypeName(uid);
-
-      const IDs: Record<string, unknown>[] = await strapi.db
-        .connection(`${contentTypeName}s`)
-        .select("id")
-        .where({
-          owner_id: organizationId,
-          owner_type: "plugin::better-auth.organization",
-        });
+      const IDs = await findOwnedContentIds(
+        uid,
+        organizationId,
+        "plugin::better-auth.organization",
+      );
 
       return strapi.documents(uid).findMany({
         ...query,
         filters: {
           ...query?.filters,
           id: {
-            $in: IDs.map(
-              (row) => row.id,
-            ) as Modules.Documents.Params.Attribute.ID[],
+            $in: IDs as Modules.Documents.Params.Attribute.ID[],
           },
         },
       });

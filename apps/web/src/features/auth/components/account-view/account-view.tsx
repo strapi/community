@@ -5,6 +5,7 @@ import {
   ApiKeysCard,
   AuthUIContext,
   accountViewPaths,
+  DeleteAccountCard,
   getViewByPath,
   OrganizationsCard,
   SecuritySettingsCards,
@@ -209,7 +210,33 @@ export function AccountView({ pathname }: Props) {
         </div>
 
         <div className="flex w-full flex-col gap-4 md:gap-6">
-          {view === "SETTINGS" && <AccountSettingsCards />}
+          {view === "SETTINGS" && (
+            <>
+              <AccountSettingsCards />
+              <DeleteAccountCard
+                localization={{
+                  // Overrides the confirmation dialog's description (not
+                  // just the settings card blurb) to warn that this cascades
+                  // to everything the account owns — see `cascadeDeleteUser`
+                  // in the CMS (apps/cms/src/extensions/better-auth/utils/cascade-delete.ts).
+                  DELETE_ACCOUNT_INSTRUCTIONS:
+                    "This action is not reversible. Deleting your account will also permanently delete your profile, all plugins and templates you own, and any organizations you're the owner of — along with all of their content.",
+                }}
+                classNames={{
+                  // `classNames` is shared as-is with both the always-visible
+                  // settings card AND the confirmation dialog (better-auth-ui
+                  // passes the same object to both internally) — its
+                  // description text renders via different components
+                  // though (`CardDescription` vs `DialogDescription`), each
+                  // stamping its own `data-slot`. Scoping on that keeps the
+                  // warning box out of the settings card and inside the
+                  // dialog only.
+                  description:
+                    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
+                }}
+              />
+            </>
+          )}
 
           {view === "PROFILE" && <ProfileView variant="user" />}
 

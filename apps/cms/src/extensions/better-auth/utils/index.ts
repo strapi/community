@@ -2,10 +2,16 @@ import type { UID } from "@strapi/strapi";
 import { auth } from "../../../lib/auth";
 import type services from "../services";
 
+export {
+  cascadeDeleteOrganization,
+  cascadeDeleteUser,
+  deleteOrganizationProfileAndLogo,
+  deleteOwnedContent,
+  deleteUserProfileAndAvatar,
+  findOwnedContentIds,
+} from "./cascade-delete";
+export { extractContentTypeName } from "./content-type-name";
 export { validateProfileData } from "./profile-validation";
-
-export const extractContentTypeName = (uid: UID.ContentType) =>
-  uid.split(".")[1];
 
 /**
  * A helper function to obtain a plugin service.
