@@ -32,6 +32,10 @@ export function useAuthUIProviderProps(): Omit<
     Link: ({ href, ...props }) => <Link href={href ?? "#"} {...props} />,
     basePath: "/auth",
     baseURL: process.env.NEXT_PUBLIC_WEB_URL,
+    // Where to send the user after a successful sign-in/sign-up (and other
+    // post-auth flows like accepting an invitation) — defaults to "/"
+    // otherwise. Account settings is the more useful landing spot here.
+    redirectTo: "/account",
     // `slug` renders as an extra "Profile URL" card in the Settings tab,
     // right after the built-in avatar/name/email cards (better-auth-ui's
     // `AccountSettingsCards` always renders those first, then walks
