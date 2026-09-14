@@ -20,7 +20,13 @@ export async function syncStats(): Promise<{
     }),
     strapi.documents("api::template.template").findMany({
       status: "published",
-      fields: ["documentId", "git_repository", "stars", "readme"],
+      fields: [
+        "documentId",
+        "git_repository",
+        "stars",
+        "readme",
+        "readme_auto_sync",
+      ],
       pagination: { pageSize: 500 },
     }),
   ]);
@@ -75,7 +81,16 @@ export async function syncStats(): Promise<{
 
       const patch: Record<string, unknown> = {};
       if (stars !== null && stars !== template.stars) patch.stars = stars;
-      if (readme !== null && readme !== template.readme) patch.readme = readme;
+      // Owner opted out of readme auto-sync (see the "Submissions" edit
+      // form) — stars still sync, readme does not. Syncing is the
+      // default: treat `null` (templates that predate this field) the
+      // same as `true`, not as opted out.
+      if (
+        template.readme_auto_sync !== false &&
+        readme !== null &&
+        readme !== template.readme
+      )
+        patch.readme = readme;
 
       if (Object.keys(patch).length === 0) continue;
 

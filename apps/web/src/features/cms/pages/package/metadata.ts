@@ -34,8 +34,6 @@ export const packageMetadata = async (
     description: description ?? undefined,
   });
 
-  console.log("owner", owner);
-
   return {
     title: name,
     description,

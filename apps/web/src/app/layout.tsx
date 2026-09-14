@@ -51,7 +51,26 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {isAuthEnabled ? <AuthProviders>{content}</AuthProviders> : content}
-        {isAuthEnabled && <Toaster />}
+        {isAuthEnabled && (
+          <Toaster
+            richColors
+            closeButton
+            position="top-right"
+            toastOptions={{
+              style: {
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                padding: "16px 20px",
+                border: "1.5px solid",
+                boxShadow: "0 12px 32px rgba(0, 0, 0, 0.2)",
+              },
+              classNames: {
+                closeButton: "toast-close-btn",
+              },
+            }}
+            style={{ "--width": "420px" } as React.CSSProperties}
+          />
+        )}
       </body>
     </html>
   );

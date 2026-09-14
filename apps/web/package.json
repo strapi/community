@@ -27,6 +27,8 @@
     "@repo/strapi-client": "workspace:*",
     "@repo/strapi-ui": "workspace:*",
     "@types/react-copy-to-clipboard": "^5.0.7",
+    "@uiw/react-markdown-preview": "^5.2.1",
+    "@uiw/react-md-editor": "^4.1.1",
     "better-auth": "catalog:better-auth",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { CategorySelect } from "@/features/submit/components/category-select";
@@ -214,12 +215,11 @@ export function SubmitPluginForm({
 
       <div className="mb-5">
         <Label htmlFor="readme">README / Documentation</Label>
-        <Textarea
+        <MarkdownEditor
           id="readme"
           value={fields.readme}
           onChange={(v) => set("readme", v)}
           placeholder="Paste your plugin's README or any additional documentation here."
-          rows={6}
         />
       </div>
 

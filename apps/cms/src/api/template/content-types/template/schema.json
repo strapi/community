@@ -120,6 +120,10 @@
     },
     "submission_notes": {
       "type": "text"
+    },
+    "readme_auto_sync": {
+      "type": "boolean",
+      "default": true
     }
   }
 }
