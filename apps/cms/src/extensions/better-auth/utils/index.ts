@@ -7,8 +7,12 @@ export {
   cascadeDeleteUser,
   deleteOrganizationProfileAndLogo,
   deleteOwnedContent,
+  deleteSingleOwnedPackage,
+  deleteSingleOwnedTemplate,
   deleteUserProfileAndAvatar,
+  findContentOwner,
   findOwnedContentIds,
+  type OwnerType,
 } from "./cascade-delete";
 export { extractContentTypeName } from "./content-type-name";
 export { validateProfileData } from "./profile-validation";
@@ -31,6 +35,59 @@ export const communityContentTypes: UID.ContentType[] = [
   "api::package.package",
   "api::template.template",
 ];
+
+/**
+ * Checks whether the caller (identified via `headers`, i.e. their
+ * better-auth session cookie) has `organization: ["update"]` permission on
+ * `organizationId` — true for an owner/admin of that org. Every
+ * owner/admin check in this codebase should go through this, not call
+ * `auth.api.hasPermission` directly: confirmed directly against a real
+ * session that it *throws* (`APIError: Unauthorized`) rather than
+ * resolving to `{ success: false }` when the caller has no membership in
+ * the target organization at all — a real case (e.g. a package/template
+ * maintainer who isn't a member of the org that owns it), not an
+ * exceptional one, and left uncaught it surfaces as a 500 instead of the
+ * "not authorized" it actually is.
+ */
+export async function hasOrganizationUpdatePermission(
+  headers: Headers,
+  organizationId: string,
+): Promise<boolean> {
+  try {
+    const { success } = await auth.api.hasPermission({
+      headers,
+      body: {
+        organizationId,
+        permissions: { organization: ["update"] },
+      },
+    });
+    return success;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Is `userId` a member of `organizationId` at all — owner, admin, or
+ * plain member? Unlike `hasOrganizationUpdatePermission`, this is a read
+ * check, not a write one: used to gate *visibility* (e.g. the
+ * "Submissions" list, or viewing a submission read-only) where every
+ * member should see the org's content, even though only an owner/admin
+ * may edit it.
+ */
+export async function isOrganizationMember(
+  userId: string | number,
+  organizationId: string | number,
+): Promise<boolean> {
+  const [membership] = await strapi
+    .documents("plugin::better-auth.member")
+    .findMany({
+      filters: { organizationId, userId },
+      fields: ["documentId"],
+      pagination: { pageSize: 1 },
+    });
+  return Boolean(membership);
+}
 
 /**
  * `api::profile.profile` fields an org owner/admin may edit through the
@@ -136,15 +193,10 @@ export async function deleteOwnedFile({
 
   const canManageRelatedOrganization =
     relatedOrganization &&
-    (
-      await auth.api.hasPermission({
-        headers,
-        body: {
-          organizationId: String(relatedOrganization.id),
-          permissions: { organization: ["update"] },
-        },
-      })
-    ).success;
+    (await hasOrganizationUpdatePermission(
+      headers,
+      String(relatedOrganization.id),
+    ));
 
   if (!isOwnFile && !canManageRelatedOrganization) return false;
 

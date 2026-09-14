@@ -32,6 +32,7 @@
     "@strapi/strapi": "catalog:strapi",
     "@strapi/types": "catalog:strapi",
     "@strapi/typescript-utils": "catalog:strapi",
+    "@strapi/utils": "catalog:strapi",
     "airtable": "^0.12.2",
     "better-auth": "catalog:better-auth",
     "better-sqlite3": "12.4.1",

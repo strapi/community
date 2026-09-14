@@ -974,6 +974,8 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     package_location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    readme_auto_sync: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     security_reviews: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::moderation.security-review'
@@ -1340,6 +1342,8 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    readme_auto_sync: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     security_reviews: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::moderation.security-review'

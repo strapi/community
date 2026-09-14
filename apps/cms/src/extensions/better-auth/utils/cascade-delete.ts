@@ -1,7 +1,7 @@
 import type { UID } from "@strapi/strapi";
 import { extractContentTypeName } from "./content-type-name";
 
-type OwnerType =
+export type OwnerType =
   | "plugin::better-auth.user"
   | "plugin::better-auth.organization";
 
@@ -27,6 +27,39 @@ export async function findOwnedContentIds(
   return rows.map((row) => row.id);
 }
 
+/**
+ * Finds the `owner_id`/`owner_type` of a single entry by `documentId` — the
+ * single-entry counterpart to `findOwnedContentIds` above, for callers that
+ * already know which document they mean (the `is-content-owner` policy) and
+ * just need to find out *what kind* of owner it has, since a populated
+ * `owner` relation doesn't say which concrete type it resolved to.
+ *
+ * A draftAndPublish document can have both a draft and a published row;
+ * they're kept in sync on transfer (`submissions.transferOwnership`) and
+ * whenever the draft is republished after an edit, but prefer the
+ * published row here regardless — it's the live, authoritative owner for
+ * anyone still mid-edit on a stale draft.
+ */
+export async function findContentOwner(
+  uid: UID.ContentType,
+  documentId: string,
+): Promise<{ id: number; type: OwnerType } | null> {
+  const contentTypeName = extractContentTypeName(uid);
+
+  const rows: {
+    owner_id: number;
+    owner_type: OwnerType;
+    published_at: string | null;
+  }[] = await strapi.db
+    .connection(`${contentTypeName}s`)
+    .select("owner_id", "owner_type", "published_at")
+    .where({ document_id: documentId });
+
+  const row = rows.find((r) => r.published_at !== null) ?? rows[0];
+  if (!row?.owner_id) return null;
+  return { id: row.owner_id, type: row.owner_type };
+}
+
 /** Deletes a media file (looked up by id) via the upload plugin, if it exists. */
 async function deleteMediaById(id: number) {
   const file = await strapi.db
@@ -36,9 +69,53 @@ async function deleteMediaById(id: number) {
 }
 
 /**
+ * Deletes one package, along with what would otherwise be left orphaned
+ * once it's gone: its business/security reviews, its `url_alias` redirect
+ * entries, and its icon. Shared by the bulk `deleteOwnedPackages` cascade
+ * below and the single-entry "delete my submission" action
+ * (`extensions/better-auth/services/submissions.ts`).
+ */
+export async function deleteSingleOwnedPackage(documentId: string) {
+  const entry = await strapi.documents("api::package.package").findOne({
+    documentId,
+    fields: ["documentId"],
+    populate: {
+      icon: { fields: ["id"] },
+      business_review: { fields: ["documentId"] },
+      security_reviews: { fields: ["documentId"] },
+      url_alias: { fields: ["documentId"] },
+    },
+  });
+  if (!entry) return;
+
+  if (entry.business_review) {
+    await strapi
+      .documents("plugin::moderation.business-review")
+      .delete({ documentId: entry.business_review.documentId });
+  }
+
+  for (const review of entry.security_reviews ?? []) {
+    await strapi
+      .documents("plugin::moderation.security-review")
+      .delete({ documentId: review.documentId });
+  }
+
+  for (const alias of entry.url_alias ?? []) {
+    await strapi
+      .documents("plugin::webtools.url-alias")
+      .delete({ documentId: alias.documentId });
+  }
+
+  if (entry.icon) await deleteMediaById(entry.icon.id);
+
+  await strapi
+    .documents("api::package.package")
+    .delete({ documentId: entry.documentId });
+}
+
+/**
  * Deletes every package owned by a user/organization, along with what would
- * otherwise be left orphaned once it's gone: its business/security reviews,
- * its `url_alias` redirect entries, and its icon.
+ * otherwise be left orphaned once it's gone — see `deleteSingleOwnedPackage`.
  */
 async function deleteOwnedPackages(
   ownerId: string | number,
@@ -54,42 +131,53 @@ async function deleteOwnedPackages(
   const entries = await strapi.documents("api::package.package").findMany({
     filters: { id: { $in: ids } },
     fields: ["documentId"],
+  });
+
+  for (const entry of entries) {
+    await deleteSingleOwnedPackage(entry.documentId);
+  }
+}
+
+/** Same as `deleteSingleOwnedPackage`, for templates (whose media field is `preview_image`). */
+export async function deleteSingleOwnedTemplate(documentId: string) {
+  const entry = await strapi.documents("api::template.template").findOne({
+    documentId,
+    fields: ["documentId"],
     populate: {
-      icon: { fields: ["id"] },
+      preview_image: { fields: ["id"] },
       business_review: { fields: ["documentId"] },
       security_reviews: { fields: ["documentId"] },
       url_alias: { fields: ["documentId"] },
     },
   });
+  if (!entry) return;
 
-  for (const entry of entries) {
-    if (entry.business_review) {
-      await strapi
-        .documents("plugin::moderation.business-review")
-        .delete({ documentId: entry.business_review.documentId });
-    }
-
-    for (const review of entry.security_reviews ?? []) {
-      await strapi
-        .documents("plugin::moderation.security-review")
-        .delete({ documentId: review.documentId });
-    }
-
-    for (const alias of entry.url_alias ?? []) {
-      await strapi
-        .documents("plugin::webtools.url-alias")
-        .delete({ documentId: alias.documentId });
-    }
-
-    if (entry.icon) await deleteMediaById(entry.icon.id);
-
+  if (entry.business_review) {
     await strapi
-      .documents("api::package.package")
-      .delete({ documentId: entry.documentId });
+      .documents("plugin::moderation.business-review")
+      .delete({ documentId: entry.business_review.documentId });
   }
+
+  for (const review of entry.security_reviews ?? []) {
+    await strapi
+      .documents("plugin::moderation.security-review")
+      .delete({ documentId: review.documentId });
+  }
+
+  for (const alias of entry.url_alias ?? []) {
+    await strapi
+      .documents("plugin::webtools.url-alias")
+      .delete({ documentId: alias.documentId });
+  }
+
+  if (entry.preview_image) await deleteMediaById(entry.preview_image.id);
+
+  await strapi
+    .documents("api::template.template")
+    .delete({ documentId: entry.documentId });
 }
 
-/** Same as `deleteOwnedPackages`, for templates (whose media field is `preview_image`). */
+/** Same as `deleteOwnedPackages`, for templates. */
 async function deleteOwnedTemplates(
   ownerId: string | number,
   ownerType: OwnerType,
@@ -104,38 +192,10 @@ async function deleteOwnedTemplates(
   const entries = await strapi.documents("api::template.template").findMany({
     filters: { id: { $in: ids } },
     fields: ["documentId"],
-    populate: {
-      preview_image: { fields: ["id"] },
-      business_review: { fields: ["documentId"] },
-      security_reviews: { fields: ["documentId"] },
-      url_alias: { fields: ["documentId"] },
-    },
   });
 
   for (const entry of entries) {
-    if (entry.business_review) {
-      await strapi
-        .documents("plugin::moderation.business-review")
-        .delete({ documentId: entry.business_review.documentId });
-    }
-
-    for (const review of entry.security_reviews ?? []) {
-      await strapi
-        .documents("plugin::moderation.security-review")
-        .delete({ documentId: review.documentId });
-    }
-
-    for (const alias of entry.url_alias ?? []) {
-      await strapi
-        .documents("plugin::webtools.url-alias")
-        .delete({ documentId: alias.documentId });
-    }
-
-    if (entry.preview_image) await deleteMediaById(entry.preview_image.id);
-
-    await strapi
-      .documents("api::template.template")
-      .delete({ documentId: entry.documentId });
+    await deleteSingleOwnedTemplate(entry.documentId);
   }
 }
 
