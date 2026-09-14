@@ -13,6 +13,7 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { TemplatePageData } from "@/features/cms/pages/template/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { EditContentButton } from "@/features/submissions/components/edit-content-button";
 import type { Owner } from "@/utils/types";
 
 type Props = {
@@ -38,39 +39,45 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
           {/* ── Left column ── */}
           <section className="lg:col-span-8 space-y-6 sm:space-y-8">
             {/* Header */}
-            <div className="flex items-center gap-5">
-              <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
-                <Image
-                  src={
-                    document.preview_image
-                      ? cmsImageUrl(document.preview_image.url)
-                      : "/template-fallback-image.png"
-                  }
-                  width={64}
-                  height={64}
-                  alt={document.name ?? ""}
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="text-3xl font-bold text-(--color-primary700)">
-                    {document.name}
-                  </h1>
-                  <ContentLabels labels={document.labels} />
+            <div className="flex items-center justify-between gap-5">
+              <div className="flex items-center gap-5">
+                <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
+                  <Image
+                    src={
+                      document.preview_image
+                        ? cmsImageUrl(document.preview_image.url)
+                        : "/template-fallback-image.png"
+                    }
+                    width={64}
+                    height={64}
+                    alt={document.name ?? ""}
+                    className="object-contain"
+                  />
                 </div>
-                {owner && (
-                  <p>
-                    By{" "}
-                    <Link
-                      href={owner.url_alias?.[0]?.url_path!}
-                      className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                    >
-                      {owner.name}
-                    </Link>
-                  </p>
-                )}
+                <div>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h1 className="text-3xl font-bold text-(--color-primary700)">
+                      {document.name}
+                    </h1>
+                    <ContentLabels labels={document.labels} />
+                  </div>
+                  {owner && (
+                    <p>
+                      By{" "}
+                      <Link
+                        href={owner.url_alias?.[0]?.url_path!}
+                        className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                      >
+                        {owner.name}
+                      </Link>
+                    </p>
+                  )}
+                </div>
               </div>
+              <EditContentButton
+                type="template"
+                documentId={document.documentId}
+              />
             </div>
 
             {document.description && (

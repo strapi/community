@@ -15,20 +15,37 @@ import {
 } from "@daveyplate/better-auth-ui";
 import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { SubmissionsView } from "@/features/submissions/components/submissions-view";
+import type {
+  SubmissionCategory,
+  SubmissionType,
+} from "@/features/submissions/lib/types";
 import { cn } from "@/lib/utils";
 import type { OrganizationProfile } from "../../lib/organization-profile";
 import { ProfileView } from "../profile-view";
 import { SettingsContextSwitcher } from "../settings-context-switcher";
 
-type View = "SETTINGS" | "PROFILE" | "MEMBERS" | "TEAMS" | "API_KEYS";
+type View =
+  | "SETTINGS"
+  | "PROFILE"
+  | "MEMBERS"
+  | "TEAMS"
+  | "API_KEYS"
+  | "SUBMISSIONS";
 
-const viewPaths = { ...organizationViewPaths, PROFILE: "profile" } as const;
+const viewPaths = {
+  ...organizationViewPaths,
+  PROFILE: "profile",
+  SUBMISSIONS: "submissions",
+} as const;
 
 type Props = {
   slug?: string;
   pathname?: string;
   organizationId?: string;
   initialProfile?: OrganizationProfile;
+  packageCategories?: SubmissionCategory[];
+  templateCategories?: SubmissionCategory[];
 };
 
 /**
@@ -50,6 +67,8 @@ export function OrganizationView({
   pathname,
   organizationId,
   initialProfile,
+  packageCategories = [],
+  templateCategories = [],
 }: Props) {
   const {
     teams: teamOptions,
@@ -67,9 +86,21 @@ export function OrganizationView({
 
   useAuthenticate();
 
-  const path = pathname?.split("/").pop();
-  const view =
-    (getViewByPath(viewPaths, path) as View | undefined) ?? "SETTINGS";
+  // Same nested-path handling as `account-view.tsx` — see its comment for
+  // why `getViewByPath` alone isn't enough for the "Submissions" edit
+  // screen (`/org/<slug>/submissions/<type>/<documentId>/edit`). Two fixed
+  // segments here (`org`, `<slug>`) instead of one (`account`).
+  const segments = pathname?.split("/").filter(Boolean).slice(2) ?? [];
+  const isSubmissionEdit = segments[0] === "submissions" && segments.length > 2;
+  const editTarget =
+    isSubmissionEdit && segments[1] && segments[2]
+      ? { type: segments[1] as SubmissionType, documentId: segments[2] }
+      : undefined;
+
+  const view: View = isSubmissionEdit
+    ? "SUBMISSIONS"
+    : ((getViewByPath(viewPaths, segments[0]) as View | undefined) ??
+      "SETTINGS");
 
   const slug = slugProp || contextSlug;
 
@@ -84,6 +115,7 @@ export function OrganizationView({
       { view: "SETTINGS", label: "Settings" },
       { view: "PROFILE", label: "Profile" },
       { view: "MEMBERS", label: "Members" },
+      { view: "SUBMISSIONS", label: "Submissions" },
     ];
 
     if (teamsEnabled) items.push({ view: "TEAMS", label: "Teams" });
@@ -116,6 +148,10 @@ export function OrganizationView({
     `${organizationOptions?.basePath}${
       organizationOptions?.pathMode === "slug" ? `/${slug}` : ""
     }/${viewPaths[item.view]}`;
+
+  const submissionsBase = `${organizationOptions?.basePath}${
+    organizationOptions?.pathMode === "slug" ? `/${slug}` : ""
+  }/${viewPaths.SUBMISSIONS}`;
 
   const navItemClassName = (item: { view: View }) =>
     cn(
@@ -232,7 +268,7 @@ export function OrganizationView({
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-4 md:gap-6">
+        <div className="flex w-full min-w-0 flex-col gap-4 md:gap-6">
           {view === "MEMBERS" && (
             <>
               <OrganizationMembersCard slug={slug} />
@@ -248,6 +284,23 @@ export function OrganizationView({
             <ApiKeysCard
               isPending={organizationPending}
               organizationId={organization?.id}
+            />
+          )}
+
+          {view === "SUBMISSIONS" && (
+            <SubmissionsView
+              variant="organization"
+              organizationId={
+                organizationId ??
+                (organization?.id != null ? String(organization.id) : undefined)
+              }
+              editTarget={editTarget}
+              backHref={submissionsBase}
+              editHrefFor={(type, documentId) =>
+                `${submissionsBase}/${type}/${documentId}/edit`
+              }
+              packageCategories={packageCategories}
+              templateCategories={templateCategories}
             />
           )}
 

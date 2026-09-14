@@ -15,16 +15,33 @@ import {
 } from "@daveyplate/better-auth-ui";
 import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { SubmissionsView } from "@/features/submissions/components/submissions-view";
+import type {
+  SubmissionCategory,
+  SubmissionType,
+} from "@/features/submissions/lib/types";
 import { cn } from "@/lib/utils";
 import { ProfileView } from "../profile-view";
 import { SettingsContextSwitcher } from "../settings-context-switcher";
 
-type View = "SETTINGS" | "PROFILE" | "SECURITY" | "API_KEYS" | "ORGANIZATIONS";
+type View =
+  | "SETTINGS"
+  | "PROFILE"
+  | "SECURITY"
+  | "API_KEYS"
+  | "ORGANIZATIONS"
+  | "SUBMISSIONS";
 
-const viewPaths = { ...accountViewPaths, PROFILE: "profile" } as const;
+const viewPaths = {
+  ...accountViewPaths,
+  PROFILE: "profile",
+  SUBMISSIONS: "submissions",
+} as const;
 
 type Props = {
   pathname?: string;
+  packageCategories?: SubmissionCategory[];
+  templateCategories?: SubmissionCategory[];
 };
 
 /**
@@ -42,7 +59,11 @@ type Props = {
  * NOTE: upgrading `@daveyplate/better-auth-ui` won't automatically carry
  * changes to the library's own `AccountView` into this copy.
  */
-export function AccountView({ pathname }: Props) {
+export function AccountView({
+  pathname,
+  packageCategories = [],
+  templateCategories = [],
+}: Props) {
   const {
     apiKey,
     organization: organizationOptions,
@@ -62,15 +83,29 @@ export function AccountView({ pathname }: Props) {
   // in auth-navigation.tsx, which links to this same public profile URL.
   const userSlug = (sessionData?.user as { slug?: string } | undefined)?.slug;
 
-  const path = pathname?.split("/").pop();
-  const view =
-    (getViewByPath(viewPaths, path) as View | undefined) ?? "SETTINGS";
+  // The catch-all only ever needs one segment for the tabs above
+  // ("/account/<view>"), but the "Submissions" edit screen nests two more
+  // ("/account/submissions/<type>/<documentId>/edit") — `getViewByPath`
+  // only matches a single flat segment, so that nested case is handled
+  // here first, before falling back to it for every other (flat) tab.
+  const segments = pathname?.split("/").filter(Boolean).slice(1) ?? [];
+  const isSubmissionEdit = segments[0] === "submissions" && segments.length > 2;
+  const editTarget =
+    isSubmissionEdit && segments[1] && segments[2]
+      ? { type: segments[1] as SubmissionType, documentId: segments[2] }
+      : undefined;
+
+  const view: View = isSubmissionEdit
+    ? "SUBMISSIONS"
+    : ((getViewByPath(viewPaths, segments[0]) as View | undefined) ??
+      "SETTINGS");
 
   const navItems = useMemo(() => {
     const items: { view: View; label: string }[] = [
       { view: "SETTINGS", label: "Settings" },
       { view: "PROFILE", label: "Profile" },
       { view: "SECURITY", label: "Security" },
+      { view: "SUBMISSIONS", label: "Submissions" },
     ];
 
     if (apiKey) items.push({ view: "API_KEYS", label: "API Keys" });
@@ -209,7 +244,7 @@ export function AccountView({ pathname }: Props) {
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-4 md:gap-6">
+        <div className="flex w-full min-w-0 flex-col gap-4 md:gap-6">
           {view === "SETTINGS" && (
             <>
               <AccountSettingsCards />
@@ -239,6 +274,19 @@ export function AccountView({ pathname }: Props) {
           )}
 
           {view === "PROFILE" && <ProfileView variant="user" />}
+
+          {view === "SUBMISSIONS" && (
+            <SubmissionsView
+              variant="user"
+              editTarget={editTarget}
+              backHref="/account/submissions"
+              editHrefFor={(type, documentId) =>
+                `/account/submissions/${type}/${documentId}/edit`
+              }
+              packageCategories={packageCategories}
+              templateCategories={templateCategories}
+            />
+          )}
 
           {view === "SECURITY" && <SecuritySettingsCards />}
 

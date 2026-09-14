@@ -5,6 +5,10 @@ import { Navigation } from "@/components/layout/navigation";
 import { OrganizationView } from "@/features/auth/components/organization-view";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsClient } from "@/features/cms/lib/strapi";
+import {
+  getPackageCategories,
+  getTemplateCategories,
+} from "@/features/submissions/lib/categories";
 
 const contentType = "plugin::better-auth.organization" as const;
 
@@ -13,23 +17,27 @@ type Props = {
 };
 
 // Keyed by organization-view.tsx's own `viewPaths` (`@daveyplate/better-auth-ui`'s
-// default `organizationViewPaths` segments plus its custom "profile" tab).
-// Not imported directly — that package's entry file is a "use client"
-// boundary, so its exports can't be pulled into this server-only
-// generateMetadata. organization-view.tsx doesn't override `viewPaths`
-// either, so these literal segments stay in sync with what it actually
-// renders at.
+// default `organizationViewPaths` segments plus its custom "profile"/
+// "submissions" tabs). Not imported directly — that package's entry file is
+// a "use client" boundary, so its exports can't be pulled into this
+// server-only generateMetadata. organization-view.tsx doesn't override
+// `viewPaths` either (beyond those two), so these literal segments stay in
+// sync with what it actually renders at.
 const TITLES: Record<string, string> = {
   settings: "Settings",
   profile: "Profile",
   members: "Members",
   teams: "Teams",
   "api-keys": "API keys",
+  submissions: "Submissions",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, path } = await params;
-  const view = path?.at(-1);
+  // The "Submissions" edit screen nests further segments
+  // (.../submissions/<type>/<documentId>/edit) — title on the first
+  // segment there, the last segment everywhere else (the flat tabs).
+  const view = path?.[0] === "submissions" ? "submissions" : path?.at(-1);
   const label = (view && TITLES[view]) || TITLES.settings;
 
   const { data } = await cmsClient.collection(contentType).find({
@@ -56,7 +64,11 @@ export default async function OrgPage({ params }: Props) {
     populate: ["profile"],
   } satisfies GetQueryParams<typeof contentType>;
 
-  const { data } = await cmsClient.collection(contentType).find(query);
+  const [{ data }, packageCategories, templateCategories] = await Promise.all([
+    cmsClient.collection(contentType).find(query),
+    getPackageCategories(),
+    getTemplateCategories(),
+  ]);
   const organization = data[0];
 
   return (
@@ -70,6 +82,8 @@ export default async function OrgPage({ params }: Props) {
             organization?.id != null ? String(organization.id) : undefined
           }
           initialProfile={organization?.profile ?? undefined}
+          packageCategories={packageCategories}
+          templateCategories={templateCategories}
         />
       </main>
     </>

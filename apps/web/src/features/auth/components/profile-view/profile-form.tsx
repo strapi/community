@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { COPY } from "./fields";
@@ -96,7 +97,16 @@ export function ProfileForm({
                   </span>
                 )}
               </div>
-              {field.multiline ? (
+              {field.name === "readme" ? (
+                <MarkdownEditor
+                  id={field.name}
+                  value={value}
+                  disabled={disabled}
+                  onChange={(next) =>
+                    setValues((prev) => ({ ...prev, [field.name]: next }))
+                  }
+                />
+              ) : field.multiline ? (
                 <textarea
                   id={field.name}
                   placeholder={field.placeholder}
