@@ -5,12 +5,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
-import {
-  deleteSubmission,
-  transferSubmission,
-} from "../../lib/submission-edit";
+import { deleteSubmission } from "../../lib/submission-edit";
+// import { transferSubmission } from "../../lib/submission-edit";
 import type { SubmissionType } from "../../lib/types";
-import { OwnerPicker, type PickedOwner } from "../owner-picker/owner-picker";
+// import { OwnerPicker, type PickedOwner } from "../owner-picker/owner-picker";
 
 /**
  * Transfer ownership (to any user or org, immediate — no acceptance flow)
@@ -18,6 +16,13 @@ import { OwnerPicker, type PickedOwner } from "../owner-picker/owner-picker";
  * for the owner — see `submission-edit-form.tsx`, which hides this whole
  * section when `isOwner` is false; the write is also rejected server-side
  * for anyone else regardless (`is-content-owner`).
+ *
+ * "Transfer ownership" is temporarily commented out below — the
+ * corresponding CMS routes are disabled the same way (see
+ * apps/cms/src/extensions/better-auth/routes/submissions.ts) pending a
+ * consent flow for the destination owner. Uncomment the imports, the
+ * `owner` state, `handleTransfer`, and the JSX block below together to
+ * re-enable.
  */
 export function DangerZone({
   type,
@@ -31,24 +36,24 @@ export function DangerZone({
   backHref: string;
 }) {
   const router = useRouter();
-  const [owner, setOwner] = useState<PickedOwner | null>(null);
+  // const [owner, setOwner] = useState<PickedOwner | null>(null);
   const [confirmName, setConfirmName] = useState("");
 
-  const handleTransfer = async () => {
-    if (!owner) return;
-    const ok = await transferSubmission(
-      type,
-      documentId,
-      owner.documentId,
-      owner.type,
-    );
-    if (ok) {
-      toast.success(`Ownership transferred to ${owner.name}.`);
-      setOwner(null);
-      router.push(backHref);
-      router.refresh();
-    }
-  };
+  // const handleTransfer = async () => {
+  //   if (!owner) return;
+  //   const ok = await transferSubmission(
+  //     type,
+  //     documentId,
+  //     owner.documentId,
+  //     owner.type,
+  //   );
+  //   if (ok) {
+  //     toast.success(`Ownership transferred to ${owner.name}.`);
+  //     setOwner(null);
+  //     router.push(backHref);
+  //     router.refresh();
+  //   }
+  // };
 
   const handleDelete = async () => {
     const ok = await deleteSubmission(type, documentId);
@@ -68,6 +73,7 @@ export function DangerZone({
         </p>
       </div>
 
+      {/*
       <div className="flex flex-col gap-2 border-t border-red-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium text-(--color-neutral900)">
@@ -97,6 +103,7 @@ export function DangerZone({
           <OwnerPicker value={owner} onChange={setOwner} />
         </ConfirmDialog>
       </div>
+      */}
 
       <div className="flex flex-col gap-2 border-t border-red-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

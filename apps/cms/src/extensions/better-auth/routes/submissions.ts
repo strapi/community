@@ -149,34 +149,45 @@ export default {
           prefix: "",
         },
       },
-      {
-        method: "POST",
-        path: "/packages/:documentId/transfer",
-        handler: "submissions.transferPackage",
-        config: {
-          auth: false,
-          policies: [
-            "plugin::better-auth.is-authenticated",
-            PACKAGE_OWNER_POLICY,
-          ],
-          middlewares: [],
-          prefix: "",
-        },
-      },
-      {
-        method: "POST",
-        path: "/templates/:documentId/transfer",
-        handler: "submissions.transferTemplate",
-        config: {
-          auth: false,
-          policies: [
-            "plugin::better-auth.is-authenticated",
-            TEMPLATE_OWNER_POLICY,
-          ],
-          middlewares: [],
-          prefix: "",
-        },
-      },
+      // Ownership transfer — temporarily disabled (route removed, not just
+      // gated) pending a consent flow for the destination owner. As it
+      // stands, `transferOwnership` (see services/submissions.ts) accepts
+      // any `ownerDocumentId`/`ownerType` the caller supplies with no check
+      // that the destination user/org agreed to it, and — since this is a
+      // `POST` route with no CSRF token, only a cookie-based session — that
+      // was reachable via a forged cross-site form submission, not just a
+      // deliberate call. `transferPackage`/`transferTemplate` (controller),
+      // `transferOwnership` (service), and the `OwnerPicker`/`transferSubmission`
+      // front-end code are left in place; re-add these two route entries
+      // once destination consent is implemented.
+      // {
+      //   method: "POST",
+      //   path: "/packages/:documentId/transfer",
+      //   handler: "submissions.transferPackage",
+      //   config: {
+      //     auth: false,
+      //     policies: [
+      //       "plugin::better-auth.is-authenticated",
+      //       PACKAGE_OWNER_POLICY,
+      //     ],
+      //     middlewares: [],
+      //     prefix: "",
+      //   },
+      // },
+      // {
+      //   method: "POST",
+      //   path: "/templates/:documentId/transfer",
+      //   handler: "submissions.transferTemplate",
+      //   config: {
+      //     auth: false,
+      //     policies: [
+      //       "plugin::better-auth.is-authenticated",
+      //       TEMPLATE_OWNER_POLICY,
+      //     ],
+      //     middlewares: [],
+      //     prefix: "",
+      //   },
+      // },
       {
         method: "DELETE",
         path: "/packages/:documentId/submission",
