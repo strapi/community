@@ -44,9 +44,7 @@ const importEmailComponents = () =>
   )() as Promise<EmailComponents>;
 
 const APP_NAME = process.env.SITE_NAME ?? "Strapi Community";
-const LOGO_URL = process.env.WEBSITE_URL
-  ? `${process.env.WEBSITE_URL}/logo.svg`
-  : undefined;
+const LOGO_URL = "https://community.strapi.io/logo.svg";
 
 async function sendEmail(
   to: string,
