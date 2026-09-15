@@ -38,6 +38,23 @@ function absolutizeCallbackURL(url: string): string {
 
 const STRAPI_URL = process.env.STRAPI_URL || "http://localhost:1337";
 
+/**
+ * The `dash` plugin below authenticates its dashboard-integration requests
+ * by hashing this key (see `@better-auth/infra`'s dash plugin) — falling
+ * back to a checked-in default here would mean anyone reading this
+ * (now-public) source could compute a valid hash if the env var was ever
+ * left unset in a real deployment. Fail closed instead.
+ */
+function requireDashboardSecret(): string {
+  const secret = process.env.BETTER_AUTH_DASHBOARD_SECRET;
+  if (!secret) {
+    throw new Error(
+      "BETTER_AUTH_DASHBOARD_SECRET must be set (no insecure default is used).",
+    );
+  }
+  return secret;
+}
+
 function absolutizeMediaUrl(url: string): string {
   return /^https?:\/\//i.test(url) ? url : `${STRAPI_URL}${url}`;
 }
@@ -124,9 +141,7 @@ export const auth = betterAuth({
     }),
     dash({
       apiUrl: STRAPI_URL,
-      apiKey:
-        process.env.BETTER_AUTH_DASHBOARD_SECRET ||
-        "strapi-internal-dashboard-key",
+      apiKey: requireDashboardSecret(),
     }),
     jwt(),
     magicLink({

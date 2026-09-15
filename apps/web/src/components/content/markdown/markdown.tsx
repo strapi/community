@@ -3,9 +3,11 @@
 import { createContext, useContext } from "react";
 import MarkdownRender from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/content/code-block";
+import { MARKDOWN_SANITIZE_SCHEMA } from "@/components/content/markdown-editor/sanitize-schema";
 import styles from "./markdown.module.css";
 
 type Props = {
@@ -38,7 +40,11 @@ const Markdown = (props: Props) => {
   return (
     <div className={styles.markdown}>
       <MarkdownRender
-        rehypePlugins={[rehypeRaw, rehypeSlug]}
+        rehypePlugins={[
+          rehypeRaw,
+          [rehypeSanitize, MARKDOWN_SANITIZE_SCHEMA],
+          rehypeSlug,
+        ]}
         remarkPlugins={[remarkGfm]}
         components={{
           a: ({ node, ...props }) => (

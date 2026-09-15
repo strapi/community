@@ -35,6 +35,7 @@
     "email": {
       "type": "email",
       "configurable": false,
+      "private": true,
       "pluginOptions": {
         "better-auth": {
           "managed": true

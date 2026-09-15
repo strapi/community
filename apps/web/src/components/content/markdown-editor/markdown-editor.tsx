@@ -4,9 +4,11 @@ import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import dynamic from "next/dynamic";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { MARKDOWN_SANITIZE_SCHEMA } from "./sanitize-schema";
 
 // The underlying CodeMirror instance needs the DOM, so this can't render
 // server-side.
@@ -18,10 +20,14 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
  * Shared markdown editor for every "readme"-style field in the app (the
  * "Submissions" edit form, the account/organization profile form, the
  * original public submit form) — wired to the same
- * remark-gfm/rehype-raw/rehype-slug pipeline as the read-only `Markdown`
- * render component (`components/content/markdown`), so a submission's
- * live page renders the same GFM tables/raw-HTML/heading-anchors its
- * editor preview showed.
+ * remark-gfm/rehype-raw/rehype-sanitize/rehype-slug pipeline as the
+ * read-only `Markdown` render component (`components/content/markdown`),
+ * so a submission's live page renders the same GFM tables/raw-HTML/
+ * heading-anchors its editor preview showed. `rehype-sanitize` (shared
+ * schema in `./sanitize-schema`) strips `<script>`, event-handler
+ * attributes, and non-http(s) URLs that `rehype-raw` would otherwise turn
+ * into live DOM — without it, anyone editing this field could inject
+ * markup that executes in every later viewer's browser.
  *
  * `disabled` swaps to a read-only rendered preview (no textarea, no
  * toolbar) rather than a merely-inert editor — matches how every other
@@ -74,7 +80,11 @@ export function MarkdownEditor({
         textareaProps={{ placeholder, readOnly: disabled, disabled }}
         previewOptions={{
           remarkPlugins: [remarkGfm],
-          rehypePlugins: [rehypeRaw, rehypeSlug],
+          rehypePlugins: [
+            rehypeRaw,
+            [rehypeSanitize, MARKDOWN_SANITIZE_SCHEMA],
+            rehypeSlug,
+          ],
         }}
       />
     </div>

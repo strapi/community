@@ -1904,6 +1904,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
+      Schema.Attribute.Private &
       Schema.Attribute.Unique &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
