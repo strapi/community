@@ -44,13 +44,39 @@
  * policy plus whichever ownership policy runs after it) — Strapi's own
  * coarse "can this principal read the target content-type" check is
  * redundant on top of that, not a check we're bypassing.
+ *
+ * Also rejects a mismatched `Origin` — this plugin's routes carry no CSRF
+ * token, only this cookie, and the cookie is `SameSite=None` in production
+ * (see `advanced.defaultCookieAttributes` in `lib/auth.ts`, required since
+ * the web app and this API are cross-site). `SameSite=None` means the
+ * browser attaches the cookie to a cross-site request too, and — unlike a
+ * cross-site `fetch`/XHR — a plain auto-submitting HTML `<form>` (`POST`,
+ * `enctype="multipart/form-data"`) reaches a `POST` route like this with no
+ * CORS preflight at all, since `strapi::cors`'s origin allow-list is only
+ * consulted for script-initiated requests, never for a form navigation.
+ * That made every `auth: false` `POST` route here forgeable from any
+ * external site while a victim was logged in. Better Auth's own handler
+ * (everything under `/api/auth/*`) already guards against exactly this by
+ * verifying `Origin` against `trustedOrigins`; this mirrors that same
+ * check for this plugin's *own* routes, which sit outside that handler and
+ * so aren't covered by it. A cross-origin `fetch`/XHR always sets `Origin`
+ * (this plugin's own client-side callers included — see
+ * `apps/web/src/features/submissions/lib/submission-edit.ts` and
+ * similar), so this only ever rejects a request that's either forged or
+ * genuinely misconfigured — never a normal call from the web app.
  */
 
 import { errors } from "@strapi/utils";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../../../lib/auth";
 
+/** `Origin` header has no path — normalize away a trailing slash on `WEBSITE_URL`. */
+const TRUSTED_ORIGIN = process.env.WEBSITE_URL?.replace(/\/+$/, "");
+
 export default async function isAuthenticated(ctx) {
+  const origin = ctx.request.headers.origin;
+  if (origin && origin !== TRUSTED_ORIGIN) throw new errors.UnauthorizedError();
+
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(ctx.request.headers),
   });
