@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createTypedStrapiClient } from "@repo/strapi-client";
 
 export const cmsClient: ReturnType<typeof createTypedStrapiClient> =

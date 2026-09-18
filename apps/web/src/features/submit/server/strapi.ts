@@ -1,3 +1,7 @@
+import "server-only";
+
+import { sanitizeIfSvg } from "./sanitize-svg";
+
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337";
 const CMS_BEARER_TOKEN = process.env.CMS_BEARER_TOKEN;
 
@@ -27,8 +31,9 @@ export async function uploadImageToStrapi(
   file: File,
   logPrefix: string,
 ): Promise<string | null> {
+  const safeFile = await sanitizeIfSvg(file);
   const form = new FormData();
-  form.append("files", file, file.name);
+  form.append("files", safeFile, safeFile.name);
 
   try {
     const res = await fetch(`${CMS_URL}/api/upload`, {

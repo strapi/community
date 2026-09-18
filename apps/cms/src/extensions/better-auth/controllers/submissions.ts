@@ -10,6 +10,7 @@ import {
   hasOrganizationUpdatePermission,
   isOrganizationMember,
   type OwnerType,
+  sanitizeIfSvg,
 } from "../utils";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -174,6 +175,8 @@ async function uploadImage(
   if (file.size > MAX_IMAGE_SIZE) {
     return ctx.badRequest("Image must be smaller than 5 MB.");
   }
+
+  await sanitizeIfSvg(file);
 
   const previous = await strapi.documents(uid).findOne({
     documentId: entry.documentId,

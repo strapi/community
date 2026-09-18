@@ -1,6 +1,7 @@
 import type { UID } from "@strapi/strapi";
 import { auth } from "../../../lib/auth";
 import type services from "../services";
+import { sanitizeIfSvg } from "./sanitize-svg";
 
 export {
   cascadeDeleteOrganization,
@@ -16,6 +17,7 @@ export {
 } from "./cascade-delete";
 export { extractContentTypeName } from "./content-type-name";
 export { validateProfileData } from "./profile-validation";
+export { sanitizeIfSvg } from "./sanitize-svg";
 
 /**
  * A helper function to obtain a plugin service.
@@ -139,6 +141,8 @@ export async function uploadOwnedFile({
   field: string;
   name: string;
 }) {
+  await sanitizeIfSvg(file as { filepath?: string; mimetype?: string });
+
   const [uploaded] = await strapi
     .plugin("upload")
     .service("upload")
