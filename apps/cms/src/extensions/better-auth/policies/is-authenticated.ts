@@ -46,16 +46,15 @@
  * redundant on top of that, not a check we're bypassing.
  *
  * Also rejects a mismatched `Origin` — this plugin's routes carry no CSRF
- * token, only this cookie, and the cookie is `SameSite=None` in production
- * (see `advanced.defaultCookieAttributes` in `lib/auth.ts`, required since
- * the web app and this API are cross-site). `SameSite=None` means the
- * browser attaches the cookie to a cross-site request too, and — unlike a
- * cross-site `fetch`/XHR — a plain auto-submitting HTML `<form>` (`POST`,
- * `enctype="multipart/form-data"`) reaches a `POST` route like this with no
- * CORS preflight at all, since `strapi::cors`'s origin allow-list is only
- * consulted for script-initiated requests, never for a form navigation.
- * That made every `auth: false` `POST` route here forgeable from any
- * external site while a victim was logged in. Better Auth's own handler
+ * token, only this cookie. The cookie is `SameSite=Lax` (see
+ * `advanced.defaultCookieAttributes` in `lib/auth.ts`), which already stops
+ * it being attached to most cross-site requests, but a plain auto-submitting
+ * HTML `<form>` (`POST`, `enctype="multipart/form-data"`) is a top-level
+ * navigation that `Lax` still permits — and, unlike a cross-site
+ * `fetch`/XHR, it reaches a `POST` route like this with no CORS preflight at
+ * all, since `strapi::cors`'s origin allow-list is only consulted for
+ * script-initiated requests, never for a form navigation. This Origin check
+ * closes that remaining gap. Better Auth's own handler
  * (everything under `/api/auth/*`) already guards against exactly this by
  * verifying `Origin` against `trustedOrigins`; this mirrors that same
  * check for this plugin's *own* routes, which sit outside that handler and

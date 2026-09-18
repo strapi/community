@@ -264,7 +264,7 @@ export const auth = betterAuth({
     },
     defaultCookieAttributes: {
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "lax",
     },
   },
 });
