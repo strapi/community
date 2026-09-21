@@ -940,6 +940,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'oneToOne',
       'plugin::moderation.business-review'
     >;
+    buy_link: Schema.Attribute.String;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::package-category.package-category'
@@ -976,6 +977,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
     package_location: Schema.Attribute.String;
+    price: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     readme_auto_sync: Schema.Attribute.Boolean &
@@ -1317,6 +1319,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'oneToOne',
       'plugin::moderation.business-review'
     >;
+    buy_link: Schema.Attribute.String;
     categories: Schema.Attribute.Relation<
       'oneToMany',
       'api::template-category.template-category'
@@ -1353,6 +1356,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     packages: Schema.Attribute.Relation<'oneToMany', 'api::package.package'>;
     preview_image: Schema.Attribute.Media<'images'>;
     preview_link: Schema.Attribute.String;
+    price: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     readme_auto_sync: Schema.Attribute.Boolean &

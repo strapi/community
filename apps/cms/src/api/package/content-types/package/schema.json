@@ -43,6 +43,12 @@
     "package_location": {
       "type": "string"
     },
+    "buy_link": {
+      "type": "string"
+    },
+    "price": {
+      "type": "string"
+    },
     "type": {
       "type": "enumeration",
       "required": true,

@@ -1,5 +1,5 @@
 import type { Data } from "@strapi/types";
-import { BadgeCheck, Star } from "lucide-react";
+import { BadgeCheck, Star, Tag } from "lucide-react";
 
 const LabelTooltip = ({
   label,
@@ -73,6 +73,11 @@ const ContentLabels = ({ labels, size = "md" }: ContentLabelsProps) => {
       {labels?.featured && (
         <LabelTooltip label="Featured">
           <Star className={`${iconClass} fill-amber-400 text-amber-400`} />
+        </LabelTooltip>
+      )}
+      {labels?.paid && (
+        <LabelTooltip label="Paid">
+          <Tag className={`${iconClass} text-(--color-success700)`} />
         </LabelTooltip>
       )}
     </>
