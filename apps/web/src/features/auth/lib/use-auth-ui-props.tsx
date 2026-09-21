@@ -1,6 +1,7 @@
 "use client";
 
 import type { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,20 +75,40 @@ export function useAuthUIProviderProps(): Omit<
         // ends up in the DOM and the fallback initials show instead.
         if (!src) return null;
 
+        const resolvedSrc = cmsImageUrl(src);
+
         return (
-          // better-auth-ui renders this in place of Radix's AvatarImage
-          // (which normally gets `aspect-square size-full` to fill the
-          // circular container) — replicate that here with `fill`
-          // instead of a fixed width/height, or the image only covers a
-          // small, badly-positioned box inside the avatar circle.
-          <Image
-            src={cmsImageUrl(src)}
-            alt={alt}
-            fill
-            sizes="128px"
-            className={cn("object-cover", className)}
-            {...props}
-          />
+          <>
+            {/*
+             * better-auth-ui's <UserAvatar> always renders a Radix
+             * <AvatarFallback> alongside `avatar.Image`, and Radix only
+             * hides that fallback once its *own* <AvatarImage> reports
+             * the image as loaded — a status it tracks on the shared
+             * Avatar context. Since we render next/image below instead
+             * of Radix's <AvatarImage>, that context never learns the
+             * avatar loaded, so the fallback initials stayed visible
+             * behind every uploaded avatar. This unrendered-but-mounted
+             * AvatarImage does the real Radix load tracking (it uses an
+             * offscreen Image object internally, so `hidden` here is
+             * safe) purely to flip that context so the fallback
+             * disappears; the actual visible avatar is still the
+             * next/image below.
+             */}
+            <AvatarPrimitive.Image src={resolvedSrc} hidden />
+            {/* better-auth-ui renders this in place of Radix's AvatarImage
+                (which normally gets `aspect-square size-full` to fill the
+                circular container) — replicate that here with `fill`
+                instead of a fixed width/height, or the image only covers a
+                small, badly-positioned box inside the avatar circle. */}
+            <Image
+              src={resolvedSrc}
+              alt={alt}
+              fill
+              sizes="128px"
+              className={cn("object-cover", className)}
+              {...props}
+            />
+          </>
         );
       },
     },
