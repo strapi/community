@@ -325,7 +325,7 @@ export default () => ({
   async getPackage(ctx) {
     return getSubmission(ctx, "api::package.package", {
       categories: true,
-      maintainers: { fields: ["documentId", "name", "email", "image"] },
+      maintainers: { fields: ["documentId", "name", "image"] },
       icon: true,
     });
   },
@@ -334,7 +334,7 @@ export default () => ({
   async getTemplate(ctx) {
     return getSubmission(ctx, "api::template.template", {
       categories: true,
-      maintainers: { fields: ["documentId", "name", "email", "image"] },
+      maintainers: { fields: ["documentId", "name", "image"] },
       preview_image: true,
     });
   },

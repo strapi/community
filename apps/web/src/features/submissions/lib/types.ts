@@ -7,7 +7,6 @@ export type SubmissionCategory = { documentId: string; name: string };
 export type SubmissionMaintainer = {
   documentId: string;
   name: string | null;
-  email?: string | null;
   image?: string | null;
 };
 
