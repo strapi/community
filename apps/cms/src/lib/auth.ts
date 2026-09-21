@@ -103,7 +103,7 @@ export const auth = betterAuth({
    */
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
-  appName: process.env.SITE_NAME ?? "Strapi Community",
+  appName: process.env.SITE_NAME ?? "Strapi Community Hub",
   plugins: [
     organization({
       sendInvitationEmail: async (data) => {
