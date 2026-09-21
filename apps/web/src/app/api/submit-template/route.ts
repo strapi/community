@@ -56,6 +56,8 @@ export async function POST(req: NextRequest) {
   const errors: string[] = [];
   if (!template_name) errors.push("Template name is required.");
   if (!description) errors.push("Description is required.");
+  else if (description.length > 100)
+    errors.push("Description must be 100 characters or fewer.");
   if (!repository_url) errors.push("Repository URL is required.");
   else if (!/^https?:\/\//i.test(repository_url))
     errors.push("Repository URL must be a valid https:// URL.");

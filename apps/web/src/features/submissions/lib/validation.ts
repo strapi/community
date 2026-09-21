@@ -5,13 +5,15 @@ import type { SubmissionType } from "./types";
  * touched/submitAttempted pattern in
  * `apps/web/src/features/auth/components/profile-view/validation.ts`. Kept
  * intentionally light — `description` is only required for packages (see
- * `api::package.package`'s schema — templates leave it optional), and the
- * server-side field whitelist/read-only guard
- * (`apps/cms/src/api/{package,template}/controllers/*.ts`) is the real
- * backstop either way.
+ * `api::package.package`'s schema — templates leave it optional). The real
+ * backstops either way: the server-side field whitelist/read-only guard
+ * (`apps/cms/src/api/{package,template}/controllers/*.ts`) and, for
+ * `DESCRIPTION_MAX_LENGTH`, the `maxLength` on each content type's
+ * `description` schema attribute.
  */
 
 export const NAME_MAX_LENGTH = 100;
+export const DESCRIPTION_MAX_LENGTH = 100;
 
 export type SubmissionFormValues = {
   name: string;
@@ -43,8 +45,11 @@ export function validateSubmissionField(
     }
   }
 
-  if (name === "description" && type === "package" && !trimmed) {
-    return "Description is required.";
+  if (name === "description") {
+    if (type === "package" && !trimmed) return "Description is required.";
+    if (trimmed.length > DESCRIPTION_MAX_LENGTH) {
+      return `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
+    }
   }
 
   if (name === "preview_link" && trimmed && !isHttpUrl(trimmed)) {

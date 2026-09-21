@@ -5,9 +5,13 @@
  * (apps/web/src/features/auth/components/profile-view/validation.ts) —
  * this is the server-side backstop for anyone calling the API directly.
  * Keep the two in sync if either changes.
+ *
+ * Length limits (bio, subtitle) aren't here — they're `maxLength` on the
+ * `api::profile.profile` schema itself
+ * (apps/cms/src/api/profile/content-types/profile/schema.json), enforced
+ * by Strapi on every write path. This file only covers format rules a
+ * schema attribute can't express.
  */
-
-const BIO_MAX_LENGTH = 100;
 
 /** `https://github.com/<username>` only — not a repo, gist, or org team link. */
 const GITHUB_PROFILE_PATTERN =
@@ -25,10 +29,6 @@ function isHttpUrl(value: string): boolean {
 }
 
 const VALIDATORS: Record<string, (value: string) => string | undefined> = {
-  bio: (value) =>
-    value.length > BIO_MAX_LENGTH
-      ? `Bio must be ${BIO_MAX_LENGTH} characters or fewer.`
-      : undefined,
   website: (value) =>
     isHttpUrl(value)
       ? undefined

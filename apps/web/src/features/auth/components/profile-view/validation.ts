@@ -3,12 +3,15 @@ import type { Profile } from "./types";
 /**
  * Format rules for the profile fields, enforced here for inline
  * validation before anything is submitted. The API enforces the same
- * rules server-side for anyone calling it directly
- * (apps/cms/src/extensions/better-auth/utils/profile-validation.ts) —
- * keep the two in sync if either changes.
+ * rules server-side for anyone calling it directly — length limits (bio,
+ * subtitle) via `maxLength` on the `api::profile.profile` schema
+ * (apps/cms/src/api/profile/content-types/profile/schema.json), the rest
+ * in apps/cms/src/extensions/better-auth/utils/profile-validation.ts.
+ * Keep these in sync if either changes.
  */
 
 export const BIO_MAX_LENGTH = 100;
+export const SUBTITLE_MAX_LENGTH = 50;
 
 /** `https://github.com/<username>` only — not a repo, gist, or org team link. */
 const GITHUB_PROFILE_PATTERN =
@@ -31,6 +34,10 @@ const VALIDATORS: Partial<
   bio: (value) =>
     value.length > BIO_MAX_LENGTH
       ? `Bio must be ${BIO_MAX_LENGTH} characters or fewer.`
+      : undefined,
+  subtitle: (value) =>
+    value.length > SUBTITLE_MAX_LENGTH
+      ? `Subtitle must be ${SUBTITLE_MAX_LENGTH} characters or fewer.`
       : undefined,
   website: (value) =>
     isHttpUrl(value)

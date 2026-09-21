@@ -8,9 +8,15 @@ import { COPY } from "./fields";
 import type { Field, Profile, Props } from "./types";
 import {
   BIO_MAX_LENGTH,
+  SUBTITLE_MAX_LENGTH,
   validateProfile,
   validateProfileField,
 } from "./validation";
+
+const FIELD_MAX_LENGTHS: Partial<Record<keyof Profile, number>> = {
+  bio: BIO_MAX_LENGTH,
+  subtitle: SUBTITLE_MAX_LENGTH,
+};
 
 const textareaClassName =
   "flex w-full rounded-md border border-(--color-neutral150) bg-white px-3 py-2 text-sm text-(--color-neutral900) shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none placeholder:text-(--color-neutral600) focus-visible:border-(--color-primary200) disabled:cursor-not-allowed disabled:opacity-50";
@@ -86,14 +92,15 @@ export function ProfileForm({
                 >
                   {field.label}
                 </label>
-                {field.name === "bio" && (
+                {field.name in FIELD_MAX_LENGTHS && (
                   <span
                     className={cn(
                       "text-xs text-(--color-neutral600)",
-                      value.length > BIO_MAX_LENGTH && "text-red-600",
+                      value.length > FIELD_MAX_LENGTHS[field.name]! &&
+                        "text-red-600",
                     )}
                   >
-                    {value.length}/{BIO_MAX_LENGTH}
+                    {value.length}/{FIELD_MAX_LENGTHS[field.name]}
                   </span>
                 )}
               </div>

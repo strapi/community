@@ -15,8 +15,12 @@ import {
 import { ImageUpload } from "@/features/submit/components/image-upload";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
-import { URL_RE } from "@/features/submit/lib/validation";
+import {
+  DESCRIPTION_MAX_LENGTH,
+  URL_RE,
+} from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
+import { cn } from "@/lib/utils";
 
 interface TemplateFormFields extends BaseFormFields {
   template_name: string;
@@ -38,6 +42,8 @@ function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
   const e: FieldErrors<TemplateFormFields> = {};
   if (!f.template_name.trim()) e.template_name = "Template name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
+  else if (f.description.trim().length > DESCRIPTION_MAX_LENGTH)
+    e.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
@@ -184,9 +190,20 @@ export function SubmitTemplateForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="description" required>
-          Template Description
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description" required>
+            Template Description
+          </Label>
+          <span
+            className={cn(
+              "text-xs text-(--color-neutral600)",
+              fields.description.length > DESCRIPTION_MAX_LENGTH &&
+                "text-red-600",
+            )}
+          >
+            {fields.description.length}/{DESCRIPTION_MAX_LENGTH}
+          </span>
+        </div>
         <Textarea
           id="description"
           value={fields.description}

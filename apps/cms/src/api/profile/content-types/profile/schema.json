@@ -19,10 +19,12 @@
   },
   "attributes": {
     "bio": {
-      "type": "text"
+      "type": "text",
+      "maxLength": 100
     },
     "subtitle": {
-      "type": "string"
+      "type": "string",
+      "maxLength": 50
     },
     "website": {
       "type": "string"

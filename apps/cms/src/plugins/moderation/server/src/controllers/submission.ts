@@ -1,3 +1,4 @@
+import { errors } from "@strapi/utils";
 import type { ModerationContentTypeConfig } from "../config";
 
 const svc = (strapi) => strapi.plugin("moderation").service("submission");
@@ -48,6 +49,13 @@ export default ({ strapi }) => ({
       );
       ctx.created({ data: { documentId: submission.documentId } });
     } catch (err) {
+      // A content-type schema violation (e.g. description too long) is the
+      // caller's fault, not ours — surface its message as a 400 rather than
+      // masking it behind the generic 500 below.
+      if (err instanceof errors.ValidationError) {
+        return ctx.badRequest(err.message);
+      }
+
       strapi.log.error(
         `[moderation] Submission create error: ${(err as Error).message}`,
       );

@@ -947,7 +947,11 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text & Schema.Attribute.Required;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
     git_repository: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     integrations: Schema.Attribute.Relation<
@@ -1023,7 +1027,10 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    bio: Schema.Attribute.Text;
+    bio: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
     countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1040,7 +1047,10 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
-    subtitle: Schema.Attribute.String;
+    subtitle: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     tech_stacks: Schema.Attribute.Relation<
       'oneToMany',
       'api::tech-stack.tech-stack'
@@ -1314,7 +1324,10 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
     git_repository: Schema.Attribute.String;
     integrations: Schema.Attribute.Relation<
       'manyToMany',

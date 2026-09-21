@@ -30,6 +30,7 @@ import type {
   SubmissionType,
 } from "../../lib/types";
 import {
+  DESCRIPTION_MAX_LENGTH,
   type SubmissionFormValues,
   validateSubmissionForm,
 } from "../../lib/validation";
@@ -259,9 +260,20 @@ export function SubmissionEditForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="description" required={type === "package"}>
-            Description
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="description" required={type === "package"}>
+              Description
+            </Label>
+            <span
+              className={cn(
+                "text-xs text-(--color-neutral600)",
+                values.description.length > DESCRIPTION_MAX_LENGTH &&
+                  "text-red-600",
+              )}
+            >
+              {values.description.length}/{DESCRIPTION_MAX_LENGTH}
+            </span>
+          </div>
           <Textarea
             id="description"
             value={values.description}
