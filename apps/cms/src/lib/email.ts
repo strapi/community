@@ -12,6 +12,7 @@ import type {
 } from "@better-auth-ui/react/dist/email";
 import { render, toPlainText } from "@react-email/render";
 import React from "react";
+import { AccountAccessEmail } from "./account-access-email";
 
 type EmailComponents = {
   EmailVerificationEmail: (
@@ -218,6 +219,22 @@ export async function sendOrganizationInvitationEmail(
       appName: APP_NAME,
       logoURL: LOGO_URL,
       ...options,
+    }),
+  );
+}
+
+export async function sendAccountAccessEmail(
+  to: string,
+  url: string,
+): Promise<void> {
+  await sendEmail(
+    to,
+    "You have an account on the Strapi Community Hub!",
+    React.createElement(AccountAccessEmail, {
+      url,
+      email: to,
+      appName: APP_NAME,
+      logoURL: LOGO_URL,
     }),
   );
 }
