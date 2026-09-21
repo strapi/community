@@ -35,6 +35,12 @@
     "preview_link": {
       "type": "string"
     },
+    "buy_link": {
+      "type": "string"
+    },
+    "price": {
+      "type": "string"
+    },
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
