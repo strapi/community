@@ -13,6 +13,7 @@ import {
   Textarea,
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
+import { OwnerSelect } from "@/features/submit/components/owner-select";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import {
@@ -36,6 +37,8 @@ const INITIAL: TemplateFormFields = {
   categories_list: [],
   submission_notes: "",
   agreed: false,
+  owner_type: "plugin::better-auth.user",
+  owner_id: null,
 };
 
 function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
@@ -51,6 +54,8 @@ function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
   if (f.demo_url.trim() && !URL_RE.test(f.demo_url.trim()))
     e.demo_url = "Must be a valid https:// URL.";
   if (!f.agreed) e.agreed = "You must agree to the terms to continue.";
+  if (f.owner_type === "plugin::better-auth.organization" && !f.owner_id)
+    e.owner_id = "Select an organization to submit as.";
   return e;
 }
 
@@ -67,6 +72,9 @@ function buildFormData(
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
   form.append("recaptcha_token", recaptchaToken);
+  form.append("owner_type", fields.owner_type);
+  if (fields.owner_id !== null)
+    form.append("owner_id", String(fields.owner_id));
   if (fields.logo_file)
     form.append("logo_file", fields.logo_file, fields.logo_file.name);
   return form;
@@ -90,8 +98,9 @@ export function SubmitTemplateForm({
 }) {
   // Submitting requires an account — redirects to sign-in (with a
   // `redirectTo` back here) when there's no session, same as the
-  // /account settings pages. The submitter becomes the owner server-side;
-  // there's no owner field on this form to fill in.
+  // /account settings pages. Defaults to the submitter as owner, but they
+  // can submit on behalf of an organization they administer instead (see
+  // the "Submit as" field below) — enforced server-side, not just here.
   const { user, isPending } = useAuthenticate();
 
   const {
@@ -144,6 +153,25 @@ export function SubmitTemplateForm({
       formError={errors._form}
       onSubmit={handleSubmit}
     >
+      <div className="mb-5">
+        <Label htmlFor="owner_id" required>
+          Submit as
+        </Label>
+        <OwnerSelect
+          value={{ type: fields.owner_type, id: fields.owner_id }}
+          onChange={(owner) => {
+            set("owner_type", owner.type);
+            set("owner_id", owner.id);
+          }}
+          personalLabel={user?.name || user?.email || "You"}
+        />
+        <FieldError message={errors.owner_id} />
+        <Hint>
+          Choose whether this template belongs to your personal account or to
+          one of the organizations you administer.
+        </Hint>
+      </div>
+
       <div className="mb-5">
         <Label htmlFor="template_name" required>
           Template Name

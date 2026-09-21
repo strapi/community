@@ -1,4 +1,6 @@
 import { errors } from "@strapi/utils";
+import { fromNodeHeaders } from "better-auth/node";
+import { hasOrganizationUpdatePermission } from "../../../../../extensions/better-auth/utils";
 import type { ModerationContentTypeConfig } from "../config";
 
 const svc = (strapi) => strapi.plugin("moderation").service("submission");
@@ -16,7 +18,11 @@ export default ({ strapi }) => ({
   /**
    * POST /api/moderation/:plural/submit — gated by `is-authenticated`
    * (see routes/index.ts), so the submitter is always the caller's own
-   * better-auth session, never a client-supplied identity.
+   * better-auth session, never a client-supplied identity. The *owner*
+   * is client-supplied (`owner_type`/`owner_id` in the body) — either
+   * the submitter themself, or an organization, but only one the
+   * submitter actually administers, checked below via the same
+   * `hasOrganizationUpdatePermission` helper `is-content-owner` uses.
    */
   async create(ctx) {
     const { plural } = ctx.params;
@@ -40,12 +46,36 @@ export default ({ strapi }) => ({
 
     const { user } = ctx.state.betterAuthSession;
 
+    let owner: { id: string | number; __type: string };
+    if (body?.owner_type === "plugin::better-auth.organization") {
+      const organizationId = body?.owner_id;
+      if (!organizationId) {
+        return ctx.badRequest("An organization must be selected.");
+      }
+      const allowed = await hasOrganizationUpdatePermission(
+        fromNodeHeaders(ctx.request.headers),
+        String(organizationId),
+      );
+      if (!allowed) {
+        return ctx.forbidden(
+          "You don't have permission to submit on behalf of this organization.",
+        );
+      }
+      owner = {
+        id: organizationId,
+        __type: "plugin::better-auth.organization",
+      };
+    } else {
+      owner = { id: user.id, __type: "plugin::better-auth.user" };
+    }
+
     try {
       const submission = await svc(strapi).createSubmission(
         ctConfig.uid,
         body,
         submitterIp,
         { id: user.id, email: user.email, name: user.name },
+        owner,
       );
       ctx.created({ data: { documentId: submission.documentId } });
     } catch (err) {

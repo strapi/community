@@ -79,6 +79,7 @@ export default ({ strapi }) => {
       rawBody: Record<string, unknown>,
       submitterIp: string | null,
       submitter: { id: string | number; email: string; name: string },
+      owner: { id: string | number; __type: string },
     ) {
       const ctConfig = getConfigByUid(uid);
 
@@ -86,12 +87,6 @@ export default ({ strapi }) => {
       const businessReview = await strapi.documents(BUSINESS_REVIEW_CT).create({
         data: { status: "pending" },
       });
-
-      // The submitter is always the owner — derived from the authenticated
-      // session (see the `is-authenticated` policy on this route), never
-      // client-supplied. Ownership can be transferred afterwards via the
-      // existing `transferOwnership` flow.
-      const owner = { id: submitter.id, __type: "plugin::better-auth.user" };
 
       // Resolve categories (optional, requires categoryUid in config)
       let categories: object[] = [];
@@ -104,7 +99,11 @@ export default ({ strapi }) => {
       }
 
       // Build entity data — strip meta fields, apply defaults, attach relations
-      const META_FIELDS = new Set(["categories_list"]);
+      const META_FIELDS = new Set([
+        "categories_list",
+        "owner_type",
+        "owner_id",
+      ]);
       const entityData: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(rawBody)) {
         if (!META_FIELDS.has(key)) entityData[key] = val;

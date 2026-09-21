@@ -52,6 +52,12 @@ export async function POST(req: NextRequest) {
   const repository_url = str(formData.get("repository_url"));
   const demo_url = str(formData.get("demo_url"));
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
+  const owner_type_raw = str(formData.get("owner_type"));
+  const owner_id = str(formData.get("owner_id"));
+  const owner_type =
+    owner_type_raw === "plugin::better-auth.organization"
+      ? "plugin::better-auth.organization"
+      : "plugin::better-auth.user";
 
   const errors: string[] = [];
   if (!template_name) errors.push("Template name is required.");
@@ -63,6 +69,8 @@ export async function POST(req: NextRequest) {
     errors.push("Repository URL must be a valid https:// URL.");
   if (demo_url && !/^https?:\/\//i.test(demo_url))
     errors.push("Demo URL must be a valid https:// URL.");
+  if (owner_type === "plugin::better-auth.organization" && !owner_id)
+    errors.push("Select an organization to submit as.");
   if (!agreed) errors.push("You must agree to the terms.");
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
@@ -99,11 +107,15 @@ export async function POST(req: NextRequest) {
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
     preview_image: logoDocumentId ? { documentId: logoDocumentId } : null,
+    owner_type,
+    owner_id:
+      owner_type === "plugin::better-auth.organization" ? owner_id : null,
   };
 
   // The actual creation happens client-side, straight against the CMS
-  // (see features/submit/lib/create-submission.ts) so the owner can be
-  // derived from the caller's own better-auth session — this route only
-  // handles what needs server-side secrets (reCAPTCHA, image upload).
+  // (see features/submit/lib/create-submission.ts) with the caller's own
+  // better-auth session cookie — that's what the CMS checks `owner_id`
+  // against (must be an org the submitter administers), so this route
+  // only shapes the payload; it doesn't itself authorize the owner choice.
   return NextResponse.json({ success: true, payload }, { status: 200 });
 }

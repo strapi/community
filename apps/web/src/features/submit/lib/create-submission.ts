@@ -6,8 +6,10 @@ export type SubmissionKind = "packages" | "templates";
  * POST /api/moderation/:plural/submit — called directly from the browser
  * (not through a Next.js route) with the caller's better-auth session
  * cookie, same pattern as `updateSubmission`/`transferSubmission` in
- * `features/submissions/lib/submission-edit.ts`. The CMS derives the
- * owner from that session, so there is no owner field to send here.
+ * `features/submissions/lib/submission-edit.ts`. `payload` carries
+ * `owner_type`/`owner_id` (see the submit forms' "Submit as" selector) —
+ * the CMS still derives the *submitter* from the session, but validates
+ * that the chosen owner (if an organization) is one they administer.
  */
 export async function createSubmission(
   kind: SubmissionKind,

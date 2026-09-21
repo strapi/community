@@ -35,6 +35,25 @@ export default factories.createCoreController(
 
       ctx.body = { packages, templates };
     },
+    /**
+     * GET /organizations/mine — organizations the caller is an
+     * owner/admin of. Used by the plugin/template submission forms'
+     * "Submit as" selector, scoped to the caller (via their better-auth
+     * session), not a specific org — so there's no `is-organization-*`
+     * policy to apply here, only `is-authenticated`.
+     */
+    async mine(ctx) {
+      const session = ctx.state.betterAuthSession;
+
+      const organizations = await getPluginService(
+        "organization",
+      ).getManageable({
+        userId: session.user.id,
+      });
+
+      ctx.body = organizations;
+    },
+
     async members(ctx) {
       const { id } = ctx.params;
 

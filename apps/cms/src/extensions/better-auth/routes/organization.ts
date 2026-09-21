@@ -13,6 +13,19 @@ export default {
       },
       {
         method: "GET",
+        path: "/organizations/mine",
+        handler: "organization.mine",
+        config: {
+          // Registered before `/organizations/:id` — otherwise that
+          // route would match `mine` as an `:id` value first.
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "GET",
         path: "/organizations/:id",
         handler: "organization.findOne",
         config: {

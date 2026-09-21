@@ -77,6 +77,35 @@ export default factories.createCoreService(
       });
     },
 
+    /**
+     * Organizations `userId` is an owner/admin of — i.e. allowed to
+     * submit content on behalf of. Backs `GET /organizations/mine`, used
+     * by the plugin/template submission forms' "Submit as" selector.
+     */
+    async getManageable({ userId }: { userId: string | number }) {
+      const memberships = await strapi
+        .documents("plugin::better-auth.member")
+        .findMany({
+          filters: {
+            userId,
+            role: { $in: ["admin", "owner"] },
+          },
+          fields: ["organizationId"],
+        });
+
+      if (memberships.length === 0) return [];
+
+      return strapi.documents("plugin::better-auth.organization").findMany({
+        filters: {
+          id: {
+            $in: memberships.map((membership) => membership.organizationId),
+          },
+        },
+        fields: ["id", "name", "slug", "logo"],
+        sort: { name: "asc" },
+      });
+    },
+
     async getMembers({
       organizationId,
       query,
