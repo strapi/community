@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticate } from "@daveyplate/better-auth-ui";
 import Link from "next/link";
 import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +16,7 @@ import {
 import { ImageUpload } from "@/features/submit/components/image-upload";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
-import { EMAIL_RE, URL_RE } from "@/features/submit/lib/validation";
+import { URL_RE } from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
 
 interface PluginFormFields extends BaseFormFields {
@@ -33,8 +34,6 @@ const INITIAL: PluginFormFields = {
   categories_list: [],
   readme: "",
   submission_notes: "",
-  owner_name: "",
-  owner_email: "",
   agreed: false,
 };
 
@@ -46,10 +45,6 @@ function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
     e.repository_url = "Must be a valid https:// URL.";
-  if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
-  if (!f.owner_email.trim()) e.owner_email = "Contact email is required.";
-  else if (!EMAIL_RE.test(f.owner_email.trim()))
-    e.owner_email = "Must be a valid email address.";
   if (!f.agreed) e.agreed = "You must agree to the terms to continue.";
   return e;
 }
@@ -65,8 +60,6 @@ function buildFormData(
   form.append("description", fields.description.trim());
   form.append("readme", fields.readme.trim());
   form.append("submission_notes", fields.submission_notes.trim());
-  form.append("owner_name", fields.owner_name.trim());
-  form.append("owner_email", fields.owner_email.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
   form.append("recaptcha_token", recaptchaToken);
@@ -91,6 +84,12 @@ export function SubmitPluginForm({
 }: {
   initialCategories: string[];
 }) {
+  // Submitting requires an account — redirects to sign-in (with a
+  // `redirectTo` back here) when there's no session, same as the
+  // /account settings pages. The submitter becomes the owner server-side;
+  // there's no owner field on this form to fill in.
+  const { user, isPending } = useAuthenticate();
+
   const {
     fields,
     errors,
@@ -104,9 +103,18 @@ export function SubmitPluginForm({
     initial: INITIAL,
     validate,
     apiEndpoint: "/api/submit-plugin",
+    submissionKind: "packages",
     recaptchaAction: "submit_plugin",
     buildFormData,
   });
+
+  if (isPending || !user) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-(--color-neutral500)">
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <SubmitFormShell
@@ -221,38 +229,6 @@ export function SubmitPluginForm({
           onChange={(v) => set("readme", v)}
           placeholder="Paste your plugin's README or any additional documentation here."
         />
-      </div>
-
-      <SectionDivider label="Owner" />
-
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="owner_name" required>
-            Owner / Author Name
-          </Label>
-          <Input
-            id="owner_name"
-            value={fields.owner_name}
-            onChange={(e) => set("owner_name", e.target.value)}
-            placeholder="Your name or organisation"
-            className={errors.owner_name ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_name} />
-        </div>
-        <div>
-          <Label htmlFor="owner_email" required>
-            Contact Email
-          </Label>
-          <Input
-            id="owner_email"
-            type="email"
-            value={fields.owner_email}
-            onChange={(e) => set("owner_email", e.target.value)}
-            placeholder="you@example.com"
-            className={errors.owner_email ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_email} />
-        </div>
       </div>
 
       <div className="mb-5">

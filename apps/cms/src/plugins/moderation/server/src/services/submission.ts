@@ -1,4 +1,3 @@
-import { auth } from "../../../../../lib/auth";
 import type { ModerationContentTypeConfig } from "../config";
 import { runAutomatedChecks } from "./automated-checks";
 import { getPackageSecurityInfo } from "./get-package-security-info";
@@ -10,32 +9,6 @@ const PACKAGE_UID = "api::package.package";
 const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-async function findOrCreateUser(strapi, { email, name }) {
-  const existing = await strapi.documents("plugin::better-auth.user").findMany({
-    filters: { email: { $eq: email } },
-    pagination: { pageSize: 1 },
-  });
-  if (existing?.length > 0) return existing[0].id;
-
-  try {
-    await auth.api.signUpEmail({
-      body: { email, name, password: crypto.randomUUID() },
-    });
-  } catch (err) {
-    // Email sending may fail in local dev (no email provider configured).
-    // Better Auth creates the user record before sending — check the DB anyway.
-    strapi.log.warn(
-      `[moderation] signUpEmail for ${email} failed (${(err as Error)?.message}) — checking if user was created`,
-    );
-  }
-
-  const created = await strapi.documents("plugin::better-auth.user").findMany({
-    filters: { email: { $eq: email } },
-    pagination: { pageSize: 1 },
-  });
-  return created[0]?.id ?? null;
-}
 
 function buildAdminLink(uid: string, documentId: string) {
   const adminBase = (
@@ -105,6 +78,7 @@ export default ({ strapi }) => {
       uid: string,
       rawBody: Record<string, unknown>,
       submitterIp: string | null,
+      submitter: { id: string | number; email: string; name: string },
     ) {
       const ctConfig = getConfigByUid(uid);
 
@@ -113,17 +87,11 @@ export default ({ strapi }) => {
         data: { status: "pending" },
       });
 
-      // Resolve owner user
-      let owner: object | null = null;
-      if (rawBody.owner_email) {
-        const ownerId = await findOrCreateUser(strapi, {
-          email: rawBody.owner_email,
-          name: rawBody.owner_name || rawBody.owner_email,
-        });
-        if (ownerId) {
-          owner = { id: ownerId, __type: "plugin::better-auth.user" };
-        }
-      }
+      // The submitter is always the owner — derived from the authenticated
+      // session (see the `is-authenticated` policy on this route), never
+      // client-supplied. Ownership can be transferred afterwards via the
+      // existing `transferOwnership` flow.
+      const owner = { id: submitter.id, __type: "plugin::better-auth.user" };
 
       // Resolve categories (optional, requires categoryUid in config)
       let categories: object[] = [];
@@ -136,11 +104,7 @@ export default ({ strapi }) => {
       }
 
       // Build entity data — strip meta fields, apply defaults, attach relations
-      const META_FIELDS = new Set([
-        "owner_email",
-        "owner_name",
-        "categories_list",
-      ]);
+      const META_FIELDS = new Set(["categories_list"]);
       const entityData: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(rawBody)) {
         if (!META_FIELDS.has(key)) entityData[key] = val;
@@ -187,11 +151,8 @@ export default ({ strapi }) => {
             kind: kindForUid(uid),
             name: entity.name,
             git_repository: entity.git_repository ?? null,
-            owner_email: (rawBody.owner_email as string) ?? null,
-            owner_name:
-              (rawBody.owner_name as string) ??
-              (rawBody.owner_email as string) ??
-              null,
+            owner_email: submitter.email,
+            owner_name: submitter.name ?? submitter.email,
             dashboard_link: buildAdminLink(uid, entity.documentId),
           },
           { strapi },

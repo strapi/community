@@ -54,35 +54,3 @@ export async function uploadImageToStrapi(
     return null;
   }
 }
-
-export async function submitToStrapi(
-  endpoint: string,
-  payload: Record<string, unknown>,
-  logPrefix: string,
-): Promise<{ submissionId: string }> {
-  if (!CMS_BEARER_TOKEN) {
-    console.warn(
-      `[${logPrefix}] CMS_BEARER_TOKEN not set — Strapi may reject the request.`,
-    );
-  }
-
-  const res = await fetch(`${CMS_URL}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(CMS_BEARER_TOKEN
-        ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` }
-        : {}),
-    },
-    body: JSON.stringify({ data: payload }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.error(`[${logPrefix}] Strapi ${res.status}: ${body}`);
-    throw new Error("strapi_error");
-  }
-
-  const result = (await res.json()) as { data: { documentId: string } };
-  return { submissionId: result.data?.documentId };
-}

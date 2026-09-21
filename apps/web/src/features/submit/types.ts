@@ -4,8 +4,6 @@ export interface BaseFormFields {
   logo_file: File | null;
   categories_list: string[];
   submission_notes: string;
-  owner_name: string;
-  owner_email: string;
   agreed: boolean;
 }
 

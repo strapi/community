@@ -12,7 +12,11 @@ export default ({ strapi }) => ({
 
   // ── Submission creation (content-api) ───────────────────────────────────
 
-  /** POST /api/moderation/:plural/submit */
+  /**
+   * POST /api/moderation/:plural/submit — gated by `is-authenticated`
+   * (see routes/index.ts), so the submitter is always the caller's own
+   * better-auth session, never a client-supplied identity.
+   */
   async create(ctx) {
     const { plural } = ctx.params;
     let ctConfig: ModerationContentTypeConfig | null;
@@ -33,11 +37,14 @@ export default ({ strapi }) => ({
       ctx.request.ip ||
       null;
 
+    const { user } = ctx.state.betterAuthSession;
+
     try {
       const submission = await svc(strapi).createSubmission(
         ctConfig.uid,
         body,
         submitterIp,
+        { id: user.id, email: user.email, name: user.name },
       );
       ctx.created({ data: { documentId: submission.documentId } });
     } catch (err) {

@@ -9,7 +9,6 @@ import {
   MAX_LOGO_SIZE,
   parseCategories,
   str,
-  submitToStrapi,
   uploadImageToStrapi,
 } from "@/features/submit/server/strapi";
 
@@ -51,8 +50,6 @@ export async function POST(req: NextRequest) {
   const plugin_name = str(formData.get("plugin_name"));
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
-  const owner_name = str(formData.get("owner_name"));
-  const owner_email = str(formData.get("owner_email"));
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
 
   const errors: string[] = [];
@@ -61,10 +58,6 @@ export async function POST(req: NextRequest) {
   if (!repository_url) errors.push("Repository URL is required.");
   else if (!/^https?:\/\//i.test(repository_url))
     errors.push("Repository URL must be a valid https:// URL.");
-  if (!owner_name) errors.push("Owner name is required.");
-  if (!owner_email) errors.push("Contact email is required.");
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(owner_email))
-    errors.push("Contact email is not valid.");
   if (!agreed) errors.push("You must agree to the terms.");
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
@@ -99,35 +92,15 @@ export async function POST(req: NextRequest) {
     package_location: str(formData.get("package_location")),
     type: str(formData.get("package_type")) || "plugin",
     categories_list: parseCategories(formData.get("categories_list")),
-    owner_name,
-    owner_email,
     readme: str(formData.get("readme")),
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
     icon: logoDocumentId ? { documentId: logoDocumentId } : null,
   };
 
-  try {
-    const { submissionId } = await submitToStrapi(
-      "/api/moderation/packages/submit",
-      payload,
-      LOG,
-    );
-    return NextResponse.json({ success: true, submissionId }, { status: 201 });
-  } catch (err) {
-    if ((err as Error).message === "strapi_error") {
-      return NextResponse.json(
-        { error: "Submission failed. Please try again." },
-        { status: 500 },
-      );
-    }
-    console.error(`[${LOG}] Could not reach Strapi:`, err);
-    return NextResponse.json(
-      {
-        error:
-          "Could not submit your plugin at this time. Please try again later.",
-      },
-      { status: 503 },
-    );
-  }
+  // The actual creation happens client-side, straight against the CMS
+  // (see features/submit/lib/create-submission.ts) so the owner can be
+  // derived from the caller's own better-auth session — this route only
+  // handles what needs server-side secrets (reCAPTCHA, image upload).
+  return NextResponse.json({ success: true, payload }, { status: 200 });
 }

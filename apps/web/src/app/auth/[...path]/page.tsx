@@ -63,13 +63,15 @@ export default async function AuthPage({ params, searchParams }: Props) {
   }
 
   // better-auth-ui's `useAuthenticate()` bounces a logged-out visitor from
-  // `/auth/accept-invitation` to this view with `redirectTo` pointing back
-  // at the invitation, but does so silently — there's no visual sign of
-  // *why* they landed here. Surface that context so it doesn't read like a
-  // dead end.
+  // `/auth/accept-invitation` (or, for the submit forms, from `/submit/plugin`
+  // and `/submit/template`) to this view with `redirectTo` pointing back at
+  // wherever they came from, but does so silently — there's no visual sign
+  // of *why* they landed here. Surface that context so it doesn't read like
+  // a dead end.
   const { redirectTo } = await searchParams;
   const isAcceptingInvitation =
     redirectTo?.startsWith("/auth/accept-invitation") ?? false;
+  const isSubmitting = redirectTo?.startsWith("/submit/") ?? false;
 
   return (
     <>
@@ -83,6 +85,11 @@ export default async function AuthPage({ params, searchParams }: Props) {
           {isAcceptingInvitation && (
             <AuthNotice icon={LogInIcon}>
               Sign in or create an account to accept your invitation.
+            </AuthNotice>
+          )}
+          {isSubmitting && (
+            <AuthNotice icon={LogInIcon}>
+              Sign in or create an account to submit a plugin or template.
             </AuthNotice>
           )}
           {view === "sign-up" ? (
