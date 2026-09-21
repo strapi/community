@@ -153,6 +153,7 @@ export const auth = betterAuth({
     }),
     jwt(),
     magicLink({
+      disableSignUp: true,
       sendMagicLink: async ({ email, url }) => {
         await sendMagicLinkEmail(email, absolutizeCallbackURL(url));
       },
