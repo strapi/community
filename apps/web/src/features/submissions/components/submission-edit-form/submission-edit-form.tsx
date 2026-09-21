@@ -156,6 +156,7 @@ export function SubmissionEditForm({
   }
 
   const isOwner = detail.isOwner;
+  const isApproved = detail.overall_status === "approved";
   const errors = validateSubmissionForm(type, values);
   const currentImageUrl =
     type === "package" ? detail.icon?.url : detail.preview_image?.url;
@@ -165,7 +166,7 @@ export function SubmissionEditForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!isOwner) return;
+    if (!isOwner || !isApproved) return;
 
     if (Object.keys(errors).length > 0) {
       setSubmitAttempted(true);
@@ -215,7 +216,7 @@ export function SubmissionEditForm({
     }
   };
 
-  const disabled = !isOwner || submitting;
+  const disabled = !isOwner || !isApproved || submitting;
 
   return (
     <div className="flex flex-col gap-6">
@@ -228,6 +229,12 @@ export function SubmissionEditForm({
         <div className="rounded-md border border-(--color-neutral150) bg-(--color-neutral100) px-4 py-3 text-sm text-(--color-neutral700)">
           You don't own this {type} (or manage its owning organization), so
           these fields are read-only.
+        </div>
+      )}
+
+      {isOwner && !isApproved && (
+        <div className="rounded-md border border-(--color-neutral150) bg-(--color-neutral100) px-4 py-3 text-sm text-(--color-neutral700)">
+          This submission can't be edited until it's been approved.
         </div>
       )}
 

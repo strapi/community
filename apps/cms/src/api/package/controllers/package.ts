@@ -21,8 +21,13 @@ export default factories.createCoreController("api::package.package", () => ({
    * PUT /api/packages/:id — reused by the web app's "Submissions" edit
    * form. The route's `is-content-owner` policy already restricts who
    * can reach this action at all (see `routes/package.ts`); this
-   * override adds two more layers on top of that:
+   * override adds three more layers on top of that:
    *
+   * - blocks the edit entirely unless the submission is already
+   *   `approved` — while it's still `submitted`/`under_review`/
+   *   `changes_requested`/`rejected`, moderation is reviewing (or has
+   *   reviewed) the content as originally submitted, so the owner can't
+   *   change it out from under that review;
    * - rejects the request outright if `git_repository`/`package_location`
    *   are present and differ from the current value — the edit form
    *   shows these as read-only ("we do not support updating this atm"),
@@ -36,6 +41,12 @@ export default factories.createCoreController("api::package.package", () => ({
     const entry = ctx.state.contentEntry as Record<string, unknown>;
     const documentId = ctx.params.id as string;
     const incoming = (ctx.request.body?.data ?? {}) as Record<string, unknown>;
+
+    if (entry.overall_status !== "approved") {
+      return ctx.badRequest(
+        "This submission cannot be edited until it has been approved.",
+      );
+    }
 
     for (const field of READ_ONLY_FIELDS) {
       if (field in incoming && incoming[field] !== entry[field]) {

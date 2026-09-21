@@ -21,13 +21,19 @@ export default factories.createCoreController("api::template.template", () => ({
   /**
    * PUT /api/templates/:id — reused by the web app's "Submissions" edit
    * form. See `api::package.package`'s controller override for the full
-   * reasoning; templates have no `package_location` field, so only
-   * `git_repository` is read-only here.
+   * reasoning, including the approved-only edit gate; templates have no
+   * `package_location` field, so only `git_repository` is read-only here.
    */
   async update(ctx) {
     const entry = ctx.state.contentEntry as Record<string, unknown>;
     const documentId = ctx.params.id as string;
     const incoming = (ctx.request.body?.data ?? {}) as Record<string, unknown>;
+
+    if (entry.overall_status !== "approved") {
+      return ctx.badRequest(
+        "This submission cannot be edited until it has been approved.",
+      );
+    }
 
     for (const field of READ_ONLY_FIELDS) {
       if (field in incoming && incoming[field] !== entry[field]) {
