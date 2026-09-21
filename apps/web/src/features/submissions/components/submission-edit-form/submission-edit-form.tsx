@@ -156,7 +156,10 @@ export function SubmissionEditForm({
   }
 
   const isOwner = detail.isOwner;
-  const isApproved = detail.overall_status === "approved";
+  // Entries predating the moderation workflow have no `overall_status`
+  // at all — those stay editable rather than being permanently locked out.
+  const isEditable =
+    !detail.overall_status || detail.overall_status === "approved";
   const errors = validateSubmissionForm(type, values);
   const currentImageUrl =
     type === "package" ? detail.icon?.url : detail.preview_image?.url;
@@ -166,7 +169,7 @@ export function SubmissionEditForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!isOwner || !isApproved) return;
+    if (!isOwner || !isEditable) return;
 
     if (Object.keys(errors).length > 0) {
       setSubmitAttempted(true);
@@ -216,7 +219,7 @@ export function SubmissionEditForm({
     }
   };
 
-  const disabled = !isOwner || !isApproved || submitting;
+  const disabled = !isOwner || !isEditable || submitting;
 
   return (
     <div className="flex flex-col gap-6">
@@ -232,7 +235,7 @@ export function SubmissionEditForm({
         </div>
       )}
 
-      {isOwner && !isApproved && (
+      {isOwner && !isEditable && (
         <div className="rounded-md border border-(--color-neutral150) bg-(--color-neutral100) px-4 py-3 text-sm text-(--color-neutral700)">
           This submission can't be edited until it's been approved.
         </div>

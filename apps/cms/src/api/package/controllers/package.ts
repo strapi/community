@@ -27,7 +27,9 @@ export default factories.createCoreController("api::package.package", () => ({
    *   `approved` — while it's still `submitted`/`under_review`/
    *   `changes_requested`/`rejected`, moderation is reviewing (or has
    *   reviewed) the content as originally submitted, so the owner can't
-   *   change it out from under that review;
+   *   change it out from under that review. Entries predating the
+   *   moderation workflow have no `overall_status` at all (`null`), so
+   *   those are left editable rather than permanently locked out;
    * - rejects the request outright if `git_repository`/`package_location`
    *   are present and differ from the current value — the edit form
    *   shows these as read-only ("we do not support updating this atm"),
@@ -42,7 +44,7 @@ export default factories.createCoreController("api::package.package", () => ({
     const documentId = ctx.params.id as string;
     const incoming = (ctx.request.body?.data ?? {}) as Record<string, unknown>;
 
-    if (entry.overall_status !== "approved") {
+    if (entry.overall_status && entry.overall_status !== "approved") {
       return ctx.badRequest(
         "This submission cannot be edited until it has been approved.",
       );
