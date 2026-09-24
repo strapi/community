@@ -93,17 +93,19 @@ async function relinkOrganizationLogo(organization: {
 }
 
 export const auth = betterAuth({
-  /**
-   * Social logins (Google/GitHub) are intentionally disabled: `socialProviders`
-   * is opt-in in better-auth, so leaving it out means no OAuth provider is
-   * registered and `/api/auth/sign-in/social` rejects every request. Sign-in is
-   * email + password, magic link and 2FA only — the front-end mirrors this by
-   * not passing `social` to <AuthUIProvider>
-   * (apps/web/src/features/auth/lib/use-auth-ui-props.tsx).
-   */
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
   appName: process.env.SITE_NAME ?? "Strapi Community Hub",
+  socialProviders: {
+    google: {
+      clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+    },
+    github: {
+      clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
+      clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
+    },
+  },
   plugins: [
     organization({
       sendInvitationEmail: async (data) => {

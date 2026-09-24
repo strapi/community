@@ -113,9 +113,9 @@ export function useAuthUIProviderProps(): Omit<
       },
     },
     magicLink: true,
-    // Social logins (Google/GitHub) are disabled — no `socialProviders` are
-    // configured on the better-auth server either (apps/cms/src/lib/auth.ts),
-    // so listing providers here would only render buttons that fail.
+    social: {
+      providers: ["google", "github"],
+    },
     twoFactor: ["otp", "totp"],
     organization: {
       basePath: "/org",
