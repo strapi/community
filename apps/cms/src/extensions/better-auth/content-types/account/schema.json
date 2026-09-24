@@ -20,7 +20,7 @@
   },
   "attributes": {
     "accountId": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -30,7 +30,7 @@
       "required": true
     },
     "providerId": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -50,7 +50,7 @@
       "required": true
     },
     "accessToken": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -59,7 +59,7 @@
       }
     },
     "refreshToken": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -68,7 +68,7 @@
       }
     },
     "idToken": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -95,7 +95,7 @@
       }
     },
     "scope": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -104,7 +104,7 @@
       }
     },
     "password": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {

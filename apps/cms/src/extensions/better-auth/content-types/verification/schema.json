@@ -20,7 +20,7 @@
   },
   "attributes": {
     "identifier": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
@@ -30,7 +30,7 @@
       "required": true
     },
     "value": {
-      "type": "string",
+      "type": "text",
       "configurable": false,
       "pluginOptions": {
         "better-auth": {
