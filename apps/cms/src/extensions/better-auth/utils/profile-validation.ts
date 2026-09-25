@@ -10,8 +10,11 @@
  * `api::profile.profile` schema itself
  * (apps/cms/src/api/profile/content-types/profile/schema.json), enforced
  * by Strapi on every write path. This file only covers format rules a
- * schema attribute can't express.
+ * schema attribute can't express. Rules for `links` live in
+ * ./profile-links.ts.
  */
+
+import { validateProfileLinks } from "./profile-links";
 
 /** `https://github.com/<username>` only — not a repo, gist, or org team link. */
 const GITHUB_PROFILE_PATTERN =
@@ -61,6 +64,8 @@ export function validateProfileData(data: Record<string, unknown>): string[] {
     const error = validate(value.trim());
     if (error) errors.push(error);
   }
+
+  if ("links" in data) errors.push(...validateProfileLinks(data.links));
 
   return errors;
 }

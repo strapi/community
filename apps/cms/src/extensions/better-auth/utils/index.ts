@@ -16,6 +16,7 @@ export {
   type OwnerType,
 } from "./cascade-delete";
 export { extractContentTypeName } from "./content-type-name";
+export { pickProfileLinks } from "./profile-links";
 export { validateProfileData } from "./profile-validation";
 export { sanitizeIfSvg } from "./sanitize-svg";
 
@@ -94,13 +95,14 @@ export async function isOrganizationMember(
 /**
  * `api::profile.profile` fields an org owner/admin may edit through the
  * organization "Profile" tab — scoped to exactly what the public
- * organization page renders (bio/subtitle/website/github/location/readme).
+ * organization page renders (bio/subtitle/website/github/links/location/readme).
  */
 export const organizationProfileFields = [
   "bio",
   "subtitle",
   "website",
   "github",
+  "links",
   "location",
   "readme",
 ] as const;
@@ -108,7 +110,7 @@ export const organizationProfileFields = [
 /**
  * `api::profile.profile` fields a user may edit through their personal
  * "Profile" tab — scoped to exactly what the public user page renders
- * (bio/subtitle/website/github/location/email/readme). Includes `email`
+ * (bio/subtitle/website/github/links/location/email/readme). Includes `email`
  * (a public contact address), unlike `organizationProfileFields` — an
  * organization has no equivalent distinct-from-account address.
  */
@@ -117,6 +119,7 @@ export const userProfileFields = [
   "subtitle",
   "website",
   "github",
+  "links",
   "location",
   "email",
   "readme",

@@ -6,6 +6,7 @@ import { factories } from "@strapi/strapi";
 import { fromNodeHeaders } from "better-auth/node";
 import {
   getPluginService,
+  pickProfileLinks,
   userProfileFields,
   validateProfileData,
 } from "../utils";
@@ -61,7 +62,10 @@ export default factories.createCoreController(
       const data = Object.fromEntries(
         userProfileFields
           .filter((field) => field in body)
-          .map((field) => [field, body[field]]),
+          .map((field) => [
+            field,
+            field === "links" ? pickProfileLinks(body.links) : body[field],
+          ]),
       );
 
       const errors = validateProfileData(data);
