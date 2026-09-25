@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { Navigation } from "@/components/layout/navigation";
 import { AuthNotice } from "@/features/auth/components/auth-notice";
 import { AuthView } from "@/features/auth/components/auth-view";
+import { CheckEmailView } from "@/features/auth/components/check-email-view";
 import { SignUpAuthView } from "@/features/auth/components/sign-up-auth-view";
 import { TwoFactorAuthView } from "@/features/auth/components/two-factor-auth-view";
 import { authClient } from "@/features/auth/lib/client";
@@ -12,7 +13,7 @@ import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 
 type Props = {
   params: Promise<{ path: string[] }>;
-  searchParams: Promise<{ redirectTo?: string }>;
+  searchParams: Promise<{ redirectTo?: string; email?: string }>;
 };
 
 // Keyed by `@daveyplate/better-auth-ui`'s default `authViewPaths` segments
@@ -34,6 +35,9 @@ const TITLES: Record<string, string> = {
   "accept-invitation": "Accept invitation",
   "sign-out": "Sign out",
   callback: "Signing in",
+  // Not a better-auth-ui view — our own screen, which our patch to its
+  // sign-up and sign-in forms navigates to when the email isn't verified.
+  "check-email": "Check your email",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -68,10 +72,16 @@ export default async function AuthPage({ params, searchParams }: Props) {
   // wherever they came from, but does so silently — there's no visual sign
   // of *why* they landed here. Surface that context so it doesn't read like
   // a dead end.
-  const { redirectTo } = await searchParams;
+  const { redirectTo, email } = await searchParams;
+  // `check-email` keeps `redirectTo` (so the verification link lands in
+  // the right place), but by then the visitor has already acted on that
+  // context, so it no longer needs the notice.
+  const showRedirectNotice = view !== "check-email";
   const isAcceptingInvitation =
-    redirectTo?.startsWith("/auth/accept-invitation") ?? false;
-  const isSubmitting = redirectTo?.startsWith("/submit/") ?? false;
+    showRedirectNotice &&
+    (redirectTo?.startsWith("/auth/accept-invitation") ?? false);
+  const isSubmitting =
+    showRedirectNotice && (redirectTo?.startsWith("/submit/") ?? false);
 
   return (
     <>
@@ -92,7 +102,9 @@ export default async function AuthPage({ params, searchParams }: Props) {
               Sign in or create an account to submit a plugin or template.
             </AuthNotice>
           )}
-          {view === "sign-up" ? (
+          {view === "check-email" ? (
+            <CheckEmailView email={email} redirectTo={redirectTo} />
+          ) : view === "sign-up" ? (
             <SignUpAuthView pathname={pathname} />
           ) : view === "two-factor" ? (
             <TwoFactorAuthView pathname={pathname} />

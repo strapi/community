@@ -1,5 +1,5 @@
 diff --git a/dist/index.cjs b/dist/index.cjs
-index 4a3f015fc32847cfcd6a6eb38aad1d096e5e4011..791599bb93e88046908f476fb1a04a1541290d9d 100644
+index 4a3f015fc32847cfcd6a6eb38aad1d096e5e4011..4855bb7a39834d25083bdfa6f41d44c7d7bdd07a 100644
 --- a/dist/index.cjs
 +++ b/dist/index.cjs
 @@ -2325,17 +2325,28 @@ function UpdateAvatarCard({
@@ -41,7 +41,37 @@ index 4a3f015fc32847cfcd6a6eb38aad1d096e5e4011..791599bb93e88046908f476fb1a04a15
      }
      if (!image) {
        setLoading(false);
-@@ -11512,17 +11523,28 @@ function OrganizationLogoForm({
+@@ -8404,6 +8415,12 @@ function SignInForm({
+     } catch (error) {
+       form.resetField("password");
+       resetCaptcha();
++      if (!(emailVerification == null ? void 0 : emailVerification.otp) && ((_a = error == null ? void 0 : error.error) == null ? void 0 : _a.code) === "EMAIL_NOT_VERIFIED") {
++        const checkEmailParams = new URLSearchParams(window.location.search);
++        checkEmailParams.set("email", email);
++        navigate(`${basePath}/check-email?${checkEmailParams}`);
++        return;
++      }
+       toast({
+         variant: "error",
+         message: _chunk2IFYYEVLcjs.getLocalizedError.call(void 0, {
+@@ -8780,13 +8797,9 @@ function SignUpForm({
+           `${basePath}/${viewPaths.EMAIL_VERIFICATION}?email=${encodeURIComponent(email)}`
+         );
+       } else {
+-        navigate(
+-          `${basePath}/${viewPaths.SIGN_IN}${window.location.search}`
+-        );
+-        toast({
+-          variant: "success",
+-          message: localization.SIGN_UP_EMAIL
+-        });
++        const checkEmailParams = new URLSearchParams(window.location.search);
++        checkEmailParams.set("email", email);
++        navigate(`${basePath}/check-email?${checkEmailParams}`);
+       }
+     } catch (error) {
+       toast({
+@@ -11512,17 +11525,28 @@ function OrganizationLogoForm({
    const handleLogoChange = async (file) => {
      if (!(organizationOptions == null ? void 0 : organizationOptions.logo) || !(hasPermission == null ? void 0 : hasPermission.success)) return;
      setLoading(true);
@@ -81,7 +111,7 @@ index 4a3f015fc32847cfcd6a6eb38aad1d096e5e4011..791599bb93e88046908f476fb1a04a15
      if (!image) {
        setLoading(false);
 diff --git a/dist/index.js b/dist/index.js
-index 135cbffb51236e54eb3d17b2e8a9a26ff151b91c..62a4aee6106e59230fc89bd4f59b66ca0e2075f4 100644
+index 135cbffb51236e54eb3d17b2e8a9a26ff151b91c..c5410c7624badc51c25a8dca010e77fc4df8aa2f 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -2325,17 +2325,28 @@ function UpdateAvatarCard({
@@ -123,7 +153,37 @@ index 135cbffb51236e54eb3d17b2e8a9a26ff151b91c..62a4aee6106e59230fc89bd4f59b66ca
      }
      if (!image) {
        setLoading(false);
-@@ -11512,17 +11523,28 @@ function OrganizationLogoForm({
+@@ -8404,6 +8415,12 @@ function SignInForm({
+     } catch (error) {
+       form.resetField("password");
+       resetCaptcha();
++      if (!(emailVerification == null ? void 0 : emailVerification.otp) && ((_a = error == null ? void 0 : error.error) == null ? void 0 : _a.code) === "EMAIL_NOT_VERIFIED") {
++        const checkEmailParams = new URLSearchParams(window.location.search);
++        checkEmailParams.set("email", email);
++        navigate(`${basePath}/check-email?${checkEmailParams}`);
++        return;
++      }
+       toast({
+         variant: "error",
+         message: getLocalizedError({
+@@ -8780,13 +8797,9 @@ function SignUpForm({
+           `${basePath}/${viewPaths.EMAIL_VERIFICATION}?email=${encodeURIComponent(email)}`
+         );
+       } else {
+-        navigate(
+-          `${basePath}/${viewPaths.SIGN_IN}${window.location.search}`
+-        );
+-        toast({
+-          variant: "success",
+-          message: localization.SIGN_UP_EMAIL
+-        });
++        const checkEmailParams = new URLSearchParams(window.location.search);
++        checkEmailParams.set("email", email);
++        navigate(`${basePath}/check-email?${checkEmailParams}`);
+       }
+     } catch (error) {
+       toast({
+@@ -11512,17 +11525,28 @@ function OrganizationLogoForm({
    const handleLogoChange = async (file) => {
      if (!(organizationOptions == null ? void 0 : organizationOptions.logo) || !(hasPermission == null ? void 0 : hasPermission.success)) return;
      setLoading(true);
