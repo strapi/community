@@ -50,7 +50,7 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
     const [user] = await strapi.documents("plugin::better-auth.user").findMany({
       filters: { id: userId },
       fields: ["documentId"],
-      populate: { profile: {} },
+      populate: { profile: { populate: ["links"] } },
     });
 
     return user?.profile ?? null;
@@ -80,11 +80,13 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
       return strapi.documents("api::profile.profile").update({
         documentId: user.profile.documentId,
         data,
+        populate: ["links"],
       });
     }
 
     const profile = await strapi.documents("api::profile.profile").create({
       data,
+      populate: ["links"],
     });
 
     await strapi.documents("plugin::better-auth.user").update({

@@ -1,5 +1,33 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface ProfileLink extends Struct.ComponentSchema {
+  collectionName: 'components_profile_links';
+  info: {
+    displayName: 'Link';
+    icon: 'link';
+  };
+  attributes: {
+    type: Schema.Attribute.Enumeration<
+      [
+        'website',
+        'github',
+        'linkedin',
+        'x',
+        'instagram',
+        'youtube',
+        'linktree',
+        'other',
+      ]
+    > &
+      Schema.Attribute.Required;
+    value: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 2048;
+      }>;
+  };
+}
+
 export interface SectionsCardGrid extends Struct.ComponentSchema {
   collectionName: 'components_sections_card_grids';
   info: {
@@ -223,6 +251,7 @@ export interface SharedVersionInfo extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export namespace Public {
     export interface ComponentSchemas {
+      'profile.link': ProfileLink;
       'sections.card-grid': SectionsCardGrid;
       'sections.card-grid-item': SectionsCardGridItem;
       'sections.cta': SectionsCta;

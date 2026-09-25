@@ -7,6 +7,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import {
   getPluginService,
   organizationProfileFields,
+  pickProfileLinks,
   validateProfileData,
 } from "../utils";
 
@@ -79,7 +80,10 @@ export default factories.createCoreController(
       const data = Object.fromEntries(
         organizationProfileFields
           .filter((field) => field in body)
-          .map((field) => [field, body[field]]),
+          .map((field) => [
+            field,
+            field === "links" ? pickProfileLinks(body.links) : body[field],
+          ]),
       );
 
       const errors = validateProfileData(data);
