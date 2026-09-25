@@ -163,11 +163,13 @@ export default factories.createCoreService(
         return strapi.documents("api::profile.profile").update({
           documentId: organization.profile.documentId,
           data,
+          populate: ["links"],
         });
       }
 
       const profile = await strapi.documents("api::profile.profile").create({
         data,
+        populate: ["links"],
       });
 
       await strapi.documents("plugin::better-auth.organization").update({
