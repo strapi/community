@@ -14,7 +14,8 @@
     "lint": "biome check .",
     "check-types": "tsc --noEmit",
     "upgrade": "npx @strapi/upgrade latest",
-    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+    "upgrade:dry": "npx @strapi/upgrade latest --dry",
+    "test": "vitest run"
   },
   "dependencies": {
     "@better-auth-ui/react": "^1.6.44",
@@ -58,7 +59,8 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
