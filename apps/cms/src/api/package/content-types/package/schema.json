@@ -24,12 +24,13 @@
     },
     "name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "maxLength": 50
     },
     "description": {
       "type": "text",
       "required": true,
-      "maxLength": 100
+      "maxLength": 300
     },
     "icon": {
       "type": "media",
