@@ -156,7 +156,14 @@ export const auth = betterAuth({
     jwt(),
     magicLink({
       disableSignUp: true,
-      sendMagicLink: async ({ email, url }) => {
+      /**
+       * better-auth only enforces `disableSignUp` when the link is verified,
+       * so skip sending to unknown emails here. The endpoint still responds
+       * with success, so this doesn't reveal whether an account exists.
+       */
+      sendMagicLink: async ({ email, url }, ctx) => {
+        const found = await ctx?.context.internalAdapter.findUserByEmail(email);
+        if (!found) return;
         await sendMagicLinkEmail(email, absolutizeCallbackURL(url));
       },
     }),
