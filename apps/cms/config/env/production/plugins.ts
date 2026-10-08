@@ -37,6 +37,16 @@ export default ({ env }) => ({
           defaultFieldValues: {
             labels: { official: false, featured: false, paid: false },
           },
+          submittableFields: [
+            "name",
+            "slug",
+            "description",
+            "git_repository",
+            "package_location",
+            "type",
+            "readme",
+            "icon",
+          ],
           checks: [
             "repo_public",
             "readme_exists",
@@ -60,6 +70,14 @@ export default ({ env }) => ({
           defaultFieldValues: {
             labels: { official: false, featured: false, paid: false },
           },
+          submittableFields: [
+            "name",
+            "slug",
+            "description",
+            "git_repository",
+            "preview_link",
+            "preview_image",
+          ],
           checks: ["repo_public", "readme_exists", "mit_license"],
           webhooks: {
             submissionReceived: `${N8N_WEBHOOK_NS}/template-submission-received`,

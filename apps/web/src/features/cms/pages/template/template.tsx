@@ -31,6 +31,56 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
   const maintainers = document.maintainers ?? [];
   const githubStars = document.stars;
 
+  const priceLabel = document.price && (
+    <span className="text-sm font-medium text-(--color-neutral700)">
+      {document.price}
+    </span>
+  );
+
+  const ctaButtons = (
+    <>
+      {document.buy_link && (
+        <div className="mb-4">
+          <Button asChild size="lg" className="w-full justify-center">
+            <Link
+              href={document.buy_link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Purchase
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          </Button>
+          <p className="mt-2 text-center text-sm leading-snug text-(--color-neutral600)">
+            This takes you to an external site. Strapi isn't affiliated with the
+            seller and isn't responsible for issues with their product.{" "}
+            <Link
+              href="/help/paid-plugins"
+              className="underline hover:text-(--color-neutral700)"
+            >
+              Learn more
+            </Link>
+            .
+          </p>
+        </div>
+      )}
+
+      {document.preview_link && (
+        <Button
+          asChild
+          variant={document.buy_link ? "secondary" : "default"}
+          size="lg"
+          className="w-full justify-center mb-4"
+        >
+          <Link href={document.preview_link} target="_blank" rel="noopener">
+            Preview Template
+            <ExternalLink className="h-4 w-4" />
+          </Link>
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <>
       <Navigation theme="light" />
@@ -39,46 +89,39 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
           {/* ── Left column ── */}
           <section className="lg:col-span-8 space-y-6 sm:space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between gap-5">
-              <div className="flex items-center gap-5">
-                <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
-                  <Image
-                    src={
-                      document.preview_image
-                        ? cmsImageUrl(document.preview_image.url)
-                        : "/template-fallback-image.png"
-                    }
-                    width={64}
-                    height={64}
-                    alt={document.name ?? ""}
-                    className="object-contain"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h1 className="text-3xl font-bold text-(--color-primary700)">
-                      {document.name}
-                    </h1>
+            <div className="flex items-start justify-between gap-5">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-3xl font-bold text-(--color-primary700)">
+                  {document.name}
+                </h1>
+                {owner && (
+                  <p>
+                    By{" "}
+                    <Link
+                      href={owner.url_alias?.[0]?.url_path!}
+                      className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                    >
+                      {owner.name}
+                    </Link>
+                  </p>
+                )}
+              </div>
+              <div className="flex items-start gap-3 mt-3">
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex items-center gap-1.5">
                     <ContentLabels labels={document.labels} />
                   </div>
-                  {owner && (
-                    <p>
-                      By{" "}
-                      <Link
-                        href={owner.url_alias?.[0]?.url_path!}
-                        className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                      >
-                        {owner.name}
-                      </Link>
-                    </p>
-                  )}
+                  {priceLabel}
                 </div>
+                <EditContentButton
+                  type="template"
+                  documentId={document.documentId}
+                />
               </div>
-              <EditContentButton
-                type="template"
-                documentId={document.documentId}
-              />
             </div>
+
+            {/* CTA buttons — shown here on mobile, above the description; on lg+ they move into the sidebar */}
+            <div className="lg:hidden">{ctaButtons}</div>
 
             {document.description && (
               <p className="text-lg text-(--color-neutral700)">
@@ -105,23 +148,8 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
             <div className="sticky top-28">
-              {/* Preview link */}
-              {document.preview_link && (
-                <Button
-                  asChild
-                  size="lg"
-                  className="w-full justify-center mb-4"
-                >
-                  <Link
-                    href={document.preview_link}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Preview Template
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
+              {/* CTA buttons — hidden on mobile, where they're shown above the description instead */}
+              <div className="hidden lg:block">{ctaButtons}</div>
 
               {/* Stats */}
               {githubStars != null && (

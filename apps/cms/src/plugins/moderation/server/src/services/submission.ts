@@ -98,15 +98,17 @@ export default ({ strapi }) => {
         categories = (results ?? []).map((c) => ({ documentId: c.documentId }));
       }
 
-      // Build entity data — strip meta fields, apply defaults, attach relations
-      const META_FIELDS = new Set([
-        "categories_list",
-        "owner_type",
-        "owner_id",
-      ]);
+      // Build entity data — keep only the fields this content type allows a
+      // submitter to set, apply defaults, attach relations. This is an
+      // allowlist, not a denylist: `rawBody` is caller-controlled JSON
+      // reaching us straight from the content API (see
+      // `controllers/submission.ts`'s `create`), so anything not in
+      // `submittableFields` (e.g. `labels`, `buy_link`, `price`, `stars`)
+      // must never reach `documents(uid).create()` from here.
+      const submittable = new Set(ctConfig.submittableFields ?? []);
       const entityData: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(rawBody)) {
-        if (!META_FIELDS.has(key)) entityData[key] = val;
+        if (submittable.has(key)) entityData[key] = val;
       }
 
       const entity = await strapi.documents(uid).create({

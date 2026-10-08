@@ -15,6 +15,15 @@ export interface ModerationContentTypeConfig {
   categoryUid?: string;
   /** Default entity field values set on every new submission */
   defaultFieldValues?: Record<string, unknown>;
+  /**
+   * Allowlist of entity fields a submitter may set at submission time
+   * (via `POST /api/moderation/:plural/submit`). Anything not listed here
+   * is silently dropped from the incoming body before it reaches
+   * `documents(uid).create()` — this is the only thing standing between
+   * an authenticated caller and setting arbitrary fields (labels, price,
+   * stars, relations, ...) directly through that content-API route.
+   */
+  submittableFields?: string[];
   /** IDs of automated checks to run at submission time */
   checks?: string[];
   /** n8n webhook paths fired for lifecycle events */
@@ -46,6 +55,14 @@ export default {
       if (!ct.pluralName) {
         throw new Error(
           `[moderation] contentType '${ct.uid}' must have a pluralName`,
+        );
+      }
+      if (
+        ct.submittableFields !== undefined &&
+        !Array.isArray(ct.submittableFields)
+      ) {
+        throw new Error(
+          `[moderation] contentType '${ct.uid}' submittableFields must be an array`,
         );
       }
     }

@@ -1,6 +1,6 @@
 import { Button, Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
-import { Download, Star } from "lucide-react";
+import { Download, ExternalLink, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
@@ -34,6 +34,38 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
   const githubStars = document.stars;
   const npmDownloads = document.monthly_downloads;
 
+  const buyCta = document.buy_link && (
+    <div className="mb-4">
+      <Button asChild size="lg" className="w-full justify-center">
+        <Link
+          href={document.buy_link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Purchase
+          <ExternalLink className="h-4 w-4" />
+        </Link>
+      </Button>
+      <p className="mt-2 text-center text-sm leading-snug text-(--color-neutral600)">
+        This takes you to an external site. Strapi isn't affiliated with the
+        seller and isn't responsible for issues with their product.{" "}
+        <Link
+          href="/help/paid-plugins"
+          className="underline hover:text-(--color-neutral700)"
+        >
+          Learn more
+        </Link>
+        .
+      </p>
+    </div>
+  );
+
+  const priceLabel = document.price && (
+    <span className="text-sm font-medium text-(--color-neutral700)">
+      {document.price}
+    </span>
+  );
+
   return (
     <>
       <Navigation theme="light" />
@@ -42,8 +74,8 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
           {/* ── Left column ── */}
           <section className="lg:col-span-8 space-y-6 sm:space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between gap-5">
-              <div className="flex items-center gap-5">
+            <div className="flex items-start justify-between gap-5">
+              <div className="flex items-start gap-5 min-w-0 flex-1">
                 <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
                   <Image
                     src={
@@ -57,13 +89,10 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                     className="object-contain"
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h1 className="text-3xl font-bold text-(--color-primary700)">
-                      {document.name}
-                    </h1>
-                    <ContentLabels labels={document.labels} />
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-3xl font-bold text-(--color-primary700)">
+                    {document.name}
+                  </h1>
                   {owner && (
                     <p>
                       By{" "}
@@ -77,11 +106,22 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                   )}
                 </div>
               </div>
-              <EditContentButton
-                type="package"
-                documentId={document.documentId}
-              />
+              <div className="flex items-start gap-3 mt-3">
+                <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <ContentLabels labels={document.labels} />
+                  </div>
+                  {priceLabel}
+                </div>
+                <EditContentButton
+                  type="package"
+                  documentId={document.documentId}
+                />
+              </div>
             </div>
+
+            {/* Buy — shown here on mobile, above the description; on lg+ it moves into the sidebar */}
+            <div className="lg:hidden">{buyCta}</div>
 
             {document.description && (
               <p className="text-lg text-(--color-neutral700)">
@@ -105,6 +145,9 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
           {/* ── Sidebar ── */}
           <aside className="lg:col-span-4">
             <div className="sticky top-28">
+              {/* Buy — hidden on mobile, where it's shown above the description instead */}
+              <div className="hidden lg:block">{buyCta}</div>
+
               {/* Stats */}
               {(githubStars != null || npmDownloads != null) && (
                 <SidebarSection title="Stats">
