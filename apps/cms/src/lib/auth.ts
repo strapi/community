@@ -24,14 +24,25 @@ import {
 
 const pendingEmailChanges = new Map<string, string>();
 
+/**
+ * better-auth resolves relative redirect params against its own base URL
+ * (the CMS), so make them absolute on the web app instead — including the
+ * error/new-user variants, which it redirects to with `?error=<code>`.
+ */
 function absolutizeCallbackURL(url: string): string {
   const parsed = new URL(url);
-  const callbackURL = parsed.searchParams.get("callbackURL");
-  if (callbackURL && !/^https?:\/\//i.test(callbackURL)) {
-    parsed.searchParams.set(
-      "callbackURL",
-      new URL(callbackURL, process.env.WEBSITE_URL).toString(),
-    );
+  for (const param of [
+    "callbackURL",
+    "errorCallbackURL",
+    "newUserCallbackURL",
+  ]) {
+    const value = parsed.searchParams.get(param);
+    if (value && !/^https?:\/\//i.test(value)) {
+      parsed.searchParams.set(
+        param,
+        new URL(value, process.env.WEBSITE_URL).toString(),
+      );
+    }
   }
   return parsed.toString();
 }
@@ -96,6 +107,22 @@ export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
   appName: process.env.SITE_NAME ?? "Strapi Community Hub",
+  /**
+   * Where redirect-based flows (OAuth sign-in/linking callbacks, and
+   * better-auth's own `/error` page) send the browser on failure. Without
+   * this they fall back to `/api/auth/error` on the CMS, which in production
+   * redirects to `/` — i.e. the Strapi admin login. The web app's
+   * `/auth/error` view forwards the `?error=` code on to a page that toasts it.
+   */
+  onAPIError: {
+    errorURL: `${process.env.WEBSITE_URL}/auth/error`,
+  },
+  account: {
+    accountLinking: {
+      disableImplicitLinking: true,
+      allowDifferentEmails: true,
+    },
+  },
   socialProviders: {
     google: {
       clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
