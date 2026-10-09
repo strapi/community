@@ -98,10 +98,12 @@ export const auth = betterAuth({
   appName: process.env.SITE_NAME ?? "Strapi Community Hub",
   socialProviders: {
     google: {
+      enabled: false,
       clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
     },
     github: {
+      enabled: false,
       clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
     },
@@ -156,7 +158,14 @@ export const auth = betterAuth({
     jwt(),
     magicLink({
       disableSignUp: true,
-      sendMagicLink: async ({ email, url }) => {
+      /**
+       * better-auth only enforces `disableSignUp` when the link is verified,
+       * so skip sending to unknown emails here. The endpoint still responds
+       * with success, so this doesn't reveal whether an account exists.
+       */
+      sendMagicLink: async ({ email, url }, ctx) => {
+        const found = await ctx?.context.internalAdapter.findUserByEmail(email);
+        if (!found) return;
         await sendMagicLinkEmail(email, absolutizeCallbackURL(url));
       },
     }),

@@ -20,7 +20,7 @@
   "attributes": {
     "bio": {
       "type": "text",
-      "maxLength": 100
+      "maxLength": 300
     },
     "subtitle": {
       "type": "string",

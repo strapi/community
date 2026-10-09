@@ -10,7 +10,7 @@ import type { Profile } from "./types";
  * Keep these in sync if either changes.
  */
 
-export const BIO_MAX_LENGTH = 100;
+export const BIO_MAX_LENGTH = 300;
 export const SUBTITLE_MAX_LENGTH = 50;
 
 /** `https://github.com/<username>` only — not a repo, gist, or org team link. */

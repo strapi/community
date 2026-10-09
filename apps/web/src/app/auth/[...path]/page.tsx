@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Navigation } from "@/components/layout/navigation";
+import { AcceptInvitationView } from "@/features/auth/components/accept-invitation-view";
 import { AuthNotice } from "@/features/auth/components/auth-notice";
 import { AuthView } from "@/features/auth/components/auth-view";
 import { CheckEmailView } from "@/features/auth/components/check-email-view";
@@ -13,7 +14,11 @@ import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 
 type Props = {
   params: Promise<{ path: string[] }>;
-  searchParams: Promise<{ redirectTo?: string; email?: string }>;
+  searchParams: Promise<{
+    redirectTo?: string;
+    email?: string;
+    invitationId?: string;
+  }>;
 };
 
 // Keyed by `@daveyplate/better-auth-ui`'s default `authViewPaths` segments
@@ -72,7 +77,7 @@ export default async function AuthPage({ params, searchParams }: Props) {
   // wherever they came from, but does so silently — there's no visual sign
   // of *why* they landed here. Surface that context so it doesn't read like
   // a dead end.
-  const { redirectTo, email } = await searchParams;
+  const { redirectTo, email, invitationId } = await searchParams;
   // `check-email` keeps `redirectTo` (so the verification link lands in
   // the right place), but by then the visitor has already acted on that
   // context, so it no longer needs the notice.
@@ -104,6 +109,11 @@ export default async function AuthPage({ params, searchParams }: Props) {
           )}
           {view === "check-email" ? (
             <CheckEmailView email={email} redirectTo={redirectTo} />
+          ) : view === "accept-invitation" ? (
+            <AcceptInvitationView
+              invitationId={invitationId}
+              redirectTo={redirectTo}
+            />
           ) : view === "sign-up" ? (
             <SignUpAuthView pathname={pathname} />
           ) : view === "two-factor" ? (

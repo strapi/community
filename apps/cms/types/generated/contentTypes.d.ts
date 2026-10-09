@@ -950,7 +950,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     description: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
     git_repository: Schema.Attribute.String;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
@@ -970,7 +970,11 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     monthly_downloads: Schema.Attribute.Integer;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
@@ -1029,7 +1033,7 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   attributes: {
     bio: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
     countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
@@ -1326,7 +1330,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
     git_repository: Schema.Attribute.String;
     integrations: Schema.Attribute.Relation<
@@ -1345,7 +1349,11 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'oneToMany',
       'plugin::better-auth.user'
     >;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
