@@ -98,10 +98,12 @@ export const auth = betterAuth({
   appName: process.env.SITE_NAME ?? "Strapi Community Hub",
   socialProviders: {
     google: {
+      redirectUri: process.env.WEBSITE_URL,
       clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
     },
     github: {
+      redirectUri: process.env.WEBSITE_URL,
       clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
     },
