@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Navigation } from "@/components/layout/navigation";
 import { AcceptInvitationView } from "@/features/auth/components/accept-invitation-view";
+import { AuthErrorRedirect } from "@/features/auth/components/auth-error-redirect";
 import { AuthNotice } from "@/features/auth/components/auth-notice";
 import { AuthView } from "@/features/auth/components/auth-view";
 import { CheckEmailView } from "@/features/auth/components/check-email-view";
@@ -18,8 +19,6 @@ type Props = {
     redirectTo?: string;
     email?: string;
     invitationId?: string;
-    error?: string;
-    error_description?: string;
   }>;
 };
 
@@ -61,19 +60,8 @@ export default async function AuthPage({ params, searchParams }: Props) {
   const pathname = `/auth/${path.join("/")}`;
   const view = path.at(-1);
 
-  // The CMS's `onAPIError.errorURL` — where failed OAuth sign-ins/links
-  // land. Not a page of its own: forward the error to wherever the visitor
-  // belongs (account settings when signed in, e.g. a failed link; sign-in
-  // otherwise), where <AuthErrorToast> picks it up.
-  if (view === "error") {
-    const { error, error_description } = await searchParams;
-    const { data: session } = await authClient.getSession({
-      fetchOptions: { headers: await headers(), cache: "no-store" },
-    });
-    const query = new URLSearchParams({ error: error || "UNKNOWN" });
-    if (error_description) query.set("error_description", error_description);
-    redirect(`${session ? "/account" : "/auth/sign-in"}?${query}`);
-  }
+  // The CMS's `onAPIError.errorURL` — see <AuthErrorRedirect>.
+  if (view === "error") return <AuthErrorRedirect />;
 
   // Only guard sign-in/sign-up — views like sign-out, callback, or
   // reset-password need to run their course even with a session. Checked

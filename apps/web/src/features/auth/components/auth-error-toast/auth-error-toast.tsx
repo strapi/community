@@ -5,12 +5,16 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { getAuthErrorMessage } from "../../lib/auth-errors";
 
+const SKIPPED_PATHS = ["/auth/error", "/auth/reset-password"];
+
 /**
  * Toasts the `?error=<code>` better-auth appends when a redirect-based flow
  * fails (OAuth callbacks, email verification, magic link, password reset),
  * then strips it from the URL so a refresh doesn't toast it again.
  *
- * Skipped on `/auth/reset-password`: better-auth-ui handles that one itself
+ * Skipped on `/auth/error`, which only forwards the error on to the page
+ * that should show it (see <AuthErrorRedirect>), and on
+ * `/auth/reset-password`: better-auth-ui handles that one itself
  * (toast + redirect to sign-in, carrying the query string along). The toast
  * there and the one fired here after that redirect share a sonner `id` (see
  * the `toast` prop in use-auth-ui-props), so they collapse into one.
@@ -22,7 +26,7 @@ export function AuthErrorToast() {
   const error = searchParams.get("error");
 
   useEffect(() => {
-    if (!error || pathname === "/auth/reset-password") return;
+    if (!error || SKIPPED_PATHS.includes(pathname)) return;
 
     const message = getAuthErrorMessage(
       error,

@@ -123,14 +123,19 @@ export const auth = betterAuth({
       allowDifferentEmails: true,
     },
   },
+  // `prompt: "select_account"` makes Google/GitHub always show their account
+  // picker instead of silently reusing whichever account is signed in there —
+  // matters most when linking, where the wrong account is easy to pick up.
   socialProviders: {
     google: {
       clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+      prompt: "select_account",
     },
     github: {
       clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
+      prompt: "select_account",
     },
   },
   plugins: [
