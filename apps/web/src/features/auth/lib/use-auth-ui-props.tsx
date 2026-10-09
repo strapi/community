@@ -113,9 +113,9 @@ export function useAuthUIProviderProps(): Omit<
       },
     },
     magicLink: true,
-    // social: {
-    //   providers: ["google", "github"],
-    // },
+    social: {
+      providers: ["google", "github"],
+    },
     twoFactor: ["otp", "totp"],
     organization: {
       basePath: "/org",
