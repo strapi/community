@@ -71,12 +71,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/package-info",
   },
-  webtools: {
-    enabled: true,
-    config: {
-      website_url: env("WEBSITE_URL"),
-    },
-  },
+  // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
+  // key order of this file, and the first registered document middleware is the
+  // outermost. Meilisearch has to wrap webtools so it indexes entries only after
+  // webtools has generated/updated their url_alias.
   meilisearch: {
     enabled: env("ENABLE_MIGRATION") !== "true",
     config: {
@@ -217,6 +215,12 @@ export default ({ env }) => ({
           ],
         },
       },
+    },
+  },
+  webtools: {
+    enabled: true,
+    config: {
+      website_url: env("WEBSITE_URL"),
     },
   },
 });
