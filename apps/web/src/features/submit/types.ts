@@ -7,6 +7,9 @@ export interface BaseFormFields {
   description: string;
   logo_file: File | null;
   categories_list: string[];
+  readme: string;
+  /** Keep the readme synced from the registry/repository (the default) instead of `readme`. */
+  readme_auto_sync: boolean;
   submission_notes: string;
   agreed: boolean;
   /** Who this submission belongs to — the submitter, or an org they administer. */

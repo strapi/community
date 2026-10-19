@@ -2,7 +2,6 @@
 
 import { useAuthenticate } from "@daveyplate/better-auth-ui";
 import Link from "next/link";
-import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { CategorySelect } from "@/features/submit/components/category-select";
@@ -15,6 +14,7 @@ import {
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
 import { OwnerSelect } from "@/features/submit/components/owner-select";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import {
@@ -27,7 +27,6 @@ import { cn } from "@/lib/utils";
 interface PluginFormFields extends BaseFormFields {
   plugin_name: string;
   package_location: string;
-  readme: string;
 }
 
 const INITIAL: PluginFormFields = {
@@ -38,6 +37,7 @@ const INITIAL: PluginFormFields = {
   logo_file: null,
   categories_list: [],
   readme: "",
+  readme_auto_sync: true,
   submission_notes: "",
   agreed: false,
   owner_type: "plugin::better-auth.user",
@@ -50,6 +50,10 @@ function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
   if (!f.description.trim()) e.description = "Description is required.";
   else if (f.description.trim().length > DESCRIPTION_MAX_LENGTH)
     e.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
+  if (!f.package_location.trim())
+    e.package_location = "Registry URL is required.";
+  else if (!URL_RE.test(f.package_location.trim()))
+    e.package_location = "Must be a valid https:// URL.";
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
@@ -70,6 +74,7 @@ function buildFormData(
   form.append("repository_url", fields.repository_url.trim());
   form.append("description", fields.description.trim());
   form.append("readme", fields.readme.trim());
+  form.append("readme_auto_sync", String(fields.readme_auto_sync));
   form.append("submission_notes", fields.submission_notes.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
@@ -190,37 +195,6 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="package_location">Registry URL</Label>
-        <Input
-          id="package_location"
-          value={fields.package_location}
-          onChange={(e) => set("package_location", e.target.value)}
-          placeholder="https://www.npmjs.com/package/your-plugin"
-          autoComplete="off"
-        />
-        <Hint>
-          Full URL to your published package on npm, Packagist, PyPI, RubyGems,
-          or NuGet. Leave blank if not yet published.
-        </Hint>
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="repository_url" required>
-          Repository URL
-        </Label>
-        <Input
-          id="repository_url"
-          type="url"
-          value={fields.repository_url}
-          onChange={(e) => set("repository_url", e.target.value)}
-          placeholder="https://github.com/org/repo or https://gitlab.com/org/repo"
-          className={errors.repository_url ? "border-red-400" : ""}
-        />
-        <FieldError message={errors.repository_url} />
-        <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
-      </div>
-
-      <div className="mb-5">
         <div className="flex items-center justify-between">
           <Label htmlFor="description" required>
             Plugin Description
@@ -247,6 +221,52 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
+        <Label htmlFor="package_location" required>
+          Registry URL
+        </Label>
+        <Input
+          id="package_location"
+          type="url"
+          value={fields.package_location}
+          onChange={(e) => set("package_location", e.target.value)}
+          placeholder="https://www.npmjs.com/package/your-plugin"
+          className={errors.package_location ? "border-red-400" : ""}
+          autoComplete="off"
+        />
+        <FieldError message={errors.package_location} />
+        <Hint>
+          Full URL to your published package on npm, Packagist, PyPI, RubyGems,
+          or NuGet.
+        </Hint>
+      </div>
+
+      <ReadmeField
+        className="mb-5"
+        type="package"
+        readme={fields.readme}
+        autoSync={fields.readme_auto_sync}
+        onReadmeChange={(v) => set("readme", v)}
+        onAutoSyncChange={(v) => set("readme_auto_sync", v)}
+        placeholder="Paste your plugin's README or any additional documentation here."
+      />
+
+      <div className="mb-5">
+        <Label htmlFor="repository_url" required>
+          Repository URL
+        </Label>
+        <Input
+          id="repository_url"
+          type="url"
+          value={fields.repository_url}
+          onChange={(e) => set("repository_url", e.target.value)}
+          placeholder="https://github.com/org/repo or https://gitlab.com/org/repo"
+          className={errors.repository_url ? "border-red-400" : ""}
+        />
+        <FieldError message={errors.repository_url} />
+        <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
+      </div>
+
+      <div className="mb-5">
         <Label htmlFor="logo_file">Plugin Logo / Icon</Label>
         <ImageUpload
           file={fields.logo_file}
@@ -263,16 +283,6 @@ export function SubmitPluginForm({
           selected={fields.categories_list}
           onAdd={addCategory}
           onRemove={removeCategory}
-        />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="readme">README / Documentation</Label>
-        <MarkdownEditor
-          id="readme"
-          value={fields.readme}
-          onChange={(v) => set("readme", v)}
-          placeholder="Paste your plugin's README or any additional documentation here."
         />
       </div>
 

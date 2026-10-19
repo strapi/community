@@ -92,6 +92,9 @@ export function useSubmitForm<T extends BaseFormFields>({
       }
 
       setSuccess(true);
+      // The success screen replaces a long form — without this the user
+      // lands somewhere below its (much shorter) content.
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setErrors({
         _form: "Could not submit. Please check your connection and try again.",

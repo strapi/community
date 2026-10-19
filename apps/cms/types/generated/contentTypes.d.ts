@@ -952,7 +952,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 300;
       }>;
-    git_repository: Schema.Attribute.String;
+    git_repository: Schema.Attribute.String & Schema.Attribute.Required;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     integrations: Schema.Attribute.Relation<
       'manyToMany',
@@ -979,7 +979,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
-    package_location: Schema.Attribute.String;
+    package_location: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     readme_auto_sync: Schema.Attribute.Boolean &

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { findUserBySlug } from "../../lib/submission-edit";
 import type { SubmissionMaintainer } from "../../lib/types";
 
@@ -82,7 +83,13 @@ export function MaintainerPicker({
   return (
     <div className="flex flex-col gap-2">
       {selected.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <fieldset
+          disabled={disabled}
+          className={cn(
+            "flex flex-wrap gap-2",
+            disabled && "pointer-events-none opacity-50",
+          )}
+        >
           {selected.map((maintainer) => (
             <MaintainerPill
               key={maintainer.documentId}
@@ -90,7 +97,7 @@ export function MaintainerPicker({
               onRemove={() => onRemove(maintainer.documentId)}
             />
           ))}
-        </div>
+        </fieldset>
       )}
 
       <div className="flex gap-2">
