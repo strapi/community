@@ -1,7 +1,10 @@
 import {
-  ownerPopulate,
+  mediaPopulate,
+  namePopulate,
+  transformHelpPage,
   transformMember,
-  transformOwner,
+  urlAliasPopulate,
+  withOwner,
 } from "../src/lib/search";
 
 // n8n webhook path namespace. Each Strapi instance posts to "<namespace>/<event>",
@@ -88,17 +91,23 @@ export default ({ env }) => ({
       apiKey: env("MEILISEARCH_API_KEY"),
       package: {
         indexName: env("MEILISEARCH_PACKAGES_INDEX_NAME"),
-        entriesQuery: {
+        ...withOwner({
+          fields: [
+            "name",
+            "description",
+            "type",
+            "stars",
+            "monthly_downloads",
+            "createdAt",
+          ],
           populate: {
-            owner: ownerPopulate,
-            icon: true,
+            icon: mediaPopulate,
             labels: true,
-            url_alias: true,
-            categories: true,
-            integrations: true,
+            url_alias: urlAliasPopulate,
+            categories: namePopulate,
+            integrations: namePopulate,
           },
-        },
-        transformEntry: transformOwner,
+        }),
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           searchableAttributes: ["name", "description"],
@@ -114,19 +123,19 @@ export default ({ env }) => ({
       },
       template: {
         indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
-        entriesQuery: {
+        ...withOwner({
+          fields: ["name", "description", "stars", "createdAt"],
           populate: {
-            owner: ownerPopulate,
-            preview_image: true,
+            preview_image: mediaPopulate,
             labels: true,
-            url_alias: true,
-            integrations: true,
-            categories: true,
+            url_alias: urlAliasPopulate,
+            integrations: namePopulate,
+            categories: namePopulate,
           },
-        },
-        transformEntry: transformOwner,
+        }),
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
+          searchableAttributes: ["name", "description"],
           filterableAttributes: [
             "type",
             "categories",
@@ -140,7 +149,8 @@ export default ({ env }) => ({
       showcase: {
         indexName: env("MEILISEARCH_SHOWCASES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "categories"],
+          fields: ["title", "url", "description", "createdAt", "publishedAt"],
+          populate: { image: mediaPopulate, categories: namePopulate },
         },
         settings: {
           sortableAttributes: ["createdAt"],
@@ -150,7 +160,8 @@ export default ({ env }) => ({
       recipe: {
         indexName: env("MEILISEARCH_RECIPES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "url_alias"],
+          fields: ["title", "description", "createdAt", "publishedAt"],
+          populate: { image: mediaPopulate, url_alias: urlAliasPopulate },
         },
         settings: {
           sortableAttributes: ["createdAt"],
@@ -160,9 +171,15 @@ export default ({ env }) => ({
       "help-page": {
         indexName: env("MEILISEARCH_HELP_PAGES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "url_alias", "parent"],
+          fields: ["title", "description", "createdAt", "publishedAt"],
+          populate: {
+            image: mediaPopulate,
+            url_alias: urlAliasPopulate,
+            parent: { fields: ["documentId"] },
+          },
         },
         filterEntry: ({ entry }) => !entry.parent,
+        transformEntry: transformHelpPage,
         settings: {
           sortableAttributes: ["createdAt"],
           searchableAttributes: ["title", "description"],
@@ -172,7 +189,13 @@ export default ({ env }) => ({
       integration: {
         indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["logo", "labels", "categories", "url_alias"],
+          fields: ["name", "description", "publishedAt"],
+          populate: {
+            logo: mediaPopulate,
+            labels: true,
+            categories: namePopulate,
+            url_alias: urlAliasPopulate,
+          },
         },
         settings: {
           sortableAttributes: ["labels.featured"],
@@ -182,7 +205,17 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: { url_alias: true, profile: { fields: ["bio"] } },
+          fields: [
+            "name",
+            "image",
+            "community_star",
+            "createdAt",
+            "publishedAt",
+          ],
+          populate: {
+            url_alias: urlAliasPopulate,
+            profile: { fields: ["bio"] },
+          },
         },
         transformEntry: transformMember,
         settings: {
@@ -193,12 +226,21 @@ export default ({ env }) => ({
       organization: {
         indexName: env("MEILISEARCH_PARTNERS_INDEX_NAME"),
         entriesQuery: {
-          populate: [
-            "profile",
-            "profile.services",
-            "profile.countries",
-            "url_alias",
+          fields: [
+            "name",
+            "logo",
+            "partner",
+            "partner_level",
+            "createdAt",
+            "publishedAt",
           ],
+          populate: {
+            profile: {
+              fields: ["bio"],
+              populate: { services: namePopulate, countries: namePopulate },
+            },
+            url_alias: urlAliasPopulate,
+          },
         },
         filterEntry: ({ entry }) => entry.partner,
         transformEntry: ({ entry }) => {

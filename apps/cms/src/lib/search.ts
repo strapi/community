@@ -14,18 +14,45 @@ const pickPublicProfile = (entity) =>
       }
     : null;
 
+// Populate fragments for entriesQuery. Every index selects its fields explicitly,
+// so only what the search UI renders, filters or sorts on ends up in Meilisearch.
+// `publishedAt` must always be selected: the plugin drops entries without it.
+export const urlAliasPopulate = { fields: ["url_path"] };
+export const mediaPopulate = { fields: ["url", "alternativeText"] };
+export const namePopulate = { fields: ["name"] };
+
 // `owner` is a morph relation, so nested fields must be populated per target.
-export const ownerPopulate = {
+const ownerPopulate = {
   on: {
-    "plugin::better-auth.user": { populate: ["url_alias"] },
-    "plugin::better-auth.organization": { populate: ["url_alias"] },
+    "plugin::better-auth.user": {
+      fields: ["name", "image"],
+      populate: { url_alias: urlAliasPopulate },
+    },
+    "plugin::better-auth.organization": {
+      fields: ["name", "logo"],
+      populate: { url_alias: urlAliasPopulate },
+    },
   },
 };
 
-export const transformOwner = ({ entry }) => ({
-  ...entry,
-  owner: pickPublicProfile(entry.owner),
-});
+// Entries query + transform for content types with an `owner`. A top-level
+// `fields` selection drops the morph columns (owner_type/owner_id), which makes
+// `owner` resolve to null. So all fields are fetched and the transform picks
+// the selected ones instead.
+export const withOwner = ({ fields, populate }) => {
+  const keys = ["id", "documentId", ...fields, ...Object.keys(populate)];
+
+  return {
+    entriesQuery: { populate: { ...populate, owner: ownerPopulate } },
+    transformEntry: ({ entry }) => ({
+      ...Object.fromEntries(keys.map((key) => [key, entry[key]])),
+      owner: pickPublicProfile(entry.owner),
+    }),
+  };
+};
+
+// `parent` is only populated for filterEntry (top-level pages only).
+export const transformHelpPage = ({ entry: { parent, ...entry } }) => entry;
 
 // Sort/filter attributes (createdAt, community_star) must stay on the document.
 export const transformMember = ({ entry }) => ({
