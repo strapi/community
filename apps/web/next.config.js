@@ -28,6 +28,16 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.strapiapp.com",
       },
+      // Google social auth
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+      },
+      // Github social auth
+      {
+        protocol: "https",
+        hostname: "**.githubusercontent.com",
+      },
     ],
   },
 };
