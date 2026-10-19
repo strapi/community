@@ -11,7 +11,9 @@ const EDITABLE_FIELDS = [
   "description",
   "icon",
   "categories",
-  "maintainers",
+  // "maintainers" — temporarily not editable, pending an invite flow so the
+  // added user consents first (see the commented-out `MaintainerPicker` in
+  // apps/web/.../submission-edit-form.tsx). Re-add once that's built.
   "readme",
   "readme_auto_sync",
 ] as const;

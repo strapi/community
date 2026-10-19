@@ -98,11 +98,14 @@ export default ({ strapi }) => {
         categories = (results ?? []).map((c) => ({ documentId: c.documentId }));
       }
 
-      // Build entity data — strip meta fields, apply defaults, attach relations
+      // Build entity data — strip meta fields, apply defaults, attach relations.
+      // `maintainers` is stripped too: it's not part of the submit form, and
+      // adding maintainers will go through an invite flow, never a raw write.
       const META_FIELDS = new Set([
         "categories_list",
         "owner_type",
         "owner_id",
+        "maintainers",
       ]);
       const entityData: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(rawBody)) {

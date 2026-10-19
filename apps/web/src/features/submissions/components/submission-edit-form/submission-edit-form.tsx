@@ -24,7 +24,7 @@ import {
 import type {
   SubmissionCategory,
   SubmissionDetail,
-  SubmissionMaintainer,
+  // SubmissionMaintainer,
   SubmissionType,
 } from "../../lib/types";
 import {
@@ -34,7 +34,17 @@ import {
 } from "../../lib/validation";
 import { CategoryPicker } from "./category-picker";
 import { DangerZone } from "./danger-zone";
-import { MaintainerPicker } from "./maintainer-picker";
+
+// import { MaintainerPicker } from "./maintainer-picker";
+
+// Maintainer editing is temporarily commented out throughout this file —
+// adding/removing maintainers was immediate with no consent from the added
+// user, and will be replaced by an invite flow. `maintainers` is also
+// dropped from the CMS edit whitelists (apps/cms/src/api/{package,template}/
+// controllers) the same way. `MaintainerPicker`, `findUserBySlug` and the
+// `maintainers` field on `SubmissionUpdateData` are left in place; uncomment
+// the import above, the `maintainers` state, its load/save lines, and the
+// JSX block below together (and re-add the whitelist entries) to re-enable.
 
 const READ_ONLY_COPY: Record<SubmissionType, string> = {
   package: "We do not support updating this at the moment.",
@@ -92,7 +102,7 @@ export function SubmissionEditForm({
   const [readme, setReadme] = useState("");
   const [readmeAutoSync, setReadmeAutoSync] = useState(true);
   const [categories, setCategories] = useState<SubmissionCategory[]>([]);
-  const [maintainers, setMaintainers] = useState<SubmissionMaintainer[]>([]);
+  // const [maintainers, setMaintainers] = useState<SubmissionMaintainer[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const [touched, setTouched] = useState<
@@ -122,7 +132,7 @@ export function SubmissionEditForm({
       // synced, not to "manual edit".
       setReadmeAutoSync(fetched.readme_auto_sync !== false);
       setCategories(fetched.categories ?? []);
-      setMaintainers(fetched.maintainers ?? []);
+      // setMaintainers(fetched.maintainers ?? []);
       setLoading(false);
     });
 
@@ -203,7 +213,7 @@ export function SubmissionEditForm({
       name: values.name.trim(),
       description: values.description.trim(),
       categories: categories.map((category) => category.documentId),
-      maintainers: maintainers.map((maintainer) => maintainer.documentId),
+      // maintainers: maintainers.map((maintainer) => maintainer.documentId),
       readme,
       readme_auto_sync: readmeAutoSync,
       ...(type === "template" && { preview_link: values.preview_link.trim() }),
@@ -368,6 +378,7 @@ export function SubmissionEditForm({
           />
         </div>
 
+        {/*
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="maintainer_search">Maintainers</Label>
           <MaintainerPicker
@@ -381,6 +392,7 @@ export function SubmissionEditForm({
             disabled={disabled}
           />
         </div>
+        */}
 
         <SectionDivider label="Readme" />
 
