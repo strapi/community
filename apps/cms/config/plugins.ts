@@ -1,3 +1,9 @@
+import {
+  ownerPopulate,
+  transformMember,
+  transformOwner,
+} from "../src/lib/search";
+
 // n8n webhook path namespace. Each Strapi instance posts to "<namespace>/<event>",
 // so duplicate workflow sets sharing one n8n instance (e.g. staging vs production)
 // listen on distinct paths and never collide. Defaults to "strapi" (production).
@@ -83,16 +89,16 @@ export default ({ env }) => ({
       package: {
         indexName: env("MEILISEARCH_PACKAGES_INDEX_NAME"),
         entriesQuery: {
-          populate: [
-            "owner",
-            "maintainers",
-            "icon",
-            "labels",
-            "url_alias",
-            "categories",
-            "integrations",
-          ],
+          populate: {
+            owner: ownerPopulate,
+            icon: true,
+            labels: true,
+            url_alias: true,
+            categories: true,
+            integrations: true,
+          },
         },
+        transformEntry: transformOwner,
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           searchableAttributes: ["name", "description"],
@@ -109,16 +115,16 @@ export default ({ env }) => ({
       template: {
         indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
         entriesQuery: {
-          populate: [
-            "owner",
-            "maintainers",
-            "preview_image",
-            "labels",
-            "url_alias",
-            "integrations",
-            "categories",
-          ],
+          populate: {
+            owner: ownerPopulate,
+            preview_image: true,
+            labels: true,
+            url_alias: true,
+            integrations: true,
+            categories: true,
+          },
         },
+        transformEntry: transformOwner,
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           filterableAttributes: [
@@ -176,11 +182,12 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["profile", "profile.services", "url_alias"],
+          populate: { url_alias: true, profile: { fields: ["bio"] } },
         },
+        transformEntry: transformMember,
         settings: {
           sortableAttributes: ["createdAt", "community_star"],
-          filterableAttributes: ["profile.services.name", "community_star"],
+          filterableAttributes: ["community_star"],
         },
       },
       organization: {
