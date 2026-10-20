@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import slugify from "slugify";
+import { isPackageType } from "@/features/submit/lib/validation";
 import {
   isRecaptchaConfigured,
   verifyRecaptcha,
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
   const package_location = str(formData.get("package_location"));
+  const package_type = str(formData.get("package_type"));
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
   const owner_type_raw = str(formData.get("owner_type"));
   const owner_id = str(formData.get("owner_id"));
@@ -61,7 +63,8 @@ export async function POST(req: NextRequest) {
       : "plugin::better-auth.user";
 
   const errors: string[] = [];
-  if (!plugin_name) errors.push("Plugin name is required.");
+  if (!isPackageType(package_type)) errors.push("Select a valid package type.");
+  if (!plugin_name) errors.push("Package name is required.");
   if (!description) errors.push("Description is required.");
   else if (description.length > 100)
     errors.push("Description must be 100 characters or fewer.");
@@ -105,7 +108,7 @@ export async function POST(req: NextRequest) {
     description,
     git_repository: repository_url,
     package_location,
-    type: str(formData.get("package_type")) || "plugin",
+    type: package_type,
     categories_list: parseCategories(formData.get("categories_list")),
     ...readmeFields(formData),
     submission_notes: str(formData.get("submission_notes")),
