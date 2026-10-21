@@ -20,7 +20,7 @@ export const migrateReadmeAutoSync = async () => {
     for (const status of ["draft", "published"] as const) {
       const entries = await strapi.documents(uid).findMany({
         status,
-        fields: ["documentId"],
+        fields: ["documentId", "name"],
         filters: { readme_auto_sync: { $null: true } },
       });
 
@@ -35,7 +35,7 @@ export const migrateReadmeAutoSync = async () => {
         } catch (error) {
           failed++;
           strapi.log.error(
-            `Error migrating readme_auto_sync for ${uid} ${entry.documentId}:`,
+            `Error migrating readme_auto_sync for ${uid} "${entry.name}":`,
             error,
           );
         }
