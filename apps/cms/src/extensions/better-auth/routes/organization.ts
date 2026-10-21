@@ -26,6 +26,19 @@ export default {
       },
       {
         method: "GET",
+        path: "/organizations/partners",
+        handler: "organization.partners",
+        config: {
+          // Same as `/organizations/mine` — must stay registered before
+          // `/organizations/:id`.
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "GET",
         path: "/organizations/:id",
         handler: "organization.findOne",
         config: {
@@ -44,6 +57,35 @@ export default {
         path: "/organizations/:id/members",
         handler: "organization.members",
         config: { policies: [], middlewares: [], prefix: "" },
+      },
+      {
+        method: "GET",
+        path: "/organizations/:id/partner-portal",
+        handler: "organization.partnerPortal",
+        config: {
+          // Owners/admins only, same as the web app's own portal gating.
+          auth: false,
+          policies: [
+            "plugin::better-auth.is-authenticated",
+            "plugin::better-auth.is-organization-owner",
+          ],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "GET",
+        path: "/organizations/:id/partner-portal/resources/:slug",
+        handler: "organization.partnerResource",
+        config: {
+          auth: false,
+          policies: [
+            "plugin::better-auth.is-authenticated",
+            "plugin::better-auth.is-organization-owner",
+          ],
+          middlewares: [],
+          prefix: "",
+        },
       },
       {
         method: "PUT",
