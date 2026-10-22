@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "../../lib/client";
+import { safeRedirectPath } from "../../lib/safe-redirect";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -46,7 +47,7 @@ export function CheckEmailView({ email, redirectTo }: CheckEmailViewProps) {
     // email lands in the same place as the one in the original email.
     const { error } = await authClient.sendVerificationEmail({
       email,
-      callbackURL: `${process.env.NEXT_PUBLIC_WEB_URL}${redirectTo || "/account"}`,
+      callbackURL: `${process.env.NEXT_PUBLIC_WEB_URL}${safeRedirectPath(redirectTo)}`,
     });
     setIsResending(false);
 

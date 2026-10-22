@@ -9,7 +9,9 @@ const READ_ONLY_FIELDS = ["git_repository"] as const;
 const EDITABLE_FIELDS = [
   "name",
   "description",
-  "preview_image",
+  // "preview_image" — deliberately not editable here; see the same note on
+  // `icon` in the package controller. Only changes through
+  // `POST /templates/:documentId/preview-image`.
   "preview_link",
   "categories",
   // "maintainers" — temporarily not editable, pending an invite flow so the

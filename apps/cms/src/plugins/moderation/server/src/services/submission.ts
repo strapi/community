@@ -1,3 +1,4 @@
+import { errors } from "@strapi/utils";
 import type { ModerationContentTypeConfig } from "../config";
 import { runAutomatedChecks } from "./automated-checks";
 import { getPackageSecurityInfo } from "./get-package-security-info";
@@ -47,6 +48,26 @@ export default ({ strapi }) => {
     return found;
   }
 
+  /**
+   * A submitted media field (e.g. `icon`) is a raw upload-file id. Only
+   * accept a file nothing else uses yet — i.e. the submitter's own fresh
+   * upload — never an existing file, which would let a submitter claim
+   * (and later, via the icon replace route, delete) any file in the media
+   * library.
+   */
+  async function assertUnattachedUpload(fileId: unknown) {
+    const id = Number(fileId);
+    const file = Number.isInteger(id)
+      ? await strapi.db.query("plugin::upload.file").findOne({
+          where: { id },
+          populate: ["related"],
+        })
+      : null;
+    if (!file || (file.related ?? []).length > 0) {
+      throw new errors.ValidationError("Invalid image upload.");
+    }
+  }
+
   function getConfigByPlural(plural: string): ModerationContentTypeConfig {
     const found = getCtConfigs().find((c) => c.pluralName === plural);
     if (!found) {
@@ -83,6 +104,20 @@ export default ({ strapi }) => {
     ) {
       const ctConfig = getConfigByUid(uid);
 
+      // Build entity data from the configured allowlist only — anything else
+      // in the body (labels, stars, relations, …) is moderation-controlled
+      // and silently dropped.
+      const attributes = strapi.getModel(uid).attributes;
+      const entityData: Record<string, unknown> = {};
+      for (const key of ctConfig.submitFields) {
+        if (!(key in rawBody)) continue;
+        const val = rawBody[key];
+        if (attributes[key]?.type === "media" && val != null) {
+          await assertUnattachedUpload(val);
+        }
+        entityData[key] = val;
+      }
+
       // Create the BusinessReview record first so we can link it
       const businessReview = await strapi.documents(BUSINESS_REVIEW_CT).create({
         data: { status: "pending" },
@@ -96,20 +131,6 @@ export default ({ strapi }) => {
           pagination: { pageSize: 100 },
         });
         categories = (results ?? []).map((c) => ({ documentId: c.documentId }));
-      }
-
-      // Build entity data — strip meta fields, apply defaults, attach relations.
-      // `maintainers` is stripped too: it's not part of the submit form, and
-      // adding maintainers will go through an invite flow, never a raw write.
-      const META_FIELDS = new Set([
-        "categories_list",
-        "owner_type",
-        "owner_id",
-        "maintainers",
-      ]);
-      const entityData: Record<string, unknown> = {};
-      for (const [key, val] of Object.entries(rawBody)) {
-        if (!META_FIELDS.has(key)) entityData[key] = val;
       }
 
       const entity = await strapi.documents(uid).create({

@@ -16,6 +16,7 @@ import {
   deleteOrganizationLogo,
   uploadOrganizationLogo,
 } from "./organization-logo";
+import { safeRedirectPath } from "./safe-redirect";
 
 /**
  * The shared <AuthUIProvider> config, factored out so a route that needs
@@ -30,8 +31,9 @@ export function useAuthUIProviderProps(): Omit<
 
   return {
     authClient,
-    navigate: (href) => router.push(href),
-    replace: (href) => router.replace(href),
+    // better-auth-ui passes `?redirectTo=` through to these unchecked.
+    navigate: (href) => router.push(safeRedirectPath(href)),
+    replace: (href) => router.replace(safeRedirectPath(href)),
     Link: ({ href, ...props }) => <Link href={href ?? "#"} {...props} />,
     basePath: "/auth",
     baseURL: process.env.NEXT_PUBLIC_WEB_URL,

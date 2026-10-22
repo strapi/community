@@ -996,7 +996,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -1456,7 +1456,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

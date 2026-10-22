@@ -83,6 +83,46 @@ function absolutizeMediaUrl(url: string): string {
  * which is harmless — it's a no-op when there's no logo, and idempotent
  * when the logo didn't change.
  */
+/**
+ * Guards the `logo` an organization is created/updated with. If the URL
+ * points at a file in our media library, that file must belong to the
+ * acting user (a fresh `uploadOwnedFile` upload) or already to this
+ * organization — otherwise `relinkOrganizationLogo` would re-tag someone
+ * else's file (another user's avatar, a package icon, …) to this org,
+ * detaching it from its real owner and letting `DELETE /organizations/logo`
+ * remove it. URLs that match no file have nothing to hijack and pass.
+ */
+async function assertLogoUsable(
+  logo: string | null | undefined,
+  userId: string | number,
+  organizationId?: string | number,
+) {
+  if (!logo) return;
+
+  const file = await strapi.db.query("plugin::upload.file").findOne({
+    where: { url: logo },
+    populate: ["related"],
+  });
+  if (!file) return;
+
+  const related =
+    (file.related as { id: string | number; __type: string }[]) ?? [];
+  const usable =
+    related.length > 0 &&
+    related.every(
+      (item) =>
+        (item.__type === "plugin::better-auth.user" &&
+          String(item.id) === String(userId)) ||
+        (organizationId !== undefined &&
+          item.__type === "plugin::better-auth.organization" &&
+          String(item.id) === String(organizationId)),
+    );
+
+  if (!usable) {
+    throw new APIError("BAD_REQUEST", { message: "Invalid logo." });
+  }
+}
+
 async function relinkOrganizationLogo(organization: {
   id: string | number;
   logo?: string | null;
@@ -159,6 +199,16 @@ export const auth = betterAuth({
         });
       },
       organizationHooks: {
+        beforeCreateOrganization: async ({ organization, user }) => {
+          await assertLogoUsable(organization.logo, user.id);
+        },
+        beforeUpdateOrganization: async ({ organization, user, member }) => {
+          await assertLogoUsable(
+            organization.logo,
+            user.id,
+            member.organizationId,
+          );
+        },
         afterUpdateOrganization: async ({ organization }) => {
           if (!organization) return;
           await relinkOrganizationLogo(organization);
