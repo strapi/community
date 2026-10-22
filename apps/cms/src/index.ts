@@ -1,9 +1,5 @@
 import type { Core } from "@strapi/strapi";
-import { migrateAccountAccessEmail } from "./migration/account-access-email";
-import { migrateCredentialAccounts } from "./migration/credential-accounts";
-import { migrateReadmeAutoSync } from "./migration/readme-auto-sync";
 import { migrateUserProfilePictures } from "./migration/user-profile-pictures";
-import { migrateUserSlugs } from "./migration/user-slugs";
 import { seedEmailTemplates } from "./seed/email-templates";
 
 export default {
@@ -17,9 +13,5 @@ export default {
     }
 
     await migrateUserProfilePictures();
-    await migrateUserSlugs();
-    await migrateReadmeAutoSync();
-    await migrateCredentialAccounts();
-    await migrateAccountAccessEmail();
   },
 };
