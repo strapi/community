@@ -15,6 +15,12 @@ const Navigation = async ({ theme }: Props) => {
     populate: "*",
   });
 
+  const ctaLinks = data.data.cta_links?.map((link) => (
+    <Button key={link.id} asChild>
+      <Link href={link.link!}>{link.label}</Link>
+    </Button>
+  ));
+
   const headersList = await headers();
   const path = new URL(headersList.get("x-url")!).pathname;
 
@@ -63,13 +69,13 @@ const Navigation = async ({ theme }: Props) => {
           <div className="flex items-center gap-2">
             <div className="hidden items-center gap-2 lg:flex">
               {isAuthEnabled ? (
-                <AuthNavigation theme={theme} />
+                <AuthNavigation
+                  theme={theme}
+                  compact
+                  signedInActions={ctaLinks}
+                />
               ) : (
-                data.data.cta_links?.map((link) => (
-                  <Button key={link.id} asChild>
-                    <Link href={link.link!}>{link.label}</Link>
-                  </Button>
-                ))
+                ctaLinks
               )}
             </div>
             <MobileNav
