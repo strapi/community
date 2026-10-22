@@ -20,6 +20,6 @@ export default {
     await migrateUserSlugs();
     await migrateReadmeAutoSync();
     await migrateCredentialAccounts();
-    // await migrateAccountAccessEmail();
+    await migrateAccountAccessEmail();
   },
 };
