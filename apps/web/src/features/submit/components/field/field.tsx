@@ -44,6 +44,7 @@ export function Textarea({
   placeholder,
   rows = 5,
   hasError,
+  disabled,
 }: {
   id?: string;
   value: string;
@@ -51,16 +52,18 @@ export function Textarea({
   placeholder?: string;
   rows?: number;
   hasError?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <textarea
       id={id}
       value={value}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
       className={cn(
-        "flex w-full resize-y rounded-md border bg-white px-3 py-2 text-sm text-(--color-neutral900) shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none placeholder:text-(--color-neutral600) focus-visible:border-(--color-primary200)",
+        "flex w-full resize-y rounded-md border bg-white px-3 py-2 text-sm text-(--color-neutral900) shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none placeholder:text-(--color-neutral600) focus-visible:border-(--color-primary200) disabled:cursor-not-allowed disabled:opacity-50",
         hasError ? "border-red-400" : "border-(--color-neutral150)",
       )}
     />

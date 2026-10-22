@@ -6,7 +6,13 @@ export async function syncVersionInfo(): Promise<{
 }> {
   const packages = await strapi.documents("api::package.package").findMany({
     status: "published",
-    fields: ["documentId", "package_location", "git_repository", "readme"],
+    fields: [
+      "documentId",
+      "package_location",
+      "git_repository",
+      "readme",
+      "readme_auto_sync",
+    ],
     populate: { version_info: true },
     pagination: { pageSize: 500 },
   });
@@ -24,7 +30,13 @@ export async function syncVersionInfo(): Promise<{
       );
       if (!info) continue;
 
-      const newReadme = info.readme ?? null;
+      // Owner opted out of readme auto-sync (see the "Submissions" edit
+      // form) — leave `readme` alone but keep version/stats syncing.
+      // Syncing is the default: treat `null` (packages that predate this
+      // field — the schema's `default: true` only applies to rows created
+      // after it was added) the same as `true`, not as opted out.
+      const newReadme =
+        pkg.readme_auto_sync !== false ? (info.readme ?? null) : pkg.readme;
       const newVersion = info.version ?? null;
       const newPublishedAt = info.publishedAt ?? null;
       const newInstallCommand = info.installCommand ?? null;

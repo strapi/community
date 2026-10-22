@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { SubmitTemplateForm } from "./SubmitTemplateForm";
+
+export const metadata: Metadata = {
+  title: "Submit a template",
+};
 
 async function fetchCategories(): Promise<string[]> {
   try {

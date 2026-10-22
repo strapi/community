@@ -23,10 +23,12 @@
     },
     "name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "maxLength": 50
     },
     "description": {
-      "type": "text"
+      "type": "text",
+      "maxLength": 300
     },
     "git_repository": {
       "type": "string"
@@ -112,7 +114,8 @@
       ]
     },
     "submitter_ip": {
-      "type": "string"
+      "type": "string",
+      "private": true
     },
     "submitter_agreed_to_terms": {
       "type": "boolean",
@@ -120,6 +123,10 @@
     },
     "submission_notes": {
       "type": "text"
+    },
+    "readme_auto_sync": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

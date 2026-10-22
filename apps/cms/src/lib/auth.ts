@@ -1,15 +1,229 @@
 import { dash } from "@better-auth/infra";
 import { strapiAdapter } from "@strapi-community/plugin-better-auth";
 import { betterAuth } from "better-auth";
-import { emailOTP, jwt, organization, twoFactor } from "better-auth/plugins";
-import { sendOtpEmail, sendResetPasswordEmail } from "./email";
+import { APIError } from "better-auth/api";
+import { jwt, magicLink, organization, twoFactor } from "better-auth/plugins";
+import {
+  cascadeDeleteOrganization,
+  cascadeDeleteUser,
+} from "../extensions/better-auth/utils/cascade-delete";
+import {
+  generateUniqueUserSlug,
+  isSlugTaken,
+  validateSlug,
+} from "../utils/slugify";
+import {
+  sendChangeEmailConfirmationEmail,
+  sendEmailChangedEmail,
+  sendMagicLinkEmail,
+  sendOrganizationInvitationEmail,
+  sendOtpEmail,
+  sendResetPasswordEmail,
+  sendVerificationEmail,
+} from "./email";
+
+const pendingEmailChanges = new Map<string, string>();
+
+/**
+ * better-auth resolves relative redirect params against its own base URL
+ * (the CMS), so make them absolute on the web app instead — including the
+ * error/new-user variants, which it redirects to with `?error=<code>`.
+ */
+function absolutizeCallbackURL(url: string): string {
+  const parsed = new URL(url);
+  for (const param of [
+    "callbackURL",
+    "errorCallbackURL",
+    "newUserCallbackURL",
+  ]) {
+    const value = parsed.searchParams.get(param);
+    if (value && !/^https?:\/\//i.test(value)) {
+      parsed.searchParams.set(
+        param,
+        new URL(value, process.env.WEBSITE_URL).toString(),
+      );
+    }
+  }
+  return parsed.toString();
+}
+
+const STRAPI_URL = process.env.STRAPI_URL || "http://localhost:1337";
+
+/**
+ * The `dash` plugin below authenticates its dashboard-integration requests
+ * by hashing this key (see `@better-auth/infra`'s dash plugin) — falling
+ * back to a checked-in default here would mean anyone reading this
+ * (now-public) source could compute a valid hash if the env var was ever
+ * left unset in a real deployment. Fail closed instead.
+ */
+function requireDashboardSecret(): string {
+  const secret = process.env.BETTER_AUTH_DASHBOARD_SECRET;
+  if (!secret) {
+    throw new Error(
+      "BETTER_AUTH_DASHBOARD_SECRET must be set (no insecure default is used).",
+    );
+  }
+  return secret;
+}
+
+function absolutizeMediaUrl(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `${STRAPI_URL}${url}`;
+}
+
+/**
+ * Re-links an uploaded logo file's `related` (the native polymorphic
+ * field on `plugin::upload.file`) to the organization it now belongs to.
+ *
+ * At upload time (`uploadOwnedFile` in the better-auth extension), the
+ * file can only be tagged to the *uploading user* — better-auth-ui's
+ * `organization.logo.upload` callback has no organization id, since the
+ * logo isn't attached to an org until this very update call. Once it is,
+ * this re-tags the file so it's correctly related to the organization
+ * instead. Runs on every organization update (not just logo changes),
+ * which is harmless — it's a no-op when there's no logo, and idempotent
+ * when the logo didn't change.
+ */
+/**
+ * Guards the `logo` an organization is created/updated with. If the URL
+ * points at a file in our media library, that file must belong to the
+ * acting user (a fresh `uploadOwnedFile` upload) or already to this
+ * organization — otherwise `relinkOrganizationLogo` would re-tag someone
+ * else's file (another user's avatar, a package icon, …) to this org,
+ * detaching it from its real owner and letting `DELETE /organizations/logo`
+ * remove it. URLs that match no file have nothing to hijack and pass.
+ */
+async function assertLogoUsable(
+  logo: string | null | undefined,
+  userId: string | number,
+  organizationId?: string | number,
+) {
+  if (!logo) return;
+
+  const file = await strapi.db.query("plugin::upload.file").findOne({
+    where: { url: logo },
+    populate: ["related"],
+  });
+  if (!file) return;
+
+  const related =
+    (file.related as { id: string | number; __type: string }[]) ?? [];
+  const usable =
+    related.length > 0 &&
+    related.every(
+      (item) =>
+        (item.__type === "plugin::better-auth.user" &&
+          String(item.id) === String(userId)) ||
+        (organizationId !== undefined &&
+          item.__type === "plugin::better-auth.organization" &&
+          String(item.id) === String(organizationId)),
+    );
+
+  if (!usable) {
+    throw new APIError("BAD_REQUEST", { message: "Invalid logo." });
+  }
+}
+
+async function relinkOrganizationLogo(organization: {
+  id: string | number;
+  logo?: string | null;
+}) {
+  if (!organization.logo) return;
+
+  await strapi.db.query("plugin::upload.file").update({
+    where: { url: organization.logo },
+    data: {
+      related: [
+        {
+          id: organization.id,
+          __type: "plugin::better-auth.organization",
+          __pivot: { field: "logo" },
+        },
+      ],
+    },
+  });
+}
 
 export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
-  appName: process.env.SITE_NAME ?? "Strapi Community",
+  appName: process.env.SITE_NAME ?? "Strapi Community Hub",
+  /**
+   * Where redirect-based flows (OAuth sign-in/linking callbacks, and
+   * better-auth's own `/error` page) send the browser on failure. Without
+   * this they fall back to `/api/auth/error` on the CMS, which in production
+   * redirects to `/` — i.e. the Strapi admin login. The web app's
+   * `/auth/error` view forwards the `?error=` code on to a page that toasts it.
+   */
+  onAPIError: {
+    errorURL: `${process.env.WEBSITE_URL}/auth/error`,
+  },
+  account: {
+    accountLinking: {
+      disableImplicitLinking: true,
+      allowDifferentEmails: true,
+    },
+  },
+  // `prompt: "select_account"` makes Google/GitHub always show their account
+  // picker instead of silently reusing whichever account is signed in there —
+  // matters most when linking, where the wrong account is easy to pick up.
+  socialProviders: {
+    google: {
+      clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+      prompt: "select_account",
+    },
+    github: {
+      clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
+      clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
+      prompt: "select_account",
+    },
+  },
   plugins: [
-    organization(),
+    organization({
+      sendInvitationEmail: async (data) => {
+        const url = `${process.env.WEBSITE_URL}/auth/accept-invitation?invitationId=${data.id}`;
+        const expirationHours = Math.round(
+          (new Date(data.invitation.expiresAt).getTime() - Date.now()) /
+            (60 * 60 * 1000),
+        );
+
+        await sendOrganizationInvitationEmail(data.email, url, {
+          inviterName: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
+          organizationName: data.organization.name,
+          organizationLogoURL: data.organization.logo
+            ? absolutizeMediaUrl(data.organization.logo)
+            : undefined,
+          role: data.role,
+          expirationHours,
+        });
+      },
+      organizationHooks: {
+        beforeCreateOrganization: async ({ organization, user }) => {
+          await assertLogoUsable(organization.logo, user.id);
+        },
+        beforeUpdateOrganization: async ({ organization, user, member }) => {
+          await assertLogoUsable(
+            organization.logo,
+            user.id,
+            member.organizationId,
+          );
+        },
+        afterUpdateOrganization: async ({ organization }) => {
+          if (!organization) return;
+          await relinkOrganizationLogo(organization);
+        },
+        /**
+         * Cascade-deletes everything the organization owns (packages,
+         * templates, showcases, its profile, its logo — see
+         * `cascade-delete.ts`) before better-auth deletes the org's own
+         * `member`/`invitation` rows and the organization itself.
+         */
+        beforeDeleteOrganization: async ({ organization }) => {
+          await cascadeDeleteOrganization(organization.id);
+        },
+      },
+    }),
     twoFactor({
       otpOptions: {
         sendOTP: async ({ user, otp }) => {
@@ -18,27 +232,125 @@ export const auth = betterAuth({
       },
     }),
     dash({
-      apiUrl: process.env.STRAPI_URL || "http://localhost:1337",
-      apiKey:
-        process.env.BETTER_AUTH_DASHBOARD_SECRET ||
-        "strapi-internal-dashboard-key",
+      apiUrl: STRAPI_URL,
+      apiKey: requireDashboardSecret(),
     }),
     jwt(),
-    emailOTP({
-      overrideDefaultEmailVerification: true,
-      sendVerificationOTP: async ({ email, otp }) => {
-        await sendOtpEmail(email, otp);
+    magicLink({
+      disableSignUp: true,
+      /**
+       * better-auth only enforces `disableSignUp` when the link is verified,
+       * so skip sending to unknown emails here. The endpoint still responds
+       * with success, so this doesn't reveal whether an account exists.
+       */
+      sendMagicLink: async ({ email, url }, ctx) => {
+        const found = await ctx?.context.internalAdapter.findUserByEmail(email);
+        if (!found) return;
+        await sendMagicLinkEmail(email, absolutizeCallbackURL(url));
       },
     }),
   ],
   emailVerification: {
     sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail(user.email, absolutizeCallbackURL(url));
+    },
   },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendResetPasswordEmail(user.email, url);
+      await sendResetPasswordEmail(user.email, absolutizeCallbackURL(url));
+    },
+    onExistingUserSignUp: async ({ user }, request) => {
+      await auth.api.signInMagicLink({
+        body: { email: user.email },
+        headers: request?.headers,
+      });
+    },
+  },
+  user: {
+    deleteUser: {
+      enabled: true,
+      /**
+       * Cascade-deletes everything the user owns (packages, templates,
+       * showcases, their profile, their avatar — see `cascade-delete.ts`),
+       * removes their membership from every organization, and fully
+       * cascade-deletes any organization they own — before better-auth
+       * deletes the user's own `session`/`account`/`user` rows.
+       */
+      beforeDelete: async (user) => {
+        await cascadeDeleteUser(user.id);
+      },
+    },
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        pendingEmailChanges.set(newEmail, user.email);
+        await sendChangeEmailConfirmationEmail(
+          user.email,
+          user.email,
+          newEmail,
+          absolutizeCallbackURL(url),
+        );
+      },
+    },
+    additionalFields: {
+      /**
+       * Determines the user's public profile URL (via the
+       * `strapi-plugin-webtools` `/[slug]` pattern) independently of
+       * `name` — see the account settings' "Profile URL" field
+       * (apps/web/src/features/auth/lib/use-auth-ui-props.tsx). Not
+       * `required` here, since that would also force it onto every
+       * sign-up flow (social/magic link included) — it's populated by
+       * `databaseHooks.user.create.before` below instead, and backfilled
+       * for existing users by `migrateUserSlugs`.
+       */
+      slug: {
+        type: "string",
+        required: false,
+        unique: true,
+        input: true,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => ({
+          data: { slug: await generateUniqueUserSlug(user.name) },
+        }),
+      },
+      update: {
+        before: async (data, context) => {
+          if (typeof data.slug !== "string") return;
+
+          const slug = data.slug.trim();
+          const formatError = validateSlug(slug);
+          if (formatError) {
+            throw new APIError("BAD_REQUEST", { message: formatError });
+          }
+
+          const currentUserId = context?.context?.session?.user?.id;
+          if (await isSlugTaken(slug, { excludeUserId: currentUserId })) {
+            throw new APIError("BAD_REQUEST", {
+              message: "That profile URL is already taken.",
+            });
+          }
+
+          return { data: { ...data, slug } };
+        },
+        after: async (updated) => {
+          const oldEmail = pendingEmailChanges.get(updated.email);
+          if (!oldEmail || !updated.emailVerified) return;
+          pendingEmailChanges.delete(updated.email);
+          await Promise.all([
+            sendEmailChangedEmail(oldEmail, oldEmail, updated.email),
+            sendEmailChangedEmail(updated.email, oldEmail, updated.email),
+          ]);
+        },
+      },
     },
   },
   database: strapiAdapter({
@@ -52,7 +364,7 @@ export const auth = betterAuth({
     },
     defaultCookieAttributes: {
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "lax",
     },
   },
 });

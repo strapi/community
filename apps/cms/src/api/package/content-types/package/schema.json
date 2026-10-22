@@ -24,11 +24,13 @@
     },
     "name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "maxLength": 50
     },
     "description": {
       "type": "text",
-      "required": true
+      "required": true,
+      "maxLength": 300
     },
     "icon": {
       "type": "media",
@@ -37,10 +39,12 @@
       "allowedTypes": ["images", "files", "videos", "audios"]
     },
     "git_repository": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "package_location": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "type": {
       "type": "enumeration",
@@ -125,7 +129,8 @@
       ]
     },
     "submitter_ip": {
-      "type": "string"
+      "type": "string",
+      "private": true
     },
     "submitter_agreed_to_terms": {
       "type": "boolean",
@@ -133,6 +138,10 @@
     },
     "submission_notes": {
       "type": "text"
+    },
+    "readme_auto_sync": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

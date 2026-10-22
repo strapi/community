@@ -947,8 +947,12 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text & Schema.Attribute.Required;
-    git_repository: Schema.Attribute.String;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
+    git_repository: Schema.Attribute.String & Schema.Attribute.Required;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     integrations: Schema.Attribute.Relation<
       'manyToMany',
@@ -966,14 +970,20 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     monthly_downloads: Schema.Attribute.Integer;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
-    package_location: Schema.Attribute.String;
+    package_location: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    readme_auto_sync: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     security_reviews: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::moderation.security-review'
@@ -986,7 +996,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -1021,7 +1031,10 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    bio: Schema.Attribute.Text;
+    bio: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
     countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1038,7 +1051,10 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
-    subtitle: Schema.Attribute.String;
+    subtitle: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     tech_stacks: Schema.Attribute.Relation<
       'oneToMany',
       'api::tech-stack.tech-stack'
@@ -1312,7 +1328,10 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
     git_repository: Schema.Attribute.String;
     integrations: Schema.Attribute.Relation<
       'manyToMany',
@@ -1330,7 +1349,11 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'oneToMany',
       'plugin::better-auth.user'
     >;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
@@ -1340,6 +1363,8 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     preview_link: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
+    readme_auto_sync: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     security_reviews: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::moderation.security-review'
@@ -1352,7 +1377,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1384,7 +1409,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    accessToken: Schema.Attribute.String &
+    accessToken: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
@@ -1396,7 +1421,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
-    accountId: Schema.Attribute.String &
+    accountId: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1406,7 +1431,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    idToken: Schema.Attribute.String &
+    idToken: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
@@ -1418,13 +1443,13 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
       'plugin::better-auth.account'
     > &
       Schema.Attribute.Private;
-    password: Schema.Attribute.String &
+    password: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
         };
       }>;
-    providerId: Schema.Attribute.String &
+    providerId: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1432,7 +1457,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
         };
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    refreshToken: Schema.Attribute.String &
+    refreshToken: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
@@ -1444,7 +1469,7 @@ export interface PluginBetterAuthAccount extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
-    scope: Schema.Attribute.String &
+    scope: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
@@ -1697,7 +1722,7 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
-    name: Schema.Attribute.Text &
+    name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1900,6 +1925,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
+      Schema.Attribute.Private &
       Schema.Attribute.Unique &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1926,7 +1952,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     > &
       Schema.Attribute.Private;
-    name: Schema.Attribute.Text &
+    name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1938,6 +1964,13 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     sitemap_exclude: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;
+    slug: Schema.Attribute.Text &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     twoFactorEnabled: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -1987,7 +2020,7 @@ export interface PluginBetterAuthVerification
           managed: true;
         };
       }>;
-    identifier: Schema.Attribute.String &
+    identifier: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -2004,7 +2037,7 @@ export interface PluginBetterAuthVerification
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    value: Schema.Attribute.String &
+    value: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {

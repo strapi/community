@@ -12,6 +12,9 @@
     "resolveJsonModule": true,
     "noEmitOnError": true,
     "noImplicitThis": true,
+    // Lets server-side code (e.g. React Email templates) use JSX; the
+    // admin panel has its own tsconfig/build and is unaffected.
+    "jsx": "react-jsx",
     "outDir": "dist",
     "rootDir": "."
   },
@@ -20,6 +23,8 @@
     "./",
     // Include all ts files
     "./**/*.ts",
+    // Include all tsx files
+    "./**/*.tsx",
     // Include all js files
     "./**/*.js",
     // Force the JSON files in the src folder to be included

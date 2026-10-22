@@ -1,3 +1,7 @@
+import "server-only";
+
+import { sanitizeIfSvg } from "./sanitize-svg";
+
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337";
 const CMS_BEARER_TOKEN = process.env.CMS_BEARER_TOKEN;
 
@@ -23,12 +27,31 @@ export function parseCategories(raw: FormDataEntryValue | null): string[] {
   return [];
 }
 
+/**
+ * Syncing is the default (same as the edit form) — the submitted readme
+ * is only kept when the submitter opted to edit it manually; otherwise
+ * the package-info cron fills it from the registry/repository.
+ */
+export function readmeFields(formData: FormData) {
+  const readme_auto_sync = formData.get("readme_auto_sync") !== "false";
+  return {
+    readme_auto_sync,
+    readme: readme_auto_sync ? null : str(formData.get("readme")),
+  };
+}
+
+/**
+ * Uploads to the CMS media library and returns the file's numeric `id` —
+ * media fields are linked by `id`, not `documentId` (a `{ documentId }`
+ * value on a media field is silently dropped by the document service).
+ */
 export async function uploadImageToStrapi(
   file: File,
   logPrefix: string,
-): Promise<string | null> {
+): Promise<number | null> {
+  const safeFile = await sanitizeIfSvg(file);
   const form = new FormData();
-  form.append("files", file, file.name);
+  form.append("files", safeFile, safeFile.name);
 
   try {
     const res = await fetch(`${CMS_URL}/api/upload`, {
@@ -42,42 +65,10 @@ export async function uploadImageToStrapi(
       console.error(`[${logPrefix}] Image upload failed: ${res.status}`);
       return null;
     }
-    const data = (await res.json()) as Array<{ documentId: string }>;
-    return data[0]?.documentId ?? null;
+    const data = (await res.json()) as Array<{ id: number }>;
+    return data[0]?.id ?? null;
   } catch (err) {
     console.error(`[${logPrefix}] Image upload error:`, err);
     return null;
   }
-}
-
-export async function submitToStrapi(
-  endpoint: string,
-  payload: Record<string, unknown>,
-  logPrefix: string,
-): Promise<{ submissionId: string }> {
-  if (!CMS_BEARER_TOKEN) {
-    console.warn(
-      `[${logPrefix}] CMS_BEARER_TOKEN not set — Strapi may reject the request.`,
-    );
-  }
-
-  const res = await fetch(`${CMS_URL}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(CMS_BEARER_TOKEN
-        ? { Authorization: `Bearer ${CMS_BEARER_TOKEN}` }
-        : {}),
-    },
-    body: JSON.stringify({ data: payload }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.error(`[${logPrefix}] Strapi ${res.status}: ${body}`);
-    throw new Error("strapi_error");
-  }
-
-  const result = (await res.json()) as { data: { documentId: string } };
-  return { submissionId: result.data?.documentId };
 }

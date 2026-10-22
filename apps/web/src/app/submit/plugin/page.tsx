@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { Navigation } from "@/components/layout/navigation";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { SubmitPluginForm } from "./SubmitPluginForm";
+
+export const metadata: Metadata = {
+  title: "Submit a plugin",
+};
 
 async function fetchCategories(): Promise<string[]> {
   try {

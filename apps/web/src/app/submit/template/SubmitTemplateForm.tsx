@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticate } from "@daveyplate/better-auth-ui";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,10 +13,16 @@ import {
   Textarea,
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
+import { OwnerSelect } from "@/features/submit/components/owner-select";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
-import { EMAIL_RE, URL_RE } from "@/features/submit/lib/validation";
+import {
+  DESCRIPTION_MAX_LENGTH,
+  URL_RE,
+} from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
+import { cn } from "@/lib/utils";
 
 interface TemplateFormFields extends BaseFormFields {
   template_name: string;
@@ -29,27 +36,29 @@ const INITIAL: TemplateFormFields = {
   description: "",
   logo_file: null,
   categories_list: [],
+  readme: "",
+  readme_auto_sync: true,
   submission_notes: "",
-  owner_name: "",
-  owner_email: "",
   agreed: false,
+  owner_type: "plugin::better-auth.user",
+  owner_id: null,
 };
 
 function validate(f: TemplateFormFields): FieldErrors<TemplateFormFields> {
   const e: FieldErrors<TemplateFormFields> = {};
   if (!f.template_name.trim()) e.template_name = "Template name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
+  else if (f.description.trim().length > DESCRIPTION_MAX_LENGTH)
+    e.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
     e.repository_url = "Must be a valid https:// URL.";
   if (f.demo_url.trim() && !URL_RE.test(f.demo_url.trim()))
     e.demo_url = "Must be a valid https:// URL.";
-  if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
-  if (!f.owner_email.trim()) e.owner_email = "Contact email is required.";
-  else if (!EMAIL_RE.test(f.owner_email.trim()))
-    e.owner_email = "Must be a valid email address.";
   if (!f.agreed) e.agreed = "You must agree to the terms to continue.";
+  if (f.owner_type === "plugin::better-auth.organization" && !f.owner_id)
+    e.owner_id = "Select an organization to submit as.";
   return e;
 }
 
@@ -62,12 +71,15 @@ function buildFormData(
   form.append("repository_url", fields.repository_url.trim());
   form.append("demo_url", fields.demo_url.trim());
   form.append("description", fields.description.trim());
+  form.append("readme", fields.readme.trim());
+  form.append("readme_auto_sync", String(fields.readme_auto_sync));
   form.append("submission_notes", fields.submission_notes.trim());
-  form.append("owner_name", fields.owner_name.trim());
-  form.append("owner_email", fields.owner_email.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
   form.append("recaptcha_token", recaptchaToken);
+  form.append("owner_type", fields.owner_type);
+  if (fields.owner_id !== null)
+    form.append("owner_id", String(fields.owner_id));
   if (fields.logo_file)
     form.append("logo_file", fields.logo_file, fields.logo_file.name);
   return form;
@@ -89,6 +101,13 @@ export function SubmitTemplateForm({
 }: {
   initialCategories: string[];
 }) {
+  // Submitting requires an account — redirects to sign-in (with a
+  // `redirectTo` back here) when there's no session, same as the
+  // /account settings pages. Defaults to the submitter as owner, but they
+  // can submit on behalf of an organization they administer instead (see
+  // the "Submit as" field below) — enforced server-side, not just here.
+  const { user, isPending } = useAuthenticate();
+
   const {
     fields,
     errors,
@@ -102,9 +121,18 @@ export function SubmitTemplateForm({
     initial: INITIAL,
     validate,
     apiEndpoint: "/api/submit-template",
+    submissionKind: "templates",
     recaptchaAction: "submit_template",
     buildFormData,
   });
+
+  if (isPending || !user) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-(--color-neutral500)">
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <SubmitFormShell
@@ -131,6 +159,25 @@ export function SubmitTemplateForm({
       onSubmit={handleSubmit}
     >
       <div className="mb-5">
+        <Label htmlFor="owner_id" required>
+          Submit as
+        </Label>
+        <OwnerSelect
+          value={{ type: fields.owner_type, id: fields.owner_id }}
+          onChange={(owner) => {
+            set("owner_type", owner.type);
+            set("owner_id", owner.id);
+          }}
+          personalLabel={user?.name || user?.email || "You"}
+        />
+        <FieldError message={errors.owner_id} />
+        <Hint>
+          Choose whether this template belongs to your personal account or to
+          one of the organizations you administer.
+        </Hint>
+      </div>
+
+      <div className="mb-5">
         <Label htmlFor="template_name" required>
           Template Name
         </Label>
@@ -143,6 +190,32 @@ export function SubmitTemplateForm({
           autoComplete="off"
         />
         <FieldError message={errors.template_name} />
+      </div>
+
+      <div className="mb-5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description" required>
+            Template Description
+          </Label>
+          <span
+            className={cn(
+              "text-xs text-(--color-neutral600)",
+              fields.description.length > DESCRIPTION_MAX_LENGTH &&
+                "text-red-600",
+            )}
+          >
+            {fields.description.length}/{DESCRIPTION_MAX_LENGTH}
+          </span>
+        </div>
+        <Textarea
+          id="description"
+          value={fields.description}
+          onChange={(v) => set("description", v)}
+          placeholder="Tell us about your template — what it includes and what use cases it covers."
+          rows={4}
+          hasError={!!errors.description}
+        />
+        <FieldError message={errors.description} />
       </div>
 
       <div className="mb-5">
@@ -161,6 +234,16 @@ export function SubmitTemplateForm({
         <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
       </div>
 
+      <ReadmeField
+        className="mb-5"
+        type="template"
+        readme={fields.readme}
+        autoSync={fields.readme_auto_sync}
+        onReadmeChange={(v) => set("readme", v)}
+        onAutoSyncChange={(v) => set("readme_auto_sync", v)}
+        placeholder="Paste your template's README or any additional documentation here."
+      />
+
       <div className="mb-5">
         <Label htmlFor="demo_url">Live Demo URL</Label>
         <Input
@@ -173,21 +256,6 @@ export function SubmitTemplateForm({
         />
         <FieldError message={errors.demo_url} />
         <Hint>A live preview URL, if available.</Hint>
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="description" required>
-          Template Description
-        </Label>
-        <Textarea
-          id="description"
-          value={fields.description}
-          onChange={(v) => set("description", v)}
-          placeholder="Tell us about your template — what it includes and what use cases it covers."
-          rows={4}
-          hasError={!!errors.description}
-        />
-        <FieldError message={errors.description} />
       </div>
 
       <div className="mb-5">
@@ -208,38 +276,6 @@ export function SubmitTemplateForm({
           onAdd={addCategory}
           onRemove={removeCategory}
         />
-      </div>
-
-      <SectionDivider label="Owner" />
-
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="owner_name" required>
-            Owner / Author Name
-          </Label>
-          <Input
-            id="owner_name"
-            value={fields.owner_name}
-            onChange={(e) => set("owner_name", e.target.value)}
-            placeholder="Your name or organisation"
-            className={errors.owner_name ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_name} />
-        </div>
-        <div>
-          <Label htmlFor="owner_email" required>
-            Contact Email
-          </Label>
-          <Input
-            id="owner_email"
-            type="email"
-            value={fields.owner_email}
-            onChange={(e) => set("owner_email", e.target.value)}
-            placeholder="you@example.com"
-            className={errors.owner_email ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_email} />
-        </div>
       </div>
 
       <div className="mb-5">

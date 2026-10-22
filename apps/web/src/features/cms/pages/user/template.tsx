@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
+import { Markdown } from "@/components/content/markdown";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -31,6 +32,8 @@ type Props = {
 const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
   const { templates, packages } = relatedContent;
   const noRelatedContent = templates.length === 0 && packages.length === 0;
+  const defaultTab =
+    document.profile?.readme || noRelatedContent ? "about" : "content";
 
   return (
     <>
@@ -138,11 +141,11 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
       </Hero>
 
       <Container>
-        <Tabs
-          defaultValue={noRelatedContent ? "about" : "content"}
-          className="w-full"
-        >
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-4 sm:py-6 lg:py-10">
+            <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
+              About
+            </TabsTrigger>
             {!noRelatedContent && (
               <TabsTrigger
                 value="content"
@@ -151,9 +154,6 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                 Published Content
               </TabsTrigger>
             )}
-            <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
-              About
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="content">
@@ -222,9 +222,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
               About {document.name}
             </h2>
             {document.profile?.readme ? (
-              <p className="text-md leading-7 text-(--color-neutral700)">
-                {document.profile.readme}
-              </p>
+              <Markdown markdown={document.profile.readme} />
             ) : (
               <p className="text-md text-(--color-neutral600)">
                 No description provided.

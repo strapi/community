@@ -39,6 +39,8 @@ const OrganizationTemplate = ({
 }: Props) => {
   const { templates, packages } = relatedContent;
   const noRelatedContent = templates.length === 0 && packages.length === 0;
+  const defaultTab =
+    document.profile?.readme || noRelatedContent ? "about" : "content";
 
   return (
     <>
@@ -136,11 +138,11 @@ const OrganizationTemplate = ({
       </Hero>
 
       <Container>
-        <Tabs
-          defaultValue={noRelatedContent ? "about" : "content"}
-          className="w-full"
-        >
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="border-(--color-neutral300) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-4 sm:py-6 lg:py-10">
+            <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
+              About {document.name}
+            </TabsTrigger>
             {!noRelatedContent && (
               <TabsTrigger
                 value="content"
@@ -149,9 +151,6 @@ const OrganizationTemplate = ({
                 Published Content
               </TabsTrigger>
             )}
-            <TabsTrigger value="about" icon={<AppWindow className="h-4 w-4" />}>
-              About {document.name}
-            </TabsTrigger>
             {members.length > 0 && (
               <TabsTrigger value="people" icon={<Users className="h-4 w-4" />}>
                 People

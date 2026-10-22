@@ -13,6 +13,19 @@ export default {
       },
       {
         method: "GET",
+        path: "/organizations/mine",
+        handler: "organization.mine",
+        config: {
+          // Registered before `/organizations/:id` — otherwise that
+          // route would match `mine` as an `:id` value first.
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "GET",
         path: "/organizations/:id",
         handler: "organization.findOne",
         config: {
@@ -31,6 +44,46 @@ export default {
         path: "/organizations/:id/members",
         handler: "organization.members",
         config: { policies: [], middlewares: [], prefix: "" },
+      },
+      {
+        method: "PUT",
+        path: "/organizations/:id/profile",
+        handler: "organization.updateProfile",
+        config: {
+          // Called directly from the browser with a better-auth session
+          // cookie, not a Strapi API token, so the default
+          // content-api-token check must be skipped in favor of our own
+          // session- and role-based policies.
+          auth: false,
+          policies: [
+            "plugin::better-auth.is-authenticated",
+            "plugin::better-auth.is-organization-owner",
+          ],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "POST",
+        path: "/organizations/logo",
+        handler: "organization.uploadLogo",
+        config: {
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+          middlewares: [],
+          prefix: "",
+        },
+      },
+      {
+        method: "DELETE",
+        path: "/organizations/logo",
+        handler: "organization.deleteLogo",
+        config: {
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+          middlewares: [],
+          prefix: "",
+        },
       },
     ],
   },

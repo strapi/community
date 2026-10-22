@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticate } from "@daveyplate/better-auth-ui";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,44 +13,60 @@ import {
   Textarea,
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
+import { OwnerSelect } from "@/features/submit/components/owner-select";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
-import { EMAIL_RE, URL_RE } from "@/features/submit/lib/validation";
+import {
+  DESCRIPTION_MAX_LENGTH,
+  isPackageType,
+  PACKAGE_TYPES,
+  type PackageType,
+  URL_RE,
+} from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
+import { cn } from "@/lib/utils";
 
 interface PluginFormFields extends BaseFormFields {
   plugin_name: string;
+  package_type: PackageType | "";
   package_location: string;
-  readme: string;
 }
 
 const INITIAL: PluginFormFields = {
   plugin_name: "",
+  package_type: "",
   package_location: "",
   repository_url: "",
   description: "",
   logo_file: null,
   categories_list: [],
   readme: "",
+  readme_auto_sync: true,
   submission_notes: "",
-  owner_name: "",
-  owner_email: "",
   agreed: false,
+  owner_type: "plugin::better-auth.user",
+  owner_id: null,
 };
 
 function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
   const e: FieldErrors<PluginFormFields> = {};
-  if (!f.plugin_name.trim()) e.plugin_name = "Plugin name is required.";
+  if (!f.package_type) e.package_type = "Select a package type.";
+  if (!f.plugin_name.trim()) e.plugin_name = "Package name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
+  else if (f.description.trim().length > DESCRIPTION_MAX_LENGTH)
+    e.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
+  if (!f.package_location.trim())
+    e.package_location = "Registry URL is required.";
+  else if (!URL_RE.test(f.package_location.trim()))
+    e.package_location = "Must be a valid https:// URL.";
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
     e.repository_url = "Must be a valid https:// URL.";
-  if (!f.owner_name.trim()) e.owner_name = "Owner name is required.";
-  if (!f.owner_email.trim()) e.owner_email = "Contact email is required.";
-  else if (!EMAIL_RE.test(f.owner_email.trim()))
-    e.owner_email = "Must be a valid email address.";
   if (!f.agreed) e.agreed = "You must agree to the terms to continue.";
+  if (f.owner_type === "plugin::better-auth.organization" && !f.owner_id)
+    e.owner_id = "Select an organization to submit as.";
   return e;
 }
 
@@ -59,16 +76,19 @@ function buildFormData(
 ): FormData {
   const form = new FormData();
   form.append("plugin_name", fields.plugin_name.trim());
+  form.append("package_type", fields.package_type);
   form.append("package_location", fields.package_location.trim());
   form.append("repository_url", fields.repository_url.trim());
   form.append("description", fields.description.trim());
   form.append("readme", fields.readme.trim());
+  form.append("readme_auto_sync", String(fields.readme_auto_sync));
   form.append("submission_notes", fields.submission_notes.trim());
-  form.append("owner_name", fields.owner_name.trim());
-  form.append("owner_email", fields.owner_email.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
   form.append("recaptcha_token", recaptchaToken);
+  form.append("owner_type", fields.owner_type);
+  if (fields.owner_id !== null)
+    form.append("owner_id", String(fields.owner_id));
   if (fields.logo_file)
     form.append("logo_file", fields.logo_file, fields.logo_file.name);
   return form;
@@ -90,6 +110,13 @@ export function SubmitPluginForm({
 }: {
   initialCategories: string[];
 }) {
+  // Submitting requires an account — redirects to sign-in (with a
+  // `redirectTo` back here) when there's no session, same as the
+  // /account settings pages. Defaults to the submitter as owner, but they
+  // can submit on behalf of an organization they administer instead (see
+  // the "Submit as" field below) — enforced server-side, not just here.
+  const { user, isPending } = useAuthenticate();
+
   const {
     fields,
     errors,
@@ -103,18 +130,28 @@ export function SubmitPluginForm({
     initial: INITIAL,
     validate,
     apiEndpoint: "/api/submit-plugin",
+    submissionKind: "packages",
     recaptchaAction: "submit_plugin",
     buildFormData,
   });
 
+  if (isPending || !user) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-(--color-neutral500)">
+        Loading…
+      </div>
+    );
+  }
+
   return (
     <SubmitFormShell
-      title="Submit a Plugin"
+      title="Submit a Package"
       subtitle={
         <>
-          Share your Strapi plugin with the community. All submissions go
-          through a business and security review before being listed in the
-          marketplace. We&rsquo;ll reach out if we need more information.{" "}
+          Share your Strapi plugin, provider, SDK, or tool with the community.
+          All submissions go through a business and security review before being
+          listed in the marketplace. We&rsquo;ll reach out if we need more
+          information.{" "}
           <Link
             href="/community"
             className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -124,16 +161,66 @@ export function SubmitPluginForm({
         </>
       }
       reviewSteps={REVIEW_STEPS}
-      contentType="plugin"
+      contentType="package"
       success={success}
       submitting={submitting}
-      submitLabel="Submit Plugin"
+      submitLabel="Submit Package"
       formError={errors._form}
       onSubmit={handleSubmit}
     >
       <div className="mb-5">
+        <Label htmlFor="owner_id" required>
+          Submit as
+        </Label>
+        <OwnerSelect
+          value={{ type: fields.owner_type, id: fields.owner_id }}
+          onChange={(owner) => {
+            set("owner_type", owner.type);
+            set("owner_id", owner.id);
+          }}
+          personalLabel={user?.name || user?.email || "You"}
+        />
+        <FieldError message={errors.owner_id} />
+        <Hint>
+          Choose whether this package belongs to your personal account or to one
+          of the organizations you administer.
+        </Hint>
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="package_type" required>
+          Package Type
+        </Label>
+        <select
+          id="package_type"
+          className={cn(
+            "flex h-10 w-full rounded-md border border-(--color-neutral150) bg-white px-3 py-2 text-sm text-(--color-neutral900) shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none focus:border-(--color-primary200)",
+            !fields.package_type && "text-(--color-neutral600)",
+            errors.package_type && "border-red-400",
+          )}
+          value={fields.package_type}
+          onChange={(e) =>
+            set(
+              "package_type",
+              isPackageType(e.target.value) ? e.target.value : "",
+            )
+          }
+        >
+          <option value="" disabled>
+            Select a type…
+          </option>
+          {PACKAGE_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+        <FieldError message={errors.package_type} />
+      </div>
+
+      <div className="mb-5">
         <Label htmlFor="plugin_name" required>
-          Plugin Name
+          Package Name
         </Label>
         <Input
           id="plugin_name"
@@ -147,19 +234,60 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="package_location">Registry URL</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description" required>
+            Package Description
+          </Label>
+          <span
+            className={cn(
+              "text-xs text-(--color-neutral600)",
+              fields.description.length > DESCRIPTION_MAX_LENGTH &&
+                "text-red-600",
+            )}
+          >
+            {fields.description.length}/{DESCRIPTION_MAX_LENGTH}
+          </span>
+        </div>
+        <Textarea
+          id="description"
+          value={fields.description}
+          onChange={(v) => set("description", v)}
+          placeholder="Tell us about your package — what it does and why it's useful."
+          rows={4}
+          hasError={!!errors.description}
+        />
+        <FieldError message={errors.description} />
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="package_location" required>
+          Registry URL
+        </Label>
         <Input
           id="package_location"
+          type="url"
           value={fields.package_location}
           onChange={(e) => set("package_location", e.target.value)}
           placeholder="https://www.npmjs.com/package/your-plugin"
+          className={errors.package_location ? "border-red-400" : ""}
           autoComplete="off"
         />
+        <FieldError message={errors.package_location} />
         <Hint>
           Full URL to your published package on npm, Packagist, PyPI, RubyGems,
-          or NuGet. Leave blank if not yet published.
+          or NuGet.
         </Hint>
       </div>
+
+      <ReadmeField
+        className="mb-5"
+        type="package"
+        readme={fields.readme}
+        autoSync={fields.readme_auto_sync}
+        onReadmeChange={(v) => set("readme", v)}
+        onAutoSyncChange={(v) => set("readme_auto_sync", v)}
+        placeholder="Paste your package's README or any additional documentation here."
+      />
 
       <div className="mb-5">
         <Label htmlFor="repository_url" required>
@@ -178,22 +306,7 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="description" required>
-          Plugin Description
-        </Label>
-        <Textarea
-          id="description"
-          value={fields.description}
-          onChange={(v) => set("description", v)}
-          placeholder="Tell us about your plugin — what it does and why it's useful."
-          rows={4}
-          hasError={!!errors.description}
-        />
-        <FieldError message={errors.description} />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="logo_file">Plugin Logo / Icon</Label>
+        <Label htmlFor="logo_file">Package Logo / Icon</Label>
         <ImageUpload
           file={fields.logo_file}
           onChange={(f) => set("logo_file", f)}
@@ -210,49 +323,6 @@ export function SubmitPluginForm({
           onAdd={addCategory}
           onRemove={removeCategory}
         />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="readme">README / Documentation</Label>
-        <Textarea
-          id="readme"
-          value={fields.readme}
-          onChange={(v) => set("readme", v)}
-          placeholder="Paste your plugin's README or any additional documentation here."
-          rows={6}
-        />
-      </div>
-
-      <SectionDivider label="Owner" />
-
-      <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="owner_name" required>
-            Owner / Author Name
-          </Label>
-          <Input
-            id="owner_name"
-            value={fields.owner_name}
-            onChange={(e) => set("owner_name", e.target.value)}
-            placeholder="Your name or organisation"
-            className={errors.owner_name ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_name} />
-        </div>
-        <div>
-          <Label htmlFor="owner_email" required>
-            Contact Email
-          </Label>
-          <Input
-            id="owner_email"
-            type="email"
-            value={fields.owner_email}
-            onChange={(e) => set("owner_email", e.target.value)}
-            placeholder="you@example.com"
-            className={errors.owner_email ? "border-red-400" : ""}
-          />
-          <FieldError message={errors.owner_email} />
-        </div>
       </div>
 
       <div className="mb-5">
@@ -280,7 +350,7 @@ export function SubmitPluginForm({
             className={errors.agreed ? "border-red-400" : ""}
           />
           <span className="text-sm leading-relaxed text-(--color-neutral700)">
-            I confirm this plugin is open-source, MIT-licensed, and compliant
+            I confirm this package is open-source, MIT-licensed, and compliant
             with the{" "}
             <Link
               href="/community"

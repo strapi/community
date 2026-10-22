@@ -2,6 +2,30 @@
 @import "@repo/strapi-ui/styles.css";
 @import "@daveyplate/better-auth-ui/css";
 
+/* Sonner: plain "x" close button, right-aligned and vertically centered.
+   Selector specificity is bumped (vs. sonner's own rules, incl. richColors
+   per-type variants) so these win without needing !important. */
+[data-sonner-toaster]
+  [data-sonner-toast][data-styled="true"]
+  [data-close-button].toast-close-btn {
+  top: 50%;
+  left: auto;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+[data-sonner-toaster]
+  [data-sonner-toast][data-styled="true"]
+  [data-close-button].toast-close-btn
+  svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

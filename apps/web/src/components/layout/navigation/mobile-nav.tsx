@@ -47,6 +47,14 @@ const MobileNav = ({
     setIsOpen(true);
   };
 
+  const ctaButtons = ctaLinks.map((link) => (
+    <Button key={link.id} asChild>
+      <Link href={link.link!} onClick={() => setIsOpen(false)}>
+        {link.label}
+      </Link>
+    </Button>
+  ));
+
   return (
     <>
       <button
@@ -129,18 +137,12 @@ const MobileNav = ({
                   )}
                 >
                   {isAuthEnabled ? (
-                    <AuthNavigation theme={theme} />
+                    <AuthNavigation
+                      theme={theme}
+                      signedInActions={ctaButtons}
+                    />
                   ) : (
-                    ctaLinks.map((link) => (
-                      <Button key={link.id} asChild>
-                        <Link
-                          href={link.link!}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {link.label}
-                        </Link>
-                      </Button>
-                    ))
+                    ctaButtons
                   )}
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { auth } from "../../../../../lib/auth";
+import { errors } from "@strapi/utils";
 import type { ModerationContentTypeConfig } from "../config";
 import { runAutomatedChecks } from "./automated-checks";
 import { getPackageSecurityInfo } from "./get-package-security-info";
@@ -10,32 +10,6 @@ const PACKAGE_UID = "api::package.package";
 const VALID_SCAN_STAGES = ["dependencies", "ai_analysis", "summary"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-async function findOrCreateUser(strapi, { email, name }) {
-  const existing = await strapi.documents("plugin::better-auth.user").findMany({
-    filters: { email: { $eq: email } },
-    pagination: { pageSize: 1 },
-  });
-  if (existing?.length > 0) return existing[0].id;
-
-  try {
-    await auth.api.signUpEmail({
-      body: { email, name, password: crypto.randomUUID() },
-    });
-  } catch (err) {
-    // Email sending may fail in local dev (no email provider configured).
-    // Better Auth creates the user record before sending — check the DB anyway.
-    strapi.log.warn(
-      `[moderation] signUpEmail for ${email} failed (${(err as Error)?.message}) — checking if user was created`,
-    );
-  }
-
-  const created = await strapi.documents("plugin::better-auth.user").findMany({
-    filters: { email: { $eq: email } },
-    pagination: { pageSize: 1 },
-  });
-  return created[0]?.id ?? null;
-}
 
 function buildAdminLink(uid: string, documentId: string) {
   const adminBase = (
@@ -74,6 +48,26 @@ export default ({ strapi }) => {
     return found;
   }
 
+  /**
+   * A submitted media field (e.g. `icon`) is a raw upload-file id. Only
+   * accept a file nothing else uses yet — i.e. the submitter's own fresh
+   * upload — never an existing file, which would let a submitter claim
+   * (and later, via the icon replace route, delete) any file in the media
+   * library.
+   */
+  async function assertUnattachedUpload(fileId: unknown) {
+    const id = Number(fileId);
+    const file = Number.isInteger(id)
+      ? await strapi.db.query("plugin::upload.file").findOne({
+          where: { id },
+          populate: ["related"],
+        })
+      : null;
+    if (!file || (file.related ?? []).length > 0) {
+      throw new errors.ValidationError("Invalid image upload.");
+    }
+  }
+
   function getConfigByPlural(plural: string): ModerationContentTypeConfig {
     const found = getCtConfigs().find((c) => c.pluralName === plural);
     if (!found) {
@@ -105,25 +99,29 @@ export default ({ strapi }) => {
       uid: string,
       rawBody: Record<string, unknown>,
       submitterIp: string | null,
+      submitter: { id: string | number; email: string; name: string },
+      owner: { id: string | number; __type: string },
     ) {
       const ctConfig = getConfigByUid(uid);
+
+      // Build entity data from the configured allowlist only — anything else
+      // in the body (labels, stars, relations, …) is moderation-controlled
+      // and silently dropped.
+      const attributes = strapi.getModel(uid).attributes;
+      const entityData: Record<string, unknown> = {};
+      for (const key of ctConfig.submitFields) {
+        if (!(key in rawBody)) continue;
+        const val = rawBody[key];
+        if (attributes[key]?.type === "media" && val != null) {
+          await assertUnattachedUpload(val);
+        }
+        entityData[key] = val;
+      }
 
       // Create the BusinessReview record first so we can link it
       const businessReview = await strapi.documents(BUSINESS_REVIEW_CT).create({
         data: { status: "pending" },
       });
-
-      // Resolve owner user
-      let owner: object | null = null;
-      if (rawBody.owner_email) {
-        const ownerId = await findOrCreateUser(strapi, {
-          email: rawBody.owner_email,
-          name: rawBody.owner_name || rawBody.owner_email,
-        });
-        if (ownerId) {
-          owner = { id: ownerId, __type: "plugin::better-auth.user" };
-        }
-      }
 
       // Resolve categories (optional, requires categoryUid in config)
       let categories: object[] = [];
@@ -133,17 +131,6 @@ export default ({ strapi }) => {
           pagination: { pageSize: 100 },
         });
         categories = (results ?? []).map((c) => ({ documentId: c.documentId }));
-      }
-
-      // Build entity data — strip meta fields, apply defaults, attach relations
-      const META_FIELDS = new Set([
-        "owner_email",
-        "owner_name",
-        "categories_list",
-      ]);
-      const entityData: Record<string, unknown> = {};
-      for (const [key, val] of Object.entries(rawBody)) {
-        if (!META_FIELDS.has(key)) entityData[key] = val;
       }
 
       const entity = await strapi.documents(uid).create({
@@ -187,11 +174,8 @@ export default ({ strapi }) => {
             kind: kindForUid(uid),
             name: entity.name,
             git_repository: entity.git_repository ?? null,
-            owner_email: (rawBody.owner_email as string) ?? null,
-            owner_name:
-              (rawBody.owner_name as string) ??
-              (rawBody.owner_email as string) ??
-              null,
+            owner_email: submitter.email,
+            owner_name: submitter.name ?? submitter.email,
             dashboard_link: buildAdminLink(uid, entity.documentId),
           },
           { strapi },

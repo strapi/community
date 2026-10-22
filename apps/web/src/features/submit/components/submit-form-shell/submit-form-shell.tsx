@@ -2,7 +2,7 @@ import { Button, Container } from "@repo/strapi-ui";
 import Link from "next/link";
 import Script from "next/script";
 import { Navigation } from "@/components/layout/navigation";
-import { RECAPTCHA_SITE_KEY } from "../lib/recaptcha";
+import { RECAPTCHA_SITE_KEY } from "../../lib/recaptcha";
 
 interface ReviewStep {
   title: string;

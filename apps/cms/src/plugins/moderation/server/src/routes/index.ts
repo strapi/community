@@ -6,7 +6,14 @@ export default {
         method: "POST",
         path: "/:plural/submit",
         handler: "submission.create",
-        config: { auth: { scope: [] }, policies: [] },
+        // Called directly from the browser with a better-auth session
+        // cookie (not a Strapi API token) so the owner can be derived from
+        // the caller's own session — same reasoning as
+        // `api::package.package`'s `update` route override.
+        config: {
+          auth: false,
+          policies: ["plugin::better-auth.is-authenticated"],
+        },
       },
       {
         method: "POST",
