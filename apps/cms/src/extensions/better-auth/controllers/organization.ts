@@ -33,7 +33,19 @@ export default factories.createCoreController(
         }),
       ]);
 
-      ctx.body = { packages, templates };
+      // Document-service results — strip `private` attributes (e.g.
+      // `submitter_ip`, a populated owner's `email`) the core controllers'
+      // `sanitizeOutput` would otherwise have removed.
+      ctx.body = {
+        packages: await strapi.contentAPI.sanitize.output(
+          packages,
+          strapi.getModel("api::package.package"),
+        ),
+        templates: await strapi.contentAPI.sanitize.output(
+          templates,
+          strapi.getModel("api::template.template"),
+        ),
+      };
     },
     /**
      * GET /organizations/mine — organizations the caller is an
@@ -64,7 +76,11 @@ export default factories.createCoreController(
         query: ctx.query,
       });
 
-      ctx.body = members;
+      // Strips private user fields (`email`) — see `relatedContent`.
+      ctx.body = await strapi.contentAPI.sanitize.output(
+        members,
+        strapi.getModel("plugin::better-auth.user"),
+      );
     },
 
     /**

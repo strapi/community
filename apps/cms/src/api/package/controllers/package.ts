@@ -9,7 +9,10 @@ const READ_ONLY_FIELDS = ["git_repository", "package_location"] as const;
 const EDITABLE_FIELDS = [
   "name",
   "description",
-  "icon",
+  // "icon" — deliberately not editable here: a media field written by id
+  // would let the caller point it at *any* file in the media library, which
+  // the icon upload route would then delete as the "previous" icon. Icons
+  // only change through `POST /packages/:documentId/icon`.
   "categories",
   // "maintainers" — temporarily not editable, pending an invite flow so the
   // added user consents first (see the commented-out `MaintainerPicker` in

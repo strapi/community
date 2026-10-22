@@ -33,7 +33,19 @@ export default factories.createCoreController(
         }),
       ]);
 
-      ctx.body = { packages, templates };
+      // Document-service results — strip `private` attributes (e.g.
+      // `submitter_ip`, a populated owner's `email`) the core controllers'
+      // `sanitizeOutput` would otherwise have removed.
+      ctx.body = {
+        packages: await strapi.contentAPI.sanitize.output(
+          packages,
+          strapi.getModel("api::package.package"),
+        ),
+        templates: await strapi.contentAPI.sanitize.output(
+          templates,
+          strapi.getModel("api::template.template"),
+        ),
+      };
     },
 
     /**

@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "../../lib/client";
+import { safeRedirectPath } from "../../lib/safe-redirect";
 
 // `authClient` is exported with the plain `createAuthClient` return type,
 // which drops the types its plugins add. Restore the organization
@@ -127,7 +128,7 @@ export function AcceptInvitationView({
       return;
     }
     toast.success("Invitation accepted");
-    router.replace(redirectTo || "/account");
+    router.replace(safeRedirectPath(redirectTo));
   };
 
   const reject = async () => {
