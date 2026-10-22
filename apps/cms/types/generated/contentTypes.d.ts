@@ -1012,6 +1012,85 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPartnerProgramPartnerProgram
+  extends Struct.SingleTypeSchema {
+  collectionName: 'partner_programs';
+  info: {
+    description: 'Partner portal settings, like the benefits listed per partner level.';
+    displayName: 'Partner Program';
+    pluralName: 'partner-programs';
+    singularName: 'partner-program';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    benefits: Schema.Attribute.Component<'partner.benefit', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::partner-program.partner-program'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPartnerResourcePartnerResource
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'partner_resources';
+  info: {
+    description: "Gated content for the partner portal's Sales enablement, Tech enablement and Reusable content sections.";
+    displayName: 'Partner Resources';
+    pluralName: 'partner-resources';
+    singularName: 'partner-resource';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    category: Schema.Attribute.String;
+    content: Schema.Attribute.RichText;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    file: Schema.Attribute.Media;
+    icon: Schema.Attribute.String &
+      Schema.Attribute.CustomField<'plugin::strapi-lucide-icons.icon'>;
+    label: Schema.Attribute.String;
+    link: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::partner-resource.partner-resource'
+    > &
+      Schema.Attribute.Private;
+    minimum_level: Schema.Attribute.Enumeration<
+      ['Unlisted', 'Community', 'Business', 'Enterprise']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Community'>;
+    publishedAt: Schema.Attribute.DateTime;
+    section: Schema.Attribute.Enumeration<
+      ['sales_enablement', 'tech_enablement', 'reusable_content']
+    > &
+      Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    sort_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   collectionName: 'profiles';
   info: {
@@ -2630,6 +2709,8 @@ declare module '@strapi/strapi' {
       'api::overview-page.overview-page': ApiOverviewPageOverviewPage;
       'api::package-category.package-category': ApiPackageCategoryPackageCategory;
       'api::package.package': ApiPackagePackage;
+      'api::partner-program.partner-program': ApiPartnerProgramPartnerProgram;
+      'api::partner-resource.partner-resource': ApiPartnerResourcePartnerResource;
       'api::profile.profile': ApiProfileProfile;
       'api::recipe.recipe': ApiRecipeRecipe;
       'api::service.service': ApiServiceService;

@@ -8,6 +8,57 @@ import {
   findOwnedContentIds,
   uploadOwnedFile,
 } from "../utils";
+import {
+  levelsUpTo,
+  type PartnerLevel,
+  type PartnerSection,
+  SECTION_MINIMUM_LEVEL,
+} from "../utils/partner-levels";
+
+/** IDs of the organizations `userId` is an owner/admin of. */
+async function findManageableOrganizationIds(userId: string | number) {
+  const memberships = await strapi
+    .documents("plugin::better-auth.member")
+    .findMany({
+      filters: {
+        userId,
+        role: { $in: ["admin", "owner"] },
+      },
+      fields: ["organizationId"],
+    });
+
+  return memberships.map((membership) => membership.organizationId);
+}
+
+/** The organization's partner level, or `null` if it isn't a partner. */
+async function findPartnerLevel(
+  organizationId: string,
+): Promise<PartnerLevel | null> {
+  const [organization] = await strapi
+    .documents("plugin::better-auth.organization")
+    .findMany({
+      filters: { id: organizationId, partner: { $eq: true } },
+      fields: ["partner_level"],
+    });
+
+  if (!organization) return null;
+  return organization.partner_level ?? "Unlisted";
+}
+
+/** Partner resources unlocked at `level` — by their own and their section's minimum level. */
+function partnerResourceFilters(level: PartnerLevel) {
+  const unlocked = levelsUpTo(level);
+  const sections = (
+    Object.entries(SECTION_MINIMUM_LEVEL) as [PartnerSection, PartnerLevel][]
+  )
+    .filter(([, minimum]) => unlocked.includes(minimum))
+    .map(([section]) => section);
+
+  return {
+    minimum_level: { $in: unlocked },
+    section: { $in: sections },
+  };
+}
 
 export default factories.createCoreService(
   "plugin::better-auth.organization",
@@ -83,27 +134,102 @@ export default factories.createCoreService(
      * by the plugin/template submission forms' "Submit as" selector.
      */
     async getManageable({ userId }: { userId: string | number }) {
-      const memberships = await strapi
-        .documents("plugin::better-auth.member")
-        .findMany({
-          filters: {
-            userId,
-            role: { $in: ["admin", "owner"] },
-          },
-          fields: ["organizationId"],
-        });
-
-      if (memberships.length === 0) return [];
+      const organizationIds = await findManageableOrganizationIds(userId);
+      if (organizationIds.length === 0) return [];
 
       return strapi.documents("plugin::better-auth.organization").findMany({
-        filters: {
-          id: {
-            $in: memberships.map((membership) => membership.organizationId),
-          },
-        },
+        filters: { id: { $in: organizationIds } },
         fields: ["id", "name", "slug", "logo"],
         sort: { name: "asc" },
       });
+    },
+
+    /**
+     * Partner organizations `userId` is an owner/admin of — i.e. whose
+     * partner portal they may access. Backs `GET /organizations/partners`,
+     * used by the web app's user menu and the partner portal itself.
+     */
+    async getPartnerPortals({ userId }: { userId: string | number }) {
+      const organizationIds = await findManageableOrganizationIds(userId);
+      if (organizationIds.length === 0) return [];
+
+      return strapi.documents("plugin::better-auth.organization").findMany({
+        filters: { id: { $in: organizationIds }, partner: { $eq: true } },
+        fields: ["id", "name", "slug", "logo", "partner_level", "createdAt"],
+        populate: { profile: { fields: ["website", "location"] } },
+        sort: { name: "asc" },
+      });
+    },
+
+    /**
+     * The partner portal's gated content for a partner organization:
+     * its level, the benefits for that level, and every published
+     * resource its level unlocks (both the resource's own
+     * `minimum_level` and its section's). Resource bodies are left out —
+     * see `getPartnerResource`. Returns `null` for non-partner
+     * organizations.
+     */
+    async getPartnerPortal({ organizationId }: { organizationId: string }) {
+      const level = await findPartnerLevel(organizationId);
+      if (!level) return null;
+
+      const [program, resources] = await Promise.all([
+        strapi.documents("api::partner-program.partner-program").findFirst({
+          populate: { benefits: true },
+        }),
+        strapi.documents("api::partner-resource.partner-resource").findMany({
+          status: "published",
+          filters: partnerResourceFilters(level),
+          fields: [
+            "title",
+            "slug",
+            "description",
+            "section",
+            "minimum_level",
+            "category",
+            "label",
+            "icon",
+            "link",
+            "content",
+          ],
+          populate: { file: { fields: ["url", "name", "ext", "size"] } },
+          sort: [{ sort_order: "asc" }, { title: "asc" }],
+        }),
+      ]);
+
+      return {
+        level,
+        benefits: (program?.benefits ?? []).filter(
+          (benefit) => benefit.level === level,
+        ),
+        resources: resources.map(({ content, ...resource }) => ({
+          ...resource,
+          has_content: !!content?.trim(),
+        })),
+      };
+    },
+
+    /**
+     * A single partner resource, including its body — or `null` if it
+     * doesn't exist or the organization's level doesn't unlock it.
+     */
+    async getPartnerResource({
+      organizationId,
+      slug,
+    }: {
+      organizationId: string;
+      slug: string;
+    }) {
+      const level = await findPartnerLevel(organizationId);
+      if (!level) return null;
+
+      return strapi
+        .documents("api::partner-resource.partner-resource")
+        .findFirst({
+          status: "published",
+          filters: { ...partnerResourceFilters(level), slug: { $eq: slug } },
+          populate: { file: { fields: ["url", "name", "ext", "size"] } },
+        });
     },
 
     async getMembers({

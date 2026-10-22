@@ -66,6 +66,55 @@ export default factories.createCoreController(
       ctx.body = organizations;
     },
 
+    /**
+     * GET /organizations/partners — partner organizations the caller is
+     * an owner/admin of, i.e. whose partner portal they can open. Scoped
+     * to the caller like `mine`, so only `is-authenticated` applies.
+     */
+    async partners(ctx) {
+      const session = ctx.state.betterAuthSession;
+
+      const organizations = await getPluginService(
+        "organization",
+      ).getPartnerPortals({
+        userId: session.user.id,
+      });
+
+      ctx.body = organizations;
+    },
+
+    /**
+     * GET /organizations/:id/partner-portal — the partner portal's gated
+     * content, filtered by the organization's partner level. Gated by
+     * the `is-authenticated` and `is-organization-owner` policies.
+     */
+    async partnerPortal(ctx) {
+      const { id } = ctx.params;
+
+      const portal = await getPluginService("organization").getPartnerPortal({
+        organizationId: id,
+      });
+      if (!portal) return ctx.notFound();
+
+      ctx.body = portal;
+    },
+
+    /**
+     * GET /organizations/:id/partner-portal/resources/:slug — a single
+     * partner resource, including its body. Same policies as
+     * `partnerPortal`.
+     */
+    async partnerResource(ctx) {
+      const { id, slug } = ctx.params;
+
+      const resource = await getPluginService(
+        "organization",
+      ).getPartnerResource({ organizationId: id, slug });
+      if (!resource) return ctx.notFound();
+
+      ctx.body = resource;
+    },
+
     async members(ctx) {
       const { id } = ctx.params;
 

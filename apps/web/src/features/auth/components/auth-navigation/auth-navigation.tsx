@@ -2,10 +2,11 @@
 
 import { SignedIn, SignedOut, UserButton } from "@daveyplate/better-auth-ui";
 import { Button } from "@repo/strapi-ui";
-import { UserIcon } from "lucide-react";
+import { HandshakeIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { authClient } from "@/features/auth/lib/client";
+import { usePartnerOrganizations } from "@/features/partner-portal/lib/partner-organizations";
 
 type Props = {
   theme: "light" | "dark";
@@ -30,13 +31,27 @@ export function AuthNavigation({
   const { data: session } = authClient.useSession();
   const slug = (session?.user as { slug?: string } | undefined)?.slug;
 
+  // One entry per partner organization the user can manage — normally
+  // just one, but the portal is organization-scoped, so name the org when
+  // there's more than one to tell them apart.
+  const { organizations: partnerOrganizations } = usePartnerOrganizations();
+  const partnerLinks = partnerOrganizations.map((organization) => ({
+    href: `/partner/${organization.slug}`,
+    icon: <HandshakeIcon />,
+    label:
+      partnerOrganizations.length > 1
+        ? `Partner portal · ${organization.name}`
+        : "Partner portal",
+    signedIn: true,
+  }));
+
   const userButton = (
     <UserButton
       size={compact ? "icon" : "default"}
       className={compact ? "size-9" : undefined}
       classNames={{ trigger: { base: "cursor-pointer" } }}
-      additionalLinks={
-        slug
+      additionalLinks={[
+        ...(slug
           ? [
               {
                 href: `/${slug}`,
@@ -45,8 +60,9 @@ export function AuthNavigation({
                 signedIn: true,
               },
             ]
-          : []
-      }
+          : []),
+        ...partnerLinks,
+      ]}
     />
   );
 
