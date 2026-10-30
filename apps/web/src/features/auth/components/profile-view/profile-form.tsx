@@ -5,7 +5,7 @@ import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { COPY } from "./fields";
-import type { Field, Profile, Props } from "./types";
+import type { Field, Profile, Props, TextField } from "./types";
 import {
   BIO_MAX_LENGTH,
   SUBTITLE_MAX_LENGTH,
@@ -13,7 +13,7 @@ import {
   validateProfileField,
 } from "./validation";
 
-const FIELD_MAX_LENGTHS: Partial<Record<keyof Profile, number>> = {
+const FIELD_MAX_LENGTHS: Partial<Record<TextField, number>> = {
   bio: BIO_MAX_LENGTH,
   subtitle: SUBTITLE_MAX_LENGTH,
 };
@@ -30,6 +30,7 @@ export function ProfileForm({
   setValues,
   disabled,
   onSubmit,
+  children,
 }: {
   variant: Props["variant"];
   fields: Field[];
@@ -37,17 +38,19 @@ export function ProfileForm({
   setValues: (updater: (prev: Profile) => Profile) => void;
   disabled: boolean;
   onSubmit: (event: React.FormEvent) => void;
+  /** Extra, variant-specific settings rendered after the text fields. */
+  children?: React.ReactNode;
 }) {
   const { heading, description } = COPY[variant];
 
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof Profile, boolean>>
-  >({});
+  const [touched, setTouched] = useState<Partial<Record<TextField, boolean>>>(
+    {},
+  );
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const errors = validateProfile(values);
 
-  const markTouched = (name: keyof Profile) =>
+  const markTouched = (name: TextField) =>
     setTouched((prev) => ({ ...prev, [name]: true }));
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -156,6 +159,8 @@ export function ProfileForm({
           );
         })}
       </div>
+
+      {children}
 
       <div className="flex justify-end">
         <button

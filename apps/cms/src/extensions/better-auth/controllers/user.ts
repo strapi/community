@@ -49,6 +49,29 @@ export default factories.createCoreController(
     },
 
     /**
+     * GET /users/:id/github-contributions — used by the public user page's
+     * "GitHub Contributions" tab. `data` is `null` when there's nothing to
+     * show (see the service's `getGithubContributions`). A GitHub failure
+     * responds 502 rather than `null`: the web app caches only 200
+     * responses, so a temporary failure isn't cached as "nothing to show".
+     */
+    async githubContributions(ctx) {
+      const { id } = ctx.params;
+
+      try {
+        const contributions = await getPluginService(
+          "user",
+        ).getGithubContributions({ userId: id });
+
+        ctx.body = { data: contributions };
+      } catch (error) {
+        strapi.log.warn(`GitHub contributions fetch failed: ${error}`);
+        ctx.status = 502;
+        ctx.body = { error: "Failed to load GitHub contributions." };
+      }
+    },
+
+    /**
      * GET /users/me/profile — used by the web app's personal "Profile"
      * tab. Gated by the `is-authenticated` policy.
      */

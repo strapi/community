@@ -52,6 +52,14 @@ const VALIDATORS: Record<string, (value: string) => string | undefined> = {
 export function validateProfileData(data: Record<string, unknown>): string[] {
   const errors: string[] = [];
 
+  if (
+    "show_github_contributions" in data &&
+    data.show_github_contributions != null &&
+    typeof data.show_github_contributions !== "boolean"
+  ) {
+    errors.push("Show GitHub contributions must be true or false.");
+  }
+
   for (const [field, validate] of Object.entries(VALIDATORS)) {
     if (!(field in data)) continue;
 
