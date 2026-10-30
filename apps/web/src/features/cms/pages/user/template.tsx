@@ -19,6 +19,11 @@ import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import {
+  type GithubContributions,
+  GithubContributionsSection,
+  hasGithubContributions,
+} from "@/features/cms/pages/user/github-contributions";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
 import type { RelatedContentItems } from "@/utils/types";
@@ -26,10 +31,16 @@ import type { RelatedContentItems } from "@/utils/types";
 type Props = {
   document: UserPageData;
   relatedContent: RelatedContentItems;
+  githubContributions?: GithubContributions | null;
   communityCta?: CommunityCTAData | null;
 };
 
-const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
+const UserTemplate = ({
+  document,
+  relatedContent,
+  githubContributions,
+  communityCta,
+}: Props) => {
   const { templates, packages } = relatedContent;
   const noRelatedContent = templates.length === 0 && packages.length === 0;
   const defaultTab =
@@ -154,7 +165,18 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                 Published Content
               </TabsTrigger>
             )}
+            {hasGithubContributions(githubContributions) && (
+              <TabsTrigger value="github" icon={<Github className="h-4 w-4" />}>
+                GitHub Contributions
+              </TabsTrigger>
+            )}
           </TabsList>
+
+          {hasGithubContributions(githubContributions) && (
+            <TabsContent value="github">
+              <GithubContributionsSection contributions={githubContributions} />
+            </TabsContent>
+          )}
 
           <TabsContent value="content">
             {templates.length > 0 && (

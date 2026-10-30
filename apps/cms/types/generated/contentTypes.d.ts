@@ -1051,6 +1051,8 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     services: Schema.Attribute.Relation<'oneToMany', 'api::service.service'>;
+    show_github_contributions: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     subtitle: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;

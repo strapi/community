@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getUserProfile, updateUserProfile } from "../../lib/user-profile";
 import { USER_FIELDS } from "./fields";
+import { GithubContributionsToggle } from "./github-contributions-toggle";
 import { ProfileForm } from "./profile-form";
 import { ProfileSkeleton } from "./profile-skeleton";
 import type { Profile } from "./types";
@@ -50,6 +51,17 @@ export function UserProfileView() {
       setValues={setValues}
       disabled={isSubmitting}
       onSubmit={onSubmit}
-    />
+    >
+      <GithubContributionsToggle
+        checked={values.show_github_contributions}
+        disabled={isSubmitting}
+        onCheckedChange={(checked) =>
+          setValues((prev) => ({
+            ...prev,
+            show_github_contributions: checked,
+          }))
+        }
+      />
+    </ProfileForm>
   );
 }

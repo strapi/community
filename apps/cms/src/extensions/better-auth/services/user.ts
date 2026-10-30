@@ -5,6 +5,7 @@
 import { factories, type Modules, type UID } from "@strapi/strapi";
 import {
   deleteOwnedFile,
+  fetchGithubContributions,
   findOwnedContentIds,
   uploadOwnedFile,
 } from "../utils";
@@ -93,6 +94,37 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
     });
 
     return profile;
+  },
+
+  /**
+   * The user's issues/PRs/discussions in the `strapi/strapi` GitHub repo,
+   * for the public profile's "GitHub Contributions" tab. `null` when the
+   * user has no linked GitHub account, has turned the tab off
+   * (`show_github_contributions` — on unless explicitly `false`, so users
+   * without a profile yet are included). Throws if GitHub can't be
+   * reached.
+   */
+  async getGithubContributions({ userId }: { userId: string | number }) {
+    const [user] = await strapi.documents("plugin::better-auth.user").findMany({
+      filters: { id: userId },
+      fields: ["documentId"],
+      populate: { profile: { fields: ["show_github_contributions"] } },
+    });
+
+    if (!user || user.profile?.show_github_contributions === false) {
+      return null;
+    }
+
+    const account = await strapi.db
+      .query("plugin::better-auth.account")
+      .findOne({
+        where: { userId, providerId: "github" },
+        select: ["accountId"],
+      });
+
+    if (!account?.accountId) return null;
+
+    return fetchGithubContributions(account.accountId);
   },
 
   async getRelatedContent<UID extends UID.ContentType>({
