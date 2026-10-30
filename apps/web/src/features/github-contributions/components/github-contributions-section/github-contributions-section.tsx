@@ -1,18 +1,11 @@
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { GithubContributionsFeed } from "./github-contributions-feed";
-import {
-  CONTRIBUTION_TYPES,
-  GITHUB_REPO,
-  type GithubContributions,
-  type GithubContributionType,
-} from "./github-contributions-shared";
-
-export type {
-  GithubContribution,
+import { CONTRIBUTION_TYPES, GITHUB_REPO } from "../../lib/config";
+import type {
   GithubContributions,
   GithubContributionType,
-} from "./github-contributions-shared";
+} from "../../lib/types";
+import { GithubContributionsFeed } from "../github-contributions-feed";
 
 /** A GitHub search for all of the user's `strapi/strapi` items of a type. */
 function searchUrl(login: string, type: GithubContributionType) {
@@ -25,12 +18,6 @@ function searchUrl(login: string, type: GithubContributionType) {
     q: query,
     type: searchType,
   })}`;
-}
-
-export function hasGithubContributions(
-  contributions: GithubContributions | null | undefined,
-): contributions is GithubContributions {
-  return Boolean(contributions && contributions.items.length > 0);
 }
 
 const GithubContributionsSection = ({

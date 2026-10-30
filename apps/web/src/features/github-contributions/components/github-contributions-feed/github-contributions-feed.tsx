@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import {
-  CONTRIBUTION_TYPES,
-  type GithubContribution,
-} from "./github-contributions-shared";
+import { CONTRIBUTION_TYPES } from "../../lib/config";
+import type { GithubContribution } from "../../lib/types";
 
 const PAGE_SIZE = 20;
 
@@ -19,7 +17,7 @@ const STATE_CLASSNAMES: Record<GithubContribution["state"], string> = {
 
 /**
  * The "Recent activity" list of the "GitHub Contributions" tab. The whole
- * list is server-rendered (see `UserPage`); "Load more" just reveals the
+ * list is server-rendered (see `fetchGithubContributions`); "Load more" just reveals the
  * next `PAGE_SIZE` items.
  */
 export function GithubContributionsFeed({

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { GithubContributionsToggle } from "@/features/github-contributions/components/github-contributions-toggle";
 import { getUserProfile, updateUserProfile } from "../../lib/user-profile";
 import { USER_FIELDS } from "./fields";
-import { GithubContributionsToggle } from "./github-contributions-toggle";
 import { ProfileForm } from "./profile-form";
 import { ProfileSkeleton } from "./profile-skeleton";
 import type { Profile } from "./types";

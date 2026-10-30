@@ -19,13 +19,13 @@ import { Navigation } from "@/components/layout/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
-import {
-  type GithubContributions,
-  GithubContributionsSection,
-  hasGithubContributions,
-} from "@/features/cms/pages/user/github-contributions";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { GithubContributionsSection } from "@/features/github-contributions/components/github-contributions-section";
+import {
+  type GithubContributions,
+  hasGithubContributions,
+} from "@/features/github-contributions/lib/types";
 import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {

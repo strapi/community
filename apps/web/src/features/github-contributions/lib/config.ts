@@ -1,33 +1,5 @@
 import { CircleDot, GitPullRequest, MessagesSquare } from "lucide-react";
-
-/**
- * Mirrors the CMS's `GithubContributions`
- * (apps/cms/src/extensions/better-auth/utils/github-contributions.ts),
- * returned by `GET /users/:id/github-contributions`. Shared by the
- * server-rendered section and the client-side feed.
- */
-export type GithubContributionType = "issue" | "pull_request" | "discussion";
-
-export type GithubContribution = {
-  type: GithubContributionType;
-  title: string;
-  url: string;
-  number: number;
-  repository: string;
-  state: "open" | "closed" | "merged" | "answered";
-  createdAt: string;
-};
-
-export type GithubContributions = {
-  login: string;
-  totals: {
-    issues: number;
-    pullRequests: number;
-    discussions: number;
-  };
-  /** The latest items across all types (up to 100 per type), newest first. */
-  items: GithubContribution[];
-};
+import type { GithubContributions, GithubContributionType } from "./types";
 
 export const GITHUB_REPO = "strapi/strapi";
 
