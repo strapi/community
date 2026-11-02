@@ -66,7 +66,7 @@ export default async function PartnerPortalPage({ params }: Props) {
   if (!isValidPath(path)) notFound();
 
   // Server-side, this only proves the organization is a partner — whether
-  // the signed-in user is one of its owners/admins is checked client-side
+  // the signed-in user is one of its members is checked client-side
   // by `PartnerPortalView` (the better-auth session cookie lives on the
   // CMS's origin, not this one).
   if (!(await findPartnerOrganization(slug))) notFound();

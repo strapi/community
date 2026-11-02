@@ -68,7 +68,7 @@ export default factories.createCoreController(
 
     /**
      * GET /organizations/partners — partner organizations the caller is
-     * an owner/admin of, i.e. whose partner portal they can open. Scoped
+     * a member of, i.e. whose partner portal they can open. Scoped
      * to the caller like `mine`, so only `is-authenticated` applies.
      */
     async partners(ctx) {
@@ -86,7 +86,7 @@ export default factories.createCoreController(
     /**
      * GET /organizations/:id/partner-portal — the partner portal's gated
      * content, filtered by the organization's partner level. Gated by
-     * the `is-authenticated` and `is-organization-owner` policies.
+     * the `is-authenticated` and `is-organization-member` policies.
      */
     async partnerPortal(ctx) {
       const { id } = ctx.params;

@@ -21,8 +21,8 @@ export type PartnerSection =
 
 /** The lowest level that can see a section at all, on top of each resource's own `minimum_level`. */
 export const SECTION_MINIMUM_LEVEL: Record<PartnerSection, PartnerLevel> = {
-  sales_enablement: "Community",
-  tech_enablement: "Community",
+  sales_enablement: "Unlisted",
+  tech_enablement: "Unlisted",
   reusable_content: "Unlisted",
 };
 

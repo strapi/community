@@ -38,8 +38,8 @@ export type PartnerPortalContent = {
 
 /**
  * GET /api/organizations/:id/partner-portal — the portal's gated content,
- * already filtered by the organization's partner level. Owners/admins
- * only, called with the browser's better-auth session cookie.
+ * already filtered by the organization's partner level. Organization
+ * members only, called with the browser's better-auth session cookie.
  */
 async function getPartnerPortal(
   organizationId: number,

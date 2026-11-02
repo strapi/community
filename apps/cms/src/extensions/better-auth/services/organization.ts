@@ -30,6 +30,18 @@ async function findManageableOrganizationIds(userId: string | number) {
   return memberships.map((membership) => membership.organizationId);
 }
 
+/** IDs of the organizations `userId` is a member of, with any role. */
+async function findMemberOrganizationIds(userId: string | number) {
+  const memberships = await strapi
+    .documents("plugin::better-auth.member")
+    .findMany({
+      filters: { userId },
+      fields: ["organizationId"],
+    });
+
+  return memberships.map((membership) => membership.organizationId);
+}
+
 /** The organization's partner level, or `null` if it isn't a partner. */
 async function findPartnerLevel(
   organizationId: string,
@@ -145,12 +157,13 @@ export default factories.createCoreService(
     },
 
     /**
-     * Partner organizations `userId` is an owner/admin of — i.e. whose
-     * partner portal they may access. Backs `GET /organizations/partners`,
-     * used by the web app's user menu and the partner portal itself.
+     * Partner organizations `userId` is a member of (any role) — i.e.
+     * whose partner portal they may access. Backs `GET
+     * /organizations/partners`, used by the web app's user menu and the
+     * partner portal itself.
      */
     async getPartnerPortals({ userId }: { userId: string | number }) {
-      const organizationIds = await findManageableOrganizationIds(userId);
+      const organizationIds = await findMemberOrganizationIds(userId);
       if (organizationIds.length === 0) return [];
 
       return strapi.documents("plugin::better-auth.organization").findMany({

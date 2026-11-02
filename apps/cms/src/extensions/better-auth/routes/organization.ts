@@ -63,11 +63,11 @@ export default {
         path: "/organizations/:id/partner-portal",
         handler: "organization.partnerPortal",
         config: {
-          // Owners/admins only, same as the web app's own portal gating.
+          // Any member of the organization (owner, admin or member).
           auth: false,
           policies: [
             "plugin::better-auth.is-authenticated",
-            "plugin::better-auth.is-organization-owner",
+            "plugin::better-auth.is-organization-member",
           ],
           middlewares: [],
           prefix: "",
@@ -81,7 +81,7 @@ export default {
           auth: false,
           policies: [
             "plugin::better-auth.is-authenticated",
-            "plugin::better-auth.is-organization-owner",
+            "plugin::better-auth.is-organization-member",
           ],
           middlewares: [],
           prefix: "",

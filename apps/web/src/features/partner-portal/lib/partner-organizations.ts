@@ -19,7 +19,7 @@ export type PartnerOrganization = {
 
 /**
  * GET /api/organizations/partners — partner organizations the signed-in
- * user is an owner/admin of, i.e. whose partner portal they can open.
+ * user is a member of, i.e. whose partner portal they can open.
  * Called with the browser's better-auth session cookie, same pattern as
  * `features/submit/lib/get-owner-options.ts`.
  */

@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
+  LEVEL_LABELS,
   meetsLevel,
   type PartnerLevel,
   type PartnerSection,
@@ -82,8 +83,7 @@ const RESOURCE_SECTIONS: Partial<
   },
   TECH: {
     section: "tech_enablement",
-    description:
-      "Training, certification and technical resources for your delivery team.",
+    description: "Training and technical resources for your delivery team.",
   },
   CONTENT: {
     section: "reusable_content",
@@ -114,7 +114,7 @@ type Props = {
 
 /**
  * An organization-scoped partner portal — same sidebar + content layout as
- * `OrganizationView`/`AccountView`, but only for owners/admins of an
+ * `OrganizationView`/`AccountView`, but only for members of an
  * organization flagged as `partner` in the CMS. The route itself already
  * 404s for non-partner organizations; this additionally checks the
  * signed-in user's own membership via `GET /organizations/partners`, and
@@ -159,8 +159,7 @@ export function PartnerPortalView({ slug, pathname }: Props) {
           No access to this partner portal
         </h1>
         <p className="max-w-md text-sm text-(--color-neutral600)">
-          The partner portal is available to owners and admins of partner
-          organizations.
+          The partner portal is available to members of partner organizations.
         </p>
         <Link
           href="/account"
@@ -229,7 +228,7 @@ export function PartnerPortalView({ slug, pathname }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-(--color-primary200) bg-(--color-primary100) px-3 py-1 text-xs font-semibold text-(--color-primary600)">
             <BadgeCheckIcon className="size-4" />
-            {level} partner
+            {LEVEL_LABELS[level]} partner
           </span>
           <Link
             href={`/org/${slug}`}

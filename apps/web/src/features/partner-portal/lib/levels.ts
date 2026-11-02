@@ -21,9 +21,17 @@ export type PartnerSection =
   | "reusable_content";
 
 export const SECTION_MINIMUM_LEVEL: Record<PartnerSection, PartnerLevel> = {
-  sales_enablement: "Community",
-  tech_enablement: "Community",
+  sales_enablement: "Unlisted",
+  tech_enablement: "Unlisted",
   reusable_content: "Unlisted",
+};
+
+/** What partners see: "Unlisted" stays the CMS value but is shown as "Registered". */
+export const LEVEL_LABELS: Record<PartnerLevel, string> = {
+  Unlisted: "Registered",
+  Community: "Community",
+  Business: "Business",
+  Enterprise: "Enterprise",
 };
 
 export function meetsLevel(level: PartnerLevel, minimum: PartnerLevel) {

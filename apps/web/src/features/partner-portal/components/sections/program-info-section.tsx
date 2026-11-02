@@ -1,6 +1,10 @@
 import { CheckIcon, LayoutGridIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PARTNER_LEVELS, type PartnerLevel } from "../../lib/levels";
+import {
+  LEVEL_LABELS,
+  PARTNER_LEVELS,
+  type PartnerLevel,
+} from "../../lib/levels";
 import type { PartnerOrganization } from "../../lib/partner-organizations";
 import type { PartnerBenefit } from "../../lib/partner-portal";
 import { OrganizationMark } from "../organization-mark";
@@ -59,7 +63,7 @@ export function ProgramInfoSection({
           </div>
 
           <dl className="flex flex-col gap-3">
-            <DetailRow label="Partner level" value={level} />
+            <DetailRow label="Partner level" value={LEVEL_LABELS[level]} />
             {organization.profile?.location && (
               <DetailRow
                 label="Location"
@@ -107,7 +111,7 @@ export function ProgramInfoSection({
                         : "text-(--color-neutral600)",
                     )}
                   >
-                    {step}
+                    {LEVEL_LABELS[step]}
                   </span>
                 </li>
               ))}
@@ -118,9 +122,7 @@ export function ProgramInfoSection({
             <Eyebrow>Your benefits</Eyebrow>
             {benefits.length === 0 ? (
               <p className="text-sm text-(--color-neutral600)">
-                {level === "Unlisted"
-                  ? "Reach Community level to unlock sales and tech enablement."
-                  : "No benefits listed for this level yet."}
+                No benefits listed for this level yet.
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
