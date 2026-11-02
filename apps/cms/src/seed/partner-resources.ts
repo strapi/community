@@ -231,7 +231,7 @@ This guide follows the Strapi lead registration policy (version 2026-01-01). Que
 
 **Strapi Cloud** is managed hosting for Strapi, run by us. Projects can be hosted in three regions: US East, Europe West and Asia Southeast. See the [deployment docs](https://docs.strapi.io/cloud/getting-started/deployment#deploying-a-project).
 
-**Enterprise** adds governance and security features to the CMS, such as SSO, audit logs and review workflows, plus commercial terms and support. Enterprise is sold through our sales team.
+**Enterprise** adds governance and security features to the CMS, such as SSO, audit logs and review workflows, plus commercial terms and support. Security and compliance documentation is in the [Strapi Trust Center](https://trust.strapi.io/). Enterprise is sold through our sales team.
 
 Self-service plans can be bought directly on our website. See [strapi.io/pricing](https://strapi.io/pricing).
 
@@ -304,7 +304,7 @@ Hosting, security and editorial workflow answers usually decide between Communit
 
 **Built for developers, usable by editors.** Developers get a customizable content model, REST and GraphQL APIs, TypeScript support and a plugin system. Editors get an admin panel with features like Live Preview, content history, releases and draft and publish.
 
-**Enterprise when they need it.** SSO, audit logs and review workflows cover governance and security reviews. Enterprise customers can also run Strapi AI features on their own AI provider and API key ([bring your own key](https://docs.strapi.io/cms/plugins/byok)).
+**Enterprise when they need it.** SSO, audit logs and review workflows cover governance and security reviews, and the [Strapi Trust Center](https://trust.strapi.io/) has the security and compliance documentation clients ask for. Enterprise customers can also run Strapi AI features on their own AI provider and API key ([bring your own key](https://docs.strapi.io/cms/plugins/byok)).
 
 **One backend, many channels.** Strapi serves websites, mobile apps and AI tooling from the same content. The Strapi MCP server lets clients work with content from their AI tools.
 
@@ -316,7 +316,7 @@ Hosting, security and editorial workflow answers usually decide between Communit
 
 **"Can it handle e-commerce?"** Strapi handles the content and a headless commerce platform like Shopify handles the commerce. Check the [Strapi Marketplace](https://market.strapi.io/) for integrations.
 
-**"Is it GDPR compliant?"** Strapi lets the client control what personal data is stored and where it's hosted. For security documentation or questionnaires on an Enterprise deal, bring us in.
+**"Is it GDPR compliant?"** Strapi lets the client control what personal data is stored and where it's hosted. Our security and compliance documentation is in the [Strapi Trust Center](https://trust.strapi.io/), so start there. If an Enterprise deal still needs a security questionnaire or more detail, bring us in.
 
 **"We're on Strapi 4."** We have a migration path and tooling. See the [migration toolkit](../tech-enablement/migration-toolkit).
 
@@ -350,7 +350,7 @@ The difference is ownership. Strapi's core is open source and the client can run
 
 Points to make:
 
-- Self-hosting means the client decides where data lives, which helps with data residency and security reviews.
+- Self-hosting means the client decides where data lives, which helps with data residency and security reviews. The [Strapi Trust Center](https://trust.strapi.io/) has the documentation those reviews ask for.
 - The content model, admin panel and APIs can be customized in code, and extended with plugins.
 - Your team builds in JavaScript or TypeScript, with a local development workflow.
 - Enterprise features like SSO, audit logs and review workflows are there when the client needs them.
@@ -404,7 +404,7 @@ Pricing and program details in older recordings may be out of date. The [program
     sort_order: 7,
     description:
       "Bring Strapi's sales team into a demo or technical call with your client.",
-    content: `Every partner level can bring the Strapi sales team into a client conversation. It's most useful for Enterprise evaluations: a product demo, a technical deep dive, a security or procurement review, or a pricing discussion.
+    content: `Every partner level can bring the Strapi sales team into a client conversation. It's most useful for Enterprise evaluations: a product demo, a technical deep dive, a security or procurement review, or a pricing discussion. For a security or compliance review, share the [Strapi Trust Center](https://trust.strapi.io/) with the client first. It answers most questions without a call.
 
 ## How to ask
 
@@ -479,7 +479,7 @@ Yes. For partner credit the subscription needs a named end customer. Projects fo
 ## Product and pricing
 
 **What's the difference between Community Edition, Cloud and Enterprise?**
-Community Edition is free and self-hosted. Strapi Cloud is managed hosting. Enterprise adds governance and security features and commercial terms. More in [pricing and packaging](./pricing-packaging).
+Community Edition is free and self-hosted. Strapi Cloud is managed hosting. Enterprise adds governance and security features and commercial terms. More in [pricing and packaging](./pricing-packaging), and security and compliance documentation is in the [Strapi Trust Center](https://trust.strapi.io/).
 
 **What counts as a Strapi "project"? Can a client have several sites?**
 A project is one Strapi application with one content model and one database. A client can have several. See [what counts as a Strapi project](https://support.strapi.io/articles/2990044364-understanding-the-definition-of-a-strapi-project).
@@ -488,7 +488,7 @@ A project is one Strapi application with one content model and one database. A c
 US East, Europe West and Asia Southeast. See the [deployment docs](https://docs.strapi.io/cloud/getting-started/deployment#deploying-a-project).
 
 **Does Strapi support GDPR compliance?**
-Your client controls what data is stored in Strapi and, if self-hosting, where it lives.
+Your client controls what data is stored in Strapi and, if self-hosting, where it lives. For security and compliance documentation, point them to the [Strapi Trust Center](https://trust.strapi.io/).
 
 **Can Strapi work with Shopify or other commerce platforms?**
 Yes. A common setup is Strapi for content and a headless commerce platform for commerce. Browse the [Strapi Marketplace](https://market.strapi.io/) for integrations.
@@ -598,6 +598,7 @@ Across the Strapi 5 releases of summer 2026, API throughput went up about 2.4x a
 - Session security: short-lived access tokens, one-time refresh tokens and logout on password change (August 2026 session, above)
 - [Custom RBAC conditions](https://docs.strapi.io/cms/configurations/guides/rbac)
 - [Audit logs](https://docs.strapi.io/cms/features/audit-logs#exporting-audit-logs) (Enterprise)
+- [Strapi Trust Center](https://trust.strapi.io/): security and compliance documentation for client reviews
 - [Strapi security policy](https://github.com/strapi/strapi/security/policy)`,
   },
   {
