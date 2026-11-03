@@ -13,6 +13,11 @@ const nextConfig = {
   // node:worker_threads). This is only ever used server-side (see
   // features/submit/server/sanitize-svg.ts), so exclude it from
   // bundling/tracing and let Node `require` it at runtime instead.
+  //
+  // It's pinned to ~2.26 (jsdom 26) in package.json: jsdom 27+ pulls in
+  // html-encoding-sniffer 6, which `require()`s the ESM-only @exodus/bytes.
+  // That relies on Node's require(esm) support, which the Vercel function
+  // runtime doesn't provide, so the route fails with ERR_REQUIRE_ESM.
   serverExternalPackages: ["isomorphic-dompurify"],
   productionBrowserSourceMaps: true,
   images: {
