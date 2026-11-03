@@ -1,31 +1,57 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
 import { getGitHubHeaders } from "../../../../package-info/server/src/services/github";
-import { type LinkCheck, parseGitHubIssueUrl } from "../lib/rules";
+import {
+  isPrivateAddress,
+  type LinkCheck,
+  parseGitHubIssueUrl,
+} from "../lib/rules";
 
 /**
  * Link validation for roadmap items. Never throws.
  *
  *   ok          — 2xx.
- *   broken      — definitively dead (404/410) or not an http(s) URL. Blocks
- *                 publishing: the proposal's "every link resolves" gate.
+ *   broken      — definitively dead (404/410), not an http(s) URL, pointing
+ *                 at a private network, or a GitHub issue in a private repo.
+ *                 Blocks publishing.
  *   unverified  — anything else (rate limit, 5xx, timeout, bot wall). Does NOT
- *                 block: a GitHub hiccup must not unpublish the roadmap. It is
- *                 listed in the needs-attention report instead.
+ *                 block on its own; see `publishable` in sync.ts.
  *
- * GitHub issue/PR links go through the GitHub API (reusing package-info's
- * GITHUB_ACCESS_TOKEN headers) so we also get open/closed/merged state.
+ * Safety: URLs come from Notion, so the CMS server must not become a proxy
+ * into its own network. Every hop (including redirects) is resolved and
+ * rejected if it lands on a loopback/private/link-local/metadata address or
+ * a non-default port. GitHub lookups use our token, so a link into a private
+ * repo would otherwise "validate" and publish its state; those are refused.
  */
 
 const TIMEOUT_MS = 10_000;
+const MAX_REDIRECTS = 5;
 const DEAD = new Set([404, 410]);
 
-function isHttpUrl(raw: string): boolean {
-  try {
-    const { protocol } = new URL(raw);
-    return protocol === "https:" || protocol === "http:";
-  } catch {
-    return false;
+class UnsafeUrlError extends Error {}
+
+// ── Address checks ─────────────────────────────────────────────────────────
+
+async function assertPublicTarget(url: URL): Promise<void> {
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new UnsafeUrlError("Not an http(s) URL");
+  }
+  if (url.port && url.port !== "80" && url.port !== "443") {
+    throw new UnsafeUrlError(`Port ${url.port} not allowed`);
+  }
+  if (url.username || url.password) {
+    throw new UnsafeUrlError("Credentials in URL not allowed");
+  }
+  const host = url.hostname.replace(/^\[|\]$/g, "");
+  const addresses = isIP(host)
+    ? [host]
+    : (await lookup(host, { all: true, verbatim: true })).map((a) => a.address);
+  if (addresses.length === 0 || addresses.some(isPrivateAddress)) {
+    throw new UnsafeUrlError("Resolves to a private or reserved address");
   }
 }
+
+// ── Checks ─────────────────────────────────────────────────────────────────
 
 function classify(url: string, status: number): LinkCheck {
   if (status >= 200 && status < 300)
@@ -34,10 +60,47 @@ function classify(url: string, status: number): LinkCheck {
   return { url, result: "unverified", httpStatus: status };
 }
 
+/** Repo visibility, cached briefly so a run checks each repo once. */
+const repoVisibility = new Map<string, { isPublic: boolean; at: number }>();
+const VISIBILITY_TTL_MS = 10 * 60_000;
+
+async function isPublicRepo(
+  owner: string,
+  repo: string,
+): Promise<boolean | null> {
+  const key = `${owner}/${repo}`.toLowerCase();
+  const cached = repoVisibility.get(key);
+  if (cached && Date.now() - cached.at < VISIBILITY_TTL_MS)
+    return cached.isPublic;
+
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+    headers: getGitHubHeaders(),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (res.status === 404) return false;
+  if (!res.ok) return null; // unknown (rate limit etc.)
+  const data: any = await res.json();
+  const isPublic = data?.private === false && data?.visibility !== "internal";
+  repoVisibility.set(key, { isPublic, at: Date.now() });
+  return isPublic;
+}
+
 async function checkGitHubIssue(
   url: string,
   ref: { owner: string; repo: string; number: number },
 ): Promise<LinkCheck> {
+  const visible = await isPublicRepo(ref.owner, ref.repo);
+  if (visible === false) {
+    return { url, result: "broken", error: "Repository is private or missing" };
+  }
+  if (visible === null) {
+    return {
+      url,
+      result: "unverified",
+      error: "Couldn't check repository visibility",
+    };
+  }
+
   const res = await fetch(
     `https://api.github.com/repos/${ref.owner}/${ref.repo}/issues/${ref.number}`,
     { headers: getGitHubHeaders(), signal: AbortSignal.timeout(TIMEOUT_MS) },
@@ -58,26 +121,55 @@ async function checkGitHubIssue(
   };
 }
 
+/** One request, following redirects by hand so every hop is re-checked. */
+async function request(start: string, method: "HEAD" | "GET"): Promise<number> {
+  let current = new URL(start);
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    await assertPublicTarget(current);
+    const res = await fetch(current, {
+      method,
+      redirect: "manual",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      headers: { "User-Agent": "strapi-community-roadmap-sync" },
+    });
+    const location = res.headers.get("location");
+    if (res.status >= 300 && res.status < 400 && location) {
+      current = new URL(location, current);
+      continue;
+    }
+    return res.status;
+  }
+  return 310; // too many redirects → unverified
+}
+
 async function checkHttp(url: string): Promise<LinkCheck> {
-  const init = {
-    redirect: "follow" as const,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-    headers: { "User-Agent": "strapi-community-roadmap-sync" },
-  };
-  let res = await fetch(url, { ...init, method: "HEAD" });
+  let status = await request(url, "HEAD");
   // Plenty of servers reject HEAD; only trust a negative answer from GET.
-  if (!res.ok) res = await fetch(url, { ...init, method: "GET" });
-  return { ...classify(url, res.status), kind: "link" };
+  if (status < 200 || status >= 300) status = await request(url, "GET");
+  return { ...classify(url, status), kind: "link" };
 }
 
 export async function checkLink(url: string): Promise<LinkCheck> {
-  if (!isHttpUrl(url)) {
-    return { url, result: "broken", error: "Not an http(s) URL" };
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { url, result: "broken", error: "Not a valid URL" };
   }
   try {
     const gh = parseGitHubIssueUrl(url);
-    return gh ? await checkGitHubIssue(url, gh) : await checkHttp(url);
+    if (gh) {
+      await assertPublicTarget(parsed);
+      return await checkGitHubIssue(url, gh);
+    }
+    return await checkHttp(url);
   } catch (err) {
-    return { url, result: "unverified", error: (err as Error).message };
+    // Unsafe targets are definitive. Network errors (fetch's TypeError,
+    // DNS failures, timeouts) are not: they're unverified.
+    return {
+      url,
+      result: err instanceof UnsafeUrlError ? "broken" : "unverified",
+      error: (err as Error).message,
+    };
   }
 }

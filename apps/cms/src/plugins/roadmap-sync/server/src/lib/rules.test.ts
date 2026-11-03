@@ -4,6 +4,7 @@ import {
   blockingReasons,
   compareVersions,
   extractUrls,
+  isPrivateAddress,
   isStale,
   type LinkCheck,
   mapNotionPage,
@@ -218,6 +219,11 @@ describe("URL parsing", () => {
     );
     assert.equal(parseCannyUrl("https://feedback.strapi.io/"), null);
     assert.equal(parseCannyUrl("not a url"), null);
+    assert.equal(
+      parseCannyUrl("javascript://feedback.strapi.io/feature-requests/p/x"),
+      null,
+    );
+    assert.equal(parseCannyUrl("data:text/html,/feature-requests/p/x"), null);
   });
 
   it("parses GitHub issue and PR URLs only", () => {
@@ -260,5 +266,41 @@ describe("versions", () => {
       compareVersions,
     );
     assert.deepEqual(sorted, ["5.9", "5.10", "5.10.1", "5.61", "5.61.1"]);
+  });
+});
+
+describe("isPrivateAddress", () => {
+  it("blocks loopback, private, link-local, metadata and reserved ranges", () => {
+    for (const ip of [
+      "127.0.0.1",
+      "10.1.2.3",
+      "172.16.0.1",
+      "172.31.255.255",
+      "192.168.1.10",
+      "169.254.169.254",
+      "100.64.0.1",
+      "0.0.0.0",
+      "224.0.0.1",
+      "::1",
+      "::",
+      "fd00::1",
+      "fe80::1",
+      "::ffff:127.0.0.1",
+      "not-an-ip",
+    ]) {
+      assert.equal(isPrivateAddress(ip), true, ip);
+    }
+  });
+
+  it("allows public addresses", () => {
+    for (const ip of [
+      "140.82.112.3",
+      "172.32.0.1",
+      "8.8.8.8",
+      "2606:4700::1111",
+      "::ffff:8.8.8.8",
+    ]) {
+      assert.equal(isPrivateAddress(ip), false, ip);
+    }
   });
 });

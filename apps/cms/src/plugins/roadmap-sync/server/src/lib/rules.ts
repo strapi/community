@@ -311,6 +311,8 @@ export function parseCannyUrl(
   } catch {
     return null;
   }
+  // The URL is rendered as a link on the public page: http(s) only.
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
   const parts = url.pathname.split("/").filter(Boolean);
   const p = parts.lastIndexOf("p");
   if (p < 1 || p === parts.length - 1) return null;
@@ -350,6 +352,57 @@ export function parseGitHubIssueUrl(
   const match = url.pathname.match(/^\/([^/]+)\/([^/]+)\/(issues|pull)\/(\d+)/);
   if (!match) return null;
   return { owner: match[1], repo: match[2], number: Number(match[4]) };
+}
+
+// ── Network safety (pure, so it's unit-testable) ─────────────────────────────
+
+const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+
+function ipv4ToInt(ip: string): number | null {
+  const m = ip.match(IPV4);
+  if (!m) return null;
+  const parts = m.slice(1).map(Number);
+  if (parts.some((p) => p > 255)) return null;
+  return parts.reduce((acc, p) => acc * 256 + p, 0);
+}
+
+const PRIVATE_V4: [string, number][] = [
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10], // carrier-grade NAT
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16], // link-local, incl. cloud metadata 169.254.169.254
+  ["172.16.0.0", 12],
+  ["192.0.0.0", 24],
+  ["192.168.0.0", 16],
+  ["198.18.0.0", 15],
+  ["224.0.0.0", 3], // multicast + reserved
+];
+
+/**
+ * True for loopback, private, link-local, CGNAT, multicast/reserved and
+ * metadata addresses (v4 and v6, incl. v4-mapped v6). Anything that isn't a
+ * recognisable IP is treated as private too: refuse rather than guess.
+ */
+export function isPrivateAddress(ip: string): boolean {
+  const v4 = ipv4ToInt(ip);
+  if (v4 !== null) {
+    return PRIVATE_V4.some(([base, bits]) => {
+      const size = 2 ** (32 - bits);
+      const start = Math.floor((ipv4ToInt(base) as number) / size) * size;
+      return v4 >= start && v4 < start + size;
+    });
+  }
+  const v6 = ip.toLowerCase();
+  if (!v6.includes(":")) return true;
+  const mapped = v6.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return isPrivateAddress(mapped[1]);
+  return (
+    v6 === "::" ||
+    v6 === "::1" ||
+    /^f[cd]/.test(v6) || // unique local fc00::/7
+    /^fe[89ab]/.test(v6) // link-local fe80::/10
+  );
 }
 
 /** Stable JSON for change detection (key order independent). */

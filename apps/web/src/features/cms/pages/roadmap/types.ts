@@ -21,6 +21,21 @@ export type RoadmapState = {
 /** Filter key for items with no release. */
 export const UNSCHEDULED = "unscheduled";
 
+/**
+ * Only http(s) URLs may become an href. Defence in depth: the sync already
+ * rejects other schemes, but a `javascript:` URL that ever reached the CMS
+ * would otherwise render as a live, clickable link.
+ */
+export function safeHref(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "https:" || protocol === "http:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 /** JSON attributes come back untyped; narrow them to string arrays. */
 export const stringList = (value: unknown): string[] =>
   Array.isArray(value)

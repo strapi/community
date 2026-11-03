@@ -55,17 +55,26 @@ export type RoadmapRelease = Modules.Documents.Result<
 
 export * from "./types";
 
+import { githubLinks, safeHref } from "./types";
+
 // The CMS route only ever serves published items, whatever the query says.
+// Every URL is scheme-checked here, once, so components can render hrefs
+// from these objects without re-validating.
 export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
   const res = await cmsClient.collection(itemType).find(itemQuery);
-  return res.data;
+  return res.data.map((item) => ({
+    ...item,
+    canny_url: safeHref(item.canny_url),
+    docs_link: safeHref(item.docs_link),
+    github_links: githubLinks(item.github_links).filter((l) => safeHref(l.url)),
+  }));
 }
 
 /** Releases are supplementary: the roadmap still renders without them. */
 export async function fetchRoadmapReleases(): Promise<RoadmapRelease[]> {
   try {
     const res = await cmsClient.collection(releaseType).find(releaseQuery);
-    return res.data;
+    return res.data.map((r) => ({ ...r, url: safeHref(r.url) }));
   } catch {
     return [];
   }
