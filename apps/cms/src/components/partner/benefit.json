@@ -2,14 +2,15 @@
   "collectionName": "components_partner_benefits",
   "info": {
     "displayName": "Benefit",
-    "description": "A benefit shown to partners of the given level."
+    "description": "A benefit shown to partners of the selected levels."
   },
   "options": {},
   "attributes": {
-    "level": {
-      "type": "enumeration",
+    "levels": {
+      "type": "customField",
+      "customField": "plugin::multi-select.multi-select",
       "required": true,
-      "enum": ["Unlisted", "Community", "Business", "Enterprise"]
+      "options": ["Registered", "Community", "Business", "Enterprise"]
     },
     "title": {
       "type": "string",

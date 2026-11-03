@@ -19,7 +19,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
-  LEVEL_LABELS,
   meetsLevel,
   type PartnerLevel,
   type PartnerSection,
@@ -171,7 +170,7 @@ export function PartnerPortalView({ slug, pathname }: Props) {
     );
   }
 
-  const level: PartnerLevel = organization.partner_level ?? "Unlisted";
+  const level: PartnerLevel = organization.partner_level ?? "Registered";
 
   const navHref = (item: { view: View }) =>
     [`/partner/${slug}`, partnerViewPaths[item.view]].filter(Boolean).join("/");
@@ -228,7 +227,7 @@ export function PartnerPortalView({ slug, pathname }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-(--color-primary200) bg-(--color-primary100) px-3 py-1 text-xs font-semibold text-(--color-primary600)">
             <BadgeCheckIcon className="size-4" />
-            {LEVEL_LABELS[level]} partner
+            {level} partner
           </span>
           <Link
             href={`/org/${slug}`}

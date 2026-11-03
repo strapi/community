@@ -11,8 +11,8 @@ export type PartnerOrganization = {
   name: string;
   slug: string;
   logo: string | null;
-  /** Empty means "Unlisted". */
-  partner_level: Exclude<PartnerLevel, "Unlisted"> | null;
+  /** Empty means "Registered". */
+  partner_level: Exclude<PartnerLevel, "Registered"> | null;
   createdAt: string;
   profile: { website?: string | null; location?: string | null } | null;
 };

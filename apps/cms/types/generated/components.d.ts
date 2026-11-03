@@ -3,15 +3,17 @@ import type { Schema, Struct } from '@strapi/strapi';
 export interface PartnerBenefit extends Struct.ComponentSchema {
   collectionName: 'components_partner_benefits';
   info: {
-    description: 'A benefit shown to partners of the given level.';
+    description: 'A benefit shown to partners of the selected levels.';
     displayName: 'Benefit';
   };
   attributes: {
     description: Schema.Attribute.Text;
-    level: Schema.Attribute.Enumeration<
-      ['Unlisted', 'Community', 'Business', 'Enterprise']
-    > &
-      Schema.Attribute.Required;
+    levels: Schema.Attribute.JSON &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<
+        'plugin::multi-select.multi-select',
+        ['Registered', 'Community', 'Business', 'Enterprise']
+      >;
     title: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }

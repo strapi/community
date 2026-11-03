@@ -1,5 +1,5 @@
 import { LockIcon } from "lucide-react";
-import { LEVEL_LABELS, type PartnerLevel } from "../../lib/levels";
+import type { PartnerLevel } from "../../lib/levels";
 import { Eyebrow } from "./shared";
 
 export function LockedSection({
@@ -16,7 +16,7 @@ export function LockedSection({
       <span className="flex size-12 items-center justify-center rounded-md bg-(--color-neutral100) text-(--color-neutral700)">
         <LockIcon className="size-6" />
       </span>
-      <Eyebrow>Available from {LEVEL_LABELS[minimumLevel]} level</Eyebrow>
+      <Eyebrow>Available from {minimumLevel} level</Eyebrow>
       <h2 className="text-xl font-semibold text-(--color-neutral900)">
         {title}
       </h2>

@@ -7,7 +7,7 @@ const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL;
 
 export type PartnerBenefit = {
   id: number;
-  level: PartnerLevel;
+  levels: PartnerLevel[];
   title: string;
   description: string | null;
 };
