@@ -1,4 +1,6 @@
-import { lookup } from "node:dns/promises";
+import { type LookupAddress, lookup } from "node:dns";
+import http from "node:http";
+import https from "node:https";
 import { isIP } from "node:net";
 import { getGitHubHeaders } from "../../../../package-info/server/src/services/github";
 import {
@@ -18,10 +20,16 @@ import {
  *                 block on its own; see `publishable` in sync.ts.
  *
  * Safety: URLs come from Notion, so the CMS server must not become a proxy
- * into its own network. Every hop (including redirects) is resolved and
- * rejected if it lands on a loopback/private/link-local/metadata address or
- * a non-default port. GitHub lookups use our token, so a link into a private
- * repo would otherwise "validate" and publish its state; those are refused.
+ * into its own network.
+ *   - Non-GitHub links are fetched with node:http(s) and a `lookup` hook, so
+ *     the address checked is the address connected to (no DNS-rebinding
+ *     window between "check" and "fetch"). Any private/reserved answer fails
+ *     the whole lookup. Literal-IP hosts are checked up front.
+ *   - Redirects are followed by hand; every hop goes through the same checks.
+ *   - Only ports 80/443, no credentials in URLs.
+ *   - GitHub lookups use our token, so a link into a private repo (directly,
+ *     or via an issue transferred there) would otherwise "validate" and
+ *     publish its state; those are refused.
  */
 
 const TIMEOUT_MS = 10_000;
@@ -32,7 +40,9 @@ class UnsafeUrlError extends Error {}
 
 // ── Address checks ─────────────────────────────────────────────────────────
 
-async function assertPublicTarget(url: URL): Promise<void> {
+/** Scheme, port, credentials and literal-IP checks. DNS names are checked
+ * at connect time by `safeLookup`. */
+function assertSafeUrl(url: URL): void {
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new UnsafeUrlError("Not an http(s) URL");
   }
@@ -43,12 +53,38 @@ async function assertPublicTarget(url: URL): Promise<void> {
     throw new UnsafeUrlError("Credentials in URL not allowed");
   }
   const host = url.hostname.replace(/^\[|\]$/g, "");
-  const addresses = isIP(host)
-    ? [host]
-    : (await lookup(host, { all: true, verbatim: true })).map((a) => a.address);
-  if (addresses.length === 0 || addresses.some(isPrivateAddress)) {
-    throw new UnsafeUrlError("Resolves to a private or reserved address");
+  if (isIP(host) && isPrivateAddress(host)) {
+    throw new UnsafeUrlError("Private or reserved address");
   }
+}
+
+/**
+ * `lookup` for http.request: resolves, refuses if ANY answer is private, and
+ * hands the vetted addresses straight to the socket.
+ */
+function safeLookup(
+  hostname: string,
+  options: { all?: boolean; family?: number },
+  callback: (
+    err: NodeJS.ErrnoException | null,
+    address: string | LookupAddress[],
+    family?: number,
+  ) => void,
+): void {
+  lookup(hostname, { all: true, verbatim: true }, (err, addresses) => {
+    if (err) return callback(err, []);
+    if (
+      addresses.length === 0 ||
+      addresses.some((a) => isPrivateAddress(a.address))
+    ) {
+      return callback(
+        new UnsafeUrlError("Resolves to a private or reserved address"),
+        [],
+      );
+    }
+    if (options?.all) return callback(null, addresses);
+    callback(null, addresses[0].address, addresses[0].family);
+  });
 }
 
 // ── Checks ─────────────────────────────────────────────────────────────────
@@ -109,6 +145,36 @@ async function checkGitHubIssue(
   if (check.result !== "ok") return check;
 
   const data: any = await res.json();
+
+  // A transferred issue redirects to its new home, which may be private.
+  // Check the repo GitHub actually answered from, not the one in the link.
+  const actual = String(data?.repository_url ?? "").match(
+    /\/repos\/([^/]+)\/([^/]+)$/,
+  );
+  if (!actual) {
+    return { url, result: "unverified", error: "Unexpected issue response" };
+  }
+  if (
+    `${actual[1]}/${actual[2]}`.toLowerCase() !==
+    `${ref.owner}/${ref.repo}`.toLowerCase()
+  ) {
+    const movedVisible = await isPublicRepo(actual[1], actual[2]);
+    if (movedVisible === false) {
+      return {
+        url,
+        result: "broken",
+        error: "Issue moved to a private repository",
+      };
+    }
+    if (movedVisible === null) {
+      return {
+        url,
+        result: "unverified",
+        error: "Couldn't check repository visibility",
+      };
+    }
+  }
+
   const isPr = Boolean(data?.pull_request);
   return {
     ...check,
@@ -121,23 +187,45 @@ async function checkGitHubIssue(
   };
 }
 
-/** One request, following redirects by hand so every hop is re-checked. */
+/** One HTTP exchange, headers only; the body is never read. */
+function requestOnce(
+  url: URL,
+  method: "HEAD" | "GET",
+): Promise<{ status: number; location: string | null }> {
+  return new Promise((resolve, reject) => {
+    const client = url.protocol === "https:" ? https : http;
+    const req = client.request(
+      url,
+      {
+        method,
+        lookup: safeLookup as any,
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+        headers: { "User-Agent": "strapi-community-roadmap-sync" },
+      },
+      (res) => {
+        resolve({
+          status: res.statusCode ?? 0,
+          location: res.headers.location ?? null,
+        });
+        res.destroy();
+      },
+    );
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+/** Follow redirects by hand so every hop is re-checked. */
 async function request(start: string, method: "HEAD" | "GET"): Promise<number> {
   let current = new URL(start);
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    await assertPublicTarget(current);
-    const res = await fetch(current, {
-      method,
-      redirect: "manual",
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers: { "User-Agent": "strapi-community-roadmap-sync" },
-    });
-    const location = res.headers.get("location");
-    if (res.status >= 300 && res.status < 400 && location) {
+    assertSafeUrl(current);
+    const { status, location } = await requestOnce(current, method);
+    if (status >= 300 && status < 400 && location) {
       current = new URL(location, current);
       continue;
     }
-    return res.status;
+    return status;
   }
   return 310; // too many redirects → unverified
 }
@@ -159,13 +247,14 @@ export async function checkLink(url: string): Promise<LinkCheck> {
   try {
     const gh = parseGitHubIssueUrl(url);
     if (gh) {
-      await assertPublicTarget(parsed);
+      assertSafeUrl(parsed);
       return await checkGitHubIssue(url, gh);
     }
     return await checkHttp(url);
   } catch (err) {
-    // Unsafe targets are definitive. Network errors (fetch's TypeError,
-    // DNS failures, timeouts) are not: they're unverified.
+    // Unsafe targets are definitive (the lookup hook's error surfaces here
+    // as the request error). Network errors, DNS failures and timeouts are
+    // not: they're unverified.
     return {
       url,
       result: err instanceof UnsafeUrlError ? "broken" : "unverified",

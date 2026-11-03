@@ -286,6 +286,16 @@ describe("isPrivateAddress", () => {
       "fd00::1",
       "fe80::1",
       "::ffff:127.0.0.1",
+      "::ffff:7f00:1", // hex v4-mapped loopback
+      "::ffff:a9fe:a9fe", // hex v4-mapped metadata
+      "::127.0.0.1", // v4-compatible
+      "::7f00:1",
+      "64:ff9b::a9fe:a9fe", // NAT64 → metadata
+      "2002:7f00:1::", // 6to4 → loopback
+      "2001:0:4136:e378::", // Teredo
+      "fec0::1",
+      "ff02::1",
+      "255.255.255.255",
       "not-an-ip",
     ]) {
       assert.equal(isPrivateAddress(ip), true, ip);
@@ -298,6 +308,7 @@ describe("isPrivateAddress", () => {
       "172.32.0.1",
       "8.8.8.8",
       "2606:4700::1111",
+      "2a00:1450:4001:80b::200e",
       "::ffff:8.8.8.8",
     ]) {
       assert.equal(isPrivateAddress(ip), false, ip);

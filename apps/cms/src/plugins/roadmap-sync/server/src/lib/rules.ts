@@ -2,12 +2,14 @@
  * Pure roadmap-sync rules: Notion property extraction, the internal → public
  * status mapping, validation and slug/URL helpers.
  *
- * Deliberately has no imports (not even types from other files) so it can be
- * unit-tested with `node --test` directly, without a build step.
+ * Imports nothing but Node built-ins, so it can be unit-tested with
+ * `node --test` directly, without a build step.
  *
  * The publishing path never infers anything: every value here is either a
  * verbatim copy of what a human wrote in Notion or a fixed lookup table.
  */
+
+import { BlockList, isIP } from "node:net";
 
 // ── Notion property names (Product Roadmap data source) ─────────────────────
 // Existing properties keep their real names. The ones marked "new" don't exist
@@ -354,19 +356,16 @@ export function parseGitHubIssueUrl(
   return { owner: match[1], repo: match[2], number: Number(match[4]) };
 }
 
-// ── Network safety (pure, so it's unit-testable) ─────────────────────────────
+// ── Network safety ──────────────────────────────────────────────────────────
 
-const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-
-function ipv4ToInt(ip: string): number | null {
-  const m = ip.match(IPV4);
-  if (!m) return null;
-  const parts = m.slice(1).map(Number);
-  if (parts.some((p) => p > 255)) return null;
-  return parts.reduce((acc, p) => acc * 256 + p, 0);
-}
-
-const PRIVATE_V4: [string, number][] = [
+/**
+ * Destinations the link checker must never connect to. node:net's BlockList
+ * parses every IPv6 spelling (hex or dotted v4-mapped, compressed, etc.), and
+ * IPv4 rules also match their ::ffff: mapped forms. The IPv6 rules cover
+ * ranges that embed or tunnel to IPv4 (v4-compatible, NAT64, 6to4, Teredo).
+ */
+const BLOCKED = new BlockList();
+for (const [net, prefix] of [
   ["0.0.0.0", 8],
   ["10.0.0.0", 8],
   ["100.64.0.0", 10], // carrier-grade NAT
@@ -374,35 +373,36 @@ const PRIVATE_V4: [string, number][] = [
   ["169.254.0.0", 16], // link-local, incl. cloud metadata 169.254.169.254
   ["172.16.0.0", 12],
   ["192.0.0.0", 24],
+  ["192.0.2.0", 24],
   ["192.168.0.0", 16],
   ["198.18.0.0", 15],
-  ["224.0.0.0", 3], // multicast + reserved
-];
+  ["198.51.100.0", 24],
+  ["203.0.113.0", 24],
+  ["224.0.0.0", 3], // multicast + reserved + broadcast
+] as const) {
+  BLOCKED.addSubnet(net, prefix, "ipv4");
+}
+for (const [net, prefix] of [
+  ["::", 96], // unspecified, loopback, v4-compatible
+  ["64:ff9b::", 96], // NAT64
+  ["64:ff9b:1::", 48], // local-use NAT64
+  ["100::", 64], // discard
+  ["2001::", 32], // Teredo
+  ["2001:db8::", 32], // documentation
+  ["2002::", 16], // 6to4
+  ["fc00::", 7], // unique local
+  ["fe80::", 10], // link-local
+  ["fec0::", 10], // site-local (deprecated)
+  ["ff00::", 8], // multicast
+] as const) {
+  BLOCKED.addSubnet(net, prefix, "ipv6");
+}
 
-/**
- * True for loopback, private, link-local, CGNAT, multicast/reserved and
- * metadata addresses (v4 and v6, incl. v4-mapped v6). Anything that isn't a
- * recognisable IP is treated as private too: refuse rather than guess.
- */
+/** True for any address we refuse to connect to, or anything not an IP. */
 export function isPrivateAddress(ip: string): boolean {
-  const v4 = ipv4ToInt(ip);
-  if (v4 !== null) {
-    return PRIVATE_V4.some(([base, bits]) => {
-      const size = 2 ** (32 - bits);
-      const start = Math.floor((ipv4ToInt(base) as number) / size) * size;
-      return v4 >= start && v4 < start + size;
-    });
-  }
-  const v6 = ip.toLowerCase();
-  if (!v6.includes(":")) return true;
-  const mapped = v6.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isPrivateAddress(mapped[1]);
-  return (
-    v6 === "::" ||
-    v6 === "::1" ||
-    /^f[cd]/.test(v6) || // unique local fc00::/7
-    /^fe[89ab]/.test(v6) // link-local fe80::/10
-  );
+  const family = isIP(ip);
+  if (family === 0) return true;
+  return BLOCKED.check(ip, family === 4 ? "ipv4" : "ipv6");
 }
 
 /** Stable JSON for change detection (key order independent). */
