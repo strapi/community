@@ -71,11 +71,11 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@strapi-community/plugin-better-auth':
-        specifier: ^1.0.0-beta.6
-        version: 1.0.0-beta.6(7ec9d1c2ac0f2b3406d4659e0887a6af)
+        specifier: ^1.0.0-beta.8
+        version: 1.0.0-beta.8(7ec9d1c2ac0f2b3406d4659e0887a6af)
       '@strapi-community/plugin-better-auth-dashboard':
-        specifier: 1.0.0-alpha.10
-        version: 1.0.0-alpha.10(7068f912c119c8fd51e8a7683d367997)
+        specifier: 1.0.0-beta.2
+        version: 1.0.0-beta.2(f79828d811e8c9dfdc8c728a7c1b2f23)
       '@strapi/admin':
         specifier: catalog:strapi
         version: 5.60.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.2.2)(@strapi/data-transfer@5.60.0(@types/node@20.19.27)(better-sqlite3@12.4.1)(pg@8.21.0)(ts-toolbelt@9.6.0)(typescript@5.9.2))(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(debug@4.3.4)(pg@8.21.0)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-toolbelt@9.6.0)
@@ -4544,11 +4544,11 @@ packages:
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
-  '@strapi-community/plugin-better-auth-dashboard@1.0.0-alpha.10':
-    resolution: {integrity: sha512-HDZptutV0vx6AwLQEuKFWXun/L3DpH/ONFwXauaxchkKyzTs+vGQV1582BituXYUTnUT338X14b7c47PYSO68g==}
+  '@strapi-community/plugin-better-auth-dashboard@1.0.0-beta.2':
+    resolution: {integrity: sha512-Lp6heJ5I1SeNFx08JOxU+w/vMsfjOXgdr9OkO2BQtmqDOg0hLfRlY9HLJUzT7Xsoy1AxK6FXDp1x7D5oBuwm5Q==}
     peerDependencies:
       '@better-auth/infra': ^0.2.6
-      '@strapi-community/plugin-better-auth': ^1.0.0-beta.6
+      '@strapi-community/plugin-better-auth': ^1.0.0-beta.8
       '@strapi/design-system': ^2.0.0
       '@strapi/icons': ^2.0.0
       '@strapi/strapi': ^5.45.0
@@ -4562,8 +4562,8 @@ packages:
       react-router-dom: ^6.0.0
       styled-components: ^6.0.0
 
-  '@strapi-community/plugin-better-auth@1.0.0-beta.6':
-    resolution: {integrity: sha512-xeFtx5fqtlZIQgN8UO58W1vkXnaT0Ws27wvtO7kdsMkqlekHwxBIh8TihSoPHvTFXthOQ7jUzvnMNy0O92gsLA==}
+  '@strapi-community/plugin-better-auth@1.0.0-beta.8':
+    resolution: {integrity: sha512-IXlUg2JUG3m9+r/Jt0xP9XVdK9+X/iUU0mVOlrQv2x1P2Vab9Idl17y1f6W3SZbLyb3JwHC5zRtPc91Zm2lgkw==}
     peerDependencies:
       '@strapi/strapi': ^5.45.0
       '@strapi/types': ^5.45.0
@@ -12531,6 +12531,18 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.2
 
+  '@formatjs/intl@2.10.0(typescript@5.9.3)':
+    dependencies:
+      '@formatjs/ecma402-abstract': 1.18.2
+      '@formatjs/fast-memoize': 2.2.0
+      '@formatjs/icu-messageformat-parser': 2.7.6
+      '@formatjs/intl-displaynames': 6.6.6
+      '@formatjs/intl-listformat': 7.5.5
+      intl-messageformat: 10.5.11
+      tslib: 2.8.1
+    optionalDependencies:
+      typescript: 5.9.3
+
   '@formatjs/intl@2.10.15(typescript@5.9.2)':
     dependencies:
       '@formatjs/ecma402-abstract': 2.2.4
@@ -15016,10 +15028,10 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@strapi-community/plugin-better-auth-dashboard@1.0.0-alpha.10(7068f912c119c8fd51e8a7683d367997)':
+  '@strapi-community/plugin-better-auth-dashboard@1.0.0-beta.2(f79828d811e8c9dfdc8c728a7c1b2f23)':
     dependencies:
       '@better-auth/infra': 0.2.5(87cf08baa35c738e239a6fa36b83c9b0)
-      '@strapi-community/plugin-better-auth': 1.0.0-beta.6(7ec9d1c2ac0f2b3406d4659e0887a6af)
+      '@strapi-community/plugin-better-auth': 1.0.0-beta.8(7ec9d1c2ac0f2b3406d4659e0887a6af)
       '@strapi/design-system': 2.2.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/state@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.0)(@strapi/icons@2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)))(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(codemirror@5.65.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@strapi/icons': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@strapi/strapi': 5.60.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.2.2)(@swc/helpers@0.5.18)(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(esbuild@0.28.2)(jiti@2.7.0)(koa@2.16.4)(lightningcss@1.32.0)(pg@8.21.0)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.51.2)(ts-toolbelt@9.6.0)(type-fest@4.41.0)(yaml@2.8.2)
@@ -15033,7 +15045,7 @@ snapshots:
       react-router-dom: 6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       styled-components: 6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@strapi-community/plugin-better-auth@1.0.0-beta.6(7ec9d1c2ac0f2b3406d4659e0887a6af)':
+  '@strapi-community/plugin-better-auth@1.0.0-beta.8(7ec9d1c2ac0f2b3406d4659e0887a6af)':
     dependencies:
       '@strapi/strapi': 5.60.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.2.2)(@swc/helpers@0.5.18)(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(esbuild@0.28.2)(jiti@2.7.0)(koa@2.16.4)(lightningcss@1.32.0)(pg@8.21.0)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(terser@5.51.2)(ts-toolbelt@9.6.0)(type-fest@4.41.0)(yaml@2.8.2)
       '@strapi/types': 5.60.0(better-sqlite3@12.4.1)(pg@8.21.0)(ts-toolbelt@9.6.0)(typescript@5.9.2)
@@ -21322,7 +21334,7 @@ snapshots:
     dependencies:
       '@formatjs/ecma402-abstract': 1.18.2
       '@formatjs/icu-messageformat-parser': 2.7.6
-      '@formatjs/intl': 2.10.0(typescript@5.9.2)
+      '@formatjs/intl': 2.10.0(typescript@5.9.3)
       '@formatjs/intl-displaynames': 6.6.6
       '@formatjs/intl-listformat': 7.5.5
       '@types/hoist-non-react-statics': 3.3.7(@types/react@18.3.27)
