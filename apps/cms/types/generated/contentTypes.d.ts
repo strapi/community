@@ -1116,6 +1116,98 @@ export interface ApiRecipeRecipe extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiReleaseRelease extends Struct.CollectionTypeSchema {
+  collectionName: 'releases';
+  info: {
+    description: 'Strapi releases (GitHub releases) and upcoming milestones, synced by the roadmap-sync plugin. Edits here are overwritten on the next sync.';
+    displayName: 'Release';
+    pluralName: 'releases';
+    singularName: 'release';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    closed_issues: Schema.Attribute.Integer;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    due_on: Schema.Attribute.Date;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::release.release'
+    > &
+      Schema.Attribute.Private;
+    open_issues: Schema.Attribute.Integer;
+    publishedAt: Schema.Attribute.DateTime;
+    released_at: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['upcoming', 'released']> &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url: Schema.Attribute.String;
+    version: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+  };
+}
+
+export interface ApiRoadmapItemRoadmapItem extends Struct.CollectionTypeSchema {
+  collectionName: 'roadmap_items';
+  info: {
+    description: 'Synced from the Notion Product Roadmap by the roadmap-sync plugin. Edit copy in Notion: the next sync overwrites changes made here.';
+    displayName: 'Roadmap Item';
+    pluralName: 'roadmap-items';
+    singularName: 'roadmap-item';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    canny_status: Schema.Attribute.String;
+    canny_url: Schema.Attribute.String;
+    canny_votes: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    delivery_quarter: Schema.Attribute.String;
+    docs_link: Schema.Attribute.String;
+    first_published_at: Schema.Attribute.DateTime;
+    github_links: Schema.Attribute.JSON;
+    last_synced_at: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::roadmap-item.roadmap-item'
+    > &
+      Schema.Attribute.Private;
+    notion_page_id: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Private &
+      Schema.Attribute.Unique;
+    public_description: Schema.Attribute.Text & Schema.Attribute.Required;
+    public_review_date: Schema.Attribute.Date;
+    public_status: Schema.Attribute.Enumeration<
+      ['exploring', 'in_progress', 'beta', 'shipped']
+    > &
+      Schema.Attribute.Required;
+    public_title: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    release: Schema.Attribute.String;
+    slug: Schema.Attribute.UID<'public_title'> & Schema.Attribute.Required;
+    squads: Schema.Attribute.JSON;
+    tags: Schema.Attribute.JSON;
+    timeframe: Schema.Attribute.Enumeration<
+      ['now', 'next', 'later', 'done', 'tbd']
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiServiceService extends Struct.CollectionTypeSchema {
   collectionName: 'services';
   info: {
@@ -2632,6 +2724,8 @@ declare module '@strapi/strapi' {
       'api::package.package': ApiPackagePackage;
       'api::profile.profile': ApiProfileProfile;
       'api::recipe.recipe': ApiRecipeRecipe;
+      'api::release.release': ApiReleaseRelease;
+      'api::roadmap-item.roadmap-item': ApiRoadmapItemRoadmapItem;
       'api::service.service': ApiServiceService;
       'api::showcase-category.showcase-category': ApiShowcaseCategoryShowcaseCategory;
       'api::showcase.showcase': ApiShowcaseShowcase;
