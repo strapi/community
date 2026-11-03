@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_partner_benefits",
+  "info": {
+    "displayName": "Benefit",
+    "description": "A benefit shown to partners of the given level."
+  },
+  "options": {},
+  "attributes": {
+    "level": {
+      "type": "enumeration",
+      "required": true,
+      "enum": ["Unlisted", "Community", "Business", "Enterprise"]
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    }
+  },
+  "config": {}
+}

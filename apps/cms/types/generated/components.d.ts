@@ -1,5 +1,21 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface PartnerBenefit extends Struct.ComponentSchema {
+  collectionName: 'components_partner_benefits';
+  info: {
+    description: 'A benefit shown to partners of the given level.';
+    displayName: 'Benefit';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    level: Schema.Attribute.Enumeration<
+      ['Unlisted', 'Community', 'Business', 'Enterprise']
+    > &
+      Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface SectionsCardGrid extends Struct.ComponentSchema {
   collectionName: 'components_sections_card_grids';
   info: {
@@ -223,6 +239,7 @@ export interface SharedVersionInfo extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export namespace Public {
     export interface ComponentSchemas {
+      'partner.benefit': PartnerBenefit;
       'sections.card-grid': SectionsCardGrid;
       'sections.card-grid-item': SectionsCardGridItem;
       'sections.cta': SectionsCta;
