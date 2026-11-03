@@ -886,8 +886,8 @@ export async function seedPartnerResources(strapi: Core.Strapi): Promise<void> {
   if ((await documents.count({})) > 0) return;
 
   for (const seed of seeds) {
-    await documents.create({ data: seed });
+    await documents.create({ data: seed, status: "published" });
   }
 
-  strapi.log.info(`[seed] Created ${seeds.length} partner resources (drafts)`);
+  strapi.log.info(`[seed] Created ${seeds.length} partner resources`);
 }

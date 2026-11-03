@@ -176,7 +176,7 @@ export default factories.createCoreService(
 
     /**
      * The partner portal's gated content for a partner organization:
-     * its level, the benefits for that level, and every published
+     * its level, the benefits listed for that level, and every published
      * resource its level unlocks (both the resource's own
      * `minimum_level` and its section's). Resource bodies are left out —
      * see `getPartnerResource`. Returns `null` for non-partner
@@ -213,7 +213,8 @@ export default factories.createCoreService(
       return {
         level,
         benefits: (program?.benefits ?? []).filter(
-          (benefit) => benefit.level === level,
+          (benefit) =>
+            Array.isArray(benefit.levels) && benefit.levels.includes(level),
         ),
         resources: resources.map(({ content, ...resource }) => ({
           ...resource,
