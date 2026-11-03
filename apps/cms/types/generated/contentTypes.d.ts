@@ -1073,7 +1073,7 @@ export interface ApiPartnerResourcePartnerResource
     > &
       Schema.Attribute.Private;
     minimum_level: Schema.Attribute.Enumeration<
-      ['Unlisted', 'Community', 'Business', 'Enterprise']
+      ['Registered', 'Community', 'Business', 'Enterprise']
     > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'Community'>;

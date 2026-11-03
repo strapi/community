@@ -54,7 +54,7 @@ async function findPartnerLevel(
     });
 
   if (!organization) return null;
-  return organization.partner_level ?? "Unlisted";
+  return organization.partner_level ?? "Registered";
 }
 
 /** Partner resources unlocked at `level` — by their own and their section's minimum level. */

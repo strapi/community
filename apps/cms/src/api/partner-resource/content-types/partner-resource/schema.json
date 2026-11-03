@@ -33,7 +33,7 @@
       "type": "enumeration",
       "required": true,
       "default": "Community",
-      "enum": ["Unlisted", "Community", "Business", "Enterprise"]
+      "enum": ["Registered", "Community", "Business", "Enterprise"]
     },
     "category": {
       "type": "string"

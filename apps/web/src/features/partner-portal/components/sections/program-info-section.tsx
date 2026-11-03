@@ -8,11 +8,7 @@ import {
   UserRoundIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  LEVEL_LABELS,
-  PARTNER_LEVELS,
-  type PartnerLevel,
-} from "../../lib/levels";
+import { PARTNER_LEVELS, type PartnerLevel } from "../../lib/levels";
 import type { PartnerOrganization } from "../../lib/partner-organizations";
 import type { PartnerBenefit } from "../../lib/partner-portal";
 import { OrganizationMark } from "../organization-mark";
@@ -112,7 +108,7 @@ export function ProgramInfoSection({
                       : "text-(--color-neutral600)",
                   )}
                 >
-                  {LEVEL_LABELS[step]}
+                  {step}
                 </span>
               </li>
             ))}
@@ -125,7 +121,7 @@ export function ProgramInfoSection({
           <Eyebrow>Your benefits</Eyebrow>
           {benefits.length > 0 && (
             <span className="text-sm text-(--color-neutral600)">
-              {benefits.length} included at {LEVEL_LABELS[level]} level
+              {benefits.length} included at {level} level
             </span>
           )}
         </div>

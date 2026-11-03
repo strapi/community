@@ -1,7 +1,7 @@
 import type { Core } from "@strapi/strapi";
 
 type Benefit = {
-  level: "Unlisted" | "Community" | "Business" | "Enterprise";
+  level: "Registered" | "Community" | "Business" | "Enterprise";
   title: string;
   description: string;
 };
@@ -10,24 +10,24 @@ type Benefit = {
 // lists all of its benefits, not just what it adds.
 const benefits: Benefit[] = [
   {
-    level: "Unlisted",
+    level: "Registered",
     title: "Partner portal",
     description:
       "Sales and technical resources, recordings and assets in one place.",
   },
   {
-    level: "Unlisted",
+    level: "Registered",
     title: "Partner newsletter",
     description: "A monthly email with product news and program updates.",
   },
   {
-    level: "Unlisted",
+    level: "Registered",
     title: "Enablement sessions",
     description:
       "Live product and sales sessions with the Strapi team, recorded for later.",
   },
   {
-    level: "Unlisted",
+    level: "Registered",
     title: "Sales support",
     description:
       "Bring Strapi's sales team into demos and technical calls with your clients.",
