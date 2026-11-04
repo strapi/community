@@ -4,7 +4,14 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  Suspense,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Configure, InstantSearch } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 import { GridHits } from "@/features/search/components/grid-hits";
@@ -43,7 +50,7 @@ interface SearchIndexRootProps {
   children: ReactNode;
 }
 
-const SearchIndexRoot = ({
+const SearchIndexRootInner = ({
   indexName,
   useNextSearch = true,
   children,
@@ -96,6 +103,14 @@ const SearchIndexRoot = ({
     </InstantSearch>
   );
 };
+
+// useSearchParams needs a Suspense boundary, or it opts the whole
+// (statically rendered) page out of rendering on the server.
+const SearchIndexRoot = (props: SearchIndexRootProps) => (
+  <Suspense>
+    <SearchIndexRootInner {...props} />
+  </Suspense>
+);
 
 // Layout
 
