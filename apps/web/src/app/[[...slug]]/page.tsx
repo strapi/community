@@ -1,5 +1,5 @@
 import type { Metadata, NextPage } from "next";
-import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
+import { findPublishedPage } from "@/features/cms/lib/webtools";
 import { HelpPagePage, helpPageMetadata } from "@/features/cms/pages/help-page";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
 import { integrationMetadata } from "@/features/cms/pages/integrations/metadata";
@@ -24,11 +24,9 @@ import {
 } from "@/features/cms/pages/template-category";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
-// Regenerate static pages periodically.
+// Pages are rendered on first request, cached, and regenerated in the
+// background at most once every 60 seconds (ISR).
 export const revalidate = 60;
-
-// Skip generation during build.
-export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -37,11 +35,7 @@ type PageProps = {
 const Router: NextPage<PageProps> = async ({ params }) => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
-  const page = await findPage({
-    path,
-    status: "published",
-    fields: ["documentId"],
-  });
+  const page = await findPublishedPage(path);
 
   if (!page) {
     return null;
@@ -84,24 +78,10 @@ const Router: NextPage<PageProps> = async ({ params }) => {
   }
 };
 
+// Nothing is prerendered at build time; returning an empty list (instead of
+// opting into `force-dynamic`) keeps on-demand ISR for every path.
 export async function generateStaticParams() {
-  const pages = await findUrlAliases();
-  const removeEmptyElements = (array: string[]) => array.filter((a) => a);
-
-  if (!pages) {
-    return [];
-  }
-
-  return pages
-    .map((page) => {
-      if (!page.url_path) {
-        return null;
-      }
-      return {
-        slug: removeEmptyElements(page.url_path.split("/")),
-      };
-    })
-    .filter(Boolean);
+  return [];
 }
 
 export const generateMetadata = async ({
@@ -109,11 +89,7 @@ export const generateMetadata = async ({
 }: PageProps): Promise<Metadata> => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
-  const page = await findPage({
-    path,
-    status: "published",
-    fields: ["documentId"],
-  });
+  const page = await findPublishedPage(path);
 
   if (!page) {
     return {};

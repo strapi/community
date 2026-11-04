@@ -1,5 +1,6 @@
 import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
+import { Suspense } from "react";
 import { HelpPagesSearch } from "@/features/search/indexes/help-pages";
 import { IntegrationsSearch } from "@/features/search/indexes/integrations";
 import { MarketplaceSearch } from "@/features/search/indexes/marketplace/marketplace";
@@ -35,7 +36,11 @@ const SearchIndex = ({ section }: Props) => {
 const SearchSection = ({ section }: Props) => {
   return (
     <Container className="py-16">
-      <SearchIndex section={section} />
+      {/* The search UIs read useSearchParams; the boundary keeps the rest of
+          the page statically rendered. */}
+      <Suspense>
+        <SearchIndex section={section} />
+      </Suspense>
     </Container>
   );
 };

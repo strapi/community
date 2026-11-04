@@ -1,10 +1,10 @@
 import { Button, Container } from "@repo/strapi-ui";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { AuthNavigation } from "@/features/auth/components/auth-navigation";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { MobileNav } from "./mobile-nav";
+import { NavLinks } from "./nav-links";
 
 type Props = {
   theme: "light" | "dark";
@@ -20,9 +20,6 @@ const Navigation = async ({ theme }: Props) => {
       <Link href={link.link!}>{link.label}</Link>
     </Button>
   ));
-
-  const headersList = await headers();
-  const path = new URL(headersList.get("x-url")!).pathname;
 
   return (
     <nav
@@ -45,25 +42,7 @@ const Navigation = async ({ theme }: Props) => {
                 {data.data.home_link.label}
               </Link>
             )}
-            <ul
-              className={`hidden items-center gap-6 font-medium text-[15px] ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-muted)"} lg:flex`}
-            >
-              {data.data.nav_links?.map((link) => {
-                const isActive =
-                  path === link.link || path.startsWith(`${link.link}/`);
-
-                return (
-                  <li key={link.id}>
-                    <Link
-                      href={link.link!}
-                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? (theme === "light" ? "text-(--color-primary900)" : "text-white") : ""}`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <NavLinks links={data.data.nav_links ?? []} theme={theme} />
           </div>
 
           <div className="flex items-center gap-2">
@@ -82,7 +61,6 @@ const Navigation = async ({ theme }: Props) => {
               navLinks={data.data.nav_links ?? []}
               ctaLinks={data.data.cta_links ?? []}
               theme={theme}
-              currentPath={path}
             />
           </div>
         </div>
