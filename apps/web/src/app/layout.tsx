@@ -3,9 +3,11 @@ import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import { JsonLd } from "@/components/content/json-ld";
 import { Analytics } from "@/features/analytics";
 import { AuthProviders } from "@/features/auth/components/providers";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
+import { siteSchema } from "@/features/cms/lib/structured-data";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -51,6 +53,7 @@ export default function RootLayout({
         className={`antialiased ${poppins.className}`}
         suppressHydrationWarning
       >
+        <JsonLd data={siteSchema()} />
         {isAuthEnabled ? <AuthProviders>{content}</AuthProviders> : content}
         <Analytics />
         {isAuthEnabled && (

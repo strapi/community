@@ -2,6 +2,7 @@ import type { API } from "@strapi/client";
 import type { Modules, UID } from "@strapi/types";
 import { notFound } from "next/navigation";
 import qs from "qs";
+import { cache } from "react";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const findUrlAliases = async (): Promise<
@@ -37,3 +38,11 @@ export const findPage = async (
       throw new Error(error);
     });
 };
+
+/**
+ * Resolves the published page at `path`. Memoized per request so
+ * generateMetadata and the page itself share a single CMS round trip.
+ */
+export const findPublishedPage = cache((path: string) =>
+  findPage({ path, status: "published", fields: ["documentId"] }),
+);

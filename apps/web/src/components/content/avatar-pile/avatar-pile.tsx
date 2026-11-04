@@ -90,8 +90,7 @@ const AvatarPile = ({ items, clickable, size = "S", white = false }: Props) => {
                 width={28}
                 height={28}
                 alt={m.name ?? ""}
-                className="rounded-full border-2 border-(--color-primary400) object-cover"
-                style={{ marginLeft: i === 0 ? 0 : -8 }}
+                className={`rounded-full border-2 border-(--color-primary400) object-cover ${i === 0 ? "" : "-ml-2"}`}
               />
               {items.filter(Boolean).length === 1 && (
                 <span className={`pl-2 ${white ? "text-white" : ""}`}>
@@ -106,8 +105,7 @@ const AvatarPile = ({ items, clickable, size = "S", white = false }: Props) => {
               key={m.documentId}
             >
               <div
-                className="h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200)"
-                style={{ marginLeft: i === 0 ? 0 : -8 }}
+                className={`h-7 w-7 text-xs flex items-center justify-center rounded-full border-2 border-(--color-primary400) bg-(--color-primary200) ${i === 0 ? "" : "-ml-2"}`}
               >
                 {m.name?.[0]}
               </div>

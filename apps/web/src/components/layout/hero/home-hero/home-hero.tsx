@@ -6,10 +6,12 @@ import { Code2, LayoutTemplate, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero/hero";
+import { authClient } from "@/features/auth/lib/client";
+import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { HomePackages, HomeTemplates } from "@/features/cms/pages/home";
 import { cn } from "@/lib/utils";
@@ -48,8 +50,75 @@ type Props = {
   templates: HomeTemplates;
 };
 
+type CtaProps = {
+  title: string;
+  text: string;
+  buttons: {
+    key: string | number;
+    href: string;
+    label: string;
+    variant: Data.Component<"shared.button">["type"];
+  }[];
+};
+
+const signedInCta: CtaProps = {
+  title: "Submit your content",
+  text: "Share your work with the community and get it listed in the Strapi ecosystem for everyone to discover and use.",
+  buttons: [
+    {
+      key: "submit",
+      href: "/submit",
+      label: "Submit",
+      variant: "primary",
+    },
+  ],
+};
+
+const HeroCta = ({ title, text, buttons }: CtaProps) => (
+  <>
+    <h2 className="text-xl font-semibold text-(--color-cta-muted)!">{title}</h2>
+    <p className="mt-3 max-w-xs text-center text-sm leading-6 text-(--color-cta-muted)">
+      {text}
+    </p>
+    <div className="mt-7 flex items-center gap-3">
+      {buttons.map((button) => (
+        <Button key={button.key} href={button.href} variant={button.variant}>
+          {button.label}
+        </Button>
+      ))}
+    </div>
+  </>
+);
+
+// The page is statically rendered, so the HTML always carries the signed-out
+// (CMS) CTA; swap in the submission CTA once the client knows the session.
+// Kept separate so the session request only runs when auth is enabled. Like
+// AuthNavigation, wait for hydration: the session can resolve before the
+// first client render, which would make it differ from the HTML.
+const subscribeNoop = () => () => {};
+
+const SessionAwareCta = (props: CtaProps) => {
+  const { data: session } = authClient.useSession();
+  const hydrated = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+  return <HeroCta {...(hydrated && session ? signedInCta : props)} />;
+};
+
 const HomeHero = (props: Props) => {
   const { title, ctaText, ctaTitle, ctaButtons, packages, templates } = props;
+  const signedOutCta: CtaProps = {
+    title: ctaTitle,
+    text: ctaText,
+    buttons: ctaButtons.map((button) => ({
+      key: button.id,
+      href: button.link!,
+      label: button.label!,
+      variant: button.type,
+    })),
+  };
 
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("packages");
@@ -101,35 +170,19 @@ const HomeHero = (props: Props) => {
                   }
                 }}
                 placeholder="Search Community"
-                className="w-full rounded-lg border border-(--color-grey700) px-4 py-3.5 pr-12 text-sm text-white placeholder:text-(--color-hero-nav-muted) focus:outline-none focus:ring-1 focus:ring-(--color-primary500)"
-                style={{
-                  background:
-                    "linear-gradient(to right, rgba(17,22,51,0.9), rgba(45,30,90,0.5))",
-                }}
+                className="w-full rounded-lg border border-(--color-grey700) px-4 py-3.5 pr-12 text-sm text-white placeholder:text-(--color-hero-nav-muted) focus:outline-none focus:ring-1 focus:ring-(--color-primary500) bg-hero-input"
               />
               <Search className="absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-(--color-primary500)" />
             </div>
           </div>
 
-          {/* CTA: Join Community */}
+          {/* CTA: join the community, or submit once signed in */}
           <div className="flex w-full lg:w-[42%] flex-col items-center justify-center px-4 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-14">
-            <h2 className="text-xl font-semibold text-(--color-cta-muted)!">
-              {ctaTitle}
-            </h2>
-            <p className="mt-3 max-w-xs text-center text-sm leading-6 text-(--color-cta-muted)">
-              {ctaText}
-            </p>
-            <div className="mt-7 flex items-center gap-3">
-              {ctaButtons.map((button) => (
-                <Button
-                  key={button.id}
-                  href={button.link!}
-                  variant={button.type}
-                >
-                  {button.label}
-                </Button>
-              ))}
-            </div>
+            {isAuthEnabled ? (
+              <SessionAwareCta {...signedOutCta} />
+            ) : (
+              <HeroCta {...signedOutCta} />
+            )}
           </div>
         </div>
       </HeroSection>
@@ -190,7 +243,7 @@ const HomeHero = (props: Props) => {
                       }
                       width={80}
                       height={80}
-                      alt={pkg.icon?.alternativeText ?? pkg.name ?? ""}
+                      alt={pkg.icon?.alternativeText || pkg.name || ""}
                       className="rounded-lg border border-(--color-neutral150)"
                     />
                   </div>
@@ -219,8 +272,8 @@ const HomeHero = (props: Props) => {
                       }
                       fill
                       alt={
-                        template.preview_image?.alternativeText ??
-                        template.name ??
+                        template.preview_image?.alternativeText ||
+                        template.name ||
                         ""
                       }
                       className="rounded-lg border border-(--color-grey700) object-cover"

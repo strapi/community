@@ -34,7 +34,11 @@ export function NavMenuLink({ component, className }: NavMenuLinkProps) {
       <div className="flex items-center gap-2">
         {component.icon?.media?.url && (
           <div className="relative size-5 shrink-0">
-            <NavBasicImage image={component.icon.media} mode="fill" />
+            <NavBasicImage
+              image={component.icon.media}
+              fallbackAlt={component.link?.label}
+              mode="fill"
+            />
           </div>
         )}
 

@@ -3,6 +3,7 @@
 import { Button, Container } from "@repo/strapi-ui";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AuthNavigation } from "@/features/auth/components/auth-navigation";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
@@ -18,15 +19,10 @@ interface MobileNavProps {
   navLinks: NavLink[];
   ctaLinks: NavLink[];
   theme: "light" | "dark";
-  currentPath: string;
 }
 
-const MobileNav = ({
-  navLinks,
-  ctaLinks,
-  theme,
-  currentPath,
-}: MobileNavProps) => {
+const MobileNav = ({ navLinks, ctaLinks, theme }: MobileNavProps) => {
+  const currentPath = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [panelTop, setPanelTop] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);

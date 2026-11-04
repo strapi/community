@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, UserButton } from "@daveyplate/better-auth-ui";
 import { Button } from "@repo/strapi-ui";
 import { HandshakeIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { type ReactNode, useSyncExternalStore } from "react";
 import { authClient } from "@/features/auth/lib/client";
 import { usePartnerOrganizations } from "@/features/partner-portal/lib/partner-organizations";
 
@@ -17,6 +17,8 @@ type Props = {
   // navigation `cta_links`).
   signedInActions?: ReactNode;
 };
+
+const subscribeNoop = () => () => {};
 
 export function AuthNavigation({
   theme,
@@ -65,6 +67,16 @@ export function AuthNavigation({
       ]}
     />
   );
+
+  // The server never knows the session, but the client can resolve it before
+  // hydrating (a fast session request on a slow page), which made the first
+  // client render differ from the HTML. Render after hydration instead.
+  const hydrated = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+  if (!hydrated) return null;
 
   return (
     <>
