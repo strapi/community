@@ -39,7 +39,7 @@ export function siteSchema(): Schema[] {
       "@id": STRAPI_ORGANIZATION_ID,
       name: "Strapi",
       url: "https://strapi.io",
-      logo: absoluteUrl("/logo.svg"),
+      logo: absoluteUrl("/icon-512.png"),
       sameAs: [
         "https://github.com/strapi",
         "https://x.com/strapijs",
