@@ -1,0 +1,21 @@
+{
+  "kind": "singleType",
+  "collectionName": "partner_programs",
+  "info": {
+    "singularName": "partner-program",
+    "pluralName": "partner-programs",
+    "displayName": "Partner Program",
+    "description": "Partner portal settings, like the benefits listed per partner level."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "benefits": {
+      "type": "component",
+      "component": "partner.benefit",
+      "repeatable": true
+    }
+  }
+}

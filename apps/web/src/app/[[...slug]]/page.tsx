@@ -1,5 +1,7 @@
 import type { Metadata, NextPage } from "next";
-import { findPage, findUrlAliases } from "@/features/cms/lib/webtools";
+import { JsonLd } from "@/components/content/json-ld";
+import { breadcrumbSchema } from "@/features/cms/lib/structured-data";
+import { findPublishedPage } from "@/features/cms/lib/webtools";
 import { HelpPagePage, helpPageMetadata } from "@/features/cms/pages/help-page";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
 import { integrationMetadata } from "@/features/cms/pages/integrations/metadata";
@@ -24,56 +26,45 @@ import {
 } from "@/features/cms/pages/template-category";
 import { UserPage, userMetadata } from "@/features/cms/pages/user";
 
-// Regenerate static pages periodically.
+// Pages are rendered on first request, cached, and regenerated in the
+// background at most once every 60 seconds (ISR).
 export const revalidate = 60;
-
-// Skip generation during build.
-export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
-const Router: NextPage<PageProps> = async ({ params }) => {
-  const { slug } = await params;
-  const path = `/${slug?.join("/") || ""}`;
-  const page = await findPage({
-    path,
-    status: "published",
-    fields: ["documentId"],
-  });
-
-  if (!page) {
-    return null;
-  }
-
+const renderPage = (
+  page: Awaited<ReturnType<typeof findPublishedPage>>,
+  path: string,
+) => {
   switch (page.contentType) {
     case "plugin::better-auth.organization": {
-      return <OrganizationPage documentId={page.documentId} />;
+      return <OrganizationPage documentId={page.documentId} path={path} />;
     }
     case "api::package.package": {
-      return <PackagePage documentId={page.documentId} />;
+      return <PackagePage documentId={page.documentId} path={path} />;
     }
     case "api::integration.integration": {
-      return <IntegrationPage documentId={page.documentId} />;
+      return <IntegrationPage documentId={page.documentId} path={path} />;
     }
     case "plugin::better-auth.user": {
-      return <UserPage documentId={page.documentId} />;
+      return <UserPage documentId={page.documentId} path={path} />;
     }
     case "api::template.template": {
-      return <TemplatePage documentId={page.documentId} />;
+      return <TemplatePage documentId={page.documentId} path={path} />;
     }
     case "api::overview-page.overview-page": {
-      return <OverviewPage documentId={page.documentId} />;
+      return <OverviewPage documentId={page.documentId} path={path} />;
     }
     case "api::package-category.package-category": {
-      return <PackageCategoryPage documentId={page.documentId} />;
+      return <PackageCategoryPage documentId={page.documentId} path={path} />;
     }
     case "api::template-category.template-category": {
-      return <TemplateCategoryPage documentId={page.documentId} />;
+      return <TemplateCategoryPage documentId={page.documentId} path={path} />;
     }
     case "api::help-page.help-page": {
-      return <HelpPagePage documentId={page.documentId} />;
+      return <HelpPagePage documentId={page.documentId} path={path} />;
     }
     case "api::home.home": {
       return <HomePage />;
@@ -84,41 +75,32 @@ const Router: NextPage<PageProps> = async ({ params }) => {
   }
 };
 
-export async function generateStaticParams() {
-  const pages = await findUrlAliases();
-  const removeEmptyElements = (array: string[]) => array.filter((a) => a);
-
-  if (!pages) {
-    return [];
-  }
-
-  return pages
-    .map((page) => {
-      if (!page.url_path) {
-        return null;
-      }
-      return {
-        slug: removeEmptyElements(page.url_path.split("/")),
-      };
-    })
-    .filter(Boolean);
-}
-
-export const generateMetadata = async ({
-  params,
-}: PageProps): Promise<Metadata> => {
+const Router: NextPage<PageProps> = async ({ params }) => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
-  const page = await findPage({
-    path,
-    status: "published",
-    fields: ["documentId"],
-  });
+  const page = await findPublishedPage(path);
 
   if (!page) {
-    return {};
+    return null;
   }
 
+  return (
+    <>
+      {path !== "/" && <JsonLd data={breadcrumbSchema(path)} />}
+      {renderPage(page, path)}
+    </>
+  );
+};
+
+// Nothing is prerendered at build time; returning an empty list (instead of
+// opting into `force-dynamic`) keeps on-demand ISR for every path.
+export async function generateStaticParams() {
+  return [];
+}
+
+const resolveMetadata = (
+  page: Awaited<ReturnType<typeof findPublishedPage>>,
+): Promise<Metadata> | Metadata => {
   switch (page.contentType) {
     case "plugin::better-auth.organization": {
       return organizationMetadata(page.documentId);
@@ -154,6 +136,34 @@ export const generateMetadata = async ({
       return {};
     }
   }
+};
+
+export const generateMetadata = async ({
+  params,
+}: PageProps): Promise<Metadata> => {
+  const { slug } = await params;
+  const path = `/${slug?.join("/") || ""}`;
+  const page = await findPublishedPage(path);
+
+  if (!page) {
+    return {};
+  }
+
+  const metadata = await resolveMetadata(page);
+
+  // Every page is canonical at its own URL alias (resolved against
+  // metadataBase), unless the content type or CMS sets one explicitly.
+  return {
+    ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      canonical: metadata.alternates?.canonical ?? path,
+    },
+    openGraph: {
+      ...metadata.openGraph,
+      url: metadata.openGraph?.url ?? path,
+    } as Metadata["openGraph"],
+  };
 };
 
 export default Router;

@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
+import {
+  pageDescription as buildDescription,
+  pageTitle as buildTitle,
+  joinTitle,
+} from "@/features/cms/lib/seo";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const integrationMetadata = async (
@@ -37,8 +42,11 @@ export const integrationMetadata = async (
   const pageUrl = urlAlias?.[0]?.url_path
     ? `${webUrl}${urlAlias[0].url_path}`
     : undefined;
-  const pageTitle = metadata?.metaTitle ?? name;
-  const pageDescription = metadata?.metaDescription ?? description ?? undefined;
+  const pageTitle = metadata?.metaTitle || joinTitle(name, "Integration Guide");
+  const pageDescription = buildDescription(
+    metadata?.metaDescription || description,
+    `Learn how to use ${name} with Strapi, with related plugins and starter templates from the community.`,
+  );
   const logoUrl = logo?.url ? cmsImageUrl(logo.url) : undefined;
   const ogImageUrl = buildOgImageUrl(webUrl, {
     name: pageTitle ?? "",
@@ -48,13 +56,13 @@ export const integrationMetadata = async (
   });
 
   return {
-    title: pageTitle,
+    title: buildTitle(pageTitle),
     description: pageDescription,
     keywords: metadata?.keywords,
     viewport: metadata?.metaViewport,
     robots: metadata?.metaRobots,
     alternates: {
-      canonical: pageUrl ?? metadata?.canonicalURL,
+      canonical: metadata?.canonicalURL || pageUrl,
     },
     openGraph: metadata?.openGraph
       ? {

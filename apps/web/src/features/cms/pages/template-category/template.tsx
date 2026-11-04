@@ -1,4 +1,5 @@
 import { Button, Container } from "@repo/strapi-ui";
+import type { InstantSearchServerState } from "react-instantsearch";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -34,9 +35,10 @@ const CategoryIcon = () => (
 
 type Props = {
   document: TemplateCategoryData;
+  searchServerState?: InstantSearchServerState;
 };
 
-const TemplateCategoryTemplate = ({ document }: Props) => {
+const TemplateCategoryTemplate = ({ document, searchServerState }: Props) => {
   const childCategories = document.children ?? [];
 
   return (
@@ -49,7 +51,7 @@ const TemplateCategoryTemplate = ({ document }: Props) => {
               <Breadcrumbs />
             </div>
             <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
-              {document.name}
+              {document.name} templates
             </h1>
             <p className="text-[17px] text-(--color-hero-muted)">
               {document.description}
@@ -77,6 +79,7 @@ const TemplateCategoryTemplate = ({ document }: Props) => {
         <div className="border-x border-(--color-neutral300) px-8 sm:px-16 py-12">
           <TemplatesSearch
             categoryFilter={document.name!}
+            serverState={searchServerState}
             showFilters={false}
           />
         </div>

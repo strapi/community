@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "sections": {
+    "collectionTypes": {
+      "groups": [
+        {
+          "id": "marketplace",
+          "name": "Marketplace",
+          "parent": null,
+          "children": [
+            { "type": "contentType", "uid": "api::package.package" },
+            { "type": "contentType", "uid": "api::template.template" },
+            { "type": "contentType", "uid": "api::integration.integration" },
+            { "type": "contentType", "uid": "api::showcase.showcase" },
+            { "type": "contentType", "uid": "api::recipe.recipe" }
+          ]
+        },
+        {
+          "id": "categories-and-tags",
+          "name": "Categories & tags",
+          "parent": null,
+          "children": [
+            {
+              "type": "contentType",
+              "uid": "api::package-category.package-category"
+            },
+            {
+              "type": "contentType",
+              "uid": "api::template-category.template-category"
+            },
+            {
+              "type": "contentType",
+              "uid": "api::integration-category.integration-category"
+            },
+            {
+              "type": "contentType",
+              "uid": "api::showcase-category.showcase-category"
+            },
+            { "type": "contentType", "uid": "api::category.category" },
+            { "type": "contentType", "uid": "api::tech-stack.tech-stack" },
+            { "type": "contentType", "uid": "api::service.service" },
+            { "type": "contentType", "uid": "api::country.country" }
+          ]
+        },
+        {
+          "id": "pages",
+          "name": "Pages",
+          "parent": null,
+          "children": [
+            {
+              "type": "contentType",
+              "uid": "api::overview-page.overview-page"
+            },
+            { "type": "contentType", "uid": "api::help-page.help-page" },
+            { "type": "contentType", "uid": "api::faq-item.faq-item" },
+            { "type": "contentType", "uid": "api::cta.cta" }
+          ]
+        },
+        {
+          "id": "partner-portal-collections",
+          "name": "Partner portal",
+          "parent": null,
+          "children": [
+            {
+              "type": "contentType",
+              "uid": "api::partner-resource.partner-resource"
+            }
+          ]
+        },
+        {
+          "id": "moderation",
+          "name": "Moderation",
+          "parent": null,
+          "children": [
+            {
+              "type": "contentType",
+              "uid": "plugin::moderation.business-review"
+            },
+            {
+              "type": "contentType",
+              "uid": "plugin::moderation.security-review"
+            },
+            {
+              "type": "contentType",
+              "uid": "api::email-template.email-template"
+            }
+          ]
+        },
+        {
+          "id": "accounts",
+          "name": "Accounts",
+          "parent": null,
+          "children": [
+            { "type": "contentType", "uid": "api::profile.profile" },
+            {
+              "type": "contentType",
+              "uid": "plugin::better-auth.organization"
+            },
+            { "type": "contentType", "uid": "plugin::better-auth.user" },
+            { "type": "contentType", "uid": "plugin::better-auth.jwks" }
+          ]
+        }
+      ]
+    },
+    "singleTypes": {
+      "groups": [
+        {
+          "id": "site",
+          "name": "Site",
+          "parent": null,
+          "children": [
+            { "type": "contentType", "uid": "api::home.home" },
+            { "type": "contentType", "uid": "api::navigation.navigation" }
+          ]
+        },
+        {
+          "id": "partner-portal-singles",
+          "name": "Partner portal",
+          "parent": null,
+          "children": [
+            {
+              "type": "contentType",
+              "uid": "api::partner-program.partner-program"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import type { OpenGraphType } from "next/dist/lib/metadata/types/opengraph-types";
 import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
+import {
+  pageDescription as buildDescription,
+  pageTitle as buildTitle,
+} from "@/features/cms/lib/seo";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const overviewPageMetadata = async (
@@ -23,8 +27,11 @@ export const overviewPageMetadata = async (
 
   const webUrl =
     process.env.NEXT_PUBLIC_WEB_URL ?? "https://community.strapi.io";
-  const pageTitle = metadata?.metaTitle ?? title;
-  const pageDescription = metadata?.metaDescription ?? description ?? undefined;
+  const pageTitle = metadata?.metaTitle || title;
+  const pageDescription = buildDescription(
+    metadata?.metaDescription || description,
+    "Part of the Strapi Community: plugins, templates, integrations and members building with Strapi.",
+  );
   const ogImageUrl = buildOgImageUrl(webUrl, {
     name: pageTitle ?? "",
     type: "Strapi",
@@ -32,20 +39,20 @@ export const overviewPageMetadata = async (
   });
 
   return {
-    title: pageTitle,
+    title: buildTitle(pageTitle),
     description: pageDescription,
     keywords: metadata?.keywords,
     viewport: metadata?.metaViewport,
     robots: metadata?.metaRobots,
     alternates: {
-      canonical: metadata?.canonicalURL,
+      canonical: metadata?.canonicalURL || undefined,
     },
     openGraph: metadata?.openGraph
       ? {
           title: metadata.openGraph.ogTitle || pageTitle || "",
           description:
             metadata.openGraph.ogDescription || pageDescription || "",
-          url: metadata.openGraph.ogUrl || "",
+          url: metadata.openGraph.ogUrl || undefined,
           type: (metadata.openGraph.ogType as OpenGraphType) || "website",
           images: [
             { url: ogImageUrl, width: 1200, height: 630, alt: pageTitle ?? "" },

@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
   type ReactNode,
+  Suspense,
   useContext,
   useEffect,
   useRef,
@@ -46,38 +47,70 @@ const Tabs = ({
 }: TabsProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  const [internalValue, setInternalValue] = useState(
-    searchParams.get("tab") ?? defaultValue,
-  );
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const activeTabRef = useRef(internalValue);
 
   const activeTab = value ?? internalValue;
 
-  const setActiveTab = (next: string) => {
+  const selectTab = (next: string) => {
     activeTabRef.current = next;
     setInternalValue(next);
     onValueChange?.(next);
+  };
 
-    const params = new URLSearchParams(searchParams.toString());
+  const setActiveTab = (next: string) => {
+    selectTab(next);
+
+    const params = new URLSearchParams(window.location.search);
     params.set("tab", next);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  // Re-assert the tab param if another router update (e.g. InstantSearch) drops it.
-  useEffect(() => {
-    if (searchParams.get("tab") === activeTabRef.current) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", activeTabRef.current);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [searchParams, pathname, router]);
-
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      {/* Only the URL sync reads search params, so only it suspends; the
+          tab content itself stays in the server-rendered HTML. */}
+      <Suspense fallback={null}>
+        <TabParamSync activeTabRef={activeTabRef} onInitialTab={selectTab} />
+      </Suspense>
       <div className={cn(className)}>{children}</div>
     </TabsContext.Provider>
   );
+};
+
+type TabParamSyncProps = {
+  activeTabRef: { current: string };
+  onInitialTab: (value: string) => void;
+};
+
+/** Keeps the active tab and the `?tab=` param in sync. */
+const TabParamSync = ({ activeTabRef, onInitialTab }: TabParamSyncProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+
+    // Open the tab from the URL on first load.
+    if (!initialized.current) {
+      initialized.current = true;
+      if (tab && tab !== activeTabRef.current) {
+        onInitialTab(tab);
+        return;
+      }
+    }
+
+    // Re-assert the tab param if another router update (e.g. InstantSearch) drops it.
+    if (tab === activeTabRef.current) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", activeTabRef.current);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, pathname, router, activeTabRef, onInitialTab]);
+
+  return null;
 };
 
 // ─── TabsList ───────────────────────────────────────────────────────────────

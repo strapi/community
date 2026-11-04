@@ -95,6 +95,32 @@ body {
   }
 }
 
+@utility bg-dotted {
+  background-image: var(--bg-dotted-pattern-image);
+  background-size: var(--bg-dotted-pattern-size);
+}
+
+@utility bg-dotted-light {
+  background-image: var(--bg-dotted-pattern-image-light);
+  background-size: var(--bg-dotted-pattern-size);
+}
+
+@utility bg-hero-glow {
+  background: radial-gradient(
+    ellipse 80% 60% at 0% 50%,
+    rgba(109, 40, 217, 0.55),
+    transparent
+  );
+}
+
+@utility bg-hero-input {
+  background: linear-gradient(
+    to right,
+    rgba(17, 22, 51, 0.9),
+    rgba(45, 30, 90, 0.5)
+  );
+}
+
 h1,
 h2,
 h3,

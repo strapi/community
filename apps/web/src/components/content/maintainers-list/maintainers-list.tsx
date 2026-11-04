@@ -11,7 +11,7 @@ const MaintainersList = ({ maintainers }: Props) => {
     return (
       <div className="flex items-center">
         <Image
-          style={{ borderRadius: "50%" }}
+          className="rounded-full"
           src={cmsImageUrl(maintainers?.[0]?.image!)}
           width={32}
           height={32}
@@ -29,11 +29,7 @@ const MaintainersList = ({ maintainers }: Props) => {
       {maintainers.map((maintainer, index) => (
         <Image
           key={maintainer.id}
-          style={{
-            borderRadius: "50%",
-            border: "2px solid white",
-            marginLeft: index === 0 ? "0" : "-8px",
-          }}
+          className={`rounded-full border-2 border-white ${index === 0 ? "" : "-ml-2"}`}
           src={cmsImageUrl(maintainer?.image!)}
           width={32}
           height={32}

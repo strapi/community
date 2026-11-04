@@ -18,7 +18,7 @@ const Hit = ({ hit }: Props) => {
             <Image
               src={cmsImageUrl(hit.image.url)}
               fill
-              alt={hit.image.alternativeText ?? hit.title ?? ""}
+              alt={hit.image.alternativeText || hit.title || ""}
               className="object-cover"
             />
           ) : (

@@ -59,8 +59,10 @@ const Faq = ({ title, items, className }: Props) => {
                 />
               </button>
               <div
-                className="grid motion-safe:transition-[grid-template-rows] motion-safe:duration-300 motion-safe:ease-in-out"
-                style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                className={cn(
+                  "grid motion-safe:transition-[grid-template-rows] motion-safe:duration-300 motion-safe:ease-in-out",
+                  isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                )}
               >
                 <div className="overflow-hidden">
                   <div className="px-6 pb-8">
