@@ -1,4 +1,6 @@
 import type { Metadata, NextPage } from "next";
+import { JsonLd } from "@/components/content/json-ld";
+import { breadcrumbSchema } from "@/features/cms/lib/structured-data";
 import { findPublishedPage } from "@/features/cms/lib/webtools";
 import { HelpPagePage, helpPageMetadata } from "@/features/cms/pages/help-page";
 import { HomePage, homeMetadata } from "@/features/cms/pages/home";
@@ -32,6 +34,47 @@ type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
+const renderPage = (
+  page: Awaited<ReturnType<typeof findPublishedPage>>,
+  path: string,
+) => {
+  switch (page.contentType) {
+    case "plugin::better-auth.organization": {
+      return <OrganizationPage documentId={page.documentId} path={path} />;
+    }
+    case "api::package.package": {
+      return <PackagePage documentId={page.documentId} path={path} />;
+    }
+    case "api::integration.integration": {
+      return <IntegrationPage documentId={page.documentId} path={path} />;
+    }
+    case "plugin::better-auth.user": {
+      return <UserPage documentId={page.documentId} path={path} />;
+    }
+    case "api::template.template": {
+      return <TemplatePage documentId={page.documentId} path={path} />;
+    }
+    case "api::overview-page.overview-page": {
+      return <OverviewPage documentId={page.documentId} path={path} />;
+    }
+    case "api::package-category.package-category": {
+      return <PackageCategoryPage documentId={page.documentId} path={path} />;
+    }
+    case "api::template-category.template-category": {
+      return <TemplateCategoryPage documentId={page.documentId} path={path} />;
+    }
+    case "api::help-page.help-page": {
+      return <HelpPagePage documentId={page.documentId} path={path} />;
+    }
+    case "api::home.home": {
+      return <HomePage />;
+    }
+    default: {
+      return `No template for content type ${page.contentType}`;
+    }
+  }
+};
+
 const Router: NextPage<PageProps> = async ({ params }) => {
   const { slug } = await params;
   const path = `/${slug?.join("/") || ""}`;
@@ -41,41 +84,12 @@ const Router: NextPage<PageProps> = async ({ params }) => {
     return null;
   }
 
-  switch (page.contentType) {
-    case "plugin::better-auth.organization": {
-      return <OrganizationPage documentId={page.documentId} />;
-    }
-    case "api::package.package": {
-      return <PackagePage documentId={page.documentId} />;
-    }
-    case "api::integration.integration": {
-      return <IntegrationPage documentId={page.documentId} />;
-    }
-    case "plugin::better-auth.user": {
-      return <UserPage documentId={page.documentId} />;
-    }
-    case "api::template.template": {
-      return <TemplatePage documentId={page.documentId} />;
-    }
-    case "api::overview-page.overview-page": {
-      return <OverviewPage documentId={page.documentId} />;
-    }
-    case "api::package-category.package-category": {
-      return <PackageCategoryPage documentId={page.documentId} />;
-    }
-    case "api::template-category.template-category": {
-      return <TemplateCategoryPage documentId={page.documentId} />;
-    }
-    case "api::help-page.help-page": {
-      return <HelpPagePage documentId={page.documentId} />;
-    }
-    case "api::home.home": {
-      return <HomePage />;
-    }
-    default: {
-      return `No template for content type ${page.contentType}`;
-    }
-  }
+  return (
+    <>
+      {path !== "/" && <JsonLd data={breadcrumbSchema(path)} />}
+      {renderPage(page, path)}
+    </>
+  );
 };
 
 // Nothing is prerendered at build time; returning an empty list (instead of
