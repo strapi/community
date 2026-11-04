@@ -69,7 +69,7 @@ export function NavLink({
       <span className={cn("relative size-4", adornmentClassName)}>
         <DecorationIcon
           url={decorations.leftIcon.media.url}
-          alt={decorations.leftIcon.media.alternativeText}
+          alt={decorations.leftIcon.media.alternativeText || label}
         />
       </span>
     ) : null;
@@ -79,7 +79,7 @@ export function NavLink({
       <span className={cn("relative size-4", adornmentClassName)}>
         <DecorationIcon
           url={decorations.rightIcon.media.url}
-          alt={decorations.rightIcon.media.alternativeText}
+          alt={decorations.rightIcon.media.alternativeText || label}
         />
       </span>
     ) : null;

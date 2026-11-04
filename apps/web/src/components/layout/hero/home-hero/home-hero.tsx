@@ -190,7 +190,7 @@ const HomeHero = (props: Props) => {
                       }
                       width={80}
                       height={80}
-                      alt={pkg.icon?.alternativeText ?? pkg.name ?? ""}
+                      alt={pkg.icon?.alternativeText || pkg.name || ""}
                       className="rounded-lg border border-(--color-neutral150)"
                     />
                   </div>
@@ -219,8 +219,8 @@ const HomeHero = (props: Props) => {
                       }
                       fill
                       alt={
-                        template.preview_image?.alternativeText ??
-                        template.name ??
+                        template.preview_image?.alternativeText ||
+                        template.name ||
                         ""
                       }
                       className="rounded-lg border border-(--color-grey700) object-cover"

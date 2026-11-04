@@ -9,7 +9,7 @@ type Props = {
 const Hit = ({ hit }: Props) => {
   const image = {
     src: hit.icon ? cmsImageUrl(hit.icon.url) : "/package-fallback-icon.png",
-    alt: hit.icon?.alternativeText ?? hit.name ?? "",
+    alt: hit.icon?.alternativeText || hit.name || "",
     size: "S" as const,
   };
 

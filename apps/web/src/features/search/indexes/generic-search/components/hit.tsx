@@ -18,8 +18,8 @@ const getImageUrl = (hit: Props["hit"]) => {
     return {
       src: cmsImageUrl(hit.preview_image.url),
       alt:
-        hit.preview_image.alternativeText ??
-        ("name" in hit ? hit.name : "") ??
+        hit.preview_image.alternativeText ||
+        ("name" in hit ? hit.name : "") ||
         "",
       size: "L" as const,
     };
@@ -27,21 +27,21 @@ const getImageUrl = (hit: Props["hit"]) => {
   if ("icon" in hit && hit.icon) {
     return {
       src: cmsImageUrl(hit.icon.url),
-      alt: hit.icon.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
+      alt: hit.icon.alternativeText || ("name" in hit ? hit.name : "") || "",
       size: "S" as const,
     };
   }
   if ("logo" in hit && hit.logo) {
     return {
       src: cmsImageUrl(hit.logo.url),
-      alt: hit.logo.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
+      alt: hit.logo.alternativeText || ("name" in hit ? hit.name : "") || "",
       size: "S" as const,
     };
   }
   if ("image" in hit && hit.image) {
     return {
       src: cmsImageUrl(hit.image.url),
-      alt: hit.image.alternativeText ?? ("name" in hit ? hit.name : "") ?? "",
+      alt: hit.image.alternativeText || ("name" in hit ? hit.name : "") || "",
       size: "L" as const,
     };
   }

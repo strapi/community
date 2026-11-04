@@ -120,7 +120,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                           src: pkg.icon
                             ? cmsImageUrl(pkg.icon.url)
                             : "/package-fallback-icon.png",
-                          alt: pkg.icon?.alternativeText ?? "",
+                          alt: pkg.icon?.alternativeText || "",
                           size: "S",
                         }}
                         link={pkg.url_alias?.[0]?.url_path ?? "#"}
@@ -150,7 +150,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                           src: tpl.preview_image
                             ? cmsImageUrl(tpl.preview_image.url)
                             : "/template-fallback-preview.png",
-                          alt: tpl.preview_image?.alternativeText ?? "",
+                          alt: tpl.preview_image?.alternativeText || "",
                           size: "L",
                         }}
                         link={tpl.url_alias?.[0]?.url_path ?? "#"}
