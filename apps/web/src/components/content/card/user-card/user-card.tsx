@@ -69,9 +69,10 @@ const UserCard = ({
       {/* Divider */}
       <div className="my-4 w-full border-t border-(--color-neutral150)" />
 
-      {/* CTA */}
-      <Button href={profileUrl} variant="secondary" className="w-full">
-        View Profile
+      {/* CTA: the whole card is the link, so this only looks like a button
+          (a nested <a> is invalid HTML and breaks hydration). */}
+      <Button asChild variant="secondary" className="w-full">
+        <span>View Profile</span>
       </Button>
     </article>
   </Link>
