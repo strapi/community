@@ -36,7 +36,7 @@ export const userMetadata = async (id: string): Promise<Metadata> => {
     description,
   });
 
-  const title = joinTitle(name, "– Community Member Profile");
+  const title = joinTitle(name, "– User Profile");
   const desc = pageDescription(
     description,
     `${name}'s profile on the Strapi Community, with the Strapi plugins, templates and contributions they maintain.`,

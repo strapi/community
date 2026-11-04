@@ -61,21 +61,17 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                     </h1>
                     <ContentLabels labels={document.labels} />
                   </div>
-                  <p>
-                    Strapi template
-                    {owner && (
-                      <>
-                        {" "}
-                        by{" "}
-                        <Link
-                          href={owner.url_alias?.[0]?.url_path!}
-                          className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                        >
-                          {owner.name}
-                        </Link>
-                      </>
-                    )}
-                  </p>
+                  {owner && (
+                    <p>
+                      By{" "}
+                      <Link
+                        href={owner.url_alias?.[0]?.url_path!}
+                        className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                      >
+                        {owner.name}
+                      </Link>
+                    </p>
+                  )}
                 </div>
               </div>
               <EditContentButton

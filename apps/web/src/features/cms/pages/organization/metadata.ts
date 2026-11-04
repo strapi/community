@@ -13,9 +13,16 @@ export const organizationMetadata = async (
       populate: { url_alias: true },
     });
 
-  const { name, metadata: bio } = document.data as {
+  const {
+    name,
+    metadata: bio,
+    partner,
+    partner_level,
+  } = document.data as {
     name?: string | null;
     metadata?: string | null;
+    partner?: boolean | null;
+    partner_level?: string | null;
     logo?: string | null;
   } & Record<string, unknown>;
   const logo = (document.data as Record<string, unknown>).logo as
@@ -45,7 +52,13 @@ export const organizationMetadata = async (
     description: bio ?? undefined,
   });
 
-  const title = joinTitle(name, "– Organization Profile");
+  // Partners show their level (no level set means "Registered").
+  const title = joinTitle(
+    name,
+    partner
+      ? `– ${partner_level ?? "Registered"} Partner`
+      : "– Organization Profile",
+  );
   const desc = pageDescription(
     bio,
     `Discover the Strapi plugins, templates and team members of ${name} on the Strapi Community.`,

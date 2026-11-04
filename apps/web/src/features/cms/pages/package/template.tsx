@@ -13,7 +13,6 @@ import { VersionSecurityBadge } from "@/components/content/version-info";
 import { Navigation } from "@/components/layout/navigation";
 import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
-import { packageTypeLabel } from "@/features/cms/lib/seo";
 import type { PackagePageData } from "@/features/cms/pages/package";
 import { CTASection } from "@/features/cms/sections/cta/cta";
 import { EditContentButton } from "@/features/submissions/components/edit-content-button";
@@ -65,21 +64,17 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                     </h1>
                     <ContentLabels labels={document.labels} />
                   </div>
-                  <p>
-                    Strapi {packageTypeLabel(document.type).toLowerCase()}
-                    {owner && (
-                      <>
-                        {" "}
-                        by{" "}
-                        <Link
-                          href={owner.url_alias?.[0]?.url_path ?? "#"}
-                          className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                        >
-                          {owner.name}
-                        </Link>
-                      </>
-                    )}
-                  </p>
+                  {owner && (
+                    <p>
+                      By{" "}
+                      <Link
+                        href={owner.url_alias?.[0]?.url_path ?? "#"}
+                        className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                      >
+                        {owner.name}
+                      </Link>
+                    </p>
+                  )}
                 </div>
               </div>
               <EditContentButton

@@ -34,67 +34,52 @@ const list = <T>(promise: Promise<{ data: T[] }>) =>
   promise.then((result) => result.data as Entry[]).catch(() => []);
 
 export async function GET() {
-  const [
-    home,
-    overviewPages,
-    packages,
-    templates,
-    integrations,
-    categories,
-    helpPages,
-  ] = await Promise.all([
-    cmsClient
-      .single("api::home.home")
-      .find({ populate: { seo: true } })
-      .then((result) => result.data)
-      .catch(() => null),
-    list(
-      cmsClient.collection("api::overview-page.overview-page").find({
-        fields: ["title", "description"],
-        populate: ["url_alias"],
-      }),
-    ),
-    list(
-      cmsClient.collection("api::package.package").find({
-        fields: ["name", "description"],
-        populate: ["url_alias"],
-        sort: "monthly_downloads:desc",
-        pagination: { limit: 50 },
-      }),
-    ),
-    list(
-      cmsClient.collection("api::template.template").find({
-        fields: ["name", "description"],
-        populate: ["url_alias"],
-        sort: "stars:desc",
-        pagination: { limit: 25 },
-      }),
-    ),
-    list(
-      cmsClient.collection("api::integration.integration").find({
-        fields: ["name", "description"],
-        populate: ["url_alias"],
-        sort: "name:asc",
-        pagination: { limit: 100 },
-      }),
-    ),
-    list(
-      cmsClient.collection("api::package-category.package-category").find({
-        fields: ["name", "description"],
-        populate: ["url_alias"],
-        sort: "name:asc",
-        pagination: { limit: 100 },
-      }),
-    ),
-    list(
-      cmsClient.collection("api::help-page.help-page").find({
-        fields: ["title", "description"],
-        populate: ["url_alias"],
-        sort: "title:asc",
-        pagination: { limit: 100 },
-      }),
-    ),
-  ]);
+  const [home, overviewPages, packages, templates, integrations, helpPages] =
+    await Promise.all([
+      cmsClient
+        .single("api::home.home")
+        .find({ populate: { seo: true } })
+        .then((result) => result.data)
+        .catch(() => null),
+      list(
+        cmsClient.collection("api::overview-page.overview-page").find({
+          fields: ["title", "description"],
+          populate: ["url_alias"],
+        }),
+      ),
+      list(
+        cmsClient.collection("api::package.package").find({
+          fields: ["name", "description"],
+          populate: ["url_alias"],
+          sort: "monthly_downloads:desc",
+          pagination: { limit: 50 },
+        }),
+      ),
+      list(
+        cmsClient.collection("api::template.template").find({
+          fields: ["name", "description"],
+          populate: ["url_alias"],
+          sort: "stars:desc",
+          pagination: { limit: 25 },
+        }),
+      ),
+      list(
+        cmsClient.collection("api::integration.integration").find({
+          fields: ["name", "description"],
+          populate: ["url_alias"],
+          sort: "name:asc",
+          pagination: { limit: 100 },
+        }),
+      ),
+      list(
+        cmsClient.collection("api::help-page.help-page").find({
+          fields: ["title", "description"],
+          populate: ["url_alias"],
+          sort: "title:asc",
+          pagination: { limit: 100 },
+        }),
+      ),
+    ]);
 
   const summary =
     home?.seo?.metaDescription ??
@@ -108,7 +93,6 @@ export async function GET() {
     section("Popular plugins", packages),
     section("Templates", templates),
     section("Integrations", integrations),
-    section("Plugin categories", categories),
     section("Help", helpPages),
     `## Optional\n\n- [Strapi documentation](https://docs.strapi.io): Official documentation for Strapi.\n- [Strapi website](https://strapi.io): Product information, blog and pricing.\n- [Sitemap](${process.env.NEXT_PUBLIC_CMS_URL}/api/sitemap/index.xml): Every page on the Strapi Community.`,
   ]
