@@ -4,6 +4,7 @@
 
 import { factories } from "@strapi/strapi";
 import { fromNodeHeaders } from "better-auth/node";
+import { withPublicMemberFilters } from "../../../lib/members";
 import {
   getPluginService,
   userProfileFields,
@@ -15,6 +16,35 @@ const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 export default factories.createCoreController(
   "plugin::better-auth.user",
   () => ({
+    /**
+     * GET /users — public listings (e.g. "newest members") only include
+     * members that are allowed a public presence. See `lib/members`.
+     */
+    async find(ctx) {
+      ctx.query = {
+        ...ctx.query,
+        filters: withPublicMemberFilters(ctx.query.filters),
+      };
+
+      return super.find(ctx);
+    },
+
+    /**
+     * GET /users/:id — 404s for members without a public presence, so they
+     * don't get a profile page. See `lib/members`.
+     */
+    async findOne(ctx) {
+      ctx.query = {
+        ...ctx.query,
+        filters: withPublicMemberFilters(ctx.query.filters),
+      };
+
+      const response = await super.findOne(ctx);
+      if (!response?.data) return ctx.notFound();
+
+      return response;
+    },
+
     async relatedContent(ctx) {
       const { id } = ctx.params;
 

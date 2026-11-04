@@ -12,6 +12,7 @@ import {
   levelsUpTo,
   type PartnerLevel,
   type PartnerSection,
+  partnerPortalFilters,
   SECTION_MINIMUM_LEVEL,
 } from "../utils/partner-levels";
 
@@ -42,14 +43,14 @@ async function findMemberOrganizationIds(userId: string | number) {
   return memberships.map((membership) => membership.organizationId);
 }
 
-/** The organization's partner level, or `null` if it isn't a partner. */
+/** The organization's partner level, or `null` if it has no partner portal access. */
 async function findPartnerLevel(
   organizationId: string,
 ): Promise<PartnerLevel | null> {
   const [organization] = await strapi
     .documents("plugin::better-auth.organization")
     .findMany({
-      filters: { id: organizationId, partner: { $eq: true } },
+      filters: { id: organizationId, ...partnerPortalFilters() },
       fields: ["partner_level"],
     });
 
@@ -157,8 +158,9 @@ export default factories.createCoreService(
     },
 
     /**
-     * Partner organizations `userId` is a member of (any role) — i.e.
-     * whose partner portal they may access. Backs `GET
+     * Partner organizations (plus the partner portal test organization)
+     * `userId` is a member of (any role) — i.e. whose partner portal they
+     * may access. Backs `GET
      * /organizations/partners`, used by the web app's user menu and the
      * partner portal itself.
      */
@@ -167,7 +169,7 @@ export default factories.createCoreService(
       if (organizationIds.length === 0) return [];
 
       return strapi.documents("plugin::better-auth.organization").findMany({
-        filters: { id: { $in: organizationIds }, partner: { $eq: true } },
+        filters: { id: { $in: organizationIds }, ...partnerPortalFilters() },
         fields: ["id", "name", "slug", "logo", "partner_level", "createdAt"],
         populate: { profile: { fields: ["website", "location"] } },
         sort: { name: "asc" },

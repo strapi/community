@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
 import { joinTitle, pageDescription, pageTitle } from "@/features/cms/lib/seo";
 import { cmsClient } from "@/features/cms/lib/strapi";
+import { notFoundOn404 } from "@/features/cms/pages/user/not-found";
 
 export const userMetadata = async (id: string): Promise<Metadata> => {
   const document = await cmsClient
@@ -11,7 +12,8 @@ export const userMetadata = async (id: string): Promise<Metadata> => {
         profile: true,
         url_alias: true,
       },
-    });
+    })
+    .catch(notFoundOn404);
 
   const { name, image, profile } = document.data as {
     name?: string | null;

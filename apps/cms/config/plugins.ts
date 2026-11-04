@@ -1,3 +1,4 @@
+import { isPublicMember } from "../src/lib/members";
 import {
   mediaPopulate,
   namePopulate,
@@ -229,6 +230,7 @@ export default ({ env }) => ({
           fields: [
             "name",
             "image",
+            "emailVerified",
             "community_star",
             "createdAt",
             "publishedAt",
@@ -238,6 +240,8 @@ export default ({ env }) => ({
             profile: { fields: ["bio"] },
           },
         },
+        // `emailVerified` is only selected for this check; transformMember drops it.
+        filterEntry: ({ entry }) => isPublicMember(entry),
         transformEntry: transformMember,
         settings: {
           sortableAttributes: ["createdAt", "community_star"],
