@@ -1,9 +1,18 @@
 import { AppWindow, LayoutGrid } from "lucide-react";
+import type { InstantSearchServerState } from "react-instantsearch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PackagesSearch } from "@/features/search/indexes/packages";
 import { TemplatesSearch } from "@/features/search/indexes/templates";
 
-const MarketplaceSearch = () => {
+type Props = {
+  packagesServerState?: InstantSearchServerState;
+  templatesServerState?: InstantSearchServerState;
+};
+
+const MarketplaceSearch = ({
+  packagesServerState,
+  templatesServerState,
+}: Props) => {
   return (
     <Tabs defaultValue="packages" className="w-full">
       <TabsList className="border-(--color-neutral300) pb-10">
@@ -15,10 +24,10 @@ const MarketplaceSearch = () => {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="packages">
-        <PackagesSearch />
+        <PackagesSearch serverState={packagesServerState} />
       </TabsContent>
       <TabsContent value="templates">
-        <TemplatesSearch />
+        <TemplatesSearch serverState={templatesServerState} />
       </TabsContent>
     </Tabs>
   );

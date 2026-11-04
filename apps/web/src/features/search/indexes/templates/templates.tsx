@@ -1,10 +1,16 @@
 "use client";
 
+import type { InstantSearchServerState } from "react-instantsearch";
 import { RefinementList } from "@/features/search/components/refinement-list/refinement-list";
 import { SearchIndex } from "@/features/search/components/search-index";
+import {
+  SEARCH_INDEXES,
+  categoryFilter as toCategoryFilter,
+} from "@/features/search/lib/indexes";
 import { Hit } from "./components";
 
 interface TemplatesSearchProps {
+  serverState?: InstantSearchServerState;
   categoryFilter?: string;
   showFilters?: boolean;
 }
@@ -13,9 +19,13 @@ const idx = process.env.NEXT_PUBLIC_MEILISEARCH_TEMPLATES_INDEX_NAME!;
 
 const TemplatesSearch = ({
   categoryFilter,
+  serverState,
   showFilters = true,
 }: TemplatesSearchProps) => (
-  <SearchIndex indexName={`${idx}:stars:desc`} useNextSearch={false}>
+  <SearchIndex
+    indexName={SEARCH_INDEXES.templates.indexName}
+    serverState={serverState}
+  >
     <SearchIndex.Layout>
       {showFilters && (
         <SearchIndex.Sidebar>
@@ -41,9 +51,7 @@ const TemplatesSearch = ({
         <SearchIndex.Hits hitComponent={Hit} />
         <SearchIndex.Configure
           hitsPerPage={24}
-          {...(categoryFilter
-            ? { filters: `categories.name = "${categoryFilter}"` }
-            : {})}
+          {...(categoryFilter && { filters: toCategoryFilter(categoryFilter) })}
         />
       </SearchIndex.Content>
     </SearchIndex.Layout>

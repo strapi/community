@@ -1,19 +1,18 @@
 "use client";
 
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
+import { history } from "instantsearch.js/es/lib/routers";
 import { SlidersHorizontal, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
-  createContext,
-  Suspense,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { Configure, InstantSearch } from "react-instantsearch";
-import { InstantSearchNext } from "react-instantsearch-nextjs";
+  Configure,
+  InstantSearch,
+  type InstantSearchServerState,
+  InstantSearchSSRProvider,
+  useInstantSearch,
+} from "react-instantsearch";
 import { GridHits } from "@/features/search/components/grid-hits";
 import { SearchBox } from "@/features/search/components/search-box";
 import { SortBy } from "@/features/search/components/sort-by";
@@ -46,26 +45,34 @@ const SearchIndexContext = createContext<SearchIndexContextValue>({
 
 interface SearchIndexRootProps {
   indexName: string;
-  useNextSearch?: boolean;
+  /**
+   * The default first page of results, fetched on the server (see
+   * getSearchServerState) so it's part of the server-rendered HTML.
+   */
+  serverState?: InstantSearchServerState;
   children: ReactNode;
 }
 
-const SearchIndexRootInner = ({
+const SearchIndexRoot = ({
   indexName,
-  useNextSearch = true,
+  serverState,
   children,
 }: SearchIndexRootProps) => {
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("query") ?? undefined;
-  const initialUiState = initialQuery
-    ? { [indexName]: { query: initialQuery } }
-    : undefined;
+  const pathname = usePathname();
 
   // Strip `page` from the URL so that "load more" doesn't pollute the URL.
   // Filters (query, refinementList, sortBy, etc.) are still persisted — this
   // is what makes them sticky across refreshes and shared links.
   const routing = useMemo(
     () => ({
+      router: history<Record<string, unknown>>({
+        // The server render (with initial results) has no window; it always
+        // renders the default state, which is what the page is cached as.
+        getLocation: () =>
+          typeof window === "undefined"
+            ? (new URL(pathname, "http://localhost") as unknown as Location)
+            : window.location,
+      }),
       stateMapping: {
         stateToRoute(uiState: Record<string, Record<string, unknown>>) {
           const { page: _page, ...rest } = uiState[indexName] ?? {};
@@ -76,41 +83,43 @@ const SearchIndexRootInner = ({
         },
       },
     }),
-    [indexName],
+    [indexName, pathname],
   );
 
-  if (useNextSearch) {
-    return (
-      <InstantSearchNext
-        routing={routing}
-        indexName={indexName}
-        searchClient={searchClient}
-        initialUiState={initialUiState}
-      >
-        {children}
-      </InstantSearchNext>
-    );
-  }
-
-  return (
+  const search = (
     <InstantSearch
       routing={routing}
       indexName={indexName}
       searchClient={searchClient}
-      initialUiState={initialUiState}
     >
+      {serverState && <RefreshAfterHydration />}
       {children}
     </InstantSearch>
   );
+
+  return serverState ? (
+    <InstantSearchSSRProvider {...serverState}>
+      {search}
+    </InstantSearchSSRProvider>
+  ) : (
+    search
+  );
 };
 
-// useSearchParams needs a Suspense boundary, or it opts the whole
-// (statically rendered) page out of rendering on the server.
-const SearchIndexRoot = (props: SearchIndexRootProps) => (
-  <Suspense>
-    <SearchIndexRootInner {...props} />
-  </Suspense>
-);
+/**
+ * Server-rendered results are the default state, while the URL may carry a
+ * query or filters (e.g. /marketplace?query=seo). Hydrate with the server
+ * results, then search with the real state.
+ */
+const RefreshAfterHydration = () => {
+  const { refresh } = useInstantSearch();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return null;
+};
 
 // Layout
 

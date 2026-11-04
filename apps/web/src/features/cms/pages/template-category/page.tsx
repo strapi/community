@@ -4,6 +4,8 @@ import { JsonLd } from "@/components/content/json-ld";
 import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { collectionPageSchema } from "@/features/cms/lib/structured-data";
+import { categoryFilter, SEARCH_INDEXES } from "@/features/search/lib/indexes";
+import { getSearchServerState } from "@/features/search/lib/server-state";
 import { TemplateCategoryTemplate } from "./template";
 
 const contentType =
@@ -46,6 +48,10 @@ const TemplateCategoryPage = async ({ documentId, path }: Props) => {
   const document = await cmsClient
     .collection(contentType)
     .findOne(documentId, query);
+  const searchServerState = await getSearchServerState(
+    SEARCH_INDEXES.templates,
+    categoryFilter(document.data.name ?? undefined),
+  );
 
   return (
     <>
@@ -55,7 +61,10 @@ const TemplateCategoryPage = async ({ documentId, path }: Props) => {
         content_name={document.data.name ?? undefined}
       />
       <JsonLd data={collectionPageSchema(path, document.data)} />
-      <TemplateCategoryTemplate document={document.data} />
+      <TemplateCategoryTemplate
+        document={document.data}
+        searchServerState={searchServerState}
+      />
     </>
   );
 };
