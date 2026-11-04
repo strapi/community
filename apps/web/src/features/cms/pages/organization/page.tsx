@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Data, Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { OrganizationTemplate } from "@/features/cms/pages/organization";
@@ -44,12 +45,19 @@ const OrganizationPage = async ({ documentId }: Props) => {
       .then((res) => res.json());
 
   return (
-    <OrganizationTemplate
-      document={document.data}
-      relatedContent={content}
-      members={members}
-      communityCta={communityCta}
-    />
+    <>
+      <PageContext
+        page_type="org_profile"
+        content_id={document.data.documentId}
+        content_name={document.data.name ?? undefined}
+      />
+      <OrganizationTemplate
+        document={document.data}
+        relatedContent={content}
+        members={members}
+        communityCta={communityCta}
+      />
+    </>
   );
 };
 

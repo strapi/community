@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { HomeTemplate } from "@/features/cms/pages/home";
 
@@ -102,11 +103,14 @@ const HomePage = async () => {
   const document = await cmsClient.single(contentType).find(query);
 
   return (
-    <HomeTemplate
-      document={document.data}
-      templates={templates.data}
-      packages={packages.data}
-    />
+    <>
+      <PageContext page_type="home" />
+      <HomeTemplate
+        document={document.data}
+        templates={templates.data}
+        packages={packages.data}
+      />
+    </>
   );
 };
 

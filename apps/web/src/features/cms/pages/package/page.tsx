@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { PackageTemplate } from "@/features/cms/pages/package";
@@ -47,7 +48,15 @@ const PackagePage = async ({ documentId }: Props) => {
    * @todo Check for any existing security scans on the latest version.
    */
   return (
-    <PackageTemplate document={document.data} communityCta={communityCta} />
+    <>
+      <PageContext
+        page_type="package_detail"
+        content_id={document.data.documentId}
+        content_name={document.data.name ?? undefined}
+        content_category={document.data.categories?.[0]?.name ?? undefined}
+      />
+      <PackageTemplate document={document.data} communityCta={communityCta} />
+    </>
   );
 };
 

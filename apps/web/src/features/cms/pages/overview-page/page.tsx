@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { OverviewPageTemplate } from "@/features/cms/pages/overview-page";
 
@@ -51,7 +52,18 @@ const OverviewPage = async ({ documentId }: Props) => {
     .collection(contentType)
     .findOne(documentId, query);
 
-  return <OverviewPageTemplate document={document.data} />;
+  return (
+    <>
+      <PageContext
+        page_type={
+          document.data.slug === "marketplace" ? "marketplace" : "overview"
+        }
+        content_id={document.data.documentId}
+        content_name={document.data.title ?? undefined}
+      />
+      <OverviewPageTemplate document={document.data} />
+    </>
+  );
 };
 
 export { OverviewPage };
