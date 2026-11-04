@@ -60,6 +60,17 @@
         }
       }
     },
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "writable": true,
+      "configurable": false,
+      "editable": false,
+      "visible": false,
+      "default": null,
+      "unique": true
+    },
     "partner": {
       "type": "boolean",
       "required": false
@@ -83,16 +94,13 @@
       "relation": "oneToOne",
       "target": "api::profile.profile"
     },
-    "url_alias": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::webtools.url-alias",
+    "sitemap_exclude": {
       "writable": true,
+      "private": true,
       "configurable": false,
-      "editable": false,
       "visible": false,
-      "default": null,
-      "unique": true
+      "default": false,
+      "type": "boolean"
     }
   }
 }

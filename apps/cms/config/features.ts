@@ -1,5 +1,3 @@
 export default () => ({
-  future: {
-    betaMediaLibrary: true,
-  },
+  future: {},
 });

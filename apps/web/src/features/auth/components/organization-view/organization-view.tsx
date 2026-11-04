@@ -13,8 +13,9 @@ import {
   useAuthenticate,
   useCurrentOrganization,
 } from "@daveyplate/better-auth-ui";
-import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, HandshakeIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { usePartnerOrganizations } from "@/features/partner-portal/lib/partner-organizations";
 import { SubmissionsView } from "@/features/submissions/components/submissions-view";
 import type {
   SubmissionCategory,
@@ -109,6 +110,27 @@ export function OrganizationView({
     isPending: organizationPending,
     isRefetching: organizationRefetching,
   } = useCurrentOrganization({ slug });
+
+  // Only owners/admins of a partner organization get a partner portal —
+  // the same list (and gating) the user menu's "Partner portal" links use.
+  const { organizations: partnerOrganizations } = usePartnerOrganizations();
+  const hasPartnerPortal = partnerOrganizations.some(
+    (partnerOrganization) => partnerOrganization.slug === slug,
+  );
+
+  const partnerPortalLink = (className?: string) =>
+    hasPartnerPortal && (
+      <Link
+        href={`/partner/${slug}`}
+        className={cn(
+          "inline-flex items-center justify-center gap-1.5 rounded-md border border-(--color-primary200) bg-(--color-primary100) px-3 py-2 text-sm font-semibold text-(--color-primary600) transition-colors hover:border-(--color-primary600)",
+          className,
+        )}
+      >
+        <HandshakeIcon className="size-4 shrink-0" />
+        Partner portal
+      </Link>
+    );
 
   const navItems = useMemo(() => {
     const items: { view: View; label: string }[] = [
@@ -212,10 +234,16 @@ export function OrganizationView({
 
       <SettingsContextSwitcher slug={slug} className="md:hidden" />
 
+      {partnerPortalLink("md:hidden")}
+
       <div className="hidden items-center justify-between gap-4 md:flex">
         {identity("lg")}
 
-        <SettingsContextSwitcher slug={slug} />
+        <div className="flex items-center gap-2">
+          {partnerPortalLink()}
+
+          <SettingsContextSwitcher slug={slug} />
+        </div>
       </div>
 
       <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
