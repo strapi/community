@@ -1,8 +1,9 @@
 import type { Core } from "@strapi/strapi";
 
 /**
- * SEO copy and keyword-rich headings for the home page and the overview
- * pages, applied on bootstrap so they reach every environment on deploy.
+ * SEO copy (meta tags only, never rendered page content) for the home page
+ * and the overview pages, applied on bootstrap so it reaches every
+ * environment on deploy.
  *
  * A field is only written when it is empty or still holds one of its known
  * `replaces` values, so anything an editor changed in the admin panel is left
@@ -89,38 +90,6 @@ const OVERVIEW_PAGES: Record<string, SeoCopy> = {
   },
 };
 
-/**
- * Page headings (rendered as the <h1>), with the copy they replace. Unlike
- * the SEO fields these are required, so they're only ever swapped out when
- * they still hold the old value.
- */
-const HOME_TITLE: FieldUpdate = {
-  value: "Extend Strapi with community plugins and templates.",
-  replaces: ["Extend Strapi in minutes. Shaped by an open community."],
-};
-
-const OVERVIEW_TITLES: Record<string, FieldUpdate> = {
-  marketplace: {
-    value: "Strapi Plugin Marketplace",
-    replaces: ["Marketplace"],
-  },
-  integrations: { value: "Strapi Integrations", replaces: ["Integrations"] },
-  members: { value: "Strapi Community Members", replaces: ["Members"] },
-  partners: { value: "Strapi Partners", replaces: ["Partners"] },
-  showcases: { value: "Built with Strapi", replaces: ["Showcases"] },
-};
-
-/** The new heading, or null when it was edited and should be left alone. */
-const pendingTitle = (
-  current: string | null | undefined,
-  update?: FieldUpdate,
-) =>
-  update &&
-  current !== update.value &&
-  update.replaces?.includes(current?.trim() ?? "")
-    ? update.value
-    : null;
-
 type SeoComponent = {
   id?: number;
   metaTitle?: string | null;
@@ -174,24 +143,20 @@ async function seedHome(strapi: Core.Strapi) {
   if (!home) return;
 
   const seo = home.seo as SeoComponent;
-  const seoChanges = pendingSeo(
+  const changes = pendingSeo(
     seo,
     toFields(HOME, HOME.titleReplaces, HOME.descriptionReplaces),
   );
-  const title = pendingTitle(home.title, HOME_TITLE);
-  if (!seoChanges && !title) return;
+  if (!changes) return;
 
   await strapi.documents("api::home.home").update({
     documentId: home.documentId,
-    data: {
-      ...(title && { title }),
-      ...(seoChanges && { seo: mergeSeo(seo, seoChanges) }),
-      // biome-ignore lint/suspicious/noExplicitAny: partial component update
-    } as any,
+    // biome-ignore lint/suspicious/noExplicitAny: partial component update
+    data: { seo: mergeSeo(seo, changes) } as any,
   });
 
   strapi.log.info(
-    `[seed] Updated home: ${[...(title ? ["title"] : []), ...Object.keys(seoChanges ?? {})].join(", ")}`,
+    `[seed] Updated home SEO: ${Object.keys(changes).join(", ")}`,
   );
 }
 
@@ -207,9 +172,8 @@ async function seedOverviewPage(strapi: Core.Strapi, slug: string) {
   if (!draft) return;
 
   const seo = draft.seo as SeoComponent;
-  const seoChanges = copy ? pendingSeo(seo, toFields(copy)) : null;
-  const title = pendingTitle(draft.title, OVERVIEW_TITLES[slug]);
-  if (!seoChanges && !title) return;
+  const changes = pendingSeo(seo, toFields(copy));
+  if (!changes) return;
 
   const published = await strapi.documents(uid).findOne({
     documentId: draft.documentId,
@@ -225,11 +189,8 @@ async function seedOverviewPage(strapi: Core.Strapi, slug: string) {
 
   await strapi.documents(uid).update({
     documentId: draft.documentId,
-    data: {
-      ...(title && { title }),
-      ...(seoChanges && { seo: mergeSeo(seo, seoChanges) }),
-      // biome-ignore lint/suspicious/noExplicitAny: partial component update
-    } as any,
+    // biome-ignore lint/suspicious/noExplicitAny: partial component update
+    data: { seo: mergeSeo(seo, changes) } as any,
   });
 
   if (inSync) {
@@ -237,18 +198,14 @@ async function seedOverviewPage(strapi: Core.Strapi, slug: string) {
   }
 
   strapi.log.info(
-    `[seed] Updated "${slug}" overview page: ${[...(title ? ["title"] : []), ...Object.keys(seoChanges ?? {})].join(", ")}${inSync ? "" : " (draft only: the page has unpublished changes)"}`,
+    `[seed] Updated "${slug}" overview page SEO: ${Object.keys(changes).join(", ")}${inSync ? "" : " (draft only: the page has unpublished changes)"}`,
   );
 }
 
 export async function seedSeoContent(strapi: Core.Strapi): Promise<void> {
   await seedHome(strapi);
 
-  const slugs = new Set([
-    ...Object.keys(OVERVIEW_PAGES),
-    ...Object.keys(OVERVIEW_TITLES),
-  ]);
-  for (const slug of slugs) {
+  for (const slug of Object.keys(OVERVIEW_PAGES)) {
     await seedOverviewPage(strapi, slug);
   }
 }
