@@ -19,6 +19,8 @@ function isExternalUrl(href: string): boolean {
 
 interface NavBasicImageProps {
   image: NavImage;
+  /** Used when the media has no alternative text (e.g. the parent link label). */
+  fallbackAlt?: string | null;
   mode?: "intrinsic" | "responsive" | "fill";
   className?: string;
   sizes?: string;
@@ -27,6 +29,7 @@ interface NavBasicImageProps {
 
 export function NavBasicImage({
   image,
+  fallbackAlt,
   mode = "intrinsic",
   className,
   sizes,
@@ -36,7 +39,7 @@ export function NavBasicImage({
 
   const commonProps = {
     src: image.url,
-    alt: image.alternativeText ?? "",
+    alt: image.alternativeText || fallbackAlt || "",
     ...(transparentPlaceholder && {
       placeholder: "blur" as const,
       blurDataURL:
@@ -114,6 +117,7 @@ export function NavLinkImageComponent({
   const imageEl = (
     <NavBasicImage
       image={component.image.media}
+      fallbackAlt={component.label}
       mode={imageMode}
       sizes={sizes}
       transparentPlaceholder={transparentPlaceholder}
@@ -175,6 +179,7 @@ export function NavMenuLinkImageComponent({
   const imageEl = (
     <NavBasicImage
       image={component.image.media}
+      fallbackAlt={component.label}
       mode={imageMode}
       sizes={sizes}
       transparentPlaceholder={transparentPlaceholder}

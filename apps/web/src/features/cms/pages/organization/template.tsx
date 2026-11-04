@@ -172,7 +172,7 @@ const OrganizationTemplate = ({
                         src: template.preview_image
                           ? cmsImageUrl(template.preview_image.url)
                           : "/template-fallback-preview.png",
-                        alt: template.preview_image?.alternativeText ?? "",
+                        alt: template.preview_image?.alternativeText || "",
                         size: "L",
                       }}
                       description={template.description ?? ""}
@@ -200,7 +200,7 @@ const OrganizationTemplate = ({
                         src: pkg.icon
                           ? cmsImageUrl(pkg.icon.url)
                           : "/package-fallback-icon.png",
-                        alt: pkg.icon?.alternativeText ?? "",
+                        alt: pkg.icon?.alternativeText || "",
                         size: "S",
                       }}
                       description={pkg.description ?? ""}

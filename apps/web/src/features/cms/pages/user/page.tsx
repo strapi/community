@@ -1,9 +1,12 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { JsonLd } from "@/components/content/json-ld";
 import { PageContext } from "@/features/analytics";
 import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
+import { personSchema } from "@/features/cms/lib/structured-data";
 import { UserTemplate } from "@/features/cms/pages/user";
+import { notFoundOn404 } from "@/features/cms/pages/user/not-found";
 import type { RelatedContentItems } from "@/utils/types";
 
 const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
@@ -19,11 +22,15 @@ export type UserPageData = Modules.Documents.Result<
 
 type Props = {
   documentId: string;
+  path: string;
 };
 
-const UserPage = async ({ documentId }: Props) => {
+const UserPage = async ({ documentId, path }: Props) => {
   const [document, communityCta] = await Promise.all([
-    cmsClient.collection(contentType).findOne(documentId, query),
+    cmsClient
+      .collection(contentType)
+      .findOne(documentId, query)
+      .catch(notFoundOn404),
     fetchCommunityCTA(),
   ]);
 
@@ -40,6 +47,7 @@ const UserPage = async ({ documentId }: Props) => {
         page_type="member_profile"
         content_id={document.data.documentId}
       />
+      <JsonLd data={personSchema(path, document.data)} />
       <UserTemplate
         document={document.data}
         relatedContent={content}

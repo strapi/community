@@ -1,4 +1,5 @@
 import { Button, Container } from "@repo/strapi-ui";
+import type { InstantSearchServerState } from "react-instantsearch";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -33,10 +34,11 @@ const CategoryIcon = () => (
 );
 
 type Props = {
+  searchServerState?: InstantSearchServerState;
   document: PackageCategoryData;
 };
 
-const PackageCategoryTemplate = ({ document }: Props) => {
+const PackageCategoryTemplate = ({ document, searchServerState }: Props) => {
   const childCategories = document.children ?? [];
 
   return (
@@ -49,7 +51,7 @@ const PackageCategoryTemplate = ({ document }: Props) => {
               <Breadcrumbs />
             </div>
             <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
-              {document.name}
+              {document.name} plugins
             </h1>
             <p className="text-[17px] text-(--color-hero-muted)">
               {document.description}
@@ -75,7 +77,11 @@ const PackageCategoryTemplate = ({ document }: Props) => {
       </Hero>
       <Container>
         <div className="border-x border-(--color-neutral300) px-8 sm:px-16 py-12">
-          <PackagesSearch categoryFilter={document.name!} showFilters={false} />
+          <PackagesSearch
+            categoryFilter={document.name!}
+            serverState={searchServerState}
+            showFilters={false}
+          />
         </div>
       </Container>
       {document.sections?.map((section) => (

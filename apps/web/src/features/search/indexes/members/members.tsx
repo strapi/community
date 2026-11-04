@@ -1,13 +1,22 @@
 "use client";
 
+import type { InstantSearchServerState } from "react-instantsearch";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { ToggleRefinement } from "@/features/search/components/toggle-refinement";
+import { SEARCH_INDEXES } from "@/features/search/lib/indexes";
 import { Hit } from "./components";
 
 const idx = process.env.NEXT_PUBLIC_MEILISEARCH_MEMBERS_INDEX_NAME!;
 
-const MembersSearch = () => (
-  <SearchIndex indexName={`${idx}:createdAt:desc`}>
+const MembersSearch = ({
+  serverState,
+}: {
+  serverState?: InstantSearchServerState;
+}) => (
+  <SearchIndex
+    indexName={SEARCH_INDEXES.members.indexName}
+    serverState={serverState}
+  >
     <SearchIndex.Layout>
       <SearchIndex.Sidebar>
         <SearchIndex.FilterGroup label="Highlighted">

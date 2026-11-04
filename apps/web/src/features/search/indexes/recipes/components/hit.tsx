@@ -10,7 +10,7 @@ const Hit = ({ hit }: Props) => {
   const image = hit.image
     ? {
         src: cmsImageUrl(hit.image.url),
-        alt: hit.image.alternativeText ?? hit.title ?? "",
+        alt: hit.image.alternativeText || hit.title || "",
         size: "L" as const,
       }
     : undefined;

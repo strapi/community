@@ -37,10 +37,14 @@ function isValidPath(path?: string[]) {
   return !resource || RESOURCE_SECTIONS.has(section);
 }
 
-/** The organization, only if it's flagged as a partner in the CMS. */
-async function findPartnerOrganization(slug: string) {
+/**
+ * The organization, if it exists. Whether it has a partner portal (and the
+ * signed-in user may see it) is decided by the CMS — see
+ * `partnerPortalFilters` there.
+ */
+async function findOrganization(slug: string) {
   const { data } = await cmsClient.collection(contentType).find({
-    filters: { slug: { $eq: slug }, partner: { $eq: true } },
+    filters: { slug: { $eq: slug } },
     fields: ["name"],
   } satisfies GetQueryParams<typeof contentType>);
 
@@ -51,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, path } = await params;
   const label = (path?.[0] && TITLES[path[0]]) || "Partner portal";
 
-  const organization = await findPartnerOrganization(slug);
+  const organization = await findOrganization(slug);
 
   return {
     title: organization ? `${label} · ${organization.name}` : label,
@@ -65,11 +69,11 @@ export default async function PartnerPortalPage({ params }: Props) {
   const { slug, path } = await params;
   if (!isValidPath(path)) notFound();
 
-  // Server-side, this only proves the organization is a partner — whether
-  // the signed-in user is one of its members is checked client-side
-  // by `PartnerPortalView` (the better-auth session cookie lives on the
-  // CMS's origin, not this one).
-  if (!(await findPartnerOrganization(slug))) notFound();
+  // Server-side, this only proves the organization exists — whether it has
+  // a partner portal and the signed-in user is one of its members is
+  // checked client-side by `PartnerPortalView`, against the CMS (the
+  // better-auth session cookie lives on the CMS's origin, not this one).
+  if (!(await findOrganization(slug))) notFound();
 
   const pathname = path
     ? `/partner/${slug}/${path.join("/")}`

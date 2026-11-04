@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { breadcrumbTrail } from "@/lib/breadcrumbs";
 
 type BreadcrumbsVariant = "full" | "short";
 
@@ -10,24 +11,9 @@ type BreadcrumbsProps = {
   variant?: BreadcrumbsVariant;
 };
 
-function slugToLabel(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 const Breadcrumbs = ({ variant = "full" }: BreadcrumbsProps) => {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-
-  const allCrumbs = [
-    { label: "Strapi Community Hub", href: "/" },
-    ...segments.map((segment, index) => ({
-      label: slugToLabel(segment),
-      href: `/${segments.slice(0, index + 1).join("/")}`,
-    })),
-  ];
+  const allCrumbs = breadcrumbTrail(pathname);
 
   const crumbs =
     variant === "short" && allCrumbs.length > 3

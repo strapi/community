@@ -6,27 +6,59 @@ import { MarketplaceSearch } from "@/features/search/indexes/marketplace/marketp
 import { MembersSearch } from "@/features/search/indexes/members/members";
 import { PartnersSearch } from "@/features/search/indexes/partners/partners";
 import { ShowcasesSearch } from "@/features/search/indexes/showcases/showcases";
+import { SEARCH_INDEXES } from "@/features/search/lib/indexes";
+import { getSearchServerState } from "@/features/search/lib/server-state";
 
 type Props = {
   section: Data.Component<"sections.search">;
 };
 
-const SearchIndex = ({ section }: Props) => {
+const SearchIndex = async ({ section }: Props) => {
   const { index_name } = section;
 
   switch (index_name) {
-    case "marketplace":
-      return <MarketplaceSearch />;
+    case "marketplace": {
+      const [packages, templates] = await Promise.all([
+        getSearchServerState(SEARCH_INDEXES.packages),
+        getSearchServerState(SEARCH_INDEXES.templates),
+      ]);
+      return (
+        <MarketplaceSearch
+          packagesServerState={packages}
+          templatesServerState={templates}
+        />
+      );
+    }
     case "partners":
-      return <PartnersSearch />;
+      return (
+        <PartnersSearch
+          serverState={await getSearchServerState(SEARCH_INDEXES.partners)}
+        />
+      );
     case "members":
-      return <MembersSearch />;
+      return (
+        <MembersSearch
+          serverState={await getSearchServerState(SEARCH_INDEXES.members)}
+        />
+      );
     case "integrations":
-      return <IntegrationsSearch />;
+      return (
+        <IntegrationsSearch
+          serverState={await getSearchServerState(SEARCH_INDEXES.integrations)}
+        />
+      );
     case "showcases":
-      return <ShowcasesSearch />;
+      return (
+        <ShowcasesSearch
+          serverState={await getSearchServerState(SEARCH_INDEXES.showcases)}
+        />
+      );
     case "help_pages":
-      return <HelpPagesSearch />;
+      return (
+        <HelpPagesSearch
+          serverState={await getSearchServerState(SEARCH_INDEXES.helpPages)}
+        />
+      );
     default:
       return <div>No index found with name {index_name}</div>;
   }
