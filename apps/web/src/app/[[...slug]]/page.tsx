@@ -84,17 +84,9 @@ export async function generateStaticParams() {
   return [];
 }
 
-export const generateMetadata = async ({
-  params,
-}: PageProps): Promise<Metadata> => {
-  const { slug } = await params;
-  const path = `/${slug?.join("/") || ""}`;
-  const page = await findPublishedPage(path);
-
-  if (!page) {
-    return {};
-  }
-
+const resolveMetadata = (
+  page: Awaited<ReturnType<typeof findPublishedPage>>,
+): Promise<Metadata> | Metadata => {
   switch (page.contentType) {
     case "plugin::better-auth.organization": {
       return organizationMetadata(page.documentId);
@@ -130,6 +122,34 @@ export const generateMetadata = async ({
       return {};
     }
   }
+};
+
+export const generateMetadata = async ({
+  params,
+}: PageProps): Promise<Metadata> => {
+  const { slug } = await params;
+  const path = `/${slug?.join("/") || ""}`;
+  const page = await findPublishedPage(path);
+
+  if (!page) {
+    return {};
+  }
+
+  const metadata = await resolveMetadata(page);
+
+  // Every page is canonical at its own URL alias (resolved against
+  // metadataBase), unless the content type or CMS sets one explicitly.
+  return {
+    ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      canonical: metadata.alternates?.canonical ?? path,
+    },
+    openGraph: {
+      ...metadata.openGraph,
+      url: metadata.openGraph?.url ?? path,
+    } as Metadata["openGraph"],
+  };
 };
 
 export default Router;

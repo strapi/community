@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildOgImageUrl } from "@/features/cms/lib/og-image-url";
+import { joinTitle, pageDescription, pageTitle } from "@/features/cms/lib/seo";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 export const templateCategoryMetadata = async (
@@ -29,23 +30,28 @@ export const templateCategoryMetadata = async (
     description: description ?? undefined,
   });
 
-  return {
-    title: name,
+  const title = joinTitle(name, "Templates and Starters");
+  const desc = pageDescription(
     description,
+    `Browse ${name} templates and starters for Strapi, built and shared by the Strapi community.`,
+  );
+  return {
+    title: pageTitle(title),
+    description: desc,
     alternates: {
       canonical: pageUrl,
     },
     openGraph: {
-      title: name ?? undefined,
-      description: description ?? undefined,
+      title,
+      description: desc,
       type: "website",
       url: pageUrl,
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: name ?? "" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: name ?? undefined,
-      description: description ?? undefined,
+      title,
+      description: desc,
       images: [ogImageUrl],
     },
   };
