@@ -43,7 +43,7 @@ const IntegrationTemplate = ({ document }: Props) => {
             {document.logo && (
               <Image
                 src={cmsImageUrl(document.logo.url)}
-                alt={document.name!}
+                alt={`${document.name} logo`}
                 width={150}
                 height={150}
                 className="sm:ml-auto shrink-0 rounded-lg object-cover"
@@ -101,7 +101,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                 <section className="border-(--color-neutral150) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
                   <div className="flex items-center justify-between mb-6 sm:mb-10">
                     <h2 className="text-[21px] font-semibold text-(--color-neutral900)">
-                      Packages built for {document.name}
+                      Strapi plugins for {document.name}
                     </h2>
                     <Button asChild>
                       <Link
@@ -140,7 +140,7 @@ const IntegrationTemplate = ({ document }: Props) => {
               {hasTemplates && (
                 <section className="border-(--color-neutral150) border-l border-r border-b px-4 sm:px-8 lg:px-16 py-6 sm:py-8 lg:py-10 pt-8 sm:pt-12 lg:pt-18">
                   <h2 className="mb-6 sm:mb-10 text-[21px] font-semibold text-(--color-neutral900)">
-                    Templates built with {document.name}
+                    Strapi templates built with {document.name}
                   </h2>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {document.templates?.map((tpl) => (

@@ -50,7 +50,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                     }
                     width={64}
                     height={64}
-                    alt={document.name ?? ""}
+                    alt={`${document.name} thumbnail`}
                     className="object-contain"
                   />
                 </div>
@@ -61,17 +61,21 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                     </h1>
                     <ContentLabels labels={document.labels} />
                   </div>
-                  {owner && (
-                    <p>
-                      By{" "}
-                      <Link
-                        href={owner.url_alias?.[0]?.url_path!}
-                        className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
-                      >
-                        {owner.name}
-                      </Link>
-                    </p>
-                  )}
+                  <p>
+                    Strapi template
+                    {owner && (
+                      <>
+                        {" "}
+                        by{" "}
+                        <Link
+                          href={owner.url_alias?.[0]?.url_path!}
+                          className="items-center gap-1.5 text-sm font-medium text-(--color-primary700) hover:underline"
+                        >
+                          {owner.name}
+                        </Link>
+                      </>
+                    )}
+                  </p>
                 </div>
               </div>
               <EditContentButton
@@ -94,7 +98,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
               }
               width={1000}
               height={1000}
-              alt={document.name ?? ""}
+              alt={`${document.name} Strapi template preview`}
               className="object-contain"
             />
 

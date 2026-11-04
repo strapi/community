@@ -49,7 +49,7 @@ const PackageCategoryTemplate = ({ document }: Props) => {
               <Breadcrumbs />
             </div>
             <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
-              {document.name}
+              {document.name} plugins
             </h1>
             <p className="text-[17px] text-(--color-hero-muted)">
               {document.description}
