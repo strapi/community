@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { HelpPageTemplate } from "./template";
 
@@ -44,7 +45,16 @@ const HelpPagePage = async ({ documentId }: Props) => {
     .collection(contentType)
     .findOne(documentId, query);
 
-  return <HelpPageTemplate document={document.data} />;
+  return (
+    <>
+      <PageContext
+        page_type="help_page"
+        content_id={document.data.documentId}
+        content_name={document.data.title ?? undefined}
+      />
+      <HelpPageTemplate document={document.data} />
+    </>
+  );
 };
 
 export { HelpPagePage };
