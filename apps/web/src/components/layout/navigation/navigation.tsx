@@ -23,11 +23,7 @@ const Navigation = async ({ theme }: Props) => {
 
   return (
     <nav
-      className={`sticky z-11 top-0 border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"}`}
-      style={{
-        backgroundImage: `${theme === "light" ? "var(--bg-dotted-pattern-image-light)" : "var(--bg-dotted-pattern-image)"}`,
-        backgroundSize: "var(--bg-dotted-pattern-size)",
-      }}
+      className={`sticky z-11 top-0 border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background) bg-dotted-light" : "bg-(--color-hero-bg) bg-dotted"}`}
     >
       <Container>
         <div

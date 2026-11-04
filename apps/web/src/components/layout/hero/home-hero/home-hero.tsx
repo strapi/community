@@ -101,11 +101,7 @@ const HomeHero = (props: Props) => {
                   }
                 }}
                 placeholder="Search Community"
-                className="w-full rounded-lg border border-(--color-grey700) px-4 py-3.5 pr-12 text-sm text-white placeholder:text-(--color-hero-nav-muted) focus:outline-none focus:ring-1 focus:ring-(--color-primary500)"
-                style={{
-                  background:
-                    "linear-gradient(to right, rgba(17,22,51,0.9), rgba(45,30,90,0.5))",
-                }}
+                className="w-full rounded-lg border border-(--color-grey700) px-4 py-3.5 pr-12 text-sm text-white placeholder:text-(--color-hero-nav-muted) focus:outline-none focus:ring-1 focus:ring-(--color-primary500) bg-hero-input"
               />
               <Search className="absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-(--color-primary500)" />
             </div>
