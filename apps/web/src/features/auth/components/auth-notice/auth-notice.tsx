@@ -7,11 +7,12 @@ type AuthNoticeProps = {
 };
 
 /**
- * A small informational banner rendered above an auth view's card (e.g.
- * sign-in/sign-up) — for surfacing context the underlying
- * `@daveyplate/better-auth-ui` view doesn't provide on its own, such as why
- * the visitor landed there. Sized by its parent rather than a width of its
- * own, so it lines up with whatever auth card it sits above.
+ * A small informational banner rendered alongside an auth view's card
+ * (e.g. above sign-in/sign-up, or above the account "Providers" card) —
+ * for surfacing context the underlying `@daveyplate/better-auth-ui` view
+ * doesn't provide on its own, such as why the visitor landed there. Sized
+ * by its parent rather than a width of its own, so it lines up with
+ * whatever auth card it sits next to.
  */
 export function AuthNotice({ icon: Icon, children }: AuthNoticeProps) {
   return (

@@ -8,7 +8,6 @@ import {
   DeleteAccountCard,
   getViewByPath,
   OrganizationsCard,
-  SecuritySettingsCards,
   UserAvatar,
   UserInvitationsCard,
   useAuthenticate,
@@ -23,6 +22,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { ProfileView } from "../profile-view";
 import { SettingsContextSwitcher } from "../settings-context-switcher";
+import { SecurityView } from "./security-view";
 
 type View =
   | "SETTINGS"
@@ -288,7 +288,7 @@ export function AccountView({
             />
           )}
 
-          {view === "SECURITY" && <SecuritySettingsCards />}
+          {view === "SECURITY" && <SecurityView />}
 
           {view === "API_KEYS" && apiKey && <ApiKeysCard />}
 

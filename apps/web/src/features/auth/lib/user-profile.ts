@@ -10,6 +10,8 @@ export type UserProfile = {
   location?: string | null;
   email?: string | null;
   readme?: string | null;
+  /** Shows the "GitHub Contributions" tab on the public profile — on unless `false`. */
+  show_github_contributions?: boolean | null;
 };
 
 async function extractErrorMessage(res: Response, fallback: string) {

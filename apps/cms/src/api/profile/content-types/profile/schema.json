@@ -41,6 +41,10 @@
     "readme": {
       "type": "richtext"
     },
+    "show_github_contributions": {
+      "type": "boolean",
+      "default": true
+    },
     "countries": {
       "type": "relation",
       "relation": "oneToMany",

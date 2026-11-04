@@ -1,4 +1,4 @@
-import type { Profile } from "./types";
+import type { Profile, TextField } from "./types";
 
 /**
  * Format rules for the profile fields, enforced here for inline
@@ -29,7 +29,7 @@ function isHttpUrl(value: string): boolean {
 }
 
 const VALIDATORS: Partial<
-  Record<keyof Profile, (value: string) => string | undefined>
+  Record<TextField, (value: string) => string | undefined>
 > = {
   bio: (value) =>
     value.length > BIO_MAX_LENGTH
@@ -57,7 +57,7 @@ const VALIDATORS: Partial<
  * format rule.
  */
 export function validateProfileField(
-  name: keyof Profile,
+  name: TextField,
   value: string | null | undefined,
 ): string | undefined {
   const trimmed = (value ?? "").trim();
@@ -68,10 +68,10 @@ export function validateProfileField(
 
 export function validateProfile(
   values: Profile,
-): Partial<Record<keyof Profile, string>> {
-  const errors: Partial<Record<keyof Profile, string>> = {};
+): Partial<Record<TextField, string>> {
+  const errors: Partial<Record<TextField, string>> = {};
 
-  for (const field of Object.keys(VALIDATORS) as (keyof Profile)[]) {
+  for (const field of Object.keys(VALIDATORS) as TextField[]) {
     const error = validateProfileField(field, values[field]);
     if (error) errors[field] = error;
   }

@@ -3,6 +3,13 @@ import type { UserProfile } from "../../lib/user-profile";
 
 export type Profile = UserProfile & OrganizationProfile;
 
+/** The `Profile` keys holding text — the ones rendered as form fields. */
+export type TextField = {
+  [K in keyof Profile]-?: Profile[K] extends string | null | undefined
+    ? K
+    : never;
+}[keyof Profile];
+
 export type Props =
   | { variant: "user" }
   | {
@@ -12,7 +19,7 @@ export type Props =
     };
 
 export type Field = {
-  name: keyof Profile;
+  name: TextField;
   label: string;
   placeholder: string;
   multiline?: boolean;
