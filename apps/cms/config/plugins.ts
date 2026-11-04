@@ -101,6 +101,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/package-info",
   },
+  "roadmap-sync": {
+    enabled: true,
+    resolve: "./src/plugins/roadmap-sync",
+  },
   // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
   // key order of this file, and the first registered document middleware is the
   // outermost. Meilisearch has to wrap webtools so it indexes entries only after

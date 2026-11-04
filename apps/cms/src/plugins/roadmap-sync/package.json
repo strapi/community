@@ -1,0 +1,15 @@
+{
+  "name": "roadmap-sync",
+  "version": "0.0.0",
+  "strapi": {
+    "name": "roadmap-sync",
+    "displayName": "Roadmap Sync",
+    "description": "Mirrors the public slice of the Notion Product Roadmap into api::roadmap-item, enriched with Canny votes and GitHub state",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "../../../dist/src/plugins/roadmap-sync/server/src/index.js"
+    }
+  }
+}
