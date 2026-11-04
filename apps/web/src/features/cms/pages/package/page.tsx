@@ -20,8 +20,14 @@ const query = {
       },
     },
     version_info: true,
+    // `owner` is polymorphic (user or organization). The content API drops
+    // a polymorphic relation populated with `populate: "*"`, so populate
+    // each possible type explicitly.
     owner: {
-      populate: "*",
+      on: {
+        "plugin::better-auth.user": { populate: { url_alias: true } },
+        "plugin::better-auth.organization": { populate: { url_alias: true } },
+      },
     },
     maintainers: {
       populate: {
