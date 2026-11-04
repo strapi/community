@@ -15,6 +15,8 @@ type Seed = {
   sort_order: number;
   description: string;
   content: string;
+  /** Leave the resource unpublished, e.g. until its file is uploaded. */
+  draft?: boolean;
 };
 
 // Partner portal MVP content. Files (partner badges, partner deck) are
@@ -329,7 +331,7 @@ Hosting, security and editorial workflow answers usually decide between Communit
 
 ## Recordings
 
-Watch "How we pitch Strapi" and the pricing session in [sales training sessions](./sales-training-sessions).`,
+Watch "How we pitch Strapi" and the pricing session in [sales enablement sessions](./sales-enablement-sessions).`,
   },
   {
     title: "Competitive positioning",
@@ -369,8 +371,8 @@ If a client is leaving WordPress, our [Claude Code skill for WordPress migration
 Going up against a specific competitor on a live deal? Email [partners@strapi.io](mailto:partners@strapi.io) and we'll help.`,
   },
   {
-    title: "Sales training sessions",
-    slug: "sales-training-sessions",
+    title: "Sales enablement sessions",
+    slug: "sales-enablement-sessions",
     section: "sales_enablement",
     minimum_level: "Registered",
     label: "Video",
@@ -496,7 +498,7 @@ Yes. A common setup is Strapi for content and a headless commerce platform for c
 **What does Strapi Enterprise cost?**
 Use the [pricing simulator](https://quote.strapi.io/).
 
-## Support and training
+## Support and enablement
 
 **Is there a Strapi developer certification?**
 Not at the moment. The [developer learning path](../tech-enablement/developer-learning-path) is the best place to train your team.
@@ -732,7 +734,7 @@ There's no ready-made tool for every platform. Strapi's REST API and Document Se
 
 Attending one live session in any 12-month period is a requirement for Community level and above. Invites go out by email and in the partner newsletter.
 
-Sales-focused sessions are in [sales training sessions](../sales-enablement/sales-training-sessions).
+Sales-focused sessions are in [sales enablement sessions](../sales-enablement/sales-enablement-sessions).
 
 ## Recordings
 
@@ -801,6 +803,7 @@ Use the badge that matches your current level. If your level changes, swap the b
     label: "PDF",
     icon: "presentation",
     sort_order: 2,
+    draft: true,
     description:
       "The official Strapi deck to use when you introduce Strapi to clients.",
     content: `The official Strapi deck covers what Strapi is, who uses it and how it's sold. Use the slides you need in your own pitch.
@@ -876,17 +879,17 @@ A published blog post or case study on your own site, or on the Strapi blog, als
 ];
 
 /**
- * Creates the partner resources as drafts, only while the collection is
- * still empty. They're reviewed and published in the admin panel, and the
- * seeder never touches them again.
+ * Creates the partner resources, only while the collection is still empty.
+ * They're published unless marked as `draft`, and the seeder never touches
+ * them again.
  */
 export async function seedPartnerResources(strapi: Core.Strapi): Promise<void> {
   const documents = strapi.documents("api::partner-resource.partner-resource");
 
   if ((await documents.count({})) > 0) return;
 
-  for (const seed of seeds) {
-    await documents.create({ data: seed, status: "published" });
+  for (const { draft, ...data } of seeds) {
+    await documents.create({ data, status: draft ? "draft" : "published" });
   }
 
   strapi.log.info(`[seed] Created ${seeds.length} partner resources`);
