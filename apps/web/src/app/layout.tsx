@@ -3,6 +3,7 @@ import { StrapiFooter, StrapiNavbar } from "@repo/strapi-ui";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@/features/analytics";
 import { AuthProviders } from "@/features/auth/components/providers";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 
@@ -51,6 +52,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {isAuthEnabled ? <AuthProviders>{content}</AuthProviders> : content}
+        <Analytics />
         {isAuthEnabled && (
           <Toaster
             richColors

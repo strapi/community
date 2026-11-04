@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { IntegrationTemplate } from "@/features/cms/pages/integrations";
 
@@ -43,7 +44,17 @@ const IntegrationPage = async ({ documentId }: Props) => {
     .collection(contentType)
     .findOne(documentId, query);
 
-  return <IntegrationTemplate document={document.data} />;
+  return (
+    <>
+      <PageContext
+        page_type="integration_detail"
+        content_id={document.data.documentId}
+        content_name={document.data.name ?? undefined}
+        content_category={document.data.categories?.[0]?.name ?? undefined}
+      />
+      <IntegrationTemplate document={document.data} />
+    </>
+  );
 };
 
 export { IntegrationPage };

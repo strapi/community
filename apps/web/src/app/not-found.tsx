@@ -1,8 +1,10 @@
 import { Button, Container } from "@repo/strapi-ui";
+import { PageContext } from "@/features/analytics";
 
 export default function NotFound() {
   return (
     <main>
+      <PageContext page_type="error" />
       <Container>
         <div className="flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">
           <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-(--color-neutral100)">

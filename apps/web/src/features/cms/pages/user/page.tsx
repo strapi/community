@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { UserTemplate } from "@/features/cms/pages/user";
@@ -32,12 +33,19 @@ const UserPage = async ({ documentId }: Props) => {
     )
     .then((res) => res.json());
 
+  // No content_name: member names stay out of analytics.
   return (
-    <UserTemplate
-      document={document.data}
-      relatedContent={content}
-      communityCta={communityCta}
-    />
+    <>
+      <PageContext
+        page_type="member_profile"
+        content_id={document.data.documentId}
+      />
+      <UserTemplate
+        document={document.data}
+        relatedContent={content}
+        communityCta={communityCta}
+      />
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { TemplateTemplate } from "@/features/cms/pages/template";
@@ -43,7 +44,15 @@ const TemplatePage = async ({ documentId }: Props) => {
   ]);
 
   return (
-    <TemplateTemplate document={document.data} communityCta={communityCta} />
+    <>
+      <PageContext
+        page_type="template_detail"
+        content_id={document.data.documentId}
+        content_name={document.data.name ?? undefined}
+        content_category={document.data.categories?.[0]?.name ?? undefined}
+      />
+      <TemplateTemplate document={document.data} communityCta={communityCta} />
+    </>
   );
 };
 

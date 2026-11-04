@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { PageContext } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { TemplateCategoryTemplate } from "./template";
 
@@ -43,7 +44,16 @@ const TemplateCategoryPage = async ({ documentId }: Props) => {
     .collection(contentType)
     .findOne(documentId, query);
 
-  return <TemplateCategoryTemplate document={document.data} />;
+  return (
+    <>
+      <PageContext
+        page_type="template_category"
+        content_id={document.data.documentId}
+        content_name={document.data.name ?? undefined}
+      />
+      <TemplateCategoryTemplate document={document.data} />
+    </>
+  );
 };
 
 export { TemplateCategoryPage };
