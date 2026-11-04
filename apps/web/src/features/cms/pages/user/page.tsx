@@ -6,6 +6,7 @@ import { fetchCommunityCTA } from "@/features/cms/lib/community-cta";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { personSchema } from "@/features/cms/lib/structured-data";
 import { UserTemplate } from "@/features/cms/pages/user";
+import { notFoundOn404 } from "@/features/cms/pages/user/not-found";
 import type { RelatedContentItems } from "@/utils/types";
 
 const contentType = "plugin::better-auth.user" satisfies UID.ContentType;
@@ -26,7 +27,10 @@ type Props = {
 
 const UserPage = async ({ documentId, path }: Props) => {
   const [document, communityCta] = await Promise.all([
-    cmsClient.collection(contentType).findOne(documentId, query),
+    cmsClient
+      .collection(contentType)
+      .findOne(documentId, query)
+      .catch(notFoundOn404),
     fetchCommunityCTA(),
   ]);
 
