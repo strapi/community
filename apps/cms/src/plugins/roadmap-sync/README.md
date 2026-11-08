@@ -24,19 +24,23 @@ facts it can check (Canny votes, GitHub issue/PR state).
 
 With no `NOTION_API_TOKEN` / `NOTION_DATA_SOURCE_ID` the plugin does nothing.
 
-## Notion setup (Phase 0)
+## Notion setup
 
-Create these properties on the Product Roadmap with exactly these names:
+The sync only reads from Notion; it never writes to it. The item's `Name`
+(the page title) is published as its public title and becomes its link slug
+(`/roadmap?item=<slug>`).
+
+`Name`, `Public description`, `Public Roadmap`, `Status`, `When?`,
+`Delivery Quarter`, `Squad`, `Tags`, `Canny Link` and
+`Version & date (Release)` are read as they are. These optional properties
+are read too when present, and are treated as empty otherwise:
 
 | Property | Type | Notes |
 | --- | --- | --- |
-| `Public title` | Text | Required to publish. Becomes the item's link slug (`/roadmap?item=<slug>`). |
 | `GitHub links` | Text | Any number of URLs, separated by spaces, commas or new lines. |
-| `Docs link` | URL | Optional. |
+| `Docs link` | URL | |
 | `Public review date` | Date | Items not reviewed in 60 days show up as stale in the digest. |
 
-`Public description`, `Public Roadmap`, `Status`, `When?`, `Delivery Quarter`,
-`Squad`, `Tags` and `Canny Link` already exist and are read as they are.
 Share the database with the integration that owns `NOTION_API_TOKEN`.
 `NOTION_DATA_SOURCE_ID` is the **data source** id, not the database id.
 
@@ -45,7 +49,7 @@ Share the database with the integration that owns `NOTION_API_TOKEN`.
 An item is live only when all of these hold:
 
 - `Public Roadmap` is ticked.
-- `Public title` and `Public description` are filled in.
+- `Name` and `Public description` are filled in.
 - `Status` maps to a public status. `Paused`, or a status missing from the
   table in `lib/rules.ts`, keeps it hidden.
 - No link is dead (404/410, or a Canny link to a post that doesn't exist).

@@ -12,12 +12,11 @@
 import { BlockList, isIP } from "node:net";
 
 // ── Notion property names (Product Roadmap data source) ─────────────────────
-// Existing properties keep their real names. The ones marked "new" don't exist
-// in the Notion DB yet — they're the Phase 0 fields from the roadmap spec and
-// must be created in Notion with exactly these names.
+// Read-only: the sync never writes to Notion. The ones marked "optional" don't
+// exist in the Notion DB; while absent they simply read as empty.
 export const NOTION_PROPS = {
+  /** The page title, published as the public title. */
   name: "Name",
-  publicTitle: "Public title", // new
   publicDescription: "Public description",
   status: "Status",
   when: "When?",
@@ -25,9 +24,9 @@ export const NOTION_PROPS = {
   squad: "Squad",
   tags: "Tags",
   cannyLink: "Canny Link",
-  githubLinks: "GitHub links", // new
-  docsLink: "Docs link", // new
-  publicReviewDate: "Public review date", // new
+  githubLinks: "GitHub links", // optional
+  docsLink: "Docs link", // optional
+  publicReviewDate: "Public review date", // optional
   publicRoadmap: "Public Roadmap",
   release: "Version & date (Release)",
 } as const;
@@ -86,7 +85,7 @@ export type NotionPage = {
 export type RoadmapRow = {
   notionPageId: string;
   notionUrl: string | null;
-  /** Internal name — only ever used in the internal report, never stored. */
+  /** Page title, or "(untitled)" — for the internal report. */
   internalName: string;
   publicTitle: string | null;
   publicDescription: string | null;
@@ -186,12 +185,13 @@ export function mapNotionPage(page: NotionPage): RoadmapRow {
   const p = page.properties ?? {};
   const internalStatus = propText(p[NOTION_PROPS.status]);
   const githubProp = p[NOTION_PROPS.githubLinks];
+  const name = propText(p[NOTION_PROPS.name]);
 
   return {
     notionPageId: page.id,
     notionUrl: page.url ?? null,
-    internalName: propText(p[NOTION_PROPS.name]) ?? "(untitled)",
-    publicTitle: propText(p[NOTION_PROPS.publicTitle]),
+    internalName: name ?? "(untitled)",
+    publicTitle: name,
     publicDescription: propText(p[NOTION_PROPS.publicDescription]),
     internalStatus,
     publicStatus: mapStatus(internalStatus),
@@ -210,7 +210,7 @@ export function mapNotionPage(page: NotionPage): RoadmapRow {
 
 /**
  * The only Notion-derived values that are ever written to Strapi. An explicit
- * allow-list: internal name/status/comments etc. have no path to storage.
+ * allow-list: internal status/comments etc. have no path to storage.
  */
 export function toPublicFields(row: RoadmapRow) {
   return {

@@ -369,8 +369,7 @@ async function syncRow(
   };
 
   // Slugs are permalinks: frozen once an item has ever been published. Until
-  // then they follow the public title — never the internal name, which is
-  // why the fallback is an opaque id.
+  // then they follow the public title, falling back to an opaque id.
   const everPublished = Boolean(existing?.first_published_at);
   const current = existing?.slug ?? null;
   const wanted =

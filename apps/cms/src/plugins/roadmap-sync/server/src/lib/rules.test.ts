@@ -27,8 +27,7 @@ function page(overrides: NotionPage["properties"] = {}): NotionPage {
     id: "11111111-2222-3333-4444-555555555555",
     url: "https://www.notion.so/abc",
     properties: {
-      Name: { type: "title", title: text("Internal codename") },
-      "Public title": { type: "rich_text", rich_text: text("Public title") },
+      Name: { type: "title", title: text("Public title") },
       "Public description": {
         type: "rich_text",
         rich_text: text("What it does"),
@@ -110,14 +109,13 @@ describe("mapNotionPage", () => {
   it("never stores internal-only values", () => {
     const stored = JSON.stringify(toPublicFields(mapNotionPage(page())));
     assert.doesNotMatch(stored, /customer X/);
-    assert.doesNotMatch(stored, /Internal codename/);
     assert.doesNotMatch(stored, /late/i);
     assert.match(stored, /"public_status":"in_progress"/);
   });
 
   it("treats whitespace-only text as missing", () => {
     const row = mapNotionPage(
-      page({ "Public title": { type: "rich_text", rich_text: text("   ") } }),
+      page({ Name: { type: "title", title: text("   ") } }),
     );
     assert.equal(row.publicTitle, null);
   });
@@ -140,7 +138,7 @@ describe("blockingReasons", () => {
   it("fails closed on missing copy", () => {
     const row = mapNotionPage(
       page({
-        "Public title": { type: "rich_text", rich_text: [] },
+        Name: { type: "title", title: [] },
         "Public description": { type: "rich_text", rich_text: [] },
       }),
     );
