@@ -6,6 +6,10 @@ import { cmsClient } from "@/features/cms/lib/strapi";
 const itemType = "api::roadmap-item.roadmap-item" satisfies UID.ContentType;
 const releaseType = "api::release.release" satisfies UID.ContentType;
 
+// The CMS caps REST page size at 100 (`api.rest.maxLimit`), so larger
+// collections are read page by page.
+const PAGE_SIZE = 100;
+
 const itemQuery = {
   fields: [
     "slug",
@@ -27,9 +31,8 @@ const itemQuery = {
     "updatedAt",
   ],
   populate: { url_alias: { fields: ["url_path"] } },
-  sort: ["canny_votes:desc", "public_title:asc"],
-  // @ts-expect-error - issue in the strapi-client
-  pagination: { pageSize: 200 },
+  // id last keeps the order total, so pages never overlap.
+  sort: ["canny_votes:desc", "public_title:asc", "id:asc"],
 } satisfies GetQueryParams<typeof itemType>;
 
 const releaseQuery = {
@@ -42,8 +45,7 @@ const releaseQuery = {
     "open_issues",
     "closed_issues",
   ],
-  // @ts-expect-error - issue in the strapi-client
-  pagination: { pageSize: 100 },
+  sort: ["version:asc"],
 } satisfies GetQueryParams<typeof releaseType>;
 
 export type RoadmapItem = Modules.Documents.Result<
@@ -59,13 +61,33 @@ export * from "./types";
 
 import { githubLinks, safeHref } from "./types";
 
+/** Every document of a collection, fetched page by page. */
+async function findAll<TResult>(
+  find: (page: number) => Promise<{
+    data: TResult[];
+    meta: { pagination?: { pageCount: number } };
+  }>,
+): Promise<TResult[]> {
+  const all: TResult[] = [];
+  for (let page = 1; ; page++) {
+    const res = await find(page);
+    all.push(...res.data);
+    if (page >= (res.meta.pagination?.pageCount ?? 1)) return all;
+  }
+}
+
 // The CMS route only ever serves published items, whatever the query says.
 // Every URL is scheme-checked here, once, so components can render hrefs
 // from these objects without re-validating.
 // Cached per request: the overview hero and the roadmap section both read it.
 export const fetchRoadmapItems = cache(async (): Promise<RoadmapItem[]> => {
-  const res = await cmsClient.collection(itemType).find(itemQuery);
-  return res.data.map((item) => ({
+  const items = await findAll((page) =>
+    cmsClient.collection(itemType).find({
+      ...itemQuery,
+      pagination: { page, pageSize: PAGE_SIZE },
+    }),
+  );
+  return items.map((item) => ({
     ...item,
     canny_url: safeHref(item.canny_url),
     docs_link: safeHref(item.docs_link),
@@ -76,8 +98,13 @@ export const fetchRoadmapItems = cache(async (): Promise<RoadmapItem[]> => {
 /** Releases are supplementary: the roadmap still renders without them. */
 export async function fetchRoadmapReleases(): Promise<RoadmapRelease[]> {
   try {
-    const res = await cmsClient.collection(releaseType).find(releaseQuery);
-    return res.data.map((r) => ({ ...r, url: safeHref(r.url) }));
+    const releases = await findAll((page) =>
+      cmsClient.collection(releaseType).find({
+        ...releaseQuery,
+        pagination: { page, pageSize: PAGE_SIZE },
+      }),
+    );
+    return releases.map((r) => ({ ...r, url: safeHref(r.url) }));
   } catch {
     return [];
   }
