@@ -847,6 +847,7 @@ export interface ApiOverviewPageOverviewPage
         'sections.search',
         'sections.highlights',
         'sections.cta',
+        'sections.roadmap',
       ]
     >;
     seo: Schema.Attribute.Component<'shared.seo', false>;
@@ -1244,6 +1245,11 @@ export interface ApiRoadmapItemRoadmapItem extends Struct.CollectionTypeSchema {
   options: {
     draftAndPublish: true;
   };
+  pluginOptions: {
+    webtools: {
+      enabled: true;
+    };
+  };
   attributes: {
     canny_status: Schema.Attribute.String;
     canny_url: Schema.Attribute.String;
@@ -1275,6 +1281,9 @@ export interface ApiRoadmapItemRoadmapItem extends Struct.CollectionTypeSchema {
     public_title: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     release: Schema.Attribute.String;
+    sitemap_exclude: Schema.Attribute.Boolean &
+      Schema.Attribute.Private &
+      Schema.Attribute.DefaultTo<false>;
     slug: Schema.Attribute.UID<'public_title'> & Schema.Attribute.Required;
     squads: Schema.Attribute.JSON;
     tags: Schema.Attribute.JSON;
@@ -1284,6 +1293,11 @@ export interface ApiRoadmapItemRoadmapItem extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    url_alias: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::webtools.url-alias'
+    > &
+      Schema.Attribute.Unique;
   };
 }
 

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { PublicStatus } from "./types";
+import type { PublicStatus } from "../lib/types";
 
 const STATUS: Record<PublicStatus, { label: string; className: string }> = {
   exploring: {

@@ -1,5 +1,6 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
+import { cache } from "react";
 import { cmsClient } from "@/features/cms/lib/strapi";
 
 const itemType = "api::roadmap-item.roadmap-item" satisfies UID.ContentType;
@@ -25,6 +26,7 @@ const itemQuery = {
     "last_synced_at",
     "updatedAt",
   ],
+  populate: { url_alias: { fields: ["url_path"] } },
   sort: ["canny_votes:desc", "public_title:asc"],
   // @ts-expect-error - issue in the strapi-client
   pagination: { pageSize: 200 },
@@ -60,7 +62,8 @@ import { githubLinks, safeHref } from "./types";
 // The CMS route only ever serves published items, whatever the query says.
 // Every URL is scheme-checked here, once, so components can render hrefs
 // from these objects without re-validating.
-export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
+// Cached per request: the overview hero and the roadmap section both read it.
+export const fetchRoadmapItems = cache(async (): Promise<RoadmapItem[]> => {
   const res = await cmsClient.collection(itemType).find(itemQuery);
   return res.data.map((item) => ({
     ...item,
@@ -68,7 +71,7 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
     docs_link: safeHref(item.docs_link),
     github_links: githubLinks(item.github_links).filter((l) => safeHref(l.url)),
   }));
-}
+});
 
 /** Releases are supplementary: the roadmap still renders without them. */
 export async function fetchRoadmapReleases(): Promise<RoadmapRelease[]> {
@@ -80,12 +83,10 @@ export async function fetchRoadmapReleases(): Promise<RoadmapRelease[]> {
   }
 }
 
-/** Just enough for link-preview metadata on `/roadmap?item=<slug>`. */
-export async function fetchRoadmapItemSummary(slug: string) {
-  const res = await cmsClient.collection(itemType).find({
+/** Just enough for an item's link-preview metadata. */
+export async function fetchRoadmapItemSummary(documentId: string) {
+  const res = await cmsClient.collection(itemType).findOne(documentId, {
     fields: ["slug", "public_title", "public_description"],
-    filters: { slug: { $eq: slug } },
-    pagination: { pageSize: 1 },
   });
-  return res.data[0] ?? null;
+  return res.data;
 }

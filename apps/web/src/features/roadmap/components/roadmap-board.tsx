@@ -1,21 +1,26 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { replaceUrlInPage } from "@/features/analytics";
 import { cn } from "@/lib/utils";
-import type { RoadmapItem, RoadmapRelease } from "./data";
-import { RoadmapCard } from "./roadmap-card";
-import { RoadmapItemDialog } from "./roadmap-item-dialog";
-import { type FacetOption, RoadmapSidebar } from "./roadmap-sidebar";
+import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
   compareVersions,
+  DEFAULT_ROADMAP_STATE,
   formatDate,
+  itemPath,
+  parseRoadmapState,
   type RoadmapSort,
   type RoadmapState,
   type RoadmapView,
   stringList,
   UNSCHEDULED,
-} from "./types";
+} from "../lib/types";
+import { RoadmapCard } from "./roadmap-card";
+import { RoadmapItemDialog } from "./roadmap-item-dialog";
+import { useRoadmapRoute } from "./roadmap-route";
+import { type FacetOption, RoadmapSidebar } from "./roadmap-sidebar";
 
 const SORTS: { value: RoadmapSort; label: string }[] = [
   { value: "votes", label: "Most votes" },
@@ -27,11 +32,13 @@ const SORTS: { value: RoadmapSort; label: string }[] = [
 const releaseKey = (item: RoadmapItem) => item.release || UNSCHEDULED;
 
 /**
- * Mirror the view into the address bar so any state can be shared. Plain
- * History API (not router.replace) so nothing round-trips to the server.
+ * Mirror the view into the address bar so any state can be shared: the open
+ * item as its own path, the rest as query params. Plain History API (not
+ * router.replace) so nothing round-trips to the server.
  */
-function writeUrl(state: RoadmapState, item: string | null) {
+function writeUrl(state: RoadmapState, pathname: string, item?: string | null) {
   const url = new URL(window.location.href);
+  url.pathname = pathname;
   const p = new URLSearchParams();
   if (state.q) p.set("q", state.q);
   if (state.sort !== "votes") p.set("sort", state.sort);
@@ -40,7 +47,7 @@ function writeUrl(state: RoadmapState, item: string | null) {
   for (const a of state.areas) p.append("area", a);
   if (item) p.set("item", item);
   url.search = p.toString();
-  window.history.replaceState(window.history.state, "", url);
+  replaceUrlInPage(url);
 }
 
 function sortItems(items: RoadmapItem[], sort: RoadmapSort) {
@@ -118,50 +125,63 @@ const Column = ({
 const RoadmapBoard = ({
   items,
   releases,
-  initialState,
-  initialItem,
 }: {
   items: RoadmapItem[];
   releases: RoadmapRelease[];
-  initialState: RoadmapState;
-  initialItem?: string;
 }) => {
-  const [state, setState] = useState<RoadmapState>(initialState);
+  const route = useRoadmapRoute();
+  const basePath = useRef(route.basePath);
+  const [state, setState] = useState<RoadmapState>(DEFAULT_ROADMAP_STATE);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
-  // Open a shared `?item=` link after hydration, not during SSR: a Radix
-  // dialog rendered open on the server doesn't match the client's first
-  // render. Unknown/unpublished items just drop the param.
+  /** Write the view and open item (or none) to the address bar. */
+  const sync = useCallback(
+    (next: RoadmapState, slug: string | null) => {
+      basePath.current ??= window.location.pathname;
+      const item = slug ? items.find((i) => i.slug === slug) : undefined;
+      const path = item && itemPath(item);
+      // An item without an alias yet falls back to `?item=` on the page.
+      writeUrl(next, path ?? basePath.current, path ? undefined : item?.slug);
+    },
+    [items],
+  );
+
+  // The page is statically rendered (ISR) with the default view, so restore
+  // a shared view and open item from the URL after hydration: the item's own
+  // path (via RoadmapRoute) or an old-style `?item=` link, which moves to
+  // the item's path. Unknown/unpublished items just drop the param.
   useEffect(() => {
-    if (initialItem && items.some((i) => i.slug === initialItem)) {
-      setOpenSlug(initialItem);
-    } else if (initialItem) {
-      writeUrl(initialState, null);
-    }
-  }, [initialItem, initialState, items]);
+    const params = new URLSearchParams(window.location.search);
+    const restored = parseRoadmapState(params);
+    const slug = route.item ?? params.get("item") ?? null;
+    const found = items.some((i) => i.slug === slug);
+    setState(restored);
+    if (found) setOpenSlug(slug);
+    if (params.has("item")) sync(restored, found ? slug : null);
+  }, [items, route.item, sync]);
 
   const update = useCallback(
     (patch: Partial<RoadmapState>) => {
       setState((prev) => {
         const next = { ...prev, ...patch };
-        writeUrl(next, openSlug);
+        sync(next, openSlug);
         return next;
       });
     },
-    [openSlug],
+    [openSlug, sync],
   );
 
   const open = useCallback(
     (slug: string) => {
       setOpenSlug(slug);
-      writeUrl(state, slug);
+      sync(state, slug);
     },
-    [state],
+    [state, sync],
   );
   const close = useCallback(() => {
     setOpenSlug(null);
-    writeUrl(state, null);
-  }, [state]);
+    sync(state, null);
+  }, [state, sync]);
 
   const toggle = (key: "releases" | "areas", value: string) =>
     update({

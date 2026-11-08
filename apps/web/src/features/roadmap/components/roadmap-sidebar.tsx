@@ -2,8 +2,8 @@
 
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RoadmapRelease } from "./data";
-import { formatDate, type RoadmapView, UNSCHEDULED } from "./types";
+import type { RoadmapRelease } from "../lib/data";
+import { formatDate, type RoadmapView, UNSCHEDULED } from "../lib/types";
 
 export type FacetOption = { value: string; label: string; count: number };
 

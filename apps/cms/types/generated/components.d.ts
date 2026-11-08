@@ -131,6 +131,18 @@ export interface SectionsHighlights extends Struct.ComponentSchema {
   };
 }
 
+export interface SectionsRoadmap extends Struct.ComponentSchema {
+  collectionName: 'components_sections_roadmaps';
+  info: {
+    displayName: 'Roadmap';
+  };
+  attributes: {
+    show_feedback_link: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
+  };
+}
+
 export interface SectionsSearch extends Struct.ComponentSchema {
   collectionName: 'components_sections_searches';
   info: {
@@ -247,6 +259,7 @@ declare module '@strapi/strapi' {
       'sections.cta': SectionsCta;
       'sections.faq-items': SectionsFaqItems;
       'sections.highlights': SectionsHighlights;
+      'sections.roadmap': SectionsRoadmap;
       'sections.search': SectionsSearch;
       'shared.button': SharedButton;
       'shared.labels': SharedLabels;

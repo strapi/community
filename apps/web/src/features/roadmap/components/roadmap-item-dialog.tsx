@@ -10,8 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import type { RoadmapItem, RoadmapRelease } from "./data";
-import { StatusBadge } from "./labels";
+import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
   formatDate,
   type GithubLink,
@@ -19,7 +18,8 @@ import {
   githubLinks,
   type PublicStatus,
   stringList,
-} from "./types";
+} from "../lib/types";
+import { StatusBadge } from "./labels";
 
 const STATE_LABEL: Record<NonNullable<GithubLink["state"]>, string> = {
   open: "Open",

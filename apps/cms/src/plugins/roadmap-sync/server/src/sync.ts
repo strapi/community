@@ -191,7 +191,7 @@ function publicUrl(slug: string | null | undefined): string | null {
   const base = (
     process.env.WEBSITE_URL || "https://community.strapi.io"
   ).replace(/\/$/, "");
-  return `${base}/roadmap?item=${encodeURIComponent(slug)}`;
+  return `${base}/roadmap/${encodeURIComponent(slug)}`;
 }
 
 function entry(row: RoadmapRow, extra: Partial<ReportEntry> = {}): ReportEntry {

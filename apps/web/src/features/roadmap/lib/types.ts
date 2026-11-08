@@ -18,6 +18,28 @@ export type RoadmapState = {
   areas: string[];
 };
 
+export const DEFAULT_ROADMAP_STATE: RoadmapState = {
+  q: "",
+  sort: "votes",
+  view: "board",
+  releases: [],
+  areas: [],
+};
+
+const SORTS: RoadmapSort[] = ["votes", "newest", "release", "title"];
+
+/** Untrusted query → a valid view state. */
+export function parseRoadmapState(params: URLSearchParams): RoadmapState {
+  const sort = params.get("sort") as RoadmapSort | null;
+  return {
+    q: params.get("q")?.slice(0, 100) ?? "",
+    sort: sort && SORTS.includes(sort) ? sort : "votes",
+    view: params.get("view") === "timeline" ? "timeline" : "board",
+    releases: params.getAll("release"),
+    areas: params.getAll("area"),
+  };
+}
+
 /** Filter key for items with no release. */
 export const UNSCHEDULED = "unscheduled";
 
@@ -35,6 +57,11 @@ export function safeHref(url: string | null | undefined): string | null {
     return null;
   }
 }
+
+/** An item's own URL (its webtools alias), if it has one yet. */
+export const itemPath = (item: {
+  url_alias?: { url_path?: string | null }[] | null;
+}): string | null => item.url_alias?.[0]?.url_path ?? null;
 
 /** JSON attributes come back untyped; narrow them to string arrays. */
 export const stringList = (value: unknown): string[] =>

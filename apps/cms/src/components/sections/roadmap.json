@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_sections_roadmaps",
+  "info": {
+    "displayName": "Roadmap"
+  },
+  "options": {},
+  "attributes": {
+    "show_feedback_link": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    }
+  },
+  "config": {}
+}
