@@ -36,7 +36,10 @@ function sameValue(a: unknown, b: unknown): boolean {
  * version Strapi knows about afterwards. Failure is non-fatal: items keep
  * syncing, the last known release list stays, and the run reports it.
  */
-async function syncReleases(report: SyncReport): Promise<Set<string>> {
+async function syncReleases(
+  report: SyncReport,
+  referenced: Iterable<string>,
+): Promise<Set<string>> {
   const existing = await strapi.documents(RELEASE_UID).findMany({
     limit: 1000,
   });
@@ -44,7 +47,7 @@ async function syncReleases(report: SyncReport): Promise<Set<string>> {
 
   let fetched: Awaited<ReturnType<typeof fetchReleases>>;
   try {
-    fetched = await fetchReleases();
+    fetched = await fetchReleases(referenced);
   } catch (err) {
     report.errors.push(`Releases not refreshed: ${(err as Error).message}`);
     return new Set(byVersion.keys());
@@ -524,12 +527,15 @@ async function doSync({
     report.notion_rows = pages.length;
 
     const { byNotionId, publishedIds, slugs } = await loadExisting();
-    const knownReleases = await syncReleases(report);
+    const rows = pages.map((page) => ({ page, row: mapNotionPage(page) }));
+    const knownReleases = await syncReleases(
+      report,
+      rows.flatMap(({ row }) => (row.release ? [row.release] : [])),
+    );
     const canny = createCannyClient();
     const seen = new Set<string>();
 
-    for (const page of pages) {
-      const row = mapNotionPage(page);
+    for (const { page, row } of rows) {
       seen.add(row.notionPageId);
       // Not blocking: a version that isn't a GitHub release or open
       // milestone yet still shows on the card, just without a date.
