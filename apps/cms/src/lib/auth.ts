@@ -24,14 +24,25 @@ import {
 
 const pendingEmailChanges = new Map<string, string>();
 
+/**
+ * better-auth resolves relative redirect params against its own base URL
+ * (the CMS), so make them absolute on the web app instead — including the
+ * error/new-user variants, which it redirects to with `?error=<code>`.
+ */
 function absolutizeCallbackURL(url: string): string {
   const parsed = new URL(url);
-  const callbackURL = parsed.searchParams.get("callbackURL");
-  if (callbackURL && !/^https?:\/\//i.test(callbackURL)) {
-    parsed.searchParams.set(
-      "callbackURL",
-      new URL(callbackURL, process.env.WEBSITE_URL).toString(),
-    );
+  for (const param of [
+    "callbackURL",
+    "errorCallbackURL",
+    "newUserCallbackURL",
+  ]) {
+    const value = parsed.searchParams.get(param);
+    if (value && !/^https?:\/\//i.test(value)) {
+      parsed.searchParams.set(
+        param,
+        new URL(value, process.env.WEBSITE_URL).toString(),
+      );
+    }
   }
   return parsed.toString();
 }
@@ -72,6 +83,46 @@ function absolutizeMediaUrl(url: string): string {
  * which is harmless — it's a no-op when there's no logo, and idempotent
  * when the logo didn't change.
  */
+/**
+ * Guards the `logo` an organization is created/updated with. If the URL
+ * points at a file in our media library, that file must belong to the
+ * acting user (a fresh `uploadOwnedFile` upload) or already to this
+ * organization — otherwise `relinkOrganizationLogo` would re-tag someone
+ * else's file (another user's avatar, a package icon, …) to this org,
+ * detaching it from its real owner and letting `DELETE /organizations/logo`
+ * remove it. URLs that match no file have nothing to hijack and pass.
+ */
+async function assertLogoUsable(
+  logo: string | null | undefined,
+  userId: string | number,
+  organizationId?: string | number,
+) {
+  if (!logo) return;
+
+  const file = await strapi.db.query("plugin::upload.file").findOne({
+    where: { url: logo },
+    populate: ["related"],
+  });
+  if (!file) return;
+
+  const related =
+    (file.related as { id: string | number; __type: string }[]) ?? [];
+  const usable =
+    related.length > 0 &&
+    related.every(
+      (item) =>
+        (item.__type === "plugin::better-auth.user" &&
+          String(item.id) === String(userId)) ||
+        (organizationId !== undefined &&
+          item.__type === "plugin::better-auth.organization" &&
+          String(item.id) === String(organizationId)),
+    );
+
+  if (!usable) {
+    throw new APIError("BAD_REQUEST", { message: "Invalid logo." });
+  }
+}
+
 async function relinkOrganizationLogo(organization: {
   id: string | number;
   logo?: string | null;
@@ -96,18 +147,61 @@ export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
   appName: process.env.SITE_NAME ?? "Strapi Community Hub",
+  /**
+   * Where redirect-based flows (OAuth sign-in/linking callbacks, and
+   * better-auth's own `/error` page) send the browser on failure. Without
+   * this they fall back to `/api/auth/error` on the CMS, which in production
+   * redirects to `/` — i.e. the Strapi admin login. The web app's
+   * `/auth/error` view forwards the `?error=` code on to a page that toasts it.
+   */
+  onAPIError: {
+    errorURL: `${process.env.WEBSITE_URL}/auth/error`,
+  },
+  account: {
+    accountLinking: {
+      disableImplicitLinking: true,
+      allowDifferentEmails: true,
+    },
+  },
+  // `prompt: "select_account"` makes Google/GitHub always show their account
+  // picker instead of silently reusing whichever account is signed in there —
+  // matters most when linking, where the wrong account is easy to pick up.
   socialProviders: {
     google: {
       clientId: process.env.BETTER_AUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+      prompt: "select_account",
     },
     github: {
       clientId: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
+      prompt: "select_account",
     },
   },
   plugins: [
     organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            /**
+             * Who may submit packages/templates on behalf of the
+             * organization — only its owners/admins, or every member.
+             * Set on the organization "Settings" tab (via better-auth's
+             * own `organization.update`, which is already restricted to
+             * owners/admins), enforced by `canSubmitForOrganization`.
+             * `private` in the Strapi schema, so it stays off the public
+             * content API. Existing organizations have no value, which
+             * counts as `"admins"`.
+             */
+            submission_policy: {
+              type: ["admins", "members"],
+              required: false,
+              defaultValue: "admins",
+              input: true,
+            },
+          },
+        },
+      },
       sendInvitationEmail: async (data) => {
         const url = `${process.env.WEBSITE_URL}/auth/accept-invitation?invitationId=${data.id}`;
         const expirationHours = Math.round(
@@ -127,6 +221,16 @@ export const auth = betterAuth({
         });
       },
       organizationHooks: {
+        beforeCreateOrganization: async ({ organization, user }) => {
+          await assertLogoUsable(organization.logo, user.id);
+        },
+        beforeUpdateOrganization: async ({ organization, user, member }) => {
+          await assertLogoUsable(
+            organization.logo,
+            user.id,
+            member.organizationId,
+          );
+        },
         afterUpdateOrganization: async ({ organization }) => {
           if (!organization) return;
           await relinkOrganizationLogo(organization);
@@ -156,7 +260,14 @@ export const auth = betterAuth({
     jwt(),
     magicLink({
       disableSignUp: true,
-      sendMagicLink: async ({ email, url }) => {
+      /**
+       * better-auth only enforces `disableSignUp` when the link is verified,
+       * so skip sending to unknown emails here. The endpoint still responds
+       * with success, so this doesn't reveal whether an account exists.
+       */
+      sendMagicLink: async ({ email, url }, ctx) => {
+        const found = await ctx?.context.internalAdapter.findUserByEmail(email);
+        if (!found) return;
         await sendMagicLinkEmail(email, absolutizeCallbackURL(url));
       },
     }),

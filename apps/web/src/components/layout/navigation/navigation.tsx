@@ -1,10 +1,10 @@
 import { Button, Container } from "@repo/strapi-ui";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { AuthNavigation } from "@/features/auth/components/auth-navigation";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { MobileNav } from "./mobile-nav";
+import { NavLinks } from "./nav-links";
 
 type Props = {
   theme: "light" | "dark";
@@ -15,16 +15,15 @@ const Navigation = async ({ theme }: Props) => {
     populate: "*",
   });
 
-  const headersList = await headers();
-  const path = new URL(headersList.get("x-url")!).pathname;
+  const ctaLinks = data.data.cta_links?.map((link) => (
+    <Button key={link.id} asChild>
+      <Link href={link.link!}>{link.label}</Link>
+    </Button>
+  ));
 
   return (
     <nav
-      className={`sticky z-11 top-0 border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background)" : "bg-(--color-hero-bg)"}`}
-      style={{
-        backgroundImage: `${theme === "light" ? "var(--bg-dotted-pattern-image-light)" : "var(--bg-dotted-pattern-image)"}`,
-        backgroundSize: "var(--bg-dotted-pattern-size)",
-      }}
+      className={`sticky z-11 top-0 border-b ${theme === "light" ? "border-(--color-neutral300)" : "border-(--color-grey700)"} ${theme === "light" ? "bg-(--background) bg-dotted-light" : "bg-(--color-hero-bg) bg-dotted"}`}
     >
       <Container>
         <div
@@ -39,44 +38,25 @@ const Navigation = async ({ theme }: Props) => {
                 {data.data.home_link.label}
               </Link>
             )}
-            <ul
-              className={`hidden items-center gap-6 font-medium text-[15px] ${theme === "light" ? "text-(--color-primary700)" : "text-(--color-hero-muted)"} lg:flex`}
-            >
-              {data.data.nav_links?.map((link) => {
-                const isActive =
-                  path === link.link || path.startsWith(`${link.link}/`);
-
-                return (
-                  <li key={link.id}>
-                    <Link
-                      href={link.link!}
-                      className={`transition-colors ${theme === "light" ? "hover:text-(--color-primary800)" : "hover:text-white"} ${isActive ? (theme === "light" ? "text-(--color-primary900)" : "text-white") : ""}`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <NavLinks links={data.data.nav_links ?? []} theme={theme} />
           </div>
 
           <div className="flex items-center gap-2">
             <div className="hidden items-center gap-2 lg:flex">
               {isAuthEnabled ? (
-                <AuthNavigation theme={theme} />
+                <AuthNavigation
+                  theme={theme}
+                  compact
+                  signedInActions={ctaLinks}
+                />
               ) : (
-                data.data.cta_links?.map((link) => (
-                  <Button key={link.id} asChild>
-                    <Link href={link.link!}>{link.label}</Link>
-                  </Button>
-                ))
+                ctaLinks
               )}
             </div>
             <MobileNav
               navLinks={data.data.nav_links ?? []}
               ctaLinks={data.data.cta_links ?? []}
               theme={theme}
-              currentPath={path}
             />
           </div>
         </div>

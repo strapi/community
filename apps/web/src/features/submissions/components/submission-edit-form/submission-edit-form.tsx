@@ -5,18 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MarkdownEditor } from "@/components/content/markdown-editor";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import {
   FieldError,
-  Hint,
   Label,
   SectionDivider,
   Textarea,
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { cn } from "@/lib/utils";
 import {
   getSubmission,
@@ -26,7 +24,7 @@ import {
 import type {
   SubmissionCategory,
   SubmissionDetail,
-  SubmissionMaintainer,
+  // SubmissionMaintainer,
   SubmissionType,
 } from "../../lib/types";
 import {
@@ -36,7 +34,17 @@ import {
 } from "../../lib/validation";
 import { CategoryPicker } from "./category-picker";
 import { DangerZone } from "./danger-zone";
-import { MaintainerPicker } from "./maintainer-picker";
+
+// import { MaintainerPicker } from "./maintainer-picker";
+
+// Maintainer editing is temporarily commented out throughout this file —
+// adding/removing maintainers was immediate with no consent from the added
+// user, and will be replaced by an invite flow. `maintainers` is also
+// dropped from the CMS edit whitelists (apps/cms/src/api/{package,template}/
+// controllers) the same way. `MaintainerPicker`, `findUserBySlug` and the
+// `maintainers` field on `SubmissionUpdateData` are left in place; uncomment
+// the import above, the `maintainers` state, its load/save lines, and the
+// JSX block below together (and re-add the whitelist entries) to re-enable.
 
 const READ_ONLY_COPY: Record<SubmissionType, string> = {
   package: "We do not support updating this at the moment.",
@@ -94,7 +102,7 @@ export function SubmissionEditForm({
   const [readme, setReadme] = useState("");
   const [readmeAutoSync, setReadmeAutoSync] = useState(true);
   const [categories, setCategories] = useState<SubmissionCategory[]>([]);
-  const [maintainers, setMaintainers] = useState<SubmissionMaintainer[]>([]);
+  // const [maintainers, setMaintainers] = useState<SubmissionMaintainer[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const [touched, setTouched] = useState<
@@ -124,7 +132,7 @@ export function SubmissionEditForm({
       // synced, not to "manual edit".
       setReadmeAutoSync(fetched.readme_auto_sync !== false);
       setCategories(fetched.categories ?? []);
-      setMaintainers(fetched.maintainers ?? []);
+      // setMaintainers(fetched.maintainers ?? []);
       setLoading(false);
     });
 
@@ -205,7 +213,7 @@ export function SubmissionEditForm({
       name: values.name.trim(),
       description: values.description.trim(),
       categories: categories.map((category) => category.documentId),
-      maintainers: maintainers.map((maintainer) => maintainer.documentId),
+      // maintainers: maintainers.map((maintainer) => maintainer.documentId),
       readme,
       readme_auto_sync: readmeAutoSync,
       ...(type === "template" && { preview_link: values.preview_link.trim() }),
@@ -370,6 +378,7 @@ export function SubmissionEditForm({
           />
         </div>
 
+        {/*
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="maintainer_search">Maintainers</Label>
           <MaintainerPicker
@@ -383,46 +392,18 @@ export function SubmissionEditForm({
             disabled={disabled}
           />
         </div>
+        */}
 
         <SectionDivider label="Readme" />
 
-        <div className="flex flex-col gap-3">
-          <label
-            className={cn(
-              "flex items-start gap-3",
-              disabled ? "cursor-not-allowed" : "cursor-pointer",
-            )}
-            htmlFor="readme_auto_sync"
-          >
-            <Checkbox
-              id="readme_auto_sync"
-              checked={!readmeAutoSync}
-              disabled={disabled}
-              onCheckedChange={(checked) => setReadmeAutoSync(checked !== true)}
-            />
-            <span className="text-sm leading-relaxed text-(--color-neutral700)">
-              Edit the readme manually instead of syncing it automatically from
-              the {type === "package" ? "registry/repository" : "repository"}.
-            </span>
-          </label>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="readme">Readme</Label>
-            {readmeAutoSync ? (
-              <Hint>
-                Automatically kept in sync with the{" "}
-                {type === "package" ? "package registry" : "git repository"}.
-                Check the box above to edit it here instead.
-              </Hint>
-            ) : null}
-            <MarkdownEditor
-              id="readme"
-              value={readme}
-              onChange={setReadme}
-              disabled={disabled || readmeAutoSync}
-            />
-          </div>
-        </div>
+        <ReadmeField
+          type={type}
+          readme={readme}
+          autoSync={readmeAutoSync}
+          onReadmeChange={setReadme}
+          onAutoSyncChange={setReadmeAutoSync}
+          disabled={disabled}
+        />
 
         <SectionDivider label="Registry & repository" />
 

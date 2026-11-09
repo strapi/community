@@ -8,6 +8,91 @@ import {
   findOwnedContentIds,
   uploadOwnedFile,
 } from "../utils";
+import {
+  levelsUpTo,
+  type PartnerLevel,
+  type PartnerSection,
+  partnerPortalFilters,
+  SECTION_MINIMUM_LEVEL,
+} from "../utils/partner-levels";
+
+/**
+ * IDs of the organizations `userId` may submit content on behalf of: any
+ * they're an owner/admin of, plus any they're a plain member of whose
+ * `submission_policy` lets all members submit. Mirrors
+ * `canSubmitForOrganization`, which the submission endpoint enforces.
+ */
+async function findSubmittableOrganizationIds(userId: string | number) {
+  const memberships = await strapi
+    .documents("plugin::better-auth.member")
+    .findMany({
+      filters: { userId },
+      fields: ["organizationId", "role"],
+    });
+
+  const managedIds = memberships
+    .filter((membership) => ["admin", "owner"].includes(membership.role))
+    .map((membership) => membership.organizationId);
+  const memberIds = memberships
+    .filter((membership) => !managedIds.includes(membership.organizationId))
+    .map((membership) => membership.organizationId);
+
+  if (memberIds.length === 0) return managedIds;
+
+  const openOrganizations = await strapi
+    .documents("plugin::better-auth.organization")
+    .findMany({
+      filters: { id: { $in: memberIds }, submission_policy: "members" },
+      fields: ["id"],
+    });
+
+  return [
+    ...managedIds,
+    ...openOrganizations.map((organization) => organization.id),
+  ];
+}
+
+/** IDs of the organizations `userId` is a member of, with any role. */
+async function findMemberOrganizationIds(userId: string | number) {
+  const memberships = await strapi
+    .documents("plugin::better-auth.member")
+    .findMany({
+      filters: { userId },
+      fields: ["organizationId"],
+    });
+
+  return memberships.map((membership) => membership.organizationId);
+}
+
+/** The organization's partner level, or `null` if it has no partner portal access. */
+async function findPartnerLevel(
+  organizationId: string,
+): Promise<PartnerLevel | null> {
+  const [organization] = await strapi
+    .documents("plugin::better-auth.organization")
+    .findMany({
+      filters: { id: organizationId, ...partnerPortalFilters() },
+      fields: ["partner_level"],
+    });
+
+  if (!organization) return null;
+  return organization.partner_level ?? "Registered";
+}
+
+/** Partner resources unlocked at `level` — by their own and their section's minimum level. */
+function partnerResourceFilters(level: PartnerLevel) {
+  const unlocked = levelsUpTo(level);
+  const sections = (
+    Object.entries(SECTION_MINIMUM_LEVEL) as [PartnerSection, PartnerLevel][]
+  )
+    .filter(([, minimum]) => unlocked.includes(minimum))
+    .map(([section]) => section);
+
+  return {
+    minimum_level: { $in: unlocked },
+    section: { $in: sections },
+  };
+}
 
 export default factories.createCoreService(
   "plugin::better-auth.organization",
@@ -78,32 +163,111 @@ export default factories.createCoreService(
     },
 
     /**
-     * Organizations `userId` is an owner/admin of — i.e. allowed to
-     * submit content on behalf of. Backs `GET /organizations/mine`, used
-     * by the plugin/template submission forms' "Submit as" selector.
+     * Organizations `userId` is allowed to submit content on behalf of
+     * (see `findSubmittableOrganizationIds`). Backs `GET
+     * /organizations/mine`, used by the plugin/template submission forms'
+     * "Submit as" selector.
      */
-    async getManageable({ userId }: { userId: string | number }) {
-      const memberships = await strapi
-        .documents("plugin::better-auth.member")
-        .findMany({
-          filters: {
-            userId,
-            role: { $in: ["admin", "owner"] },
-          },
-          fields: ["organizationId"],
-        });
-
-      if (memberships.length === 0) return [];
+    async getSubmittable({ userId }: { userId: string | number }) {
+      const organizationIds = await findSubmittableOrganizationIds(userId);
+      if (organizationIds.length === 0) return [];
 
       return strapi.documents("plugin::better-auth.organization").findMany({
-        filters: {
-          id: {
-            $in: memberships.map((membership) => membership.organizationId),
-          },
-        },
+        filters: { id: { $in: organizationIds } },
         fields: ["id", "name", "slug", "logo"],
         sort: { name: "asc" },
       });
+    },
+
+    /**
+     * Partner organizations (plus the partner portal test organization)
+     * `userId` is a member of (any role) — i.e. whose partner portal they
+     * may access. Backs `GET
+     * /organizations/partners`, used by the web app's user menu and the
+     * partner portal itself.
+     */
+    async getPartnerPortals({ userId }: { userId: string | number }) {
+      const organizationIds = await findMemberOrganizationIds(userId);
+      if (organizationIds.length === 0) return [];
+
+      return strapi.documents("plugin::better-auth.organization").findMany({
+        filters: { id: { $in: organizationIds }, ...partnerPortalFilters() },
+        fields: ["id", "name", "slug", "logo", "partner_level", "createdAt"],
+        populate: { profile: { fields: ["website", "location"] } },
+        sort: { name: "asc" },
+      });
+    },
+
+    /**
+     * The partner portal's gated content for a partner organization:
+     * its level, the benefits listed for that level, and every published
+     * resource its level unlocks (both the resource's own
+     * `minimum_level` and its section's). Resource bodies are left out —
+     * see `getPartnerResource`. Returns `null` for non-partner
+     * organizations.
+     */
+    async getPartnerPortal({ organizationId }: { organizationId: string }) {
+      const level = await findPartnerLevel(organizationId);
+      if (!level) return null;
+
+      const [program, resources] = await Promise.all([
+        strapi.documents("api::partner-program.partner-program").findFirst({
+          populate: { benefits: true },
+        }),
+        strapi.documents("api::partner-resource.partner-resource").findMany({
+          status: "published",
+          filters: partnerResourceFilters(level),
+          fields: [
+            "title",
+            "slug",
+            "description",
+            "section",
+            "minimum_level",
+            "category",
+            "label",
+            "icon",
+            "link",
+            "content",
+          ],
+          populate: { file: { fields: ["url", "name", "ext", "size"] } },
+          sort: [{ sort_order: "asc" }, { title: "asc" }],
+        }),
+      ]);
+
+      return {
+        level,
+        benefits: (program?.benefits ?? []).filter(
+          (benefit) =>
+            Array.isArray(benefit.levels) && benefit.levels.includes(level),
+        ),
+        resources: resources.map(({ content, ...resource }) => ({
+          ...resource,
+          has_content: !!content?.trim(),
+        })),
+      };
+    },
+
+    /**
+     * A single partner resource, including its body — or `null` if it
+     * doesn't exist or the organization's level doesn't unlock it.
+     */
+    async getPartnerResource({
+      organizationId,
+      slug,
+    }: {
+      organizationId: string;
+      slug: string;
+    }) {
+      const level = await findPartnerLevel(organizationId);
+      if (!level) return null;
+
+      return strapi
+        .documents("api::partner-resource.partner-resource")
+        .findFirst({
+          status: "published",
+          filters: { ...partnerResourceFilters(level), slug: { $eq: slug } },
+          populate: { file: { fields: ["url", "name", "ext", "size"] } },
+        });
     },
 
     async getMembers({

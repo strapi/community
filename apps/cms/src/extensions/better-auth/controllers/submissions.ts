@@ -25,6 +25,18 @@ type PopulatedEntry = ContentEntry & {
 };
 
 /**
+ * Strips `private` attributes (e.g. `submitter_ip`) and passwords from
+ * document-service results before they leave the content API — these
+ * custom actions bypass the core controllers' `sanitizeOutput`.
+ */
+function sanitizeEntries<T>(data: T, uid: UID.ContentType): Promise<T> {
+  return strapi.contentAPI.sanitize.output(
+    data,
+    strapi.getModel(uid),
+  ) as Promise<T>;
+}
+
+/**
  * Shared by `getSubmission` and `canEdit`: is the caller the owner of an
  * entry with this `owner`? User-owned → the account itself; org-owned →
  * any owner/admin of that org, via `hasOrganizationUpdatePermission`
@@ -112,7 +124,7 @@ async function getSubmission(
     })) as { url_alias?: { url_path?: string | null }[] | null } | null;
   const url = published?.url_alias?.[0]?.url_path ?? null;
 
-  ctx.body = { ...entry, isOwner, url };
+  ctx.body = { ...(await sanitizeEntries(entry, uid)), isOwner, url };
 }
 
 /**
@@ -166,6 +178,13 @@ async function uploadImage(
 ) {
   const entry = ctx.state.contentEntry as ContentEntry;
 
+  // Same approved-only gate as the package/template `update` overrides.
+  if (entry.overall_status && entry.overall_status !== "approved") {
+    return ctx.badRequest(
+      "This submission cannot be edited until it has been approved.",
+    );
+  }
+
   const uploaded = ctx.request.files?.file;
   const file = Array.isArray(uploaded) ? uploaded[0] : uploaded;
   if (!file) return ctx.badRequest("No file provided.");
@@ -201,11 +220,22 @@ async function uploadImage(
     data: { [field]: uploadedFile.id },
   });
 
+  // Only delete the replaced file if nothing but this entry (its draft
+  // and/or published row) still uses it — never a file shared with, or
+  // belonging to, anything else in the media library.
   if (previousFile?.id) {
-    const old = await strapi.db
-      .query("plugin::upload.file")
-      .findOne({ where: { id: previousFile.id } });
-    if (old) await strapi.plugin("upload").service("upload").remove(old);
+    const old = await strapi.db.query("plugin::upload.file").findOne({
+      where: { id: previousFile.id },
+      populate: ["related"],
+    });
+    const related =
+      (old?.related as { documentId?: string; __type: string }[]) ?? [];
+    const onlyUsedByThisEntry = related.every(
+      (item) => item.__type === uid && item.documentId === entry.documentId,
+    );
+    if (old && onlyUsedByThisEntry) {
+      await strapi.plugin("upload").service("upload").remove(old);
+    }
   }
 
   const published = await strapi.documents(uid).findOne({
@@ -264,9 +294,13 @@ export default () => ({
    */
   async mine(ctx) {
     const session = ctx.state.betterAuthSession;
-    ctx.body = await getPluginService("submissions").getUserSubmissions(
-      session.user.id,
-    );
+    const { packages, templates } = await getPluginService(
+      "submissions",
+    ).getUserSubmissions(session.user.id);
+    ctx.body = {
+      packages: await sanitizeEntries(packages, "api::package.package"),
+      templates: await sanitizeEntries(templates, "api::template.template"),
+    };
   },
 
   /**
@@ -286,10 +320,14 @@ export default () => ({
     );
     const result =
       await getPluginService("submissions").getOrganizationSubmissions(id);
+    const [packages, templates] = await Promise.all([
+      sanitizeEntries(result.packages, "api::package.package"),
+      sanitizeEntries(result.templates, "api::template.template"),
+    ]);
 
     ctx.body = {
-      packages: result.packages.map((entry) => ({ ...entry, isOwner })),
-      templates: result.templates.map((entry) => ({ ...entry, isOwner })),
+      packages: packages.map((entry) => ({ ...entry, isOwner })),
+      templates: templates.map((entry) => ({ ...entry, isOwner })),
     };
   },
 

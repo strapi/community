@@ -950,9 +950,9 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     description: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
-    git_repository: Schema.Attribute.String;
+    git_repository: Schema.Attribute.String & Schema.Attribute.Required;
     icon: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     integrations: Schema.Attribute.Relation<
       'manyToMany',
@@ -970,12 +970,16 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
       'plugin::better-auth.user'
     >;
     monthly_downloads: Schema.Attribute.Integer;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
     owner: Schema.Attribute.Relation<'morphToOne'>;
-    package_location: Schema.Attribute.String;
+    package_location: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     readme: Schema.Attribute.RichText;
     readme_auto_sync: Schema.Attribute.Boolean &
@@ -992,7 +996,7 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     type: Schema.Attribute.Enumeration<['plugin', 'provider', 'sdk', 'tool']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'plugin'>;
@@ -1005,6 +1009,85 @@ export interface ApiPackagePackage extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Unique;
     version_info: Schema.Attribute.Component<'shared.version-info', false>;
+  };
+}
+
+export interface ApiPartnerProgramPartnerProgram
+  extends Struct.SingleTypeSchema {
+  collectionName: 'partner_programs';
+  info: {
+    description: 'Partner portal settings, like the benefits listed per partner level.';
+    displayName: 'Partner Program';
+    pluralName: 'partner-programs';
+    singularName: 'partner-program';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    benefits: Schema.Attribute.Component<'partner.benefit', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::partner-program.partner-program'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPartnerResourcePartnerResource
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'partner_resources';
+  info: {
+    description: "Gated content for the partner portal's Sales enablement, Tech enablement and Reusable content sections.";
+    displayName: 'Partner Resources';
+    pluralName: 'partner-resources';
+    singularName: 'partner-resource';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    category: Schema.Attribute.String;
+    content: Schema.Attribute.RichText;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    file: Schema.Attribute.Media;
+    icon: Schema.Attribute.String &
+      Schema.Attribute.CustomField<'plugin::strapi-lucide-icons.icon'>;
+    label: Schema.Attribute.String;
+    link: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::partner-resource.partner-resource'
+    > &
+      Schema.Attribute.Private;
+    minimum_level: Schema.Attribute.Enumeration<
+      ['Registered', 'Community', 'Business', 'Enterprise']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Community'>;
+    publishedAt: Schema.Attribute.DateTime;
+    section: Schema.Attribute.Enumeration<
+      ['sales_enablement', 'tech_enablement', 'reusable_content']
+    > &
+      Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    sort_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1029,7 +1112,7 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
   attributes: {
     bio: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
     countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
@@ -1333,7 +1416,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
+        maxLength: 300;
       }>;
     git_repository: Schema.Attribute.String;
     integrations: Schema.Attribute.Relation<
@@ -1352,7 +1435,11 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
       'oneToMany',
       'plugin::better-auth.user'
     >;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
     overall_status: Schema.Attribute.Enumeration<
       ['submitted', 'under_review', 'changes_requested', 'rejected', 'approved']
     >;
@@ -1376,7 +1463,7 @@ export interface ApiTemplateTemplate extends Struct.CollectionTypeSchema {
     submission_notes: Schema.Attribute.Text;
     submitter_agreed_to_terms: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
-    submitter_ip: Schema.Attribute.String;
+    submitter_ip: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1745,6 +1832,14 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    submission_policy: Schema.Attribute.Enumeration<['admins', 'members']> &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'admins'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2629,6 +2724,8 @@ declare module '@strapi/strapi' {
       'api::overview-page.overview-page': ApiOverviewPageOverviewPage;
       'api::package-category.package-category': ApiPackageCategoryPackageCategory;
       'api::package.package': ApiPackagePackage;
+      'api::partner-program.partner-program': ApiPartnerProgramPartnerProgram;
+      'api::partner-resource.partner-resource': ApiPartnerResourcePartnerResource;
       'api::profile.profile': ApiProfileProfile;
       'api::recipe.recipe': ApiRecipeRecipe;
       'api::service.service': ApiServiceService;

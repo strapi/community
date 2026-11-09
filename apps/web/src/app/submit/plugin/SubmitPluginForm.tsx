@@ -2,7 +2,6 @@
 
 import { useAuthenticate } from "@daveyplate/better-auth-ui";
 import Link from "next/link";
-import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { CategorySelect } from "@/features/submit/components/category-select";
@@ -15,10 +14,14 @@ import {
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
 import { OwnerSelect } from "@/features/submit/components/owner-select";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import {
   DESCRIPTION_MAX_LENGTH,
+  isPackageType,
+  PACKAGE_TYPES,
+  type PackageType,
   URL_RE,
 } from "@/features/submit/lib/validation";
 import type { BaseFormFields, FieldErrors } from "@/features/submit/types";
@@ -26,18 +29,20 @@ import { cn } from "@/lib/utils";
 
 interface PluginFormFields extends BaseFormFields {
   plugin_name: string;
+  package_type: PackageType | "";
   package_location: string;
-  readme: string;
 }
 
 const INITIAL: PluginFormFields = {
   plugin_name: "",
+  package_type: "",
   package_location: "",
   repository_url: "",
   description: "",
   logo_file: null,
   categories_list: [],
   readme: "",
+  readme_auto_sync: true,
   submission_notes: "",
   agreed: false,
   owner_type: "plugin::better-auth.user",
@@ -46,10 +51,15 @@ const INITIAL: PluginFormFields = {
 
 function validate(f: PluginFormFields): FieldErrors<PluginFormFields> {
   const e: FieldErrors<PluginFormFields> = {};
-  if (!f.plugin_name.trim()) e.plugin_name = "Plugin name is required.";
+  if (!f.package_type) e.package_type = "Select a package type.";
+  if (!f.plugin_name.trim()) e.plugin_name = "Package name is required.";
   if (!f.description.trim()) e.description = "Description is required.";
   else if (f.description.trim().length > DESCRIPTION_MAX_LENGTH)
     e.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
+  if (!f.package_location.trim())
+    e.package_location = "Registry URL is required.";
+  else if (!URL_RE.test(f.package_location.trim()))
+    e.package_location = "Must be a valid https:// URL.";
   if (!f.repository_url.trim())
     e.repository_url = "Repository URL is required.";
   else if (!URL_RE.test(f.repository_url.trim()))
@@ -66,10 +76,12 @@ function buildFormData(
 ): FormData {
   const form = new FormData();
   form.append("plugin_name", fields.plugin_name.trim());
+  form.append("package_type", fields.package_type);
   form.append("package_location", fields.package_location.trim());
   form.append("repository_url", fields.repository_url.trim());
   form.append("description", fields.description.trim());
   form.append("readme", fields.readme.trim());
+  form.append("readme_auto_sync", String(fields.readme_auto_sync));
   form.append("submission_notes", fields.submission_notes.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
@@ -133,12 +145,13 @@ export function SubmitPluginForm({
 
   return (
     <SubmitFormShell
-      title="Submit a Plugin"
+      title="Submit a Package"
       subtitle={
         <>
-          Share your Strapi plugin with the community. All submissions go
-          through a business and security review before being listed in the
-          marketplace. We&rsquo;ll reach out if we need more information.{" "}
+          Share your Strapi plugin, provider, SDK, or tool with the community.
+          All submissions go through a business and security review before being
+          listed in the marketplace. We&rsquo;ll reach out if we need more
+          information.{" "}
           <Link
             href="/community"
             className="underline underline-offset-2 hover:text-(--color-primary600)"
@@ -148,10 +161,10 @@ export function SubmitPluginForm({
         </>
       }
       reviewSteps={REVIEW_STEPS}
-      contentType="plugin"
+      contentType="package"
       success={success}
       submitting={submitting}
-      submitLabel="Submit Plugin"
+      submitLabel="Submit Package"
       formError={errors._form}
       onSubmit={handleSubmit}
     >
@@ -169,14 +182,45 @@ export function SubmitPluginForm({
         />
         <FieldError message={errors.owner_id} />
         <Hint>
-          Choose whether this plugin belongs to your personal account or to one
+          Choose whether this package belongs to your personal account or to one
           of the organizations you administer.
         </Hint>
       </div>
 
       <div className="mb-5">
+        <Label htmlFor="package_type" required>
+          Package Type
+        </Label>
+        <select
+          id="package_type"
+          className={cn(
+            "flex h-10 w-full rounded-md border border-(--color-neutral150) bg-white px-3 py-2 text-sm text-(--color-neutral900) shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline-none focus:border-(--color-primary200)",
+            !fields.package_type && "text-(--color-neutral600)",
+            errors.package_type && "border-red-400",
+          )}
+          value={fields.package_type}
+          onChange={(e) =>
+            set(
+              "package_type",
+              isPackageType(e.target.value) ? e.target.value : "",
+            )
+          }
+        >
+          <option value="" disabled>
+            Select a type…
+          </option>
+          {PACKAGE_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+        <FieldError message={errors.package_type} />
+      </div>
+
+      <div className="mb-5">
         <Label htmlFor="plugin_name" required>
-          Plugin Name
+          Package Name
         </Label>
         <Input
           id="plugin_name"
@@ -190,19 +234,60 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="package_location">Registry URL</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description" required>
+            Package Description
+          </Label>
+          <span
+            className={cn(
+              "text-xs text-(--color-neutral600)",
+              fields.description.length > DESCRIPTION_MAX_LENGTH &&
+                "text-red-600",
+            )}
+          >
+            {fields.description.length}/{DESCRIPTION_MAX_LENGTH}
+          </span>
+        </div>
+        <Textarea
+          id="description"
+          value={fields.description}
+          onChange={(v) => set("description", v)}
+          placeholder="Tell us about your package — what it does and why it's useful."
+          rows={4}
+          hasError={!!errors.description}
+        />
+        <FieldError message={errors.description} />
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="package_location" required>
+          Registry URL
+        </Label>
         <Input
           id="package_location"
+          type="url"
           value={fields.package_location}
           onChange={(e) => set("package_location", e.target.value)}
           placeholder="https://www.npmjs.com/package/your-plugin"
+          className={errors.package_location ? "border-red-400" : ""}
           autoComplete="off"
         />
+        <FieldError message={errors.package_location} />
         <Hint>
           Full URL to your published package on npm, Packagist, PyPI, RubyGems,
-          or NuGet. Leave blank if not yet published.
+          or NuGet.
         </Hint>
       </div>
+
+      <ReadmeField
+        className="mb-5"
+        type="package"
+        readme={fields.readme}
+        autoSync={fields.readme_auto_sync}
+        onReadmeChange={(v) => set("readme", v)}
+        onAutoSyncChange={(v) => set("readme_auto_sync", v)}
+        placeholder="Paste your package's README or any additional documentation here."
+      />
 
       <div className="mb-5">
         <Label htmlFor="repository_url" required>
@@ -221,33 +306,7 @@ export function SubmitPluginForm({
       </div>
 
       <div className="mb-5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="description" required>
-            Plugin Description
-          </Label>
-          <span
-            className={cn(
-              "text-xs text-(--color-neutral600)",
-              fields.description.length > DESCRIPTION_MAX_LENGTH &&
-                "text-red-600",
-            )}
-          >
-            {fields.description.length}/{DESCRIPTION_MAX_LENGTH}
-          </span>
-        </div>
-        <Textarea
-          id="description"
-          value={fields.description}
-          onChange={(v) => set("description", v)}
-          placeholder="Tell us about your plugin — what it does and why it's useful."
-          rows={4}
-          hasError={!!errors.description}
-        />
-        <FieldError message={errors.description} />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="logo_file">Plugin Logo / Icon</Label>
+        <Label htmlFor="logo_file">Package Logo / Icon</Label>
         <ImageUpload
           file={fields.logo_file}
           onChange={(f) => set("logo_file", f)}
@@ -263,16 +322,6 @@ export function SubmitPluginForm({
           selected={fields.categories_list}
           onAdd={addCategory}
           onRemove={removeCategory}
-        />
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="readme">README / Documentation</Label>
-        <MarkdownEditor
-          id="readme"
-          value={fields.readme}
-          onChange={(v) => set("readme", v)}
-          placeholder="Paste your plugin's README or any additional documentation here."
         />
       </div>
 
@@ -301,7 +350,7 @@ export function SubmitPluginForm({
             className={errors.agreed ? "border-red-400" : ""}
           />
           <span className="text-sm leading-relaxed text-(--color-neutral700)">
-            I confirm this plugin is open-source, MIT-licensed, and compliant
+            I confirm this package is open-source, MIT-licensed, and compliant
             with the{" "}
             <Link
               href="/community"

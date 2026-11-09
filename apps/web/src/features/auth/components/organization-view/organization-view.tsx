@@ -3,18 +3,22 @@
 import {
   ApiKeysCard,
   AuthUIContext,
+  DeleteOrganizationCard,
   getViewByPath,
   OrganizationInvitationsCard,
   OrganizationLogo,
+  OrganizationLogoCard,
   OrganizationMembersCard,
-  OrganizationSettingsCards,
+  OrganizationNameCard,
+  OrganizationSlugCard,
   organizationViewPaths,
   TeamsCard,
   useAuthenticate,
   useCurrentOrganization,
 } from "@daveyplate/better-auth-ui";
-import { ArrowUpRightIcon, MenuIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, HandshakeIcon, MenuIcon, XIcon } from "lucide-react";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { usePartnerOrganizations } from "@/features/partner-portal/lib/partner-organizations";
 import { SubmissionsView } from "@/features/submissions/components/submissions-view";
 import type {
   SubmissionCategory,
@@ -24,6 +28,7 @@ import { cn } from "@/lib/utils";
 import type { OrganizationProfile } from "../../lib/organization-profile";
 import { ProfileView } from "../profile-view";
 import { SettingsContextSwitcher } from "../settings-context-switcher";
+import { SubmissionPolicyCard } from "./submission-policy-card";
 
 type View =
   | "SETTINGS"
@@ -38,6 +43,18 @@ const viewPaths = {
   PROFILE: "profile",
   SUBMISSIONS: "submissions",
 } as const;
+
+/**
+ * Only the dialog's own description (rendered via `DialogDescription`,
+ * whose `data-slot` differs from the card's `CardDescription`) picks up
+ * the warning-box styling — the delete card shares `classNames` between
+ * its always-visible settings-card blurb and its confirmation dialog.
+ * Mirrors the same trick in `account-view.tsx`'s `<DeleteAccountCard>`.
+ */
+const deleteCardClassNames = {
+  description:
+    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
+};
 
 type Props = {
   slug?: string;
@@ -109,6 +126,27 @@ export function OrganizationView({
     isPending: organizationPending,
     isRefetching: organizationRefetching,
   } = useCurrentOrganization({ slug });
+
+  // Only owners/admins of a partner organization get a partner portal —
+  // the same list (and gating) the user menu's "Partner portal" links use.
+  const { organizations: partnerOrganizations } = usePartnerOrganizations();
+  const hasPartnerPortal = partnerOrganizations.some(
+    (partnerOrganization) => partnerOrganization.slug === slug,
+  );
+
+  const partnerPortalLink = (className?: string) =>
+    hasPartnerPortal && (
+      <Link
+        href={`/partner/${slug}`}
+        className={cn(
+          "inline-flex items-center justify-center gap-1.5 rounded-md border border-(--color-primary200) bg-(--color-primary100) px-3 py-2 text-sm font-semibold text-(--color-primary600) transition-colors hover:border-(--color-primary600)",
+          className,
+        )}
+      >
+        <HandshakeIcon className="size-4 shrink-0" />
+        Partner portal
+      </Link>
+    );
 
   const navItems = useMemo(() => {
     const items: { view: View; label: string }[] = [
@@ -212,10 +250,16 @@ export function OrganizationView({
 
       <SettingsContextSwitcher slug={slug} className="md:hidden" />
 
+      {partnerPortalLink("md:hidden")}
+
       <div className="hidden items-center justify-between gap-4 md:flex">
         {identity("lg")}
 
-        <SettingsContextSwitcher slug={slug} />
+        <div className="flex items-center gap-2">
+          {partnerPortalLink()}
+
+          <SettingsContextSwitcher slug={slug} />
+        </div>
       </div>
 
       <div className="flex w-full grow flex-col gap-4 md:flex-row md:gap-12">
@@ -313,25 +357,22 @@ export function OrganizationView({
           )}
 
           {view === "SETTINGS" && (
-            <OrganizationSettingsCards
-              slug={slug}
-              classNames={{
-                // Shared across every card here (logo/name/slug/delete —
-                // `classNames.card` is broadcast to all of them, and the
-                // delete card in turn shares it between its always-visible
-                // settings-card blurb and its confirmation dialog), but
-                // scoping on `data-slot` keeps this out of every other card
-                // and out of the settings-card blurb — only the dialog's
-                // own description (rendered via `DialogDescription`, whose
-                // `data-slot` differs from the card's `CardDescription`)
-                // picks up the warning-box styling. Mirrors the same trick
-                // in `account-view.tsx`'s `<DeleteAccountCard>`.
-                card: {
-                  description:
-                    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
-                },
-              }}
-            />
+            // Composed from better-auth-ui's individual cards instead of
+            // its `OrganizationSettingsCards` (same order, same wrapper)
+            // so our own `SubmissionPolicyCard` can sit just above the
+            // delete card.
+            <div className="flex w-full flex-col gap-4 md:gap-6">
+              {organizationOptions?.logo && (
+                <OrganizationLogoCard slug={slug} />
+              )}
+              <OrganizationNameCard slug={slug} />
+              <OrganizationSlugCard slug={slug} />
+              <SubmissionPolicyCard slug={slug} />
+              <DeleteOrganizationCard
+                slug={slug}
+                classNames={deleteCardClassNames}
+              />
+            </div>
           )}
         </div>
       </div>

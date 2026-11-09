@@ -27,10 +27,28 @@ export function parseCategories(raw: FormDataEntryValue | null): string[] {
   return [];
 }
 
+/**
+ * Syncing is the default (same as the edit form) — the submitted readme
+ * is only kept when the submitter opted to edit it manually; otherwise
+ * the package-info cron fills it from the registry/repository.
+ */
+export function readmeFields(formData: FormData) {
+  const readme_auto_sync = formData.get("readme_auto_sync") !== "false";
+  return {
+    readme_auto_sync,
+    readme: readme_auto_sync ? null : str(formData.get("readme")),
+  };
+}
+
+/**
+ * Uploads to the CMS media library and returns the file's numeric `id` —
+ * media fields are linked by `id`, not `documentId` (a `{ documentId }`
+ * value on a media field is silently dropped by the document service).
+ */
 export async function uploadImageToStrapi(
   file: File,
   logPrefix: string,
-): Promise<string | null> {
+): Promise<number | null> {
   const safeFile = await sanitizeIfSvg(file);
   const form = new FormData();
   form.append("files", safeFile, safeFile.name);
@@ -47,8 +65,8 @@ export async function uploadImageToStrapi(
       console.error(`[${logPrefix}] Image upload failed: ${res.status}`);
       return null;
     }
-    const data = (await res.json()) as Array<{ documentId: string }>;
-    return data[0]?.documentId ?? null;
+    const data = (await res.json()) as Array<{ id: number }>;
+    return data[0]?.id ?? null;
   } catch (err) {
     console.error(`[${logPrefix}] Image upload error:`, err);
     return null;

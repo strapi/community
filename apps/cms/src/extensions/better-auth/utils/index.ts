@@ -93,6 +93,32 @@ export async function isOrganizationMember(
 }
 
 /**
+ * Can the caller submit content on behalf of `organizationId`? Always
+ * true for an owner/admin; true for a plain member only when the
+ * organization's `submission_policy` (a better-auth `additionalFields`
+ * entry — see `lib/auth.ts`) is `"members"`.
+ */
+export async function canSubmitForOrganization(
+  headers: Headers,
+  userId: string | number,
+  organizationId: string,
+): Promise<boolean> {
+  if (await hasOrganizationUpdatePermission(headers, organizationId)) {
+    return true;
+  }
+
+  const [organization] = await strapi
+    .documents("plugin::better-auth.organization")
+    .findMany({
+      filters: { id: organizationId },
+      fields: ["submission_policy"],
+    });
+  if (organization?.submission_policy !== "members") return false;
+
+  return isOrganizationMember(userId, organizationId);
+}
+
+/**
  * `api::profile.profile` fields an org owner/admin may edit through the
  * organization "Profile" tab — scoped to exactly what the public
  * organization page renders (bio/subtitle/website/github/links/location/readme).

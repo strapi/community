@@ -66,7 +66,10 @@
           "managed": true
         }
       },
-      "required": true
+      "required": true,
+      "column": {
+        "unsigned": true
+      }
     },
     "activeOrganizationId": {
       "type": "text",
@@ -77,5 +80,14 @@
         }
       }
     }
-  }
+  },
+  "foreignKeys": [
+    {
+      "name": "ba_session_user_id_fk",
+      "columns": ["user_id"],
+      "referencedColumns": ["id"],
+      "referencedTable": "ba_user",
+      "onDelete": "CASCADE"
+    }
+  ]
 }

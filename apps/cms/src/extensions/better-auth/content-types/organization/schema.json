@@ -60,6 +60,37 @@
         }
       }
     },
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "writable": true,
+      "configurable": false,
+      "editable": false,
+      "visible": false,
+      "default": null,
+      "unique": true
+    },
+    "sitemap_exclude": {
+      "writable": true,
+      "private": true,
+      "configurable": false,
+      "visible": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "submission_policy": {
+      "type": "enumeration",
+      "configurable": false,
+      "private": true,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "default": "admins",
+      "enum": ["admins", "members"]
+    },
     "partner": {
       "type": "boolean",
       "required": false
@@ -82,17 +113,6 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::profile.profile"
-    },
-    "url_alias": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::webtools.url-alias",
-      "writable": true,
-      "configurable": false,
-      "editable": false,
-      "visible": false,
-      "default": null,
-      "unique": true
     }
   }
 }

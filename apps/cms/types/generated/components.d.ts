@@ -1,5 +1,23 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface PartnerBenefit extends Struct.ComponentSchema {
+  collectionName: 'components_partner_benefits';
+  info: {
+    description: 'A benefit shown to partners of the selected levels.';
+    displayName: 'Benefit';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    levels: Schema.Attribute.JSON &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<
+        'plugin::multi-select.multi-select',
+        ['Registered', 'Community', 'Business', 'Enterprise']
+      >;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface ProfileLink extends Struct.ComponentSchema {
   collectionName: 'components_profile_links';
   info: {
@@ -251,6 +269,7 @@ export interface SharedVersionInfo extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export namespace Public {
     export interface ComponentSchemas {
+      'partner.benefit': PartnerBenefit;
       'profile.link': ProfileLink;
       'sections.card-grid': SectionsCardGrid;
       'sections.card-grid-item': SectionsCardGridItem;

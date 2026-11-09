@@ -141,7 +141,7 @@ const HighlightsSection = async ({ section }: Props) => {
                       src: pkg.icon
                         ? cmsImageUrl(pkg.icon.url)
                         : "/package-fallback-icon.png",
-                      alt: pkg.icon?.alternativeText ?? "",
+                      alt: pkg.icon?.alternativeText || "",
                       size: "S",
                     }}
                     link={pkg.url_alias?.[0]?.url_path ?? "#"}
@@ -165,7 +165,7 @@ const HighlightsSection = async ({ section }: Props) => {
                       src: tpl.preview_image
                         ? cmsImageUrl(tpl.preview_image.url)
                         : "/template-fallback-preview.png",
-                      alt: tpl.preview_image?.alternativeText ?? "",
+                      alt: tpl.preview_image?.alternativeText || "",
                       size: "L",
                     }}
                     link={tpl.url_alias?.[0]?.url_path ?? "#"}
@@ -187,7 +187,7 @@ const HighlightsSection = async ({ section }: Props) => {
                       src: integration.logo
                         ? cmsImageUrl(integration.logo.url)
                         : "/logo-plugin.png",
-                      alt: integration.logo?.alternativeText ?? "",
+                      alt: integration.logo?.alternativeText || "",
                       size: "S",
                     }}
                     link={integration.url_alias?.[0]?.url_path ?? "#"}

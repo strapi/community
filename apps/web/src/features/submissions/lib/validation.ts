@@ -12,8 +12,8 @@ import type { SubmissionType } from "./types";
  * `description` schema attribute.
  */
 
-export const NAME_MAX_LENGTH = 100;
-export const DESCRIPTION_MAX_LENGTH = 100;
+export const NAME_MAX_LENGTH = 50;
+export const DESCRIPTION_MAX_LENGTH = 300;
 
 export type SubmissionFormValues = {
   name: string;

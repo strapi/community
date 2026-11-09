@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import slugify from "slugify";
+import { isPackageType } from "@/features/submit/lib/validation";
 import {
   isRecaptchaConfigured,
   verifyRecaptcha,
@@ -8,6 +9,7 @@ import {
   ALLOWED_IMAGE_TYPES,
   MAX_LOGO_SIZE,
   parseCategories,
+  readmeFields,
   str,
   uploadImageToStrapi,
 } from "@/features/submit/server/strapi";
@@ -50,6 +52,8 @@ export async function POST(req: NextRequest) {
   const plugin_name = str(formData.get("plugin_name"));
   const description = str(formData.get("description"));
   const repository_url = str(formData.get("repository_url"));
+  const package_location = str(formData.get("package_location"));
+  const package_type = str(formData.get("package_type"));
   const agreed = formData.get("submitter_agreed_to_terms") === "true";
   const owner_type_raw = str(formData.get("owner_type"));
   const owner_id = str(formData.get("owner_id"));
@@ -59,10 +63,14 @@ export async function POST(req: NextRequest) {
       : "plugin::better-auth.user";
 
   const errors: string[] = [];
-  if (!plugin_name) errors.push("Plugin name is required.");
+  if (!isPackageType(package_type)) errors.push("Select a valid package type.");
+  if (!plugin_name) errors.push("Package name is required.");
   if (!description) errors.push("Description is required.");
   else if (description.length > 100)
     errors.push("Description must be 100 characters or fewer.");
+  if (!package_location) errors.push("Registry URL is required.");
+  else if (!/^https?:\/\//i.test(package_location))
+    errors.push("Registry URL must be a valid https:// URL.");
   if (!repository_url) errors.push("Repository URL is required.");
   else if (!/^https?:\/\//i.test(repository_url))
     errors.push("Repository URL must be a valid https:// URL.");
@@ -71,7 +79,7 @@ export async function POST(req: NextRequest) {
   if (!agreed) errors.push("You must agree to the terms.");
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
-  let logoDocumentId: string | null = null;
+  let logoFileId: number | null = null;
   const logoFile = formData.get("logo_file");
   if (logoFile instanceof File && logoFile.size > 0) {
     if (!ALLOWED_IMAGE_TYPES.includes(logoFile.type)) {
@@ -86,8 +94,8 @@ export async function POST(req: NextRequest) {
         { status: 422 },
       );
     }
-    logoDocumentId = await uploadImageToStrapi(logoFile, LOG);
-    if (!logoDocumentId) {
+    logoFileId = await uploadImageToStrapi(logoFile, LOG);
+    if (!logoFileId) {
       console.warn(
         `[${LOG}] Logo upload failed — submission will proceed without logo.`,
       );
@@ -99,13 +107,13 @@ export async function POST(req: NextRequest) {
     slug: slugify(plugin_name!),
     description,
     git_repository: repository_url,
-    package_location: str(formData.get("package_location")),
-    type: str(formData.get("package_type")) || "plugin",
+    package_location,
+    type: package_type,
     categories_list: parseCategories(formData.get("categories_list")),
-    readme: str(formData.get("readme")),
+    ...readmeFields(formData),
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
-    icon: logoDocumentId ? { documentId: logoDocumentId } : null,
+    icon: logoFileId,
     owner_type,
     owner_id:
       owner_type === "plugin::better-auth.organization" ? owner_id : null,

@@ -1,6 +1,7 @@
 "use client";
 
 import { CategorySelect } from "@/features/submit/components/category-select";
+import { cn } from "@/lib/utils";
 import type { SubmissionCategory } from "../../lib/types";
 
 /**
@@ -25,24 +26,28 @@ export function CategoryPicker({
   const byName = (name: string) =>
     allCategories.find((category) => category.name === name);
 
+  // `display: contents` on the fieldset renders no box, so the dimming
+  // lives on a wrapper — same trick as the image upload in the edit form.
   return (
-    <fieldset disabled={disabled} className="contents">
-      <CategorySelect
-        allCategories={allCategories.map((category) => category.name)}
-        selected={selected.map((category) => category.name)}
-        onAdd={(name) => {
-          const category = byName(name);
-          if (
-            category &&
-            !selected.some((c) => c.documentId === category.documentId)
-          ) {
-            onChange([...selected, category]);
-          }
-        }}
-        onRemove={(name) => {
-          onChange(selected.filter((category) => category.name !== name));
-        }}
-      />
-    </fieldset>
+    <div className={cn(disabled && "pointer-events-none opacity-50")}>
+      <fieldset disabled={disabled} className="contents">
+        <CategorySelect
+          allCategories={allCategories.map((category) => category.name)}
+          selected={selected.map((category) => category.name)}
+          onAdd={(name) => {
+            const category = byName(name);
+            if (
+              category &&
+              !selected.some((c) => c.documentId === category.documentId)
+            ) {
+              onChange([...selected, category]);
+            }
+          }}
+          onRemove={(name) => {
+            onChange(selected.filter((category) => category.name !== name));
+          }}
+        />
+      </fieldset>
+    </div>
   );
 }

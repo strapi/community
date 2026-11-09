@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
@@ -72,20 +73,33 @@ function SubmissionRow({
 
 function SubmissionSection({
   title,
+  submitLabel,
+  submitHref,
   items,
   type,
   editHrefFor,
 }: {
   title: string;
+  submitLabel: string;
+  submitHref: string;
   items: SubmissionSummary[];
   type: SubmissionType;
   editHrefFor: (type: SubmissionType, documentId: string) => string;
 }) {
   return (
     <div className="w-full min-w-0 rounded-md border border-(--color-neutral150) bg-white p-6 shadow-sm">
-      <h3 className="mb-2 text-sm font-semibold text-(--color-neutral900)">
-        {title}
-      </h3>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-(--color-neutral900)">
+          {title}
+        </h3>
+        <Link
+          href={submitHref}
+          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-(--color-neutral150) px-3 py-1.5 text-xs font-semibold text-(--color-neutral800) hover:bg-(--color-neutral100)"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden />
+          {submitLabel}
+        </Link>
+      </div>
       {items.length === 0 ? (
         <p className="text-sm text-(--color-neutral600)">Nothing here yet.</p>
       ) : (
@@ -118,12 +132,16 @@ export function SubmissionList({
     <div className="flex w-full min-w-0 flex-col gap-4 md:gap-6">
       <SubmissionSection
         title="Plugins, providers & tools"
+        submitLabel="Submit package"
+        submitHref="/submit/plugin"
         items={packages}
         type="package"
         editHrefFor={editHrefFor}
       />
       <SubmissionSection
         title="Templates"
+        submitLabel="Submit template"
+        submitHref="/submit/template"
         items={templates}
         type="template"
         editHrefFor={editHrefFor}

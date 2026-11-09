@@ -1,3 +1,13 @@
+import { isPublicMember } from "../src/lib/members";
+import {
+  mediaPopulate,
+  namePopulate,
+  transformHelpPage,
+  transformMember,
+  urlAliasPopulate,
+  withOwner,
+} from "../src/lib/search";
+
 // n8n webhook path namespace. Each Strapi instance posts to "<namespace>/<event>",
 // so duplicate workflow sets sharing one n8n instance (e.g. staging vs production)
 // listen on distinct paths and never collide. Defaults to "strapi" (production).
@@ -34,6 +44,17 @@ export default ({ env }) => ({
           defaultFieldValues: {
             labels: { official: false, featured: false, paid: false },
           },
+          submitFields: [
+            "name",
+            "slug",
+            "description",
+            "git_repository",
+            "package_location",
+            "type",
+            "readme",
+            "readme_auto_sync",
+            "icon",
+          ],
           checks: [
             "repo_public",
             "readme_exists",
@@ -57,6 +78,16 @@ export default ({ env }) => ({
           defaultFieldValues: {
             labels: { official: false, featured: false, paid: false },
           },
+          submitFields: [
+            "name",
+            "slug",
+            "description",
+            "git_repository",
+            "preview_link",
+            "readme",
+            "readme_auto_sync",
+            "preview_image",
+          ],
           checks: ["repo_public", "readme_exists", "mit_license"],
           webhooks: {
             submissionReceived: `${N8N_WEBHOOK_NS}/template-submission-received`,
@@ -71,12 +102,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/package-info",
   },
-  webtools: {
-    enabled: true,
-    config: {
-      website_url: env("WEBSITE_URL"),
-    },
-  },
+  // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
+  // key order of this file, and the first registered document middleware is the
+  // outermost. Meilisearch has to wrap webtools so it indexes entries only after
+  // webtools has generated/updated their url_alias.
   meilisearch: {
     enabled: env("ENABLE_MIGRATION") !== "true",
     config: {
@@ -84,17 +113,23 @@ export default ({ env }) => ({
       apiKey: env("MEILISEARCH_API_KEY"),
       package: {
         indexName: env("MEILISEARCH_PACKAGES_INDEX_NAME"),
-        entriesQuery: {
-          populate: [
-            "owner",
-            "maintainers",
-            "icon",
-            "labels",
-            "url_alias",
-            "categories",
-            "integrations",
+        ...withOwner({
+          fields: [
+            "name",
+            "description",
+            "type",
+            "stars",
+            "monthly_downloads",
+            "createdAt",
           ],
-        },
+          populate: {
+            icon: mediaPopulate,
+            labels: true,
+            url_alias: urlAliasPopulate,
+            categories: namePopulate,
+            integrations: namePopulate,
+          },
+        }),
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
           searchableAttributes: ["name", "description"],
@@ -110,19 +145,19 @@ export default ({ env }) => ({
       },
       template: {
         indexName: env("MEILISEARCH_TEMPLATES_INDEX_NAME"),
-        entriesQuery: {
-          populate: [
-            "owner",
-            "maintainers",
-            "preview_image",
-            "labels",
-            "url_alias",
-            "integrations",
-            "categories",
-          ],
-        },
+        ...withOwner({
+          fields: ["name", "description", "stars", "createdAt"],
+          populate: {
+            preview_image: mediaPopulate,
+            labels: true,
+            url_alias: urlAliasPopulate,
+            integrations: namePopulate,
+            categories: namePopulate,
+          },
+        }),
         settings: {
           sortableAttributes: ["monthly_downloads", "stars", "createdAt"],
+          searchableAttributes: ["name", "description"],
           filterableAttributes: [
             "type",
             "categories",
@@ -136,7 +171,8 @@ export default ({ env }) => ({
       showcase: {
         indexName: env("MEILISEARCH_SHOWCASES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "categories"],
+          fields: ["title", "url", "description", "createdAt", "publishedAt"],
+          populate: { image: mediaPopulate, categories: namePopulate },
         },
         settings: {
           sortableAttributes: ["createdAt"],
@@ -146,7 +182,8 @@ export default ({ env }) => ({
       recipe: {
         indexName: env("MEILISEARCH_RECIPES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "url_alias"],
+          fields: ["title", "description", "createdAt", "publishedAt"],
+          populate: { image: mediaPopulate, url_alias: urlAliasPopulate },
         },
         settings: {
           sortableAttributes: ["createdAt"],
@@ -156,9 +193,15 @@ export default ({ env }) => ({
       "help-page": {
         indexName: env("MEILISEARCH_HELP_PAGES_INDEX_NAME"),
         entriesQuery: {
-          populate: ["image", "url_alias", "parent"],
+          fields: ["title", "description", "createdAt", "publishedAt"],
+          populate: {
+            image: mediaPopulate,
+            url_alias: urlAliasPopulate,
+            parent: { fields: ["documentId"] },
+          },
         },
         filterEntry: ({ entry }) => !entry.parent,
+        transformEntry: transformHelpPage,
         settings: {
           sortableAttributes: ["createdAt"],
           searchableAttributes: ["title", "description"],
@@ -168,7 +211,13 @@ export default ({ env }) => ({
       integration: {
         indexName: env("MEILISEARCH_INTEGRATIONS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["logo", "labels", "categories", "url_alias"],
+          fields: ["name", "description", "publishedAt"],
+          populate: {
+            logo: mediaPopulate,
+            labels: true,
+            categories: namePopulate,
+            url_alias: urlAliasPopulate,
+          },
         },
         settings: {
           sortableAttributes: ["labels.featured"],
@@ -178,22 +227,45 @@ export default ({ env }) => ({
       user: {
         indexName: env("MEILISEARCH_MEMBERS_INDEX_NAME"),
         entriesQuery: {
-          populate: ["profile", "profile.services", "url_alias"],
+          fields: [
+            "name",
+            "image",
+            "emailVerified",
+            "community_star",
+            "createdAt",
+            "publishedAt",
+          ],
+          populate: {
+            url_alias: urlAliasPopulate,
+            profile: { fields: ["bio"] },
+          },
         },
+        // `emailVerified` is only selected for this check; transformMember drops it.
+        filterEntry: ({ entry }) => isPublicMember(entry),
+        transformEntry: transformMember,
         settings: {
           sortableAttributes: ["createdAt", "community_star"],
-          filterableAttributes: ["profile.services.name", "community_star"],
+          filterableAttributes: ["community_star"],
         },
       },
       organization: {
         indexName: env("MEILISEARCH_PARTNERS_INDEX_NAME"),
         entriesQuery: {
-          populate: [
-            "profile",
-            "profile.services",
-            "profile.countries",
-            "url_alias",
+          fields: [
+            "name",
+            "logo",
+            "partner",
+            "partner_level",
+            "createdAt",
+            "publishedAt",
           ],
+          populate: {
+            profile: {
+              fields: ["bio"],
+              populate: { services: namePopulate, countries: namePopulate },
+            },
+            url_alias: urlAliasPopulate,
+          },
         },
         filterEntry: ({ entry }) => entry.partner,
         transformEntry: ({ entry }) => {
@@ -217,6 +289,12 @@ export default ({ env }) => ({
           ],
         },
       },
+    },
+  },
+  webtools: {
+    enabled: true,
+    config: {
+      website_url: env("WEBSITE_URL"),
     },
   },
 });

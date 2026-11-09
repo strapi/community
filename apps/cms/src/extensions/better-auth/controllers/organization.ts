@@ -34,11 +34,24 @@ export default factories.createCoreController(
         }),
       ]);
 
-      ctx.body = { packages, templates };
+      // Document-service results — strip `private` attributes (e.g.
+      // `submitter_ip`, a populated owner's `email`) the core controllers'
+      // `sanitizeOutput` would otherwise have removed.
+      ctx.body = {
+        packages: await strapi.contentAPI.sanitize.output(
+          packages,
+          strapi.getModel("api::package.package"),
+        ),
+        templates: await strapi.contentAPI.sanitize.output(
+          templates,
+          strapi.getModel("api::template.template"),
+        ),
+      };
     },
     /**
-     * GET /organizations/mine — organizations the caller is an
-     * owner/admin of. Used by the plugin/template submission forms'
+     * GET /organizations/mine — organizations the caller may submit
+     * content on behalf of (owner/admin, or a member where the org lets
+     * all members submit). Used by the plugin/template submission forms'
      * "Submit as" selector, scoped to the caller (via their better-auth
      * session), not a specific org — so there's no `is-organization-*`
      * policy to apply here, only `is-authenticated`.
@@ -48,11 +61,60 @@ export default factories.createCoreController(
 
       const organizations = await getPluginService(
         "organization",
-      ).getManageable({
+      ).getSubmittable({
         userId: session.user.id,
       });
 
       ctx.body = organizations;
+    },
+
+    /**
+     * GET /organizations/partners — partner organizations the caller is
+     * a member of, i.e. whose partner portal they can open. Scoped
+     * to the caller like `mine`, so only `is-authenticated` applies.
+     */
+    async partners(ctx) {
+      const session = ctx.state.betterAuthSession;
+
+      const organizations = await getPluginService(
+        "organization",
+      ).getPartnerPortals({
+        userId: session.user.id,
+      });
+
+      ctx.body = organizations;
+    },
+
+    /**
+     * GET /organizations/:id/partner-portal — the partner portal's gated
+     * content, filtered by the organization's partner level. Gated by
+     * the `is-authenticated` and `is-organization-member` policies.
+     */
+    async partnerPortal(ctx) {
+      const { id } = ctx.params;
+
+      const portal = await getPluginService("organization").getPartnerPortal({
+        organizationId: id,
+      });
+      if (!portal) return ctx.notFound();
+
+      ctx.body = portal;
+    },
+
+    /**
+     * GET /organizations/:id/partner-portal/resources/:slug — a single
+     * partner resource, including its body. Same policies as
+     * `partnerPortal`.
+     */
+    async partnerResource(ctx) {
+      const { id, slug } = ctx.params;
+
+      const resource = await getPluginService(
+        "organization",
+      ).getPartnerResource({ organizationId: id, slug });
+      if (!resource) return ctx.notFound();
+
+      ctx.body = resource;
     },
 
     async members(ctx) {
@@ -65,7 +127,11 @@ export default factories.createCoreController(
         query: ctx.query,
       });
 
-      ctx.body = members;
+      // Strips private user fields (`email`) — see `relatedContent`.
+      ctx.body = await strapi.contentAPI.sanitize.output(
+        members,
+        strapi.getModel("plugin::better-auth.user"),
+      );
     },
 
     /**

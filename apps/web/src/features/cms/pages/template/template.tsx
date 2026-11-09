@@ -14,6 +14,7 @@ import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { TemplatePageData } from "@/features/cms/pages/template/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
 import { EditContentButton } from "@/features/submissions/components/edit-content-button";
+import { gitIssuesUrl } from "@/lib/git-repository";
 import type { Owner } from "@/utils/types";
 
 type Props = {
@@ -50,7 +51,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                     }
                     width={64}
                     height={64}
-                    alt={document.name ?? ""}
+                    alt={`${document.name} thumbnail`}
                     className="object-contain"
                   />
                 </div>
@@ -94,7 +95,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
               }
               width={1000}
               height={1000}
-              alt={document.name ?? ""}
+              alt={`${document.name} Strapi template preview`}
               className="object-contain"
             />
 
@@ -185,7 +186,7 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                   className="mt-2 w-full justify-center"
                 >
                   <Link
-                    href={`${document.git_repository}/issues`}
+                    href={gitIssuesUrl(document.git_repository)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -3,6 +3,7 @@
 import { Button, Container } from "@repo/strapi-ui";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AuthNavigation } from "@/features/auth/components/auth-navigation";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
@@ -18,15 +19,10 @@ interface MobileNavProps {
   navLinks: NavLink[];
   ctaLinks: NavLink[];
   theme: "light" | "dark";
-  currentPath: string;
 }
 
-const MobileNav = ({
-  navLinks,
-  ctaLinks,
-  theme,
-  currentPath,
-}: MobileNavProps) => {
+const MobileNav = ({ navLinks, ctaLinks, theme }: MobileNavProps) => {
+  const currentPath = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [panelTop, setPanelTop] = useState(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -46,6 +42,14 @@ const MobileNav = ({
     setPanelTop(nav ? nav.getBoundingClientRect().bottom : 0);
     setIsOpen(true);
   };
+
+  const ctaButtons = ctaLinks.map((link) => (
+    <Button key={link.id} asChild>
+      <Link href={link.link!} onClick={() => setIsOpen(false)}>
+        {link.label}
+      </Link>
+    </Button>
+  ));
 
   return (
     <>
@@ -129,18 +133,12 @@ const MobileNav = ({
                   )}
                 >
                   {isAuthEnabled ? (
-                    <AuthNavigation theme={theme} />
+                    <AuthNavigation
+                      theme={theme}
+                      signedInActions={ctaButtons}
+                    />
                   ) : (
-                    ctaLinks.map((link) => (
-                      <Button key={link.id} asChild>
-                        <Link
-                          href={link.link!}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {link.label}
-                        </Link>
-                      </Button>
-                    ))
+                    ctaButtons
                   )}
                 </div>
               </div>

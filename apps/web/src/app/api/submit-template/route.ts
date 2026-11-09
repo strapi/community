@@ -8,6 +8,7 @@ import {
   ALLOWED_IMAGE_TYPES,
   MAX_LOGO_SIZE,
   parseCategories,
+  readmeFields,
   str,
   uploadImageToStrapi,
 } from "@/features/submit/server/strapi";
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
   if (!agreed) errors.push("You must agree to the terms.");
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
-  let logoDocumentId: string | null = null;
+  let logoFileId: number | null = null;
   const logoFile = formData.get("logo_file");
   if (logoFile instanceof File && logoFile.size > 0) {
     if (!ALLOWED_IMAGE_TYPES.includes(logoFile.type)) {
@@ -89,8 +90,8 @@ export async function POST(req: NextRequest) {
         { status: 422 },
       );
     }
-    logoDocumentId = await uploadImageToStrapi(logoFile, LOG);
-    if (!logoDocumentId) {
+    logoFileId = await uploadImageToStrapi(logoFile, LOG);
+    if (!logoFileId) {
       console.warn(
         `[${LOG}] Logo upload failed — submission will proceed without logo.`,
       );
@@ -104,9 +105,10 @@ export async function POST(req: NextRequest) {
     git_repository: repository_url,
     preview_link: demo_url,
     categories_list: parseCategories(formData.get("categories_list")),
+    ...readmeFields(formData),
     submission_notes: str(formData.get("submission_notes")),
     submitter_agreed_to_terms: true,
-    preview_image: logoDocumentId ? { documentId: logoDocumentId } : null,
+    preview_image: logoFileId,
     owner_type,
     owner_id:
       owner_type === "plugin::better-auth.organization" ? owner_id : null,

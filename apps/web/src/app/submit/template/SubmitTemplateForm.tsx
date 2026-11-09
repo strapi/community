@@ -14,6 +14,7 @@ import {
 } from "@/features/submit/components/field";
 import { ImageUpload } from "@/features/submit/components/image-upload";
 import { OwnerSelect } from "@/features/submit/components/owner-select";
+import { ReadmeField } from "@/features/submit/components/readme-field";
 import { SubmitFormShell } from "@/features/submit/components/submit-form-shell";
 import { useSubmitForm } from "@/features/submit/hooks/use-submit-form";
 import {
@@ -35,6 +36,8 @@ const INITIAL: TemplateFormFields = {
   description: "",
   logo_file: null,
   categories_list: [],
+  readme: "",
+  readme_auto_sync: true,
   submission_notes: "",
   agreed: false,
   owner_type: "plugin::better-auth.user",
@@ -68,6 +71,8 @@ function buildFormData(
   form.append("repository_url", fields.repository_url.trim());
   form.append("demo_url", fields.demo_url.trim());
   form.append("description", fields.description.trim());
+  form.append("readme", fields.readme.trim());
+  form.append("readme_auto_sync", String(fields.readme_auto_sync));
   form.append("submission_notes", fields.submission_notes.trim());
   form.append("categories_list", JSON.stringify(fields.categories_list));
   form.append("submitter_agreed_to_terms", "true");
@@ -188,36 +193,6 @@ export function SubmitTemplateForm({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="repository_url" required>
-          Repository URL
-        </Label>
-        <Input
-          id="repository_url"
-          type="url"
-          value={fields.repository_url}
-          onChange={(e) => set("repository_url", e.target.value)}
-          placeholder="https://github.com/org/repo"
-          className={errors.repository_url ? "border-red-400" : ""}
-        />
-        <FieldError message={errors.repository_url} />
-        <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
-      </div>
-
-      <div className="mb-5">
-        <Label htmlFor="demo_url">Live Demo URL</Label>
-        <Input
-          id="demo_url"
-          type="url"
-          value={fields.demo_url}
-          onChange={(e) => set("demo_url", e.target.value)}
-          placeholder="https://my-template-demo.com"
-          className={errors.demo_url ? "border-red-400" : ""}
-        />
-        <FieldError message={errors.demo_url} />
-        <Hint>A live preview URL, if available.</Hint>
-      </div>
-
-      <div className="mb-5">
         <div className="flex items-center justify-between">
           <Label htmlFor="description" required>
             Template Description
@@ -241,6 +216,46 @@ export function SubmitTemplateForm({
           hasError={!!errors.description}
         />
         <FieldError message={errors.description} />
+      </div>
+
+      <div className="mb-5">
+        <Label htmlFor="repository_url" required>
+          Repository URL
+        </Label>
+        <Input
+          id="repository_url"
+          type="url"
+          value={fields.repository_url}
+          onChange={(e) => set("repository_url", e.target.value)}
+          placeholder="https://github.com/org/repo"
+          className={errors.repository_url ? "border-red-400" : ""}
+        />
+        <FieldError message={errors.repository_url} />
+        <Hint>GitHub, GitLab, Bitbucket, or any public repository URL.</Hint>
+      </div>
+
+      <ReadmeField
+        className="mb-5"
+        type="template"
+        readme={fields.readme}
+        autoSync={fields.readme_auto_sync}
+        onReadmeChange={(v) => set("readme", v)}
+        onAutoSyncChange={(v) => set("readme_auto_sync", v)}
+        placeholder="Paste your template's README or any additional documentation here."
+      />
+
+      <div className="mb-5">
+        <Label htmlFor="demo_url">Live Demo URL</Label>
+        <Input
+          id="demo_url"
+          type="url"
+          value={fields.demo_url}
+          onChange={(e) => set("demo_url", e.target.value)}
+          placeholder="https://my-template-demo.com"
+          className={errors.demo_url ? "border-red-400" : ""}
+        />
+        <FieldError message={errors.demo_url} />
+        <Hint>A live preview URL, if available.</Hint>
       </div>
 
       <div className="mb-5">

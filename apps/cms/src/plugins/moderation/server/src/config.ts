@@ -15,6 +15,13 @@ export interface ModerationContentTypeConfig {
   categoryUid?: string;
   /** Default entity field values set on every new submission */
   defaultFieldValues?: Record<string, unknown>;
+  /**
+   * Entity fields a submitter may set through the public submit endpoint.
+   * Everything else in the request body is dropped — moderation-controlled
+   * fields (labels, stars, relations, …) must never be listed here. Media
+   * fields listed here only accept a freshly uploaded, unattached file.
+   */
+  submitFields: string[];
   /** IDs of automated checks to run at submission time */
   checks?: string[];
   /** n8n webhook paths fired for lifecycle events */
@@ -46,6 +53,11 @@ export default {
       if (!ct.pluralName) {
         throw new Error(
           `[moderation] contentType '${ct.uid}' must have a pluralName`,
+        );
+      }
+      if (!Array.isArray(ct.submitFields)) {
+        throw new Error(
+          `[moderation] contentType '${ct.uid}' must have a submitFields array`,
         );
       }
     }

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
@@ -12,6 +15,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/core": "catalog:better-auth",
     "@daveyplate/better-auth-ui": "^3.4.0",
     "@hookform/resolvers": "^5.2.2",
     "@meilisearch/instant-meilisearch": "^0.29.0",
@@ -34,7 +38,7 @@
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",
     "instantsearch.js": "^4.85.2",
-    "isomorphic-dompurify": "^4.2.0",
+    "isomorphic-dompurify": "~2.26.0",
     "lucide-react": "^0.577.0",
     "next": "16.0.10",
     "qs": "^6.14.0",

@@ -11,7 +11,7 @@ const Hit = ({ hit }: Props) => {
     src: hit.preview_image
       ? cmsImageUrl(hit.preview_image.url)
       : "/template-fallback-preview.png",
-    alt: hit.preview_image?.alternativeText ?? hit.name ?? "",
+    alt: hit.preview_image?.alternativeText || hit.name || "",
     size: "L" as const,
   };
 

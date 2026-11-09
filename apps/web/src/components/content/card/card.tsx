@@ -56,7 +56,7 @@ const ContentCard = (props: Props) => {
                 <Image
                   src={image.src}
                   fill
-                  alt={image.alt ?? name}
+                  alt={image.alt || name}
                   className="object-cover pl-[8%] pr-[8%] pt-[8%] border-b border-(--color-neutral150)"
                 />
               </div>
@@ -65,7 +65,7 @@ const ContentCard = (props: Props) => {
                 src={image.src}
                 width={imgSize}
                 height={imgSize}
-                alt={image.alt ?? name}
+                alt={image.alt || name}
                 className="object-contain border rounded-sm border-(--color-neutral150)"
               />
             )

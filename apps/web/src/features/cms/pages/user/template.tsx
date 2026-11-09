@@ -40,7 +40,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="px-4 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26">
+          <div className="px-5 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26">
             <div className="mb-6">
               <Breadcrumbs />
             </div>
@@ -62,7 +62,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                 )}
               </div>
               <div>
-                <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
+                <h1 className="text-4xl sm:text-5xl leading-[1.1] tracking-tight mt-2 sm:mt-0 font-semibold text-white!">
                   {document.name}
                 </h1>
                 {document.profile?.subtitle && (
@@ -170,7 +170,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                         src: template.preview_image
                           ? cmsImageUrl(template.preview_image.url)
                           : "/template-fallback-preview.png",
-                        alt: template.preview_image?.alternativeText ?? "",
+                        alt: template.preview_image?.alternativeText || "",
                         size: "L",
                       }}
                       description={template.description ?? ""}
@@ -198,7 +198,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                         src: pkg.icon
                           ? cmsImageUrl(pkg.icon.url)
                           : "/package-fallback-icon.png",
-                        alt: pkg.icon?.alternativeText ?? "",
+                        alt: pkg.icon?.alternativeText || "",
                         size: "S",
                       }}
                       description={pkg.description ?? ""}

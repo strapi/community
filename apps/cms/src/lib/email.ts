@@ -52,9 +52,6 @@ async function sendEmail(
   subject: string,
   element: React.ReactElement,
 ): Promise<void> {
-  if (process.env.ENABLE_MIGRATION === "true") {
-    return;
-  }
   const rawHtml = await render(element, { pretty: false });
   await strapi.plugins.email.services.email.send({
     to,
