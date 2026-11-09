@@ -58,7 +58,7 @@ async function syncReleases(
     fresh.add(release.version);
     const current = byVersion.get(release.version);
     if (!current) {
-      await strapi.documents(RELEASE_UID).create({ data: release as any });
+      await strapi.documents(RELEASE_UID).create({ data: release });
       report.releases.created++;
       continue;
     }
@@ -69,7 +69,7 @@ async function syncReleases(
     if (changed) {
       await strapi.documents(RELEASE_UID).update({
         documentId: current.documentId,
-        data: release as any,
+        data: release,
       });
       report.releases.updated++;
     }
@@ -250,7 +250,7 @@ async function loadExisting() {
   const [drafts, published] = await Promise.all([
     strapi.documents(UID).findMany({
       status: "draft",
-      fields: [...ITEM_FIELDS] as any,
+      fields: [...ITEM_FIELDS],
       pagination: { pageSize: 1000 },
     }),
     strapi.documents(UID).findMany({
@@ -402,6 +402,7 @@ async function syncRow(
   let documentId = existing?.documentId;
   if (!existing) {
     const created = await strapi.documents(UID).create({
+      // biome-ignore lint/suspicious/noExplicitAny: `data` is built field by field; a new item always carries the required ones
       data: { ...data, last_synced_at: now.toISOString() } as any,
     });
     documentId = created.documentId;
@@ -409,7 +410,7 @@ async function syncRow(
   } else if (changed) {
     await strapi.documents(UID).update({
       documentId: existing.documentId,
-      data: { ...data, last_synced_at: now.toISOString() } as any,
+      data: { ...data, last_synced_at: now.toISOString() },
     });
     report.counts.updated++;
   }

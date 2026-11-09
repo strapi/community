@@ -37,7 +37,24 @@ async function request(path: string): Promise<Response> {
   });
 }
 
-async function getJson(path: string): Promise<any[]> {
+type GitHubRelease = {
+  tag_name?: string;
+  name?: string;
+  draft?: boolean;
+  prerelease?: boolean;
+  published_at?: string | null;
+  html_url?: string;
+};
+
+type GitHubMilestone = {
+  title?: string;
+  due_on?: string | null;
+  html_url?: string;
+  open_issues?: number;
+  closed_issues?: number;
+};
+
+async function getJson<T>(path: string): Promise<T[]> {
   const res = await request(path);
   if (!res.ok) throw new Error(`GitHub ${path} returned ${res.status}`);
   const data = await res.json();
@@ -46,7 +63,7 @@ async function getJson(path: string): Promise<any[]> {
 }
 
 /** A published release by tag ("v5.12.0", then "5.12.0"), or null if none. */
-async function getReleaseByTag(version: string): Promise<any | null> {
+async function getReleaseByTag(version: string): Promise<GitHubRelease | null> {
   for (const tag of [`v${version}`, version]) {
     const path = `releases/tags/${encodeURIComponent(tag)}`;
     const res = await request(path);
@@ -57,7 +74,7 @@ async function getReleaseByTag(version: string): Promise<any | null> {
   return null;
 }
 
-function toReleased(r: any, version: string): ReleaseRecord {
+function toReleased(r: GitHubRelease, version: string): ReleaseRecord {
   return {
     version,
     status: "released",
@@ -78,8 +95,8 @@ export async function fetchReleases(
   referenced: Iterable<string> = [],
 ): Promise<ReleaseRecord[]> {
   const [releases, milestones] = await Promise.all([
-    getJson(`releases?per_page=${RECENT_RELEASES * 2}`),
-    getJson("milestones?state=open&per_page=30"),
+    getJson<GitHubRelease>(`releases?per_page=${RECENT_RELEASES * 2}`),
+    getJson<GitHubMilestone>("milestones?state=open&per_page=30"),
   ]);
 
   const byVersion = new Map<string, ReleaseRecord>();

@@ -22,6 +22,14 @@ export type CannyResult =
 
 type Board = { id: string; name?: string; url?: string };
 
+type CannyResponse = {
+  error?: string;
+  boards?: Board[];
+  score?: unknown;
+  status?: unknown;
+  url?: unknown;
+};
+
 function baseUrl(): string {
   return (process.env.CANNY_API_BASE_URL || "https://canny.io").replace(
     /\/$/,
@@ -42,14 +50,17 @@ class CannyError extends Error {
   }
 }
 
-async function call(path: string, body: Record<string, unknown>) {
+async function call(
+  path: string,
+  body: Record<string, unknown>,
+): Promise<CannyResponse | null> {
   const res = await fetch(`${baseUrl()}/api/v1/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ apiKey: process.env.CANNY_API_KEY, ...body }),
     signal: AbortSignal.timeout(15_000),
   });
-  const data: any = await res.json().catch(() => null);
+  const data: CannyResponse | null = await res.json().catch(() => null);
   if (!res.ok || data?.error) {
     const message = `Canny ${path} returned ${res.status}${data?.error ? `: ${data.error}` : ""}`;
     // Canny reports a missing post as a 4xx with an error string rather than

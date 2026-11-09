@@ -35,7 +35,18 @@ function baseUrl(): string {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function postWithRetry(url: string, body: unknown): Promise<any> {
+type NotionResponse = {
+  code?: string;
+  message?: string;
+  results?: { object?: string }[];
+  has_more?: boolean;
+  next_cursor?: string | null;
+};
+
+async function postWithRetry(
+  url: string,
+  body: unknown,
+): Promise<NotionResponse | null> {
   for (let attempt = 0; ; attempt++) {
     const res = await fetch(url, {
       method: "POST",
@@ -55,7 +66,7 @@ async function postWithRetry(url: string, body: unknown): Promise<any> {
       continue;
     }
 
-    const data: any = await res.json().catch(() => null);
+    const data: NotionResponse | null = await res.json().catch(() => null);
     if (!res.ok) {
       const detail = data?.message ? `: ${data.code} — ${data.message}` : "";
       throw new Error(`Notion returned ${res.status}${detail}`);
@@ -88,7 +99,9 @@ export async function queryPublicRoadmapPages(): Promise<NotionPage[]> {
     if (!Array.isArray(data?.results)) {
       throw new Error("Notion returned an unexpected query response shape.");
     }
-    pages.push(...data.results.filter((r: any) => r?.object === "page"));
+    pages.push(
+      ...(data.results.filter((r) => r?.object === "page") as NotionPage[]),
+    );
     cursor = data.has_more ? (data.next_cursor ?? undefined) : undefined;
   } while (cursor);
 

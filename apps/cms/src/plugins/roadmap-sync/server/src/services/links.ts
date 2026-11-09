@@ -115,7 +115,7 @@ async function isPublicRepo(
   });
   if (res.status === 404) return false;
   if (!res.ok) return null; // unknown (rate limit etc.)
-  const data: any = await res.json();
+  const data: { private?: boolean; visibility?: string } = await res.json();
   const isPublic = data?.private === false && data?.visibility !== "internal";
   repoVisibility.set(key, { isPublic, at: Date.now() });
   return isPublic;
@@ -144,7 +144,11 @@ async function checkGitHubIssue(
   const check = classify(url, res.status);
   if (check.result !== "ok") return check;
 
-  const data: any = await res.json();
+  const data: {
+    repository_url?: string;
+    state?: string;
+    pull_request?: { merged_at?: string | null };
+  } = await res.json();
 
   // A transferred issue redirects to its new home, which may be private.
   // Check the repo GitHub actually answered from, not the one in the link.
@@ -198,7 +202,7 @@ function requestOnce(
       url,
       {
         method,
-        lookup: safeLookup as any,
+        lookup: safeLookup,
         signal: AbortSignal.timeout(TIMEOUT_MS),
         headers: { "User-Agent": "strapi-community-roadmap-sync" },
       },
