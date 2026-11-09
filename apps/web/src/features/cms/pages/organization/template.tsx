@@ -4,8 +4,6 @@ import {
   AppWindow,
   CalendarDays,
   ExternalLink,
-  Github,
-  Globe,
   LayoutGrid,
   MapPin,
   Users,
@@ -14,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
 import { Markdown } from "@/components/content/markdown";
+import { ProfileLinks } from "@/components/content/profile-links";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -22,6 +21,7 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { toProfileLinks } from "@/lib/profile-links";
 import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
@@ -42,12 +42,18 @@ const OrganizationTemplate = ({
   const defaultTab =
     document.profile?.readme || noRelatedContent ? "about" : "content";
 
+  // The first website gets the prominent "Visit website" button; every
+  // other link goes in the metadata row.
+  const links = toProfileLinks(document.profile?.links);
+  const website = links.find((link) => link.type === "website");
+  const otherLinks = links.filter((link) => link !== website);
+
   return (
     <>
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="px-4 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26">
+          <div className="px-5 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26">
             <div className="mb-6">
               <Breadcrumbs />
             </div>
@@ -69,7 +75,7 @@ const OrganizationTemplate = ({
                 )}
               </div>
               <div>
-                <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
+                <h1 className="text-4xl sm:text-5xl leading-[1.1] tracking-tight mt-2 sm:mt-0 font-semibold text-white!">
                   {document.name}
                 </h1>
                 {document.profile?.subtitle && (
@@ -106,27 +112,13 @@ const OrganizationTemplate = ({
                     {document.profile.location}
                   </span>
                 )}
-                {document.profile?.github && (
-                  <Link
-                    href={document.profile.github}
-                    className="flex items-center gap-1.5 transition-colors hover:text-white"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="h-4 w-4" />
-                    GitHub
-                  </Link>
-                )}
+                <ProfileLinks links={otherLinks} />
               </div>
 
               {/* Website button */}
-              {document.profile?.website && (
+              {website && (
                 <Button asChild variant="secondary">
-                  <Link
-                    href={document.profile.website}
-                    target="_blank"
-                    rel="noopener"
-                  >
+                  <Link href={website.value} target="_blank" rel="noopener">
                     Visit website
                     <ExternalLink className="h-4 w-4" />
                   </Link>

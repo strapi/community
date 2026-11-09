@@ -95,20 +95,20 @@
       "default": null,
       "unique": true
     },
-    "profile": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::profile.profile"
-    },
-    "community_star": {
-      "type": "boolean"
-    },
     "sitemap_exclude": {
       "writable": true,
       "private": true,
       "configurable": false,
       "visible": false,
       "default": false,
+      "type": "boolean"
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile"
+    },
+    "community_star": {
       "type": "boolean"
     }
   }

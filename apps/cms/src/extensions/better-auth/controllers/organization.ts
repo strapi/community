@@ -7,6 +7,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import {
   getPluginService,
   organizationProfileFields,
+  pickProfileLinks,
   validateProfileData,
 } from "../utils";
 
@@ -48,8 +49,9 @@ export default factories.createCoreController(
       };
     },
     /**
-     * GET /organizations/mine — organizations the caller is an
-     * owner/admin of. Used by the plugin/template submission forms'
+     * GET /organizations/mine — organizations the caller may submit
+     * content on behalf of (owner/admin, or a member where the org lets
+     * all members submit). Used by the plugin/template submission forms'
      * "Submit as" selector, scoped to the caller (via their better-auth
      * session), not a specific org — so there's no `is-organization-*`
      * policy to apply here, only `is-authenticated`.
@@ -59,7 +61,7 @@ export default factories.createCoreController(
 
       const organizations = await getPluginService(
         "organization",
-      ).getManageable({
+      ).getSubmittable({
         userId: session.user.id,
       });
 
@@ -144,7 +146,10 @@ export default factories.createCoreController(
       const data = Object.fromEntries(
         organizationProfileFields
           .filter((field) => field in body)
-          .map((field) => [field, body[field]]),
+          .map((field) => [
+            field,
+            field === "links" ? pickProfileLinks(body.links) : body[field],
+          ]),
       );
 
       const errors = validateProfileData(data);

@@ -3,11 +3,14 @@
 import {
   ApiKeysCard,
   AuthUIContext,
+  DeleteOrganizationCard,
   getViewByPath,
   OrganizationInvitationsCard,
   OrganizationLogo,
+  OrganizationLogoCard,
   OrganizationMembersCard,
-  OrganizationSettingsCards,
+  OrganizationNameCard,
+  OrganizationSlugCard,
   organizationViewPaths,
   TeamsCard,
   useAuthenticate,
@@ -25,6 +28,7 @@ import { cn } from "@/lib/utils";
 import type { OrganizationProfile } from "../../lib/organization-profile";
 import { ProfileView } from "../profile-view";
 import { SettingsContextSwitcher } from "../settings-context-switcher";
+import { SubmissionPolicyCard } from "./submission-policy-card";
 
 type View =
   | "SETTINGS"
@@ -39,6 +43,18 @@ const viewPaths = {
   PROFILE: "profile",
   SUBMISSIONS: "submissions",
 } as const;
+
+/**
+ * Only the dialog's own description (rendered via `DialogDescription`,
+ * whose `data-slot` differs from the card's `CardDescription`) picks up
+ * the warning-box styling — the delete card shares `classNames` between
+ * its always-visible settings-card blurb and its confirmation dialog.
+ * Mirrors the same trick in `account-view.tsx`'s `<DeleteAccountCard>`.
+ */
+const deleteCardClassNames = {
+  description:
+    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
+};
 
 type Props = {
   slug?: string;
@@ -341,25 +357,22 @@ export function OrganizationView({
           )}
 
           {view === "SETTINGS" && (
-            <OrganizationSettingsCards
-              slug={slug}
-              classNames={{
-                // Shared across every card here (logo/name/slug/delete —
-                // `classNames.card` is broadcast to all of them, and the
-                // delete card in turn shares it between its always-visible
-                // settings-card blurb and its confirmation dialog), but
-                // scoping on `data-slot` keeps this out of every other card
-                // and out of the settings-card blurb — only the dialog's
-                // own description (rendered via `DialogDescription`, whose
-                // `data-slot` differs from the card's `CardDescription`)
-                // picks up the warning-box styling. Mirrors the same trick
-                // in `account-view.tsx`'s `<DeleteAccountCard>`.
-                card: {
-                  description:
-                    "data-[slot=dialog-description]:rounded-md data-[slot=dialog-description]:border data-[slot=dialog-description]:border-red-200 data-[slot=dialog-description]:bg-red-50 data-[slot=dialog-description]:px-4 data-[slot=dialog-description]:py-3 data-[slot=dialog-description]:text-red-700",
-                },
-              }}
-            />
+            // Composed from better-auth-ui's individual cards instead of
+            // its `OrganizationSettingsCards` (same order, same wrapper)
+            // so our own `SubmissionPolicyCard` can sit just above the
+            // delete card.
+            <div className="flex w-full flex-col gap-4 md:gap-6">
+              {organizationOptions?.logo && (
+                <OrganizationLogoCard slug={slug} />
+              )}
+              <OrganizationNameCard slug={slug} />
+              <OrganizationSlugCard slug={slug} />
+              <SubmissionPolicyCard slug={slug} />
+              <DeleteOrganizationCard
+                slug={slug}
+                classNames={deleteCardClassNames}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { breadcrumbTrail } from "@/lib/breadcrumbs";
+import { profileLinkUrl, toProfileLinks } from "@/lib/profile-links";
 import { SITE_NAME } from "./seo";
 
 /**
@@ -192,9 +193,8 @@ export function templateSchema(
 type ProfileLike = {
   bio?: string | null;
   subtitle?: string | null;
-  website?: string | null;
-  github?: string | null;
   location?: string | null;
+  links?: Parameters<typeof toProfileLinks>[0];
 } | null;
 
 export function personSchema(
@@ -214,7 +214,7 @@ export function personSchema(
       jobTitle: profile?.subtitle,
       image: user.image,
       homeLocation: profile?.location,
-      sameAs: [profile?.website, profile?.github].filter(Boolean),
+      sameAs: toProfileLinks(profile?.links).map(profileLinkUrl),
     }),
   };
 }
@@ -235,7 +235,7 @@ export function organizationSchema(
       description: profile?.bio,
       logo: org.logoUrl,
       location: profile?.location,
-      sameAs: [profile?.website, profile?.github].filter(Boolean),
+      sameAs: toProfileLinks(profile?.links).map(profileLinkUrl),
     }),
   };
 }

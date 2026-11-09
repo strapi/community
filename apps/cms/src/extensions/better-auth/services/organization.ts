@@ -16,19 +16,40 @@ import {
   SECTION_MINIMUM_LEVEL,
 } from "../utils/partner-levels";
 
-/** IDs of the organizations `userId` is an owner/admin of. */
-async function findManageableOrganizationIds(userId: string | number) {
+/**
+ * IDs of the organizations `userId` may submit content on behalf of: any
+ * they're an owner/admin of, plus any they're a plain member of whose
+ * `submission_policy` lets all members submit. Mirrors
+ * `canSubmitForOrganization`, which the submission endpoint enforces.
+ */
+async function findSubmittableOrganizationIds(userId: string | number) {
   const memberships = await strapi
     .documents("plugin::better-auth.member")
     .findMany({
-      filters: {
-        userId,
-        role: { $in: ["admin", "owner"] },
-      },
-      fields: ["organizationId"],
+      filters: { userId },
+      fields: ["organizationId", "role"],
     });
 
-  return memberships.map((membership) => membership.organizationId);
+  const managedIds = memberships
+    .filter((membership) => ["admin", "owner"].includes(membership.role))
+    .map((membership) => membership.organizationId);
+  const memberIds = memberships
+    .filter((membership) => !managedIds.includes(membership.organizationId))
+    .map((membership) => membership.organizationId);
+
+  if (memberIds.length === 0) return managedIds;
+
+  const openOrganizations = await strapi
+    .documents("plugin::better-auth.organization")
+    .findMany({
+      filters: { id: { $in: memberIds }, submission_policy: "members" },
+      fields: ["id"],
+    });
+
+  return [
+    ...managedIds,
+    ...openOrganizations.map((organization) => organization.id),
+  ];
 }
 
 /** IDs of the organizations `userId` is a member of, with any role. */
@@ -142,12 +163,13 @@ export default factories.createCoreService(
     },
 
     /**
-     * Organizations `userId` is an owner/admin of — i.e. allowed to
-     * submit content on behalf of. Backs `GET /organizations/mine`, used
-     * by the plugin/template submission forms' "Submit as" selector.
+     * Organizations `userId` is allowed to submit content on behalf of
+     * (see `findSubmittableOrganizationIds`). Backs `GET
+     * /organizations/mine`, used by the plugin/template submission forms'
+     * "Submit as" selector.
      */
-    async getManageable({ userId }: { userId: string | number }) {
-      const organizationIds = await findManageableOrganizationIds(userId);
+    async getSubmittable({ userId }: { userId: string | number }) {
+      const organizationIds = await findSubmittableOrganizationIds(userId);
       if (organizationIds.length === 0) return [];
 
       return strapi.documents("plugin::better-auth.organization").findMany({
@@ -305,11 +327,13 @@ export default factories.createCoreService(
         return strapi.documents("api::profile.profile").update({
           documentId: organization.profile.documentId,
           data,
+          populate: ["links"],
         });
       }
 
       const profile = await strapi.documents("api::profile.profile").create({
         data,
+        populate: ["links"],
       });
 
       await strapi.documents("plugin::better-auth.organization").update({

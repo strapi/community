@@ -1,4 +1,4 @@
-import type { Field, Props } from "./types";
+import type { Field, Profile, Props } from "./types";
 
 export const USER_FIELDS: Field[] = [
   {
@@ -12,12 +12,7 @@ export const USER_FIELDS: Field[] = [
     placeholder: "Tell the community about yourself",
     multiline: true,
   },
-  { name: "website", label: "Website", placeholder: "https://example.com" },
-  {
-    name: "github",
-    label: "GitHub",
-    placeholder: "https://github.com/your-username",
-  },
+  { name: "links", label: "Links", placeholder: "" },
   { name: "location", label: "Location", placeholder: "City, Country" },
   {
     name: "email",
@@ -45,12 +40,7 @@ export const ORGANIZATION_FIELDS: Field[] = [
     placeholder: "Tell the community about your organization",
     multiline: true,
   },
-  { name: "website", label: "Website", placeholder: "https://example.com" },
-  {
-    name: "github",
-    label: "GitHub",
-    placeholder: "https://github.com/your-org",
-  },
+  { name: "links", label: "Links", placeholder: "" },
   { name: "location", label: "Location", placeholder: "City, Country" },
   {
     name: "readme",
@@ -74,3 +64,14 @@ export const COPY: Record<
     description: "Shown on your organization's public page.",
   },
 };
+
+/**
+ * The subset of `values` the form actually edits. Only these are sent on
+ * save, so fields the form no longer shows (the legacy `website`/`github`)
+ * are left untouched server-side rather than re-submitted as-is.
+ */
+export function pickFieldValues(fields: Field[], values: Profile): Profile {
+  return Object.fromEntries(
+    fields.map((field) => [field.name, values[field.name]]),
+  );
+}

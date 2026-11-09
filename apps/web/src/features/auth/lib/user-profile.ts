@@ -1,12 +1,16 @@
 import { toast } from "sonner";
+import type { ProfileLink } from "@/lib/profile-links";
 
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL;
 
 export type UserProfile = {
   bio?: string | null;
   subtitle?: string | null;
+  /** Legacy — superseded by `links`, kept until migrated (ADR 0003). */
   website?: string | null;
+  /** Legacy — superseded by `links`, kept until migrated (ADR 0003). */
   github?: string | null;
+  links?: ProfileLink[] | null;
   location?: string | null;
   email?: string | null;
   readme?: string | null;
