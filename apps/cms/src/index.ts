@@ -1,6 +1,6 @@
 import type { Core } from "@strapi/strapi";
-import { seedRoadmapPage } from "./seed/roadmap-page";
 import { migrateProfileLinks } from "./migration/profile-links";
+import { seedRoadmapPage } from "./seed/roadmap-page";
 
 export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
