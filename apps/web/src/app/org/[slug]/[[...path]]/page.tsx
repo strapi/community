@@ -9,6 +9,7 @@ import {
   getPackageCategories,
   getTemplateCategories,
 } from "@/features/submissions/lib/categories";
+import { toProfileLinks } from "@/lib/profile-links";
 
 const contentType = "plugin::better-auth.organization" as const;
 
@@ -61,7 +62,7 @@ export default async function OrgPage({ params }: Props) {
   // tab doesn't need its own read endpoint — only the write side does.
   const query = {
     filters: { slug: { $eq: slug } },
-    populate: ["profile"],
+    populate: { profile: { populate: ["links"] } },
   } satisfies GetQueryParams<typeof contentType>;
 
   const [{ data }, packageCategories, templateCategories] = await Promise.all([
@@ -81,7 +82,14 @@ export default async function OrgPage({ params }: Props) {
           organizationId={
             organization?.id != null ? String(organization.id) : undefined
           }
-          initialProfile={organization?.profile ?? undefined}
+          initialProfile={
+            organization?.profile
+              ? {
+                  ...organization.profile,
+                  links: toProfileLinks(organization.profile.links),
+                }
+              : undefined
+          }
           packageCategories={packageCategories}
           templateCategories={templateCategories}
         />

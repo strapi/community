@@ -4,7 +4,8 @@
  * types store only the handle — the public URL is built from a fixed
  * prefix at render time — while `website`/`other` store a full URL.
  *
- * The web app enforces the same rules inline before submitting; this is
+ * The web app enforces the same rules inline before submitting
+ * (apps/web/src/lib/profile-links.ts); this is
  * the server-side backstop for anyone calling the API directly. Keep the
  * two in sync if either changes.
  *

@@ -5,6 +5,7 @@ import { MarkdownEditor } from "@/components/content/markdown-editor";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { COPY } from "./fields";
+import { ProfileLinksField } from "./profile-links-field";
 import type { Field, Profile, Props } from "./types";
 import {
   BIO_MAX_LENGTH,
@@ -77,6 +78,28 @@ export function ProfileForm({
 
       <div className="flex flex-col gap-4">
         {fields.map((field) => {
+          if (field.name === "links") {
+            return (
+              <div key={field.name} className="flex flex-col gap-1.5">
+                <label
+                  htmlFor={field.name}
+                  className="text-sm font-medium text-(--color-neutral800)"
+                >
+                  {field.label}
+                </label>
+                <ProfileLinksField
+                  id={field.name}
+                  links={values.links ?? []}
+                  onChange={(links) =>
+                    setValues((prev) => ({ ...prev, links }))
+                  }
+                  disabled={disabled}
+                  submitAttempted={submitAttempted}
+                />
+              </div>
+            );
+          }
+
           const value = values[field.name] ?? "";
           const showError = Boolean(touched[field.name] || submitAttempted);
           const error = showError

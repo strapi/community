@@ -4,8 +4,6 @@ import {
   AppWindow,
   CalendarDays,
   ExternalLink,
-  Github,
-  Globe,
   LayoutGrid,
   MapPin,
 } from "lucide-react";
@@ -13,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content/card";
 import { Markdown } from "@/components/content/markdown";
+import { ProfileLinks } from "@/components/content/profile-links";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Hero, HeroSection } from "@/components/layout/hero";
 import { Navigation } from "@/components/layout/navigation";
@@ -21,6 +20,7 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { toProfileLinks } from "@/lib/profile-links";
 import type { RelatedContentItems } from "@/utils/types";
 
 type Props = {
@@ -99,28 +99,7 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                     {document.profile.location}
                   </span>
                 )}
-                {document.profile?.github && (
-                  <Link
-                    href={document.profile.github}
-                    className="flex items-center gap-1.5 transition-colors hover:text-white"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="h-4 w-4" />
-                    GitHub
-                  </Link>
-                )}
-                {document.profile?.website && (
-                  <Link
-                    href={document.profile.website}
-                    className="flex items-center gap-1.5 transition-colors hover:text-white"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <Globe className="h-4 w-4" />
-                    Visit Website
-                  </Link>
-                )}
+                <ProfileLinks links={toProfileLinks(document.profile?.links)} />
               </div>
 
               {/* Contact button */}
