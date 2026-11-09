@@ -18,6 +18,25 @@ export interface PartnerBenefit extends Struct.ComponentSchema {
   };
 }
 
+export interface ProfileLink extends Struct.ComponentSchema {
+  collectionName: 'components_profile_links';
+  info: {
+    displayName: 'Link';
+    icon: 'link';
+  };
+  attributes: {
+    type: Schema.Attribute.Enumeration<
+      ['website', 'github', 'linkedin', 'x', 'instagram', 'youtube', 'linktree']
+    > &
+      Schema.Attribute.Required;
+    value: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 2048;
+      }>;
+  };
+}
+
 export interface SectionsCardGrid extends Struct.ComponentSchema {
   collectionName: 'components_sections_card_grids';
   info: {
@@ -254,6 +273,7 @@ declare module '@strapi/strapi' {
   export namespace Public {
     export interface ComponentSchemas {
       'partner.benefit': PartnerBenefit;
+      'profile.link': ProfileLink;
       'sections.card-grid': SectionsCardGrid;
       'sections.card-grid-item': SectionsCardGridItem;
       'sections.cta': SectionsCta;

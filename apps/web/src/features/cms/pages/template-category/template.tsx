@@ -46,14 +46,14 @@ const TemplateCategoryTemplate = ({ document, searchServerState }: Props) => {
       <Navigation theme="dark" />
       <Hero>
         <HeroSection>
-          <div className="px-14 py-26 max-w-250">
+          <div className="px-5 sm:px-10 lg:px-14 py-10 sm:py-16 lg:py-26 max-w-250">
             <div className="mb-5">
               <Breadcrumbs />
             </div>
-            <h1 className="text-[48px] mt-2 sm:mt-0 font-semibold text-white!">
+            <h1 className="text-4xl sm:text-5xl leading-[1.1] tracking-tight mt-2 sm:mt-0 font-semibold text-white!">
               {document.name} templates
             </h1>
-            <p className="text-[17px] text-(--color-hero-muted)">
+            <p className="mt-4 text-[17px] text-(--color-hero-muted)">
               {document.description}
             </p>
             {childCategories.length > 0 && (
