@@ -26,16 +26,7 @@ export interface ProfileLink extends Struct.ComponentSchema {
   };
   attributes: {
     type: Schema.Attribute.Enumeration<
-      [
-        'website',
-        'github',
-        'linkedin',
-        'x',
-        'instagram',
-        'youtube',
-        'linktree',
-        'other',
-      ]
+      ['website', 'github', 'linkedin', 'x', 'instagram', 'youtube', 'linktree']
     > &
       Schema.Attribute.Required;
     value: Schema.Attribute.String &

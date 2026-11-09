@@ -24,10 +24,9 @@ const ICONS: Record<ProfileLinkType, LucideIcon> = {
   instagram: Instagram,
   youtube: Youtube,
   linktree: LinkIcon,
-  other: LinkIcon,
 };
 
-/** Social links read as the network; full URLs as their hostname. */
+/** Social links read as the network; websites as their hostname. */
 function profileLinkLabel(link: ProfileLink): string {
   if (PROFILE_LINK_TYPE_CONFIG[link.type].handle) {
     return PROFILE_LINK_TYPE_CONFIG[link.type].label;

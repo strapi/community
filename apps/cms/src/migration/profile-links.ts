@@ -17,8 +17,8 @@ const withProtocol = (value: string) =>
 /**
  * Maps the legacy `website`/`github` fields of a profile onto `links`
  * entries. A GitHub URL becomes a `github` handle; anything that doesn't
- * fit that (e.g. a non-GitHub URL in the `github` field) falls back to an
- * `other` link. Values that can't be made valid are dropped and returned
+ * fit that (e.g. a non-GitHub URL in the `github` field) falls back to a
+ * `website` link. Values that can't be made valid are dropped and returned
  * separately so they can be logged.
  */
 const toLinks = (profile: {
@@ -40,7 +40,7 @@ const toLinks = (profile: {
     const handle = github.match(GITHUB_URL_PATTERN)?.[1];
     const candidates: Link[] = [
       ...(handle ? [{ type: "github", value: handle } as Link] : []),
-      { type: "other", value: withProtocol(github) },
+      { type: "website", value: withProtocol(github) },
     ];
     const link = candidates.find(isValid);
     if (link) links.push(link);

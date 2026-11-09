@@ -14,11 +14,11 @@ new network would mean a schema change, a new form input and new rendering code.
 
 A repeatable component `profile.link` is added to `api::profile.profile` as `links` (max 10):
 
-- `type` — enumeration: `website`, `github`, `linkedin`, `x`, `instagram`, `youtube`, `linktree`,
-  `other`.
+- `type` — enumeration: `website`, `github`, `linkedin`, `x`, `instagram`, `youtube`, `linktree`.
+  There is no catch-all `other` type: any address that isn't one of the networks is a `website`.
 - `value` — string. For social types it is **only the handle** (e.g. `octocat`); the public URL is
-  built at render time from a fixed per-type prefix (e.g. `github.com/`). For `website` and
-  `other` it is a full `http(s)://` URL.
+  built at render time from a fixed per-type prefix (e.g. `github.com/`). For `website` it is a
+  full `http(s)://` URL.
 
 Duplicate types are allowed (e.g. two websites). Order is the order the member added them in.
 

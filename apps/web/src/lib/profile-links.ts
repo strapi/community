@@ -2,7 +2,7 @@
  * Rules for the repeatable `profile.link` component on
  * `api::profile.profile` (see docs/adr/0003-profile-links.md). Social
  * types store only the handle — the public URL is built from `prefix` at
- * render time — while `website`/`other` store a full URL.
+ * render time — while `website` stores a full URL.
  *
  * The API enforces the same rules server-side in
  * apps/cms/src/extensions/better-auth/utils/profile-links.ts. Keep the two
@@ -17,7 +17,6 @@ export const PROFILE_LINK_TYPES = [
   "instagram",
   "youtube",
   "linktree",
-  "other",
 ] as const;
 
 export type ProfileLinkType = (typeof PROFILE_LINK_TYPES)[number];
@@ -86,7 +85,6 @@ export const PROFILE_LINK_TYPE_CONFIG: Record<
       example: "janedoe",
     },
   },
-  other: { label: "Other" },
 };
 
 function isWebAddress(value: string): boolean {

@@ -2,7 +2,7 @@
  * Rules for the repeatable `profile.link` component on
  * `api::profile.profile` (see docs/adr/0003-profile-links.md). Social
  * types store only the handle — the public URL is built from a fixed
- * prefix at render time — while `website`/`other` store a full URL.
+ * prefix at render time — while `website` stores a full URL.
  *
  * The web app enforces the same rules inline before submitting
  * (apps/web/src/lib/profile-links.ts); this is
@@ -23,7 +23,6 @@ export const PROFILE_LINK_TYPES = [
   "instagram",
   "youtube",
   "linktree",
-  "other",
 ] as const;
 
 export type ProfileLinkType = (typeof PROFILE_LINK_TYPES)[number];

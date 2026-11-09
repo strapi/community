@@ -26,7 +26,7 @@ const invalidClassName = "border-red-400 focus-visible:border-red-400";
 /**
  * Editor for the repeatable `links` profile field — one row per link with
  * a type select and either a handle (social types, shown after their URL
- * prefix) or a full URL (`website`/`other`). Order is kept as entered.
+ * prefix) or a full URL (`website`). Order is kept as entered.
  */
 export function ProfileLinksField({
   id,
