@@ -1,5 +1,7 @@
 // Client-safe types and pure helpers (no server-only imports).
 
+import type { RoadmapItem } from "./data";
+
 export type PublicStatus = "exploring" | "in_progress" | "beta" | "shipped";
 export type GithubLink = {
   url: string;
@@ -57,6 +59,17 @@ export function safeHref(url: string | null | undefined): string | null {
     return null;
   }
 }
+
+/**
+ * Every URL on an item, scheme-checked once, so components can render hrefs
+ * from it without re-validating.
+ */
+export const withSafeLinks = (item: RoadmapItem): RoadmapItem => ({
+  ...item,
+  canny_url: safeHref(item.canny_url),
+  docs_link: safeHref(item.docs_link),
+  github_links: githubLinks(item.github_links).filter((l) => safeHref(l.url)),
+});
 
 /** An item's own URL (its webtools alias), if it has one yet. */
 export const itemPath = (item: {

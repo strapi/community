@@ -20,13 +20,13 @@ const { searchClient } = instantMeiliSearch(
  * searches client-side as before.
  */
 export async function getSearchServerState(
-  { indexName, facets }: SearchIndexConfig,
+  { indexName, facets, hitsPerPage = HITS_PER_PAGE }: SearchIndexConfig,
   filters?: string,
 ): Promise<InstantSearchServerState | undefined> {
   const params = {
     query: "",
     page: 0,
-    hitsPerPage: HITS_PER_PAGE,
+    hitsPerPage,
     facets,
     ...(filters && { filters }),
   };
@@ -44,7 +44,7 @@ export async function getSearchServerState(
             index: indexName,
             query: "",
             page: 0,
-            hitsPerPage: HITS_PER_PAGE,
+            hitsPerPage,
             disjunctiveFacets: facets,
             ...(filters && { filters }),
           },

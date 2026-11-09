@@ -24,6 +24,8 @@ const StatCard = ({ stat, index }: { stat: Stat; index: number }) => (
 /** Hero visual for overview pages with a roadmap section. */
 const RoadmapStats = async () => {
   const items = await fetchRoadmapItems();
+  // Nothing to count (or the index is unreachable): no hero beats zeros.
+  if (items.length === 0) return null;
 
   const count = (statuses: string[]) =>
     items.filter((i) => statuses.includes(i.public_status ?? "")).length;

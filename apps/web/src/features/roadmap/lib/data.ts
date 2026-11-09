@@ -2,6 +2,8 @@ import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { cache } from "react";
 import { cmsClient } from "@/features/cms/lib/strapi";
+import { SEARCH_INDEXES } from "@/features/search/lib/indexes";
+import { getSearchServerState } from "@/features/search/lib/server-state";
 
 const itemType = "api::roadmap-item.roadmap-item" satisfies UID.ContentType;
 const releaseType = "api::release.release" satisfies UID.ContentType;
@@ -10,6 +12,8 @@ const releaseType = "api::release.release" satisfies UID.ContentType;
 // collections are read page by page.
 const PAGE_SIZE = 100;
 
+// The fields of an item's search document (`roadmap-item` in the CMS's
+// meilisearch config); only used to type hits.
 const itemQuery = {
   fields: [
     "slug",
@@ -31,8 +35,6 @@ const itemQuery = {
     "updatedAt",
   ],
   populate: { url_alias: { fields: ["url_path"] } },
-  // id last keeps the order total, so pages never overlap.
-  sort: ["canny_votes:desc", "public_title:asc", "id:asc"],
 } satisfies GetQueryParams<typeof itemType>;
 
 const releaseQuery = {
@@ -59,7 +61,7 @@ export type RoadmapRelease = Modules.Documents.Result<
 
 export * from "./types";
 
-import { githubLinks, safeHref } from "./types";
+import { safeHref, withSafeLinks } from "./types";
 
 /** Every document of a collection, fetched page by page. */
 async function findAll<TResult>(
@@ -76,24 +78,23 @@ async function findAll<TResult>(
   }
 }
 
-// The CMS route only ever serves published items, whatever the query says.
-// Every URL is scheme-checked here, once, so components can render hrefs
-// from these objects without re-validating.
-// Cached per request: the overview hero and the roadmap section both read it.
-export const fetchRoadmapItems = cache(async (): Promise<RoadmapItem[]> => {
-  const items = await findAll((page) =>
-    cmsClient.collection(itemType).find({
-      ...itemQuery,
-      pagination: { page, pageSize: PAGE_SIZE },
-    }),
-  );
-  return items.map((item) => ({
-    ...item,
-    canny_url: safeHref(item.canny_url),
-    docs_link: safeHref(item.docs_link),
-    github_links: githubLinks(item.github_links).filter((l) => safeHref(l.url)),
-  }));
-});
+/**
+ * The whole index (unfiltered, default sort) for the board's server-rendered
+ * first results. Cached per request: the overview hero and the roadmap
+ * section both read it. Undefined when Meilisearch is unreachable.
+ */
+export const fetchRoadmapServerState = cache(() =>
+  getSearchServerState(SEARCH_INDEXES.roadmap),
+);
+
+/** Every published item (the index only holds published ones). */
+export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
+  const state = await fetchRoadmapServerState();
+  const results =
+    state?.initialResults[SEARCH_INDEXES.roadmap.indexName]?.results;
+  const hits = (results?.[0]?.hits ?? []) as unknown as RoadmapItem[];
+  return hits.map(withSafeLinks);
+}
 
 /** Releases are supplementary: the roadmap still renders without them. */
 export async function fetchRoadmapReleases(): Promise<RoadmapRelease[]> {

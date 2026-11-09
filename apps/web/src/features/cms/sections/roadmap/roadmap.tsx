@@ -3,6 +3,7 @@ import type { Data } from "@strapi/types";
 import {
   fetchRoadmapItems,
   fetchRoadmapReleases,
+  fetchRoadmapServerState,
   RoadmapBoard,
 } from "@/features/roadmap";
 
@@ -13,14 +14,19 @@ type Props = {
 };
 
 const RoadmapSection = async ({ section }: Props) => {
-  const [items, releases] = await Promise.all([
+  const [serverState, items, releases] = await Promise.all([
+    fetchRoadmapServerState(),
     fetchRoadmapItems(),
     fetchRoadmapReleases(),
   ]);
 
   return (
     <Container className="py-10 lg:py-14">
-      <RoadmapBoard items={items} releases={releases} />
+      <RoadmapBoard
+        serverState={serverState}
+        total={items.length}
+        releases={releases}
+      />
 
       {section.show_feedback_link && (
         <p className="mt-14 border-t border-(--color-neutral150) pt-6 text-sm text-(--color-neutral700)">

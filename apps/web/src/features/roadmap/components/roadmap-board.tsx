@@ -1,91 +1,71 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type InstantSearchServerState,
+  useClearRefinements,
+  useHits,
+  useRefinementList,
+  useSearchBox,
+  useSortBy,
+} from "react-instantsearch";
 import { replaceUrlInPage } from "@/features/analytics";
+import { SearchIndex } from "@/features/search/components/search-index";
+import { SEARCH_INDEXES } from "@/features/search/lib/indexes";
 import { cn } from "@/lib/utils";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
+import { ROADMAP_SORT_INDEXES, roadmapRouting } from "../lib/search";
 import {
   compareVersions,
-  DEFAULT_ROADMAP_STATE,
   formatDate,
   itemPath,
   parseRoadmapState,
-  type RoadmapSort,
-  type RoadmapState,
   type RoadmapView,
-  stringList,
   UNSCHEDULED,
+  withSafeLinks,
 } from "../lib/types";
 import { RoadmapCard } from "./roadmap-card";
 import { RoadmapItemDialog } from "./roadmap-item-dialog";
 import { useRoadmapRoute } from "./roadmap-route";
 import { type FacetOption, RoadmapSidebar } from "./roadmap-sidebar";
 
-const SORTS: { value: RoadmapSort; label: string }[] = [
-  { value: "votes", label: "Most votes" },
-  { value: "newest", label: "Newest" },
-  { value: "release", label: "Release" },
-  { value: "title", label: "A–Z" },
+const SORTS = [
+  { value: ROADMAP_SORT_INDEXES.votes, label: "Most votes" },
+  { value: ROADMAP_SORT_INDEXES.newest, label: "Newest" },
+  { value: ROADMAP_SORT_INDEXES.release, label: "Release" },
+  { value: ROADMAP_SORT_INDEXES.title, label: "A–Z" },
 ];
+
+// High enough that no release or area is ever cut off.
+const FACET_LIMIT = 100;
 
 const releaseKey = (item: RoadmapItem) => item.release || UNSCHEDULED;
 
+/** Newest version first, unscheduled last. */
+const releaseOrder = (a: { name: string }, b: { name: string }) =>
+  a.name === UNSCHEDULED
+    ? 1
+    : b.name === UNSCHEDULED
+      ? -1
+      : compareVersions(b.name, a.name);
+
 /**
- * Mirror the view into the address bar so any state can be shared: the open
- * item as its own path, the rest as query params. Plain History API (not
- * router.replace) so nothing round-trips to the server.
+ * Mirror the view and open item into the address bar so any state can be
+ * shared: the open item as its own path, the view as a query param. The
+ * search params are kept as they are; the search router writes those (see
+ * roadmapRouting). Plain History API (not router.replace) so nothing
+ * round-trips to the server.
  */
-function writeUrl(state: RoadmapState, pathname: string, item?: string | null) {
+function writeUrl(view: RoadmapView, pathname: string, item?: string | null) {
   const url = new URL(window.location.href);
   url.pathname = pathname;
-  const p = new URLSearchParams();
-  if (state.q) p.set("q", state.q);
-  if (state.sort !== "votes") p.set("sort", state.sort);
-  if (state.view !== "board") p.set("view", state.view);
-  for (const r of state.releases) p.append("release", r);
-  for (const a of state.areas) p.append("area", a);
-  if (item) p.set("item", item);
-  url.search = p.toString();
+  url.searchParams.delete("view");
+  url.searchParams.delete("item");
+  if (view !== "board") url.searchParams.set("view", view);
+  if (item) url.searchParams.set("item", item);
   replaceUrlInPage(url);
-}
-
-function sortItems(items: RoadmapItem[], sort: RoadmapSort) {
-  const byTitle = (a: RoadmapItem, b: RoadmapItem) =>
-    (a.public_title ?? "").localeCompare(b.public_title ?? "");
-  const copy = [...items];
-  switch (sort) {
-    case "newest":
-      return copy.sort(
-        (a, b) =>
-          Date.parse(String(b.first_published_at ?? 0)) -
-            Date.parse(String(a.first_published_at ?? 0)) || byTitle(a, b),
-      );
-    case "release":
-      return copy.sort((a, b) => {
-        if (!a.release !== !b.release) return a.release ? -1 : 1;
-        return (
-          compareVersions(b.release ?? "0", a.release ?? "0") || byTitle(a, b)
-        );
-      });
-    case "title":
-      return copy.sort(byTitle);
-    default:
-      return copy.sort(
-        (a, b) => (b.canny_votes ?? 0) - (a.canny_votes ?? 0) || byTitle(a, b),
-      );
-  }
-}
-
-function countBy(
-  items: RoadmapItem[],
-  keys: (i: RoadmapItem) => string[],
-): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const item of items) {
-    for (const k of keys(item)) counts.set(k, (counts.get(k) ?? 0) + 1);
-  }
-  return counts;
 }
 
 const Column = ({
@@ -122,105 +102,153 @@ const Column = ({
   </section>
 );
 
+/**
+ * The roadmap, searched, filtered and sorted through its Meilisearch index.
+ * The server renders the whole index as the first results; the board then
+ * applies whatever the URL asks for.
+ */
 const RoadmapBoard = ({
-  items,
+  serverState,
+  total,
   releases,
 }: {
-  items: RoadmapItem[];
+  serverState?: InstantSearchServerState;
+  /** Published items in total, for the "x of y" count. */
+  total: number;
+  releases: RoadmapRelease[];
+}) => {
+  const pathname = usePathname();
+  // Created once: the board rewrites the path itself when an item opens.
+  const [routing] = useState(() => roadmapRouting(pathname));
+
+  return (
+    <SearchIndex
+      indexName={SEARCH_INDEXES.roadmap.indexName}
+      serverState={serverState}
+      routing={routing}
+    >
+      <SearchIndex.Configure hitsPerPage={SEARCH_INDEXES.roadmap.hitsPerPage} />
+      <Board total={total} releases={releases} />
+    </SearchIndex>
+  );
+};
+
+const Board = ({
+  total,
+  releases,
+}: {
+  total: number;
   releases: RoadmapRelease[];
 }) => {
   const route = useRoadmapRoute();
   const basePath = useRef(route.basePath);
-  const [state, setState] = useState<RoadmapState>(DEFAULT_ROADMAP_STATE);
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [view, setView] = useState<RoadmapView>("board");
+  const [openItem, setOpenItem] = useState<RoadmapItem | null>(null);
+
+  const { query, refine: search } = useSearchBox();
+  const sort = useSortBy({ items: SORTS });
+  const release = useRefinementList({
+    attribute: "release_key",
+    limit: FACET_LIMIT,
+    sortBy: releaseOrder,
+  });
+  const area = useRefinementList({
+    attribute: "squads",
+    limit: FACET_LIMIT,
+    sortBy: ["name:asc"],
+  });
+  const { refine: clearFilters } = useClearRefinements({
+    includedAttributes: ["release_key", "squads"],
+  });
+  const { refine: clearAll } = useClearRefinements({
+    includedAttributes: ["release_key", "squads", "query"],
+  });
+  const { items: hits } = useHits<RoadmapItem>();
+  const visible = useMemo(() => hits.map(withSafeLinks), [hits]);
 
   /** Write the view and open item (or none) to the address bar. */
   const sync = useCallback(
-    (next: RoadmapState, slug: string | null) => {
+    (nextView: RoadmapView, item: RoadmapItem | null) => {
       basePath.current ??= window.location.pathname;
-      const item = slug ? items.find((i) => i.slug === slug) : undefined;
       const path = item && itemPath(item);
       // An item without an alias yet falls back to `?item=` on the page.
-      writeUrl(next, path ?? basePath.current, path ? undefined : item?.slug);
+      writeUrl(
+        nextView,
+        path ?? basePath.current,
+        path ? undefined : item?.slug,
+      );
     },
-    [items],
+    [],
   );
 
   // The page is statically rendered (ISR) with the default view, so restore
-  // a shared view and open item from the URL after hydration: the item's own
-  // path (via RoadmapRoute) or an old-style `?item=` link, which moves to
-  // the item's path. Unknown/unpublished items just drop the param.
+  // a shared view from the URL after hydration. The search state restores
+  // itself (see roadmapRouting).
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const restored = parseRoadmapState(params);
-    const slug = route.item ?? params.get("item") ?? null;
-    const found = items.some((i) => i.slug === slug);
-    setState(restored);
-    if (found) setOpenSlug(slug);
-    if (params.has("item")) sync(restored, found ? slug : null);
-  }, [items, route.item, sync]);
+    setView(
+      parseRoadmapState(new URLSearchParams(window.location.search)).view,
+    );
+  }, []);
 
-  const update = useCallback(
-    (patch: Partial<RoadmapState>) => {
-      setState((prev) => {
-        const next = { ...prev, ...patch };
-        sync(next, openSlug);
-        return next;
-      });
-    },
-    [openSlug, sync],
-  );
+  // Likewise the open item: the item's own path (via RoadmapRoute) or an
+  // old-style `?item=` link, which moves to the item's path. Unknown or
+  // unpublished items just drop the param. Runs once, against the first
+  // results, which are the server-rendered, unfiltered index.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || visible.length === 0) return;
+    restored.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const slug = route.item ?? params.get("item");
+    const found = visible.find((i) => i.slug === slug) ?? null;
+    if (found) setOpenItem(found);
+    if (params.has("item")) sync(parseRoadmapState(params).view, found);
+  }, [visible, route.item, sync]);
+
+  const changeView = (next: RoadmapView) => {
+    setView(next);
+    sync(next, openItem);
+  };
 
   const open = useCallback(
     (slug: string) => {
-      setOpenSlug(slug);
-      sync(state, slug);
+      const item = visible.find((i) => i.slug === slug) ?? null;
+      setOpenItem(item);
+      sync(view, item);
     },
-    [state, sync],
+    [visible, view, sync],
   );
   const close = useCallback(() => {
-    setOpenSlug(null);
-    sync(state, null);
-  }, [state, sync]);
-
-  const toggle = (key: "releases" | "areas", value: string) =>
-    update({
-      [key]: state[key].includes(value)
-        ? state[key].filter((v) => v !== value)
-        : [...state[key], value],
-    });
+    setOpenItem(null);
+    sync(view, null);
+  }, [view, sync]);
 
   const releasesByVersion = useMemo(
     () => new Map(releases.map((r) => [r.version, r])),
     [releases],
   );
 
-  // ── Facets (counted over everything, so options never vanish) ─────────
-  const releaseOptions: FacetOption[] = useMemo(() => {
-    const counts = countBy(items, (i) => [releaseKey(i)]);
-    return [...counts.entries()]
-      .sort(([a], [b]) =>
-        a === UNSCHEDULED ? 1 : b === UNSCHEDULED ? -1 : compareVersions(b, a),
-      )
-      .map(([value, count]) => ({
-        value,
-        count,
-        label: value === UNSCHEDULED ? "Unscheduled" : value,
-      }));
-  }, [items]);
-
-  const areaOptions: FacetOption[] = useMemo(() => {
-    const counts = countBy(items, (i) => stringList(i.squads));
-    return [...counts.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([value, count]) => ({ value, count, label: value }));
-  }, [items]);
+  // ── Facets (zero-count options stay listed, see keepZeroFacets) ───────
+  const releaseOptions: FacetOption[] = release.items.map((o) => ({
+    value: o.value,
+    count: o.count,
+    label: o.value === UNSCHEDULED ? "Unscheduled" : o.value,
+  }));
+  const areaOptions: FacetOption[] = area.items.map((o) => ({
+    value: o.value,
+    count: o.count,
+    label: o.label,
+  }));
+  const refined = (items: { value: string; isRefined: boolean }[]) =>
+    items.filter((o) => o.isRefined).map((o) => o.value);
 
   // Upcoming first (soonest version first), then the latest three shipped.
   // Versions that only exist in Notion so far show as planned, unlinked.
+  // The release facet lists every version any item targets.
   const schedule: RoadmapRelease[] = useMemo(() => {
-    const planned = [...new Set(items.map((i) => i.release).filter(Boolean))]
-      .filter((v) => !releasesByVersion.has(v as string))
+    const planned = release.items
+      .map((o) => o.value)
+      .filter((v) => v !== UNSCHEDULED && !releasesByVersion.has(v))
       .map(
         (version) =>
           ({
@@ -238,29 +266,7 @@ const RoadmapBoard = ({
       .sort((a, b) => compareVersions(b.version ?? "", a.version ?? ""))
       .slice(0, 3);
     return [...upcoming, ...shipped];
-  }, [items, releases, releasesByVersion]);
-
-  // ── Filter + sort ──────────────────────────────────────────────────────
-  const visible = useMemo(() => {
-    const q = state.q.trim().toLowerCase();
-    return sortItems(
-      items.filter((i) => {
-        if (state.releases.length && !state.releases.includes(releaseKey(i)))
-          return false;
-        if (
-          state.areas.length &&
-          !stringList(i.squads).some((a) => state.areas.includes(a))
-        )
-          return false;
-        if (!q) return true;
-        return [i.public_title, i.public_description, ...stringList(i.squads)]
-          .join(" ")
-          .toLowerCase()
-          .includes(q);
-      }),
-      state.sort,
-    );
-  }, [items, state]);
+  }, [release.items, releases, releasesByVersion]);
 
   const planned = visible.filter((i) => i.public_status === "exploring");
   const inProgress = visible.filter(
@@ -277,20 +283,18 @@ const RoadmapBoard = ({
     />
   );
 
-  const openItem = items.find((i) => i.slug === openSlug) ?? null;
-
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
       <RoadmapSidebar
-        view={state.view}
-        onViewChange={(view: RoadmapView) => update({ view })}
+        view={view}
+        onViewChange={changeView}
         releaseOptions={releaseOptions}
         areaOptions={areaOptions}
-        selectedReleases={state.releases}
-        selectedAreas={state.areas}
-        onToggleRelease={(v) => toggle("releases", v)}
-        onToggleArea={(v) => toggle("areas", v)}
-        onClear={() => update({ releases: [], areas: [] })}
+        selectedReleases={refined(release.items)}
+        selectedAreas={refined(area.items)}
+        onToggleRelease={release.refine}
+        onToggleArea={area.refine}
+        onClear={clearFilters}
         schedule={schedule}
       />
 
@@ -304,8 +308,8 @@ const RoadmapBoard = ({
             />
             <input
               type="search"
-              value={state.q}
-              onChange={(e) => update({ q: e.target.value })}
+              value={query}
+              onChange={(e) => search(e.target.value)}
               placeholder="Search the roadmap"
               className="w-full rounded-lg border border-(--color-neutral300) bg-white py-3 pr-4 pl-11 text-sm text-(--color-neutral900) placeholder:text-(--color-neutral600) focus:border-(--color-primary600) focus:outline-none"
             />
@@ -313,8 +317,8 @@ const RoadmapBoard = ({
           <label className="flex items-center gap-2 rounded-lg border border-(--color-neutral300) bg-white px-4 text-sm text-(--color-neutral800) focus-within:border-(--color-primary600)">
             <span className="text-(--color-neutral600)">Sort:</span>
             <select
-              value={state.sort}
-              onChange={(e) => update({ sort: e.target.value as RoadmapSort })}
+              value={sort.currentRefinement}
+              onChange={(e) => sort.refine(e.target.value)}
               className="h-11 cursor-pointer bg-transparent pr-1 font-medium focus:outline-none"
             >
               {SORTS.map((s) => (
@@ -329,7 +333,9 @@ const RoadmapBoard = ({
           className="mt-3 text-sm text-(--color-neutral600)"
           aria-live="polite"
         >
-          {visible.length} of {items.length} items
+          {total
+            ? `${visible.length} of ${total} items`
+            : `${visible.length} items`}
         </p>
 
         {visible.length === 0 ? (
@@ -337,13 +343,13 @@ const RoadmapBoard = ({
             <p>Nothing matches.</p>
             <button
               type="button"
-              onClick={() => update({ q: "", releases: [], areas: [] })}
+              onClick={clearAll}
               className="mt-2 font-medium text-(--color-primary600) hover:underline"
             >
               Clear search and filters
             </button>
           </div>
-        ) : state.view === "board" ? (
+        ) : view === "board" ? (
           <>
             <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-2">
               <Column
