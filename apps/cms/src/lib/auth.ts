@@ -180,6 +180,28 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            /**
+             * Who may submit packages/templates on behalf of the
+             * organization — only its owners/admins, or every member.
+             * Set on the organization "Settings" tab (via better-auth's
+             * own `organization.update`, which is already restricted to
+             * owners/admins), enforced by `canSubmitForOrganization`.
+             * `private` in the Strapi schema, so it stays off the public
+             * content API. Existing organizations have no value, which
+             * counts as `"admins"`.
+             */
+            submission_policy: {
+              type: ["admins", "members"],
+              required: false,
+              defaultValue: "admins",
+              input: true,
+            },
+          },
+        },
+      },
       sendInvitationEmail: async (data) => {
         const url = `${process.env.WEBSITE_URL}/auth/accept-invitation?invitationId=${data.id}`;
         const expirationHours = Math.round(
