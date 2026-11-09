@@ -8,7 +8,7 @@ import { UserProfileView } from "./user-profile-view";
 /**
  * The "Profile" tab shared by `AccountView` and `OrganizationView` — edits
  * the `api::profile.profile` fields the public user/organization pages
- * render (bio/subtitle/website/github/location/readme, plus a public email
+ * render (bio/subtitle/links/location/readme, plus a public email
  * for users). The two variants differ in where their initial values come
  * from and how they're saved:
  *

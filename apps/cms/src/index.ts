@@ -1,4 +1,4 @@
-import { migrateUserProfilePictures } from "./migration/user-profile-pictures";
+import { migrateProfileLinks } from "./migration/profile-links";
 
 export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
@@ -8,6 +8,6 @@ export default {
       return;
     }
 
-    await migrateUserProfilePictures();
+    await migrateProfileLinks();
   },
 };
