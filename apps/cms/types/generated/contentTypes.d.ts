@@ -1825,6 +1825,14 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    submission_policy: Schema.Attribute.Enumeration<['admins', 'members']> &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'admins'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getManageableOrganizations } from "../../lib/get-owner-options";
+import { getSubmittableOrganizations } from "../../lib/get-owner-options";
 import type { OwnerType } from "../../types";
 
 export type OwnerValue = { type: OwnerType; id: number | null };
@@ -10,8 +10,9 @@ const PERSONAL_VALUE = "personal";
 
 /**
  * Who a submission belongs to — the signed-in user, or an organization
- * they're an owner/admin of (fetched from `GET /api/organizations/mine`,
- * which already scopes the list to that role — no filtering needed here).
+ * they may submit for (fetched from `GET /api/organizations/mine`, which
+ * already scopes the list by role and the org's submission policy — no
+ * filtering needed here).
  */
 export function OwnerSelect({
   value,
@@ -27,7 +28,7 @@ export function OwnerSelect({
   >([]);
 
   useEffect(() => {
-    getManageableOrganizations().then(setOrganizations);
+    getSubmittableOrganizations().then(setOrganizations);
   }, []);
 
   const selected =
