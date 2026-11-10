@@ -32,6 +32,7 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
   }[];
   const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
+  const integrations = document.integrations ?? [];
   const githubStars = document.stars;
   const npmDownloads = document.monthly_downloads;
 
@@ -153,6 +154,23 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                         className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
                       >
                         {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Integrations */}
+              {integrations.length > 0 && (
+                <SidebarSection title="Integrations">
+                  <div className="flex flex-wrap gap-2">
+                    {integrations.map((integration) => (
+                      <Link
+                        key={integration.documentId}
+                        href={integration.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {integration.name}
                       </Link>
                     ))}
                   </div>
