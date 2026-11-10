@@ -31,6 +31,33 @@ type Props = {
   communityCta?: CommunityCTAData | null;
 };
 
+const ProfileTagList = ({
+  title,
+  items,
+}: {
+  title: string;
+  items: { name?: string | null }[];
+}) => {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <h3 className="mb-3 text-[15px] font-semibold text-(--color-neutral900)">
+        {title}
+      </h3>
+      <ul className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li
+            key={item.name}
+            className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-sm text-(--color-neutral700)"
+          >
+            {item.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const OrganizationTemplate = ({
   document,
   members,
@@ -47,6 +74,12 @@ const OrganizationTemplate = ({
   const links = toProfileLinks(document.profile?.links);
   const website = links.find((link) => link.type === "website");
   const otherLinks = links.filter((link) => link !== website);
+
+  const countries = document.profile?.countries ?? [];
+  const techStacks = document.profile?.tech_stacks ?? [];
+  const services = document.profile?.services ?? [];
+  const hasProfileDetails =
+    countries.length > 0 || techStacks.length > 0 || services.length > 0;
 
   return (
     <>
@@ -218,9 +251,19 @@ const OrganizationTemplate = ({
             {document.profile?.readme ? (
               <Markdown markdown={document.profile.readme} />
             ) : (
-              <p className="text-md text-(--color-neutral600)">
-                No description provided.
-              </p>
+              !hasProfileDetails && (
+                <p className="text-md text-(--color-neutral600)">
+                  No description provided.
+                </p>
+              )
+            )}
+
+            {hasProfileDetails && (
+              <div className="mt-8 flex flex-col gap-6">
+                <ProfileTagList title="Services" items={services} />
+                <ProfileTagList title="Tech stacks" items={techStacks} />
+                <ProfileTagList title="Countries" items={countries} />
+              </div>
             )}
           </TabsContent>
 
