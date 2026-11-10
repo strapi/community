@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { RoadmapRelease } from "../lib/data";
 import { formatDate, type RoadmapView, UNSCHEDULED } from "../lib/types";
@@ -8,6 +9,8 @@ import { formatDate, type RoadmapView, UNSCHEDULED } from "../lib/types";
 export type FacetOption = { value: string; label: string; count: number };
 
 const RELEASES_URL = "https://github.com/strapi/strapi/releases";
+
+const COLLAPSED_COUNT = 5;
 
 const heading =
   "mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-(--color-neutral600)";
@@ -22,12 +25,19 @@ const FacetGroup = ({
   options: FacetOption[];
   selected: string[];
   onToggle: (value: string) => void;
-}) =>
-  options.length === 0 ? null : (
+}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (options.length === 0) return null;
+
+  const visibleOptions = expanded ? options : options.slice(0, COLLAPSED_COUNT);
+  const hasMore = options.length > COLLAPSED_COUNT;
+
+  return (
     <fieldset>
       <legend className={heading}>{title}</legend>
       <ul className="space-y-1">
-        {options.map((o) => {
+        {visibleOptions.map((o) => {
           const id = `facet-${title}-${o.value}`.replace(/\W+/g, "-");
           const checked = selected.includes(o.value);
           return (
@@ -61,8 +71,20 @@ const FacetGroup = ({
           );
         })}
       </ul>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="mt-2 text-sm font-medium text-(--color-primary600) hover:underline"
+        >
+          {expanded
+            ? "Show less"
+            : `Show ${options.length - COLLAPSED_COUNT} more`}
+        </button>
+      )}
     </fieldset>
   );
+};
 
 const ReleaseSchedule = ({ releases }: { releases: RoadmapRelease[] }) => {
   if (releases.length === 0) return null;
