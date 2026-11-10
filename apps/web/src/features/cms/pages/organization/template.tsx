@@ -235,10 +235,17 @@ const OrganizationTemplate = ({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {members.map((member) => {
                   const avatarUrl = member?.image;
+                  const profilePath = member?.url_alias?.[0]?.url_path;
+                  const Wrapper = profilePath ? Link : "div";
                   return (
-                    <div
+                    <Wrapper
                       key={member.id}
-                      className="flex items-center gap-3 rounded-lg border border-(--color-neutral150) p-4"
+                      href={profilePath as string}
+                      className={`flex items-center gap-3 rounded-lg border border-(--color-neutral150) p-4 ${
+                        profilePath
+                          ? "transition-colors hover:border-(--color-neutral300) hover:bg-(--color-neutral100)"
+                          : ""
+                      }`}
                     >
                       {avatarUrl ? (
                         <Image
@@ -261,7 +268,7 @@ const OrganizationTemplate = ({
                           </p>
                         )}
                       </div>
-                    </div>
+                    </Wrapper>
                   );
                 })}
               </div>
