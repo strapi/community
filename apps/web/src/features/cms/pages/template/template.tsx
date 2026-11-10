@@ -44,19 +44,6 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
             {/* Header */}
             <div className="flex items-center justify-between gap-5">
               <div className="flex items-center gap-5">
-                <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
-                  <Image
-                    src={
-                      document.preview_image
-                        ? cmsImageUrl(document.preview_image.url)
-                        : "/template-fallback-image.png"
-                    }
-                    width={64}
-                    height={64}
-                    alt={`${document.name} thumbnail`}
-                    className="object-contain"
-                  />
-                </div>
                 <div>
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <h1 className="text-3xl font-bold text-(--color-primary700)">
