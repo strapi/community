@@ -5,7 +5,6 @@ import {
   compareVersions,
   extractUrls,
   isPrivateAddress,
-  isStale,
   type LinkCheck,
   mapNotionPage,
   mapStatus,
@@ -48,7 +47,6 @@ function page(overrides: NotionPage["properties"] = {}): NotionPage {
         ),
       },
       "Docs link": { type: "url", url: "https://docs.strapi.io/" },
-      "Public review date": { type: "date", date: { start: "2026-10-01" } },
       "Public Roadmap": { type: "checkbox", checkbox: true },
       "Version & date (Release)": {
         type: "select",
@@ -100,7 +98,6 @@ describe("mapNotionPage", () => {
       "https://github.com/strapi/strapi/issues/1",
       "https://github.com/strapi/strapi/pull/2",
     ]);
-    assert.equal(row.publicReviewDate, "2026-10-01");
     assert.equal(row.flagged, true);
     assert.equal(row.release, "5.61.1");
     assert.equal(toPublicFields(row).release, "5.61.1");
@@ -179,15 +176,6 @@ describe("blockingReasons", () => {
       "not_flagged",
       "archived",
     ]);
-  });
-});
-
-describe("isStale", () => {
-  const now = new Date("2026-11-03T12:00:00Z");
-  it("is stale past 60 days or when never reviewed", () => {
-    assert.equal(isStale("2026-10-01", now), false);
-    assert.equal(isStale("2026-08-01", now), true);
-    assert.equal(isStale(null, now), true);
   });
 });
 

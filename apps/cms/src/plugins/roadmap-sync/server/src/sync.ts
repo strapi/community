@@ -2,7 +2,6 @@ import { triggerN8nWebhook } from "../../../moderation/server/src/services/n8n-w
 import {
   type BlockingReason,
   blockingReasons,
-  isStale,
   type LinkCheck,
   mapNotionPage,
   type RoadmapRow,
@@ -161,7 +160,6 @@ export type SyncReport = {
     canny_unavailable: ReportEntry[];
     held_until_verified: ReportEntry[];
     unknown_release: ReportEntry[];
-    stale: ReportEntry[];
     unpublished: ReportEntry[];
   };
   errors: string[];
@@ -184,7 +182,6 @@ const ITEM_FIELDS = [
   "canny_status",
   "github_links",
   "docs_link",
-  "public_review_date",
   "release",
   "first_published_at",
 ] as const;
@@ -228,7 +225,6 @@ function emptyReport(trigger: string, startedAt: Date): SyncReport {
       canny_unavailable: [],
       held_until_verified: [],
       unknown_release: [],
-      stale: [],
       unpublished: [],
     },
     errors: [],
@@ -425,16 +421,6 @@ async function syncRow(
       report.counts.unchanged++;
     }
     report.counts.live++;
-    if (isStale(row.publicReviewDate, now)) {
-      attention.stale.push(
-        entry(row, {
-          public_url: publicUrl(slug),
-          detail: row.publicReviewDate
-            ? `last reviewed ${row.publicReviewDate}`
-            : "never reviewed",
-        }),
-      );
-    }
   } else {
     report.counts.blocked++;
     // (`isPublished` here implies `!valid`: unverified alone never unpublishes.)
@@ -481,7 +467,6 @@ function summaryText(report: SyncReport): string {
     section("Broken links", a.broken_links),
     section("Status not mapped", a.unmapped_status),
     section("Paused (flagged but hidden)", a.paused),
-    section(`Stale — not reviewed in 60 days`, a.stale),
     section("Links we couldn't verify", a.unverified_links),
     section(
       "Ready, but held until its links can be verified",

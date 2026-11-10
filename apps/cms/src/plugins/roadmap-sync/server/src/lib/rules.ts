@@ -26,7 +26,6 @@ export const NOTION_PROPS = {
   cannyLink: "Canny Link",
   githubLinks: "GitHub links", // optional
   docsLink: "Docs link", // optional
-  publicReviewDate: "Public review date", // optional
   publicRoadmap: "Public Roadmap",
   release: "Version & date (Release)",
 } as const;
@@ -54,8 +53,6 @@ const TIMEFRAMES: readonly Timeframe[] = [
   "done",
   "tbd",
 ];
-
-export const STALE_AFTER_DAYS = 60;
 
 // ── Minimal Notion API shapes (only what we read) ───────────────────────────
 type RichText = { plain_text?: string };
@@ -98,7 +95,6 @@ export type RoadmapRow = {
   cannyUrl: string | null;
   githubLinks: string[];
   docsLink: string | null;
-  publicReviewDate: string | null;
   /** Normalised release version ("5.61.1"), or null when unscheduled. */
   release: string | null;
   flagged: boolean;
@@ -174,13 +170,6 @@ export function mapTimeframe(when: string | null): Timeframe | null {
   return TIMEFRAMES.includes(key) ? key : null;
 }
 
-/** ISO date (YYYY-MM-DD) from a Notion date start, or null. */
-function toDateOnly(value: string | null): string | null {
-  if (!value) return null;
-  const match = value.match(/^\d{4}-\d{2}-\d{2}/);
-  return match ? match[0] : null;
-}
-
 export function mapNotionPage(page: NotionPage): RoadmapRow {
   const p = page.properties ?? {};
   const internalStatus = propText(p[NOTION_PROPS.status]);
@@ -202,7 +191,6 @@ export function mapNotionPage(page: NotionPage): RoadmapRow {
     cannyUrl: propText(p[NOTION_PROPS.cannyLink]),
     githubLinks: extractUrls(propText(githubProp)),
     docsLink: propText(p[NOTION_PROPS.docsLink]),
-    publicReviewDate: toDateOnly(propText(p[NOTION_PROPS.publicReviewDate])),
     release: normalizeVersion(propText(p[NOTION_PROPS.release])),
     flagged: p[NOTION_PROPS.publicRoadmap]?.checkbox === true,
   };
@@ -223,7 +211,6 @@ export function toPublicFields(row: RoadmapRow) {
     tags: row.tags,
     canny_url: row.cannyUrl,
     docs_link: row.docsLink,
-    public_review_date: row.publicReviewDate,
     release: row.release,
   };
 }
@@ -265,17 +252,6 @@ export function blockingReasons(
   if (linkChecks.some((c) => c.result === "broken"))
     reasons.push("broken_link");
   return reasons;
-}
-
-export function isStale(
-  reviewDate: string | null,
-  now: Date,
-  days = STALE_AFTER_DAYS,
-): boolean {
-  if (!reviewDate) return true;
-  const reviewed = Date.parse(`${reviewDate}T00:00:00Z`);
-  if (Number.isNaN(reviewed)) return true;
-  return now.getTime() - reviewed > days * 24 * 60 * 60 * 1000;
 }
 
 // ── Slugs & URL parsing ─────────────────────────────────────────────────────

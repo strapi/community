@@ -78,9 +78,6 @@
     "docs_link": {
       "type": "string"
     },
-    "public_review_date": {
-      "type": "date"
-    },
     "first_published_at": {
       "type": "datetime"
     },

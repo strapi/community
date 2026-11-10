@@ -1280,7 +1280,6 @@ export interface ApiRoadmapItemRoadmapItem extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private &
       Schema.Attribute.Unique;
     public_description: Schema.Attribute.Text & Schema.Attribute.Required;
-    public_review_date: Schema.Attribute.Date;
     public_status: Schema.Attribute.Enumeration<
       ['exploring', 'in_progress', 'beta', 'shipped']
     > &
