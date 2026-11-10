@@ -4,7 +4,6 @@ import { ExternalLink, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
-import { ContentCard } from "@/components/content/card";
 import { GitProviderLogo } from "@/components/content/git-provider-logo";
 import { ContentLabels } from "@/components/content/label-icons";
 import { Markdown } from "@/components/content/markdown";
@@ -104,36 +103,6 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
 
             {/* README */}
             {document.readme && <Markdown markdown={document.readme} />}
-
-            {/* Packages bundled with this template */}
-            {packages.length > 0 && (
-              <section>
-                <h2 className="mb-6 text-[21px] font-semibold text-(--color-neutral900)">
-                  Packages in this template
-                </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {packages.map((pkg) => (
-                    <ContentCard
-                      key={pkg.documentId}
-                      image={{
-                        src: pkg.icon
-                          ? cmsImageUrl(pkg.icon.url)
-                          : "/package-fallback-icon.png",
-                        alt: pkg.icon?.alternativeText || "",
-                        size: "S",
-                      }}
-                      link={pkg.url_alias?.[0]?.url_path ?? "#"}
-                      badge="Package"
-                      name={pkg.name!}
-                      description={pkg.description ?? ""}
-                      githubStars={pkg.stars || undefined}
-                      npmDownloads={pkg.monthly_downloads || undefined}
-                      labels={pkg.labels!}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
           </section>
 
           {/* ── Sidebar ── */}
@@ -193,6 +162,23 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                         className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
                       >
                         {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Packages */}
+              {packages.length > 0 && (
+                <SidebarSection title="Packages">
+                  <div className="flex flex-wrap gap-2">
+                    {packages.map((pkg) => (
+                      <Link
+                        key={pkg.documentId}
+                        href={pkg.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {pkg.name}
                       </Link>
                     ))}
                   </div>
