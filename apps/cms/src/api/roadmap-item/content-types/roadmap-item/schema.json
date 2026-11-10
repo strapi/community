@@ -1,0 +1,88 @@
+{
+  "kind": "collectionType",
+  "collectionName": "roadmap_items",
+  "info": {
+    "singularName": "roadmap-item",
+    "pluralName": "roadmap-items",
+    "displayName": "Roadmap Item",
+    "description": "Synced from the Notion Product Roadmap by the roadmap-sync plugin. Edit copy in Notion: the next sync overwrites changes made here."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "webtools": {
+      "enabled": true
+    }
+  },
+  "attributes": {
+    "url_alias": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::webtools.url-alias",
+      "configurable": false
+    },
+    "notion_page_id": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "private": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "public_title",
+      "required": true
+    },
+    "public_title": {
+      "type": "string",
+      "required": true
+    },
+    "public_description": {
+      "type": "text",
+      "required": true
+    },
+    "public_status": {
+      "type": "enumeration",
+      "enum": ["exploring", "in_progress", "beta", "shipped"],
+      "required": true
+    },
+    "timeframe": {
+      "type": "enumeration",
+      "enum": ["now", "next", "later", "done", "tbd"]
+    },
+    "delivery_quarter": {
+      "type": "string"
+    },
+    "release": {
+      "type": "string"
+    },
+    "squads": {
+      "type": "json"
+    },
+    "tags": {
+      "type": "json"
+    },
+    "canny_url": {
+      "type": "string"
+    },
+    "canny_votes": {
+      "type": "integer",
+      "default": 0
+    },
+    "canny_status": {
+      "type": "string"
+    },
+    "github_links": {
+      "type": "json"
+    },
+    "docs_link": {
+      "type": "string"
+    },
+    "first_published_at": {
+      "type": "datetime"
+    },
+    "last_synced_at": {
+      "type": "datetime"
+    }
+  }
+}

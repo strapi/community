@@ -1,0 +1,83 @@
+{
+  "name": "roadmap-needs-attention",
+  "description": "Posts the public roadmap sync's needs-attention digest to Slack. Fired by the CMS roadmap-sync plugin on Mondays, on any failed run, and when a manual run asks for a report.",
+  "nodes": [
+    {
+      "id": "webhook-1",
+      "name": "Webhook: Roadmap Needs Attention",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "strapi/roadmap-needs-attention",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "notes": "Payload is the SyncReport from apps/cms/src/plugins/roadmap-sync/server/src/sync.ts. `summary_text` is pre-rendered Slack mrkdwn; the structured buckets (needs_attention.*) are there if the message ever needs reshaping here.",
+      "webhookId": "cbb125a1-d4e3-4498-9303-2d8addfc745a"
+    },
+    {
+      "id": "slack-1",
+      "name": "Notify #product-roadmap",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "product-roadmap"
+        },
+        "text": "={{ $json.body.summary_text }}",
+        "otherOptions": {}
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "webhookId": "b7b7ae37-b321-4cde-9da8-7af55011655b"
+    }
+  ],
+  "connections": {
+    "Webhook: Roadmap Needs Attention": {
+      "main": [
+        [
+          {
+            "node": "Notify #product-roadmap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "tags": [],
+  "activeVersion": null
+}

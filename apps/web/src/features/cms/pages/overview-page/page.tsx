@@ -1,7 +1,7 @@
 import type { GetQueryParams } from "@repo/strapi-client";
 import type { Modules, UID } from "@strapi/types";
 import { JsonLd } from "@/components/content/json-ld";
-import { PageContext } from "@/features/analytics";
+import { PageContext, type PageType } from "@/features/analytics";
 import { cmsClient } from "@/features/cms/lib/strapi";
 import { collectionPageSchema } from "@/features/cms/lib/structured-data";
 import { OverviewPageTemplate } from "@/features/cms/pages/overview-page";
@@ -33,6 +33,7 @@ const query = {
           },
         },
         "sections.highlights": true,
+        "sections.roadmap": true,
       },
     },
     image: true,
@@ -44,6 +45,12 @@ export type OverviewPageData = Modules.Documents.Result<
   typeof contentType,
   typeof query
 >;
+
+// Overview pages that are tracked as their own page type.
+const PAGE_TYPES: Record<string, PageType> = {
+  marketplace: "marketplace",
+  roadmap: "roadmap",
+};
 
 type Props = {
   documentId: string;
@@ -58,9 +65,7 @@ const OverviewPage = async ({ documentId, path }: Props) => {
   return (
     <>
       <PageContext
-        page_type={
-          document.data.slug === "marketplace" ? "marketplace" : "overview"
-        }
+        page_type={PAGE_TYPES[document.data.slug ?? ""] ?? "overview"}
         content_id={document.data.documentId}
         content_name={document.data.title ?? undefined}
       />

@@ -19,6 +19,10 @@ import {
   PackageCategoryPage,
   packageCategoryMetadata,
 } from "@/features/cms/pages/package-category";
+import {
+  RoadmapItemPage,
+  roadmapItemMetadata,
+} from "@/features/cms/pages/roadmap-item";
 import { TemplatePage, templateMetadata } from "@/features/cms/pages/template";
 import {
   TemplateCategoryPage,
@@ -66,6 +70,9 @@ const renderPage = (
     case "api::help-page.help-page": {
       return <HelpPagePage documentId={page.documentId} path={path} />;
     }
+    case "api::roadmap-item.roadmap-item": {
+      return <RoadmapItemPage documentId={page.documentId} path={path} />;
+    }
     case "api::home.home": {
       return <HomePage />;
     }
@@ -100,6 +107,7 @@ export async function generateStaticParams() {
 
 const resolveMetadata = (
   page: Awaited<ReturnType<typeof findPublishedPage>>,
+  path: string,
 ): Promise<Metadata> | Metadata => {
   switch (page.contentType) {
     case "plugin::better-auth.organization": {
@@ -129,6 +137,9 @@ const resolveMetadata = (
     case "api::help-page.help-page": {
       return helpPageMetadata(page.documentId);
     }
+    case "api::roadmap-item.roadmap-item": {
+      return roadmapItemMetadata(page.documentId, path);
+    }
     case "api::home.home": {
       return homeMetadata();
     }
@@ -149,7 +160,7 @@ export const generateMetadata = async ({
     return {};
   }
 
-  const metadata = await resolveMetadata(page);
+  const metadata = await resolveMetadata(page, path);
 
   // Every page is canonical at its own URL alias (resolved against
   // metadataBase), unless the content type or CMS sets one explicitly.

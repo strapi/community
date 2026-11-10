@@ -4,6 +4,7 @@ import {
   namePopulate,
   transformHelpPage,
   transformMember,
+  transformRoadmapItem,
   urlAliasPopulate,
   withOwner,
 } from "../src/lib/search";
@@ -101,6 +102,10 @@ export default ({ env }) => ({
   "package-info": {
     enabled: true,
     resolve: "./src/plugins/package-info",
+  },
+  "roadmap-sync": {
+    enabled: true,
+    resolve: "./src/plugins/roadmap-sync",
   },
   // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
   // key order of this file, and the first registered document middleware is the
@@ -287,6 +292,47 @@ export default ({ env }) => ({
             "profile.countries.name",
             "profile.services.name",
           ],
+        },
+      },
+      "roadmap-item": {
+        indexName: env("MEILISEARCH_ROADMAP_INDEX_NAME"),
+        entriesQuery: {
+          fields: [
+            "slug",
+            "public_title",
+            "public_description",
+            "public_status",
+            "timeframe",
+            "delivery_quarter",
+            "release",
+            "squads",
+            "tags",
+            "canny_url",
+            "canny_votes",
+            "canny_status",
+            "github_links",
+            "docs_link",
+            "first_published_at",
+            "last_synced_at",
+            "updatedAt",
+            "publishedAt",
+          ],
+          populate: { url_alias: urlAliasPopulate },
+        },
+        transformEntry: transformRoadmapItem,
+        settings: {
+          sortableAttributes: [
+            "canny_votes",
+            "first_published_at",
+            "release_rank",
+            "public_title",
+          ],
+          searchableAttributes: [
+            "public_title",
+            "public_description",
+            "squads",
+          ],
+          filterableAttributes: ["public_status", "release_key", "squads"],
         },
       },
     },

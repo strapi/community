@@ -6,6 +6,8 @@
 export type SearchIndexConfig = {
   indexName: string;
   facets: string[];
+  /** Defaults to HITS_PER_PAGE. */
+  hitsPerPage?: number;
 };
 
 const env = (name: string | undefined) => name ?? "";
@@ -46,6 +48,13 @@ export const SEARCH_INDEXES = {
   recipes: {
     indexName: `${env(process.env.NEXT_PUBLIC_MEILISEARCH_RECIPES_INDEX_NAME)}:createdAt:desc`,
     facets: [],
+  },
+  // The board shows every item at once (grouped by status), so it reads the
+  // whole index in one page. Meilisearch caps a search at 1000 hits.
+  roadmap: {
+    indexName: `${env(process.env.NEXT_PUBLIC_MEILISEARCH_ROADMAP_INDEX_NAME)}:canny_votes:desc,public_title:asc`,
+    facets: ["release_key", "squads"],
+    hitsPerPage: 1000,
   },
 } satisfies Record<string, SearchIndexConfig>;
 
