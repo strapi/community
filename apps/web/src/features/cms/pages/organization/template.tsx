@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { AvatarPile } from "@/components/content/avatar-pile";
 import { ContentCard } from "@/components/content/card";
 import { Markdown } from "@/components/content/markdown";
 import { ProfileLinks } from "@/components/content/profile-links";
@@ -22,7 +23,7 @@ import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
 import { toProfileLinks } from "@/lib/profile-links";
-import type { RelatedContentItems } from "@/utils/types";
+import type { Owner, RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: OrganizationPageData;
@@ -115,6 +116,15 @@ const OrganizationTemplate = ({
                   <p className="mt-1 text-[19px] text-(--color-hero-muted)">
                     {document.profile.subtitle}
                   </p>
+                )}
+                {members.length > 0 && (
+                  <div className="mt-3">
+                    <AvatarPile
+                      items={members as unknown as Owner[]}
+                      clickable
+                      white
+                    />
+                  </div>
                 )}
               </div>
             </div>
