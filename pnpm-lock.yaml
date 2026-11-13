@@ -74,8 +74,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(7ec9d1c2ac0f2b3406d4659e0887a6af)
       '@strapi-community/plugin-better-auth-dashboard':
-        specifier: 1.1.1
-        version: 1.1.1(69df098adec2973376f0a8c5fbe062e0)
+        specifier: 1.1.2
+        version: 1.1.2(69df098adec2973376f0a8c5fbe062e0)
       '@strapi/admin':
         specifier: catalog:strapi
         version: 5.60.0(@babel/runtime@7.28.4)(@codemirror/autocomplete@6.20.0)(@codemirror/language@6.11.3)(@codemirror/lint@6.9.2)(@codemirror/search@6.5.11)(@codemirror/theme-one-dark@6.1.3)(@emotion/is-prop-valid@1.2.2)(@strapi/data-transfer@5.60.0(@types/node@20.19.27)(better-sqlite3@12.4.1)(pg@8.21.0)(ts-toolbelt@9.6.0)(typescript@5.9.2))(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.27))(@types/node@20.19.27)(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(better-sqlite3@12.4.1)(codemirror@5.65.20)(debug@4.3.4)(pg@8.21.0)(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(redis@4.6.14)(redux@4.2.1)(styled-components@6.1.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ts-toolbelt@9.6.0)
@@ -4547,8 +4547,8 @@ packages:
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
-  '@strapi-community/plugin-better-auth-dashboard@1.1.1':
-    resolution: {integrity: sha512-EQ7Xrcharsp7w3GaGDq9QqX1VOeiA2cfRsLE7kTT76HMNlnOB+EaX4pMNaIWeqTjGi0DyjZrYsB2bZrwnMv9Eg==}
+  '@strapi-community/plugin-better-auth-dashboard@1.1.2':
+    resolution: {integrity: sha512-XBSkkhCFz29BuWOuGRjTuOAVOkBbMRti+Hd2t1r1pa4V8/At+eST3NgPHi1g4ssiaw5wImhouvAaFv66slyPVw==}
     peerDependencies:
       '@better-auth/infra': ^0.2.6
       '@strapi-community/plugin-better-auth': ^1.0.0
@@ -15036,7 +15036,7 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@strapi-community/plugin-better-auth-dashboard@1.1.1(69df098adec2973376f0a8c5fbe062e0)':
+  '@strapi-community/plugin-better-auth-dashboard@1.1.2(69df098adec2973376f0a8c5fbe062e0)':
     dependencies:
       '@better-auth/infra': 0.2.14(87cf08baa35c738e239a6fa36b83c9b0)
       '@strapi-community/plugin-better-auth': 1.0.0(7ec9d1c2ac0f2b3406d4659e0887a6af)
