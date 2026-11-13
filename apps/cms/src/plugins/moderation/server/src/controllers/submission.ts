@@ -1,6 +1,6 @@
 import { errors } from "@strapi/utils";
 import { fromNodeHeaders } from "better-auth/node";
-import { hasOrganizationUpdatePermission } from "../../../../../extensions/better-auth/utils";
+import { canSubmitForOrganization } from "../../../../../extensions/better-auth/utils";
 import type { ModerationContentTypeConfig } from "../config";
 
 const svc = (strapi) => strapi.plugin("moderation").service("submission");
@@ -21,8 +21,9 @@ export default ({ strapi }) => ({
    * better-auth session, never a client-supplied identity. The *owner*
    * is client-supplied (`owner_type`/`owner_id` in the body) — either
    * the submitter themself, or an organization, but only one the
-   * submitter actually administers, checked below via the same
-   * `hasOrganizationUpdatePermission` helper `is-content-owner` uses.
+   * submitter may submit for: one they administer, or one they're a
+   * member of whose `submission_policy` lets all members submit (see
+   * `canSubmitForOrganization`).
    */
   async create(ctx) {
     const { plural } = ctx.params;
@@ -52,8 +53,9 @@ export default ({ strapi }) => ({
       if (!organizationId) {
         return ctx.badRequest("An organization must be selected.");
       }
-      const allowed = await hasOrganizationUpdatePermission(
+      const allowed = await canSubmitForOrganization(
         fromNodeHeaders(ctx.request.headers),
+        user.id,
         String(organizationId),
       );
       if (!allowed) {

@@ -1120,6 +1120,13 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.String;
     github: Schema.Attribute.String;
+    links: Schema.Attribute.Component<'profile.link', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 10;
+        },
+        number
+      >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1825,6 +1832,14 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    submission_policy: Schema.Attribute.Enumeration<['admins', 'members']> &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'admins'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

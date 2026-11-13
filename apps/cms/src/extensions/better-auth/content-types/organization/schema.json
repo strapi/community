@@ -79,6 +79,18 @@
       "default": false,
       "type": "boolean"
     },
+    "submission_policy": {
+      "type": "enumeration",
+      "configurable": false,
+      "private": true,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "default": "admins",
+      "enum": ["admins", "members"]
+    },
     "partner": {
       "type": "boolean",
       "required": false

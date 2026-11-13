@@ -1,20 +1,9 @@
-import type { Core } from "@strapi/strapi";
 import { refreshImpersonationAdmins } from "./lib/auth-impersonation";
-import { migrateUserProfilePictures } from "./migration/user-profile-pictures";
-import { seedEmailTemplates } from "./seed/email-templates";
-import { seedPartnerProgram } from "./seed/partner-program";
-import { seedPartnerResources } from "./seed/partner-resources";
-import { seedSeoContent } from "./seed/seo-content";
-
+import { migrateProfileLinks } from "./migration/profile-links";
 export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
 
-  async bootstrap({ strapi }: { strapi: Core.Strapi }) {
-    await seedEmailTemplates(strapi);
-    await seedPartnerProgram(strapi);
-    await seedPartnerResources(strapi);
-    await seedSeoContent(strapi);
-
+  async bootstrap() {
     // Seed the impersonation admin allowlist from the Strapi team org's
     // owner/admin members; kept current afterwards by the org member hooks in
     // `lib/auth.ts`. Isolated so a failure here never takes down the whole
@@ -33,6 +22,6 @@ export default {
       return;
     }
 
-    await migrateUserProfilePictures();
+    await migrateProfileLinks();
   },
 };

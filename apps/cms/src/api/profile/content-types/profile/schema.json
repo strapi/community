@@ -32,6 +32,12 @@
     "github": {
       "type": "string"
     },
+    "links": {
+      "type": "component",
+      "repeatable": true,
+      "component": "profile.link",
+      "max": 10
+    },
     "location": {
       "type": "string"
     },
