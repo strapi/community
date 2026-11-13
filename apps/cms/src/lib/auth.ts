@@ -19,6 +19,18 @@ import {
   validateSlug,
 } from "../utils/slugify";
 import {
+  absolutizeCallbackURL,
+  absolutizeMediaUrl,
+  assertLogoUsable,
+  relinkOrganizationLogo,
+  requireDashboardSecret,
+  STRAPI_URL,
+} from "./auth-helpers";
+import {
+  impersonationAdminUserIds,
+  refreshImpersonationAdmins,
+} from "./auth-impersonation";
+import {
   sendChangeEmailConfirmationEmail,
   sendEmailChangedEmail,
   sendMagicLinkEmail,
@@ -29,173 +41,6 @@ import {
 } from "./email";
 
 const pendingEmailChanges = new Map<string, string>();
-
-/**
- * better-auth resolves relative redirect params against its own base URL
- * (the CMS), so make them absolute on the web app instead — including the
- * error/new-user variants, which it redirects to with `?error=<code>`.
- */
-function absolutizeCallbackURL(url: string): string {
-  const parsed = new URL(url);
-  for (const param of [
-    "callbackURL",
-    "errorCallbackURL",
-    "newUserCallbackURL",
-  ]) {
-    const value = parsed.searchParams.get(param);
-    if (value && !/^https?:\/\//i.test(value)) {
-      parsed.searchParams.set(
-        param,
-        new URL(value, process.env.WEBSITE_URL).toString(),
-      );
-    }
-  }
-  return parsed.toString();
-}
-
-const STRAPI_URL = process.env.STRAPI_URL || "http://localhost:1337";
-
-/**
- * The `dash` plugin below authenticates its dashboard-integration requests
- * by hashing this key (see `@better-auth/infra`'s dash plugin) — falling
- * back to a checked-in default here would mean anyone reading this
- * (now-public) source could compute a valid hash if the env var was ever
- * left unset in a real deployment. Fail closed instead.
- */
-function requireDashboardSecret(): string {
-  const secret = process.env.BETTER_AUTH_DASHBOARD_SECRET;
-  if (!secret) {
-    throw new Error(
-      "BETTER_AUTH_DASHBOARD_SECRET must be set (no insecure default is used).",
-    );
-  }
-  return secret;
-}
-
-function absolutizeMediaUrl(url: string): string {
-  return /^https?:\/\//i.test(url) ? url : `${STRAPI_URL}${url}`;
-}
-
-/**
- * Re-links an uploaded logo file's `related` (the native polymorphic
- * field on `plugin::upload.file`) to the organization it now belongs to.
- *
- * At upload time (`uploadOwnedFile` in the better-auth extension), the
- * file can only be tagged to the *uploading user* — better-auth-ui's
- * `organization.logo.upload` callback has no organization id, since the
- * logo isn't attached to an org until this very update call. Once it is,
- * this re-tags the file so it's correctly related to the organization
- * instead. Runs on every organization update (not just logo changes),
- * which is harmless — it's a no-op when there's no logo, and idempotent
- * when the logo didn't change.
- */
-/**
- * Guards the `logo` an organization is created/updated with. If the URL
- * points at a file in our media library, that file must belong to the
- * acting user (a fresh `uploadOwnedFile` upload) or already to this
- * organization — otherwise `relinkOrganizationLogo` would re-tag someone
- * else's file (another user's avatar, a package icon, …) to this org,
- * detaching it from its real owner and letting `DELETE /organizations/logo`
- * remove it. URLs that match no file have nothing to hijack and pass.
- */
-async function assertLogoUsable(
-  logo: string | null | undefined,
-  userId: string | number,
-  organizationId?: string | number,
-) {
-  if (!logo) return;
-
-  const file = await strapi.db.query("plugin::upload.file").findOne({
-    where: { url: logo },
-    populate: ["related"],
-  });
-  if (!file) return;
-
-  const related =
-    (file.related as { id: string | number; __type: string }[]) ?? [];
-  const usable =
-    related.length > 0 &&
-    related.every(
-      (item) =>
-        (item.__type === "plugin::better-auth.user" &&
-          String(item.id) === String(userId)) ||
-        (organizationId !== undefined &&
-          item.__type === "plugin::better-auth.organization" &&
-          String(item.id) === String(organizationId)),
-    );
-
-  if (!usable) {
-    throw new APIError("BAD_REQUEST", { message: "Invalid logo." });
-  }
-}
-
-async function relinkOrganizationLogo(organization: {
-  id: string | number;
-  logo?: string | null;
-}) {
-  if (!organization.logo) return;
-
-  await strapi.db.query("plugin::upload.file").update({
-    where: { url: organization.logo },
-    data: {
-      related: [
-        {
-          id: organization.id,
-          __type: "plugin::better-auth.organization",
-          __pivot: { field: "logo" },
-        },
-      ],
-    },
-  });
-}
-
-/** Org roles that may impersonate (owner/admin — i.e. `organization: ["update"]`). */
-const IMPERSONATION_ADMIN_ROLES = new Set(["owner", "admin"]);
-
-/**
- * The user ids Better Auth's admin plugin treats as admins (`adminUserIds`),
- * derived from the owner/admin members of `IMPERSONATION_ORGANIZATION_ID` —
- * the Strapi team's own org, the same env-var-by-org-id pattern the partner
- * portal uses (`PARTNER_PORTAL_TEST_ORGANIZATION_ID`). The plugin captures
- * this exact array reference at init and reads it on every request, so
- * `refreshImpersonationAdmins` keeps it current by replacing its *contents*
- * in place (never reassigning). Empty — hence impersonation disabled — until
- * seeded at bootstrap and whenever org membership changes (see
- * `organizationHooks` below and `src/index.ts`).
- */
-const impersonationAdminUserIds: string[] = [];
-
-/**
- * Recomputes `impersonationAdminUserIds` from the current owner/admin members
- * of `IMPERSONATION_ORGANIZATION_ID`. A no-op that clears the list when the
- * env var is unset, so the feature is dormant until configured.
- */
-export async function refreshImpersonationAdmins(): Promise<void> {
-  const organizationId = Number(process.env.IMPERSONATION_ORGANIZATION_ID);
-
-  const ids: string[] = [];
-  if (Number.isInteger(organizationId) && organizationId > 0) {
-    const members: { userId: number | string; role: string | null }[] =
-      await strapi.db.query("plugin::better-auth.member").findMany({
-        where: { organizationId },
-        select: ["userId", "role"],
-        limit: 10000,
-      });
-
-    for (const member of members) {
-      const roles = (member.role ?? "").split(",").map((role) => role.trim());
-      if (!roles.some((role) => IMPERSONATION_ADMIN_ROLES.has(role))) continue;
-      // The strapi adapter returns numeric ids, but the admin plugin matches
-      // `adminUserIds` against `session.user.id` with a strict `includes`, and
-      // the id's runtime type is unreliable across this stack (every id
-      // comparison in the codebase goes through `String()`). Store both forms
-      // so the match holds whichever type the session carries.
-      ids.push(String(member.userId), member.userId as unknown as string);
-    }
-  }
-
-  impersonationAdminUserIds.splice(0, impersonationAdminUserIds.length, ...ids);
-}
 
 export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],

@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { refreshImpersonationAdmins } from "./lib/auth-impersonation";
 import { migrateUserProfilePictures } from "./migration/user-profile-pictures";
 import { seedEmailTemplates } from "./seed/email-templates";
 import { seedPartnerProgram } from "./seed/partner-program";
@@ -15,12 +16,10 @@ export default {
     await seedSeoContent(strapi);
 
     // Seed the impersonation admin allowlist from the Strapi team org's
-    // owner/admin members; kept current afterwards by the org member hooks
-    // in `lib/auth.ts`. Imported lazily (not at module top) so `betterAuth()`
-    // isn't initialized before `strapi` is ready, and isolated so a failure
-    // here never takes down the whole CMS — impersonation just stays off.
+    // owner/admin members; kept current afterwards by the org member hooks in
+    // `lib/auth.ts`. Isolated so a failure here never takes down the whole
+    // CMS — impersonation just stays off.
     try {
-      const { refreshImpersonationAdmins } = await import("./lib/auth");
       await refreshImpersonationAdmins();
     } catch (error) {
       strapi.log.error(
