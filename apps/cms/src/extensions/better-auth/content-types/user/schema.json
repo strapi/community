@@ -84,6 +84,43 @@
       },
       "unique": true
     },
+    "role": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
+    },
+    "banned": {
+      "type": "boolean",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      },
+      "default": false
+    },
+    "banReason": {
+      "type": "text",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
+    },
+    "banExpires": {
+      "type": "datetime",
+      "configurable": false,
+      "pluginOptions": {
+        "better-auth": {
+          "managed": true
+        }
+      }
+    },
     "url_alias": {
       "type": "relation",
       "relation": "oneToMany",
@@ -95,20 +132,20 @@
       "default": null,
       "unique": true
     },
-    "profile": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::profile.profile"
-    },
-    "community_star": {
-      "type": "boolean"
-    },
     "sitemap_exclude": {
       "writable": true,
       "private": true,
       "configurable": false,
       "visible": false,
       "default": false,
+      "type": "boolean"
+    },
+    "profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::profile.profile"
+    },
+    "community_star": {
       "type": "boolean"
     }
   }

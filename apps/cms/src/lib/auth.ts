@@ -2,7 +2,13 @@ import { dash } from "@better-auth/infra";
 import { strapiAdapter } from "@strapi-community/plugin-better-auth";
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
-import { jwt, magicLink, organization, twoFactor } from "better-auth/plugins";
+import {
+  admin,
+  jwt,
+  magicLink,
+  organization,
+  twoFactor,
+} from "better-auth/plugins";
 import {
   cascadeDeleteOrganization,
   cascadeDeleteUser,
@@ -143,6 +149,54 @@ async function relinkOrganizationLogo(organization: {
   });
 }
 
+/** Org roles that may impersonate (owner/admin — i.e. `organization: ["update"]`). */
+const IMPERSONATION_ADMIN_ROLES = new Set(["owner", "admin"]);
+
+/**
+ * The user ids Better Auth's admin plugin treats as admins (`adminUserIds`),
+ * derived from the owner/admin members of `IMPERSONATION_ORGANIZATION_ID` —
+ * the Strapi team's own org, the same env-var-by-org-id pattern the partner
+ * portal uses (`PARTNER_PORTAL_TEST_ORGANIZATION_ID`). The plugin captures
+ * this exact array reference at init and reads it on every request, so
+ * `refreshImpersonationAdmins` keeps it current by replacing its *contents*
+ * in place (never reassigning). Empty — hence impersonation disabled — until
+ * seeded at bootstrap and whenever org membership changes (see
+ * `organizationHooks` below and `src/index.ts`).
+ */
+const impersonationAdminUserIds: string[] = [];
+
+/**
+ * Recomputes `impersonationAdminUserIds` from the current owner/admin members
+ * of `IMPERSONATION_ORGANIZATION_ID`. A no-op that clears the list when the
+ * env var is unset, so the feature is dormant until configured.
+ */
+export async function refreshImpersonationAdmins(): Promise<void> {
+  const organizationId = Number(process.env.IMPERSONATION_ORGANIZATION_ID);
+
+  const ids: string[] = [];
+  if (Number.isInteger(organizationId) && organizationId > 0) {
+    const members: { userId: number | string; role: string | null }[] =
+      await strapi.db.query("plugin::better-auth.member").findMany({
+        where: { organizationId },
+        select: ["userId", "role"],
+        limit: 10000,
+      });
+
+    for (const member of members) {
+      const roles = (member.role ?? "").split(",").map((role) => role.trim());
+      if (!roles.some((role) => IMPERSONATION_ADMIN_ROLES.has(role))) continue;
+      // The strapi adapter returns numeric ids, but the admin plugin matches
+      // `adminUserIds` against `session.user.id` with a strict `includes`, and
+      // the id's runtime type is unreliable across this stack (every id
+      // comparison in the codebase goes through `String()`). Store both forms
+      // so the match holds whichever type the session carries.
+      ids.push(String(member.userId), member.userId as unknown as string);
+    }
+  }
+
+  impersonationAdminUserIds.splice(0, impersonationAdminUserIds.length, ...ids);
+}
+
 export const auth = betterAuth({
   trustedOrigins: [process.env.WEBSITE_URL],
   secret: process.env.BETTER_AUTH_SECRET,
@@ -222,6 +276,22 @@ export const auth = betterAuth({
         beforeDeleteOrganization: async ({ organization }) => {
           await cascadeDeleteOrganization(organization.id);
         },
+        /**
+         * Keep `impersonationAdminUserIds` in sync with org membership: any
+         * member added/removed or role change could add or revoke someone's
+         * impersonation access. Fires for every org (membership changes are
+         * rare), and `refreshImpersonationAdmins` only ever reads the one
+         * configured org, so a no-op recompute for other orgs is cheap.
+         */
+        afterAddMember: async () => {
+          await refreshImpersonationAdmins();
+        },
+        afterRemoveMember: async () => {
+          await refreshImpersonationAdmins();
+        },
+        afterUpdateMemberRole: async () => {
+          await refreshImpersonationAdmins();
+        },
       },
     }),
     twoFactor({
@@ -230,6 +300,24 @@ export const auth = betterAuth({
           await sendOtpEmail(user.email, otp);
         },
       },
+    }),
+    /**
+     * Provides the user-impersonation endpoints (`/api/auth/admin/
+     * impersonate-user` + `/stop-impersonating`) and the session's
+     * `impersonatedBy` field. Admins are identified natively via
+     * `adminUserIds`, which we derive from the owner/admin members of the
+     * Strapi team org — see `impersonationAdminUserIds` /
+     * `refreshImpersonationAdmins`. We don't use the `role`-based model, so
+     * no user ever needs role "admin".
+     *
+     * The plugin still contributes `role`/`banned`/`banReason`/`banExpires`
+     * to the user content type and `impersonatedBy` to the session
+     * (auto-synced by the better-auth adapter on startup); those are unused.
+     */
+    admin({
+      adminUserIds: impersonationAdminUserIds,
+      // Impersonation sessions last 1 hour by default; make it explicit.
+      impersonationSessionDuration: 60 * 60,
     }),
     dash({
       apiUrl: STRAPI_URL,

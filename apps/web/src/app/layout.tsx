@@ -8,6 +8,7 @@ import { Analytics } from "@/features/analytics";
 import { AuthProviders } from "@/features/auth/components/providers";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
 import { siteSchema } from "@/features/cms/lib/structured-data";
+import { ImpersonationBanner } from "@/features/impersonation/components/impersonation-banner";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -54,7 +55,14 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <JsonLd data={siteSchema()} />
-        {isAuthEnabled ? <AuthProviders>{content}</AuthProviders> : content}
+        {isAuthEnabled ? (
+          <AuthProviders>
+            {content}
+            <ImpersonationBanner />
+          </AuthProviders>
+        ) : (
+          content
+        )}
         <Analytics />
         {isAuthEnabled && (
           <Toaster
