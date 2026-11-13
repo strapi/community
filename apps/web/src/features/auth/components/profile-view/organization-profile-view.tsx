@@ -4,7 +4,7 @@ import { AuthUIContext } from "@daveyplate/better-auth-ui";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
 import { updateOrganizationProfile } from "../../lib/organization-profile";
-import { ORGANIZATION_FIELDS } from "./fields";
+import { ORGANIZATION_FIELDS, pickFieldValues } from "./fields";
 import { ProfileForm } from "./profile-form";
 import type { Profile, Props } from "./types";
 
@@ -34,7 +34,10 @@ export function OrganizationProfileView({
     event.preventDefault();
 
     setIsSubmitting(true);
-    const updated = await updateOrganizationProfile(organizationId, values);
+    const updated = await updateOrganizationProfile(
+      organizationId,
+      pickFieldValues(ORGANIZATION_FIELDS, values),
+    );
     setIsSubmitting(false);
 
     if (updated) {

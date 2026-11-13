@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getUserProfile, updateUserProfile } from "../../lib/user-profile";
-import { USER_FIELDS } from "./fields";
+import { pickFieldValues, USER_FIELDS } from "./fields";
 import { ProfileForm } from "./profile-form";
 import { ProfileSkeleton } from "./profile-skeleton";
 import type { Profile } from "./types";
@@ -33,7 +33,9 @@ export function UserProfileView() {
     event.preventDefault();
 
     setIsSubmitting(true);
-    const updated = await updateUserProfile(values);
+    const updated = await updateUserProfile(
+      pickFieldValues(USER_FIELDS, values),
+    );
     setIsSubmitting(false);
 
     if (updated) {

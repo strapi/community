@@ -3,6 +3,9 @@ import type { UserProfile } from "../../lib/user-profile";
 
 export type Profile = UserProfile & OrganizationProfile;
 
+/** Every profile field edited through a plain text input/editor. */
+export type TextFieldName = Exclude<keyof Profile, "links">;
+
 export type Props =
   | { variant: "user" }
   | {

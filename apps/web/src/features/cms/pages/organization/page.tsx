@@ -13,7 +13,16 @@ const contentType =
   "plugin::better-auth.organization" satisfies UID.ContentType;
 
 const query = {
-  populate: ["profile"],
+  populate: {
+    profile: {
+      populate: {
+        links: true,
+        countries: { fields: ["name"] },
+        tech_stacks: { fields: ["name"] },
+        services: { fields: ["name"] },
+      },
+    },
+  },
 } satisfies GetQueryParams<typeof contentType>;
 
 export type OrganizationPageData = Modules.Documents.Result<

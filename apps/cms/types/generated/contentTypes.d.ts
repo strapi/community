@@ -1120,6 +1120,13 @@ export interface ApiProfileProfile extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     email: Schema.Attribute.String;
     github: Schema.Attribute.String;
+    links: Schema.Attribute.Component<'profile.link', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 10;
+        },
+        number
+      >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1825,6 +1832,14 @@ export interface PluginBetterAuthOrganization
           managed: true;
         };
       }>;
+    submission_policy: Schema.Attribute.Enumeration<['admins', 'members']> &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'admins'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1867,6 +1882,12 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     expiresAt: Schema.Attribute.DateTime &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    impersonatedBy: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
           managed: true;
@@ -1998,6 +2019,25 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    banExpires: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    banned: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
+    banReason: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     community_star: Schema.Attribute.Boolean;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -2040,6 +2080,12 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       }>;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     sitemap_exclude: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;

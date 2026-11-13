@@ -34,6 +34,17 @@ const query = {
         url_alias: true,
       },
     },
+    packages: {
+      populate: {
+        url_alias: true,
+        icon: true,
+      },
+    },
+    integrations: {
+      populate: {
+        url_alias: true,
+      },
+    },
   },
 } satisfies GetQueryParams<typeof contentType>;
 

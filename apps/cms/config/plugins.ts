@@ -14,6 +14,15 @@ import {
 const N8N_WEBHOOK_NS = process.env.N8N_WEBHOOK_NAMESPACE || "strapi";
 
 export default ({ env }) => ({
+  "better-auth-dashboard": {
+    config: {
+      // Registers this plugin's Better Auth admin/analytics tools on
+      // Strapi's native MCP server (served at POST /mcp, enabled in
+      // config/server.ts). MCP clients authenticate with an admin API
+      // token whose role holds the matching Better Auth Dashboard perms.
+      mcp: { enabled: true },
+    },
+  },
   email: {
     config: {
       provider: "@piksail/strapi-provider-email-mailpit",
