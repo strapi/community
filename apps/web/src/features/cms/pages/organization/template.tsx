@@ -1,9 +1,8 @@
-import { Button, Container } from "@repo/strapi-ui";
+import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import {
   AppWindow,
   CalendarDays,
-  ExternalLink,
   LayoutGrid,
   MapPin,
   Users,
@@ -22,6 +21,7 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { getPartnerBadgeColors } from "@/lib/partner-levels";
 import { toProfileLinks } from "@/lib/profile-links";
 import type { Owner, RelatedContentItems } from "@/utils/types";
 
@@ -70,17 +70,22 @@ const OrganizationTemplate = ({
   const defaultTab =
     document.profile?.readme || noRelatedContent ? "about" : "content";
 
-  // The first website gets the prominent "Visit website" button; every
-  // other link goes in the metadata row.
+  // All links (website included) render uniformly in the metadata row.
   const links = toProfileLinks(document.profile?.links);
-  const website = links.find((link) => link.type === "website");
-  const otherLinks = links.filter((link) => link !== website);
 
   const countries = document.profile?.countries ?? [];
   const techStacks = document.profile?.tech_stacks ?? [];
   const services = document.profile?.services ?? [];
   const hasProfileDetails =
     countries.length > 0 || techStacks.length > 0 || services.length > 0;
+
+  const partnerBadge =
+    document.partner && document.partner_level
+      ? {
+          level: document.partner_level,
+          colors: getPartnerBadgeColors(document.partner_level),
+        }
+      : null;
 
   return (
     <>
@@ -117,15 +122,6 @@ const OrganizationTemplate = ({
                     {document.profile.subtitle}
                   </p>
                 )}
-                {members.length > 0 && (
-                  <div className="mt-3">
-                    <AvatarPile
-                      items={members as unknown as Owner[]}
-                      clickable
-                      white
-                    />
-                  </div>
-                )}
               </div>
             </div>
             <div>
@@ -155,17 +151,28 @@ const OrganizationTemplate = ({
                     {document.profile.location}
                   </span>
                 )}
-                <ProfileLinks links={otherLinks} />
+                {partnerBadge && (
+                  <span
+                    className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-semibold ${
+                      partnerBadge.colors?.badgeColor ??
+                      "bg-(--color-primary600)"
+                    } ${partnerBadge.colors?.badgeTextColor ?? "text-white"}`}
+                  >
+                    {partnerBadge.level} Partner
+                  </span>
+                )}
+                <ProfileLinks links={links} />
               </div>
 
-              {/* Website button */}
-              {website && (
-                <Button asChild variant="secondary">
-                  <Link href={website.value} target="_blank" rel="noopener">
-                    Visit website
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </Button>
+              {/* Members */}
+              {members.length > 0 && (
+                <div className="mb-8">
+                  <AvatarPile
+                    items={members as unknown as Owner[]}
+                    clickable
+                    white
+                  />
+                </div>
               )}
             </div>
           </div>
