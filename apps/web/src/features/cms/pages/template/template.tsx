@@ -30,6 +30,8 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
   }[];
   const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
+  const packages = document.packages ?? [];
+  const integrations = document.integrations ?? [];
   const githubStars = document.stars;
 
   return (
@@ -42,19 +44,6 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
             {/* Header */}
             <div className="flex items-center justify-between gap-5">
               <div className="flex items-center gap-5">
-                <div className="shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-(--color-neutral150) bg-white flex items-center justify-center">
-                  <Image
-                    src={
-                      document.preview_image
-                        ? cmsImageUrl(document.preview_image.url)
-                        : "/template-fallback-image.png"
-                    }
-                    width={64}
-                    height={64}
-                    alt={`${document.name} thumbnail`}
-                    className="object-contain"
-                  />
-                </div>
                 <div>
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <h1 className="text-3xl font-bold text-(--color-primary700)">
@@ -160,6 +149,40 @@ const TemplateTemplate = ({ document, communityCta }: Props) => {
                         className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
                       >
                         {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Packages */}
+              {packages.length > 0 && (
+                <SidebarSection title="Packages">
+                  <div className="flex flex-wrap gap-2">
+                    {packages.map((pkg) => (
+                      <Link
+                        key={pkg.documentId}
+                        href={pkg.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {pkg.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Integrations */}
+              {integrations.length > 0 && (
+                <SidebarSection title="Integrations">
+                  <div className="flex flex-wrap gap-2">
+                    {integrations.map((integration) => (
+                      <Link
+                        key={integration.documentId}
+                        href={integration.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {integration.name}
                       </Link>
                     ))}
                   </div>

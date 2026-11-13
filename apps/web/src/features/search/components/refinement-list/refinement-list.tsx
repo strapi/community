@@ -9,8 +9,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const COLLAPSED_COUNT = 5;
 
+// `useRefinementList` defaults to only 10 facet values, which silently
+// hid facets like the less-common countries. Fetch enough to cover every
+// value (Meilisearch returns at most `maxValuesPerFacet`, 100 by default);
+// the UI still collapses to `COLLAPSED_COUNT` behind a "Show more" toggle.
+const DEFAULT_LIMIT = 100;
+
 const RefinementList = (props: RefinementListProps) => {
-  const { items, refine } = useRefinementList(props);
+  const { items, refine } = useRefinementList({
+    limit: DEFAULT_LIMIT,
+    ...props,
+  });
   const [expanded, setExpanded] = useState(false);
 
   const visibleItems = expanded ? items : items.slice(0, COLLAPSED_COUNT);

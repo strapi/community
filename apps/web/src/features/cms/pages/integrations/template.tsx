@@ -105,7 +105,7 @@ const IntegrationTemplate = ({ document }: Props) => {
                     </h2>
                     <Button asChild>
                       <Link
-                        href={`/marketplace?packages:monthly_downloads:desc[refinementList][integrations.name][0]=${document.name}&tab=packages`}
+                        href={`/marketplace?refinementList[integrations.name][0]=${encodeURIComponent(document.name ?? "")}&tab=packages`}
                         className="text-(--color-primary600)"
                       >
                         See more
