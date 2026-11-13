@@ -20,6 +20,7 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { ImpersonateButton } from "@/features/impersonation/components/impersonate-button";
 import { toProfileLinks } from "@/lib/profile-links";
 import type { RelatedContentItems } from "@/utils/types";
 
@@ -102,18 +103,25 @@ const UserTemplate = ({ document, relatedContent, communityCta }: Props) => {
                 <ProfileLinks links={toProfileLinks(document.profile?.links)} />
               </div>
 
-              {/* Contact button */}
-              {document.profile?.email && (
-                <Link
-                  href={`mailto:${document.profile.email}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-5 py-2.5 text-md font-semibold text-white transition-colors hover:bg-(--color-hero-bg)"
-                >
-                  Contact {document.name}
-                  <ExternalLink className="h-4 w-4" />
-                </Link>
-              )}
+              {/* Actions */}
+              <div className="flex flex-wrap items-center gap-3">
+                {document.profile?.email && (
+                  <Link
+                    href={`mailto:${document.profile.email}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border border-(--color-hero-button-border) bg-(--color-hero-button-hover) px-5 py-2.5 text-md font-semibold text-white transition-colors hover:bg-(--color-hero-bg)"
+                  >
+                    Contact {document.name}
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                )}
+                {/* Admin-only; renders nothing for everyone else. */}
+                <ImpersonateButton
+                  userId={document.id}
+                  userName={document.name}
+                />
+              </div>
             </div>
           </div>
         </HeroSection>

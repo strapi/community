@@ -1887,6 +1887,12 @@ export interface PluginBetterAuthSession extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
+    impersonatedBy: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     ipAddress: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -2013,6 +2019,25 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    banExpires: Schema.Attribute.DateTime &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
+    banned: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
+    banReason: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     community_star: Schema.Attribute.Boolean;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -2055,6 +2080,12 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
       }>;
     profile: Schema.Attribute.Relation<'oneToOne', 'api::profile.profile'>;
     publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        'better-auth': {
+          managed: true;
+        };
+      }>;
     sitemap_exclude: Schema.Attribute.Boolean &
       Schema.Attribute.Private &
       Schema.Attribute.DefaultTo<false>;
