@@ -39,6 +39,17 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/owner-selector",
   },
+  "marketplace-analytics": {
+    enabled: true,
+    resolve: "./src/plugins/marketplace-analytics",
+    config: {
+      // Registers this plugin's analytics tools (submissions, partner
+      // sign-ups) on Strapi's native MCP server (served at POST /mcp,
+      // enabled in config/server.ts). MCP clients authenticate with an admin
+      // API token whose role holds the "Marketplace Analytics → Read" perm.
+      mcp: { enabled: true },
+    },
+  },
   moderation: {
     enabled: true,
     resolve: "./src/plugins/moderation",
