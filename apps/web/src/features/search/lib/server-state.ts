@@ -4,11 +4,18 @@ import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
 import type { InstantSearchServerState } from "react-instantsearch";
 import { HITS_PER_PAGE, type SearchIndexConfig } from "./indexes";
 
-const { searchClient } = instantMeiliSearch(
-  process.env.NEXT_PUBLIC_SEARCH_URL as string,
-  process.env.NEXT_PUBLIC_SEARCH_API_KEY as string,
-  { keepZeroFacets: true },
-);
+/**
+ * A fresh client per render. instant-meilisearch caches every response (and
+ * every facet value it has seen) in memory for the client's lifetime, so a
+ * shared server-side client would serve the first results it ever fetched
+ * until the process restarts, through every ISR revalidation.
+ */
+const createSearchClient = () =>
+  instantMeiliSearch(
+    process.env.NEXT_PUBLIC_SEARCH_URL as string,
+    process.env.NEXT_PUBLIC_SEARCH_API_KEY as string,
+    { keepZeroFacets: true },
+  ).searchClient;
 
 /**
  * Fetches the default (unfiltered, first page) results of a search UI so
@@ -33,7 +40,7 @@ export async function getSearchServerState(
 
   try {
     // biome-ignore lint/suspicious/noExplicitAny: the adapter's request type is a union that doesn't accept a plain multi-query
-    const { results } = await searchClient.search([
+    const { results } = await createSearchClient().search([
       { indexName, params },
     ] as any);
 
