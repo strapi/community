@@ -3,14 +3,30 @@
 import { ArrowUpRight, ChevronUp } from "lucide-react";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
+  displayStatus,
   formatDate,
   githubLinkLabel,
   githubLinks,
+  roadmapStage,
   stringList,
 } from "../lib/types";
 
 const chip =
   "inline-flex items-center rounded-md border px-2 py-0.5 text-xs leading-5";
+
+/** Edition squads get a tag on the card so users see what plan it ships in. */
+const EDITION_STYLES: Record<string, string> = {
+  Core: "border-(--color-neutral200) bg-(--color-neutral100) text-(--color-neutral800)",
+  Enterprise: "border-(--color-primary600) bg-(--color-primary600) text-white",
+};
+
+const EditionTag = ({ edition }: { edition: string }) => (
+  <span
+    className={`rounded px-1.5 py-px border font-sans text-[11px] font-semibold normal-case tracking-normal ${EDITION_STYLES[edition]}`}
+  >
+    {edition}
+  </span>
+);
 
 const ExternalLink = ({
   href,
@@ -37,7 +53,7 @@ export function scheduleChips(
   item: RoadmapItem,
   release: RoadmapRelease | undefined,
 ) {
-  const shipped = item.public_status === "shipped";
+  const shipped = roadmapStage(item) === "shipped";
   const when = shipped
     ? release?.released_at
       ? `Shipped ${formatDate(release.released_at, "month")}`
@@ -55,7 +71,9 @@ const RoadmapCard = ({
   release: RoadmapRelease | undefined;
   onOpen: (slug: string) => void;
 }) => {
-  const areas = stringList(item.squads);
+  const squads = stringList(item.squads);
+  const editions = squads.filter((s) => s in EDITION_STYLES);
+  const areas = squads.filter((s) => !(s in EDITION_STYLES));
   const [github] = githubLinks(item.github_links);
   const extraGithub = githubLinks(item.github_links).length - 1;
   const { version, when } = scheduleChips(item, release);
@@ -92,11 +110,14 @@ const RoadmapCard = ({
             </button>
           </h3>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-neutral600)">
-            {item.public_status === "beta" && (
+            {displayStatus(item) === "beta" && (
               <span className="rounded bg-(--color-warning100) px-1.5 py-px font-sans text-[11px] font-semibold normal-case tracking-normal text-(--color-warning700)">
                 Beta
               </span>
             )}
+            {editions.map((edition) => (
+              <EditionTag key={edition} edition={edition} />
+            ))}
             {areas.join(" · ")}
           </p>
         </div>

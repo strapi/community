@@ -3,6 +3,46 @@
 import type { RoadmapItem } from "./data";
 
 export type PublicStatus = "exploring" | "in_progress" | "beta" | "shipped";
+
+/** Board column an item sits in. */
+export type RoadmapStage = "planned" | "in_progress" | "shipped";
+
+/**
+ * The board mirrors the Notion board, whose columns are the `When?`
+ * property (`timeframe`): Now → In progress, Next/Later → Planned,
+ * Done → Shipped. A shipped status always wins (it's a fact), and items
+ * without a timeframe (or "TBD") fall back to their status.
+ */
+export function roadmapStage(item: {
+  public_status?: string | null;
+  timeframe?: string | null;
+}): RoadmapStage {
+  if (item.public_status === "shipped") return "shipped";
+  switch (item.timeframe) {
+    case "now":
+      return "in_progress";
+    case "next":
+    case "later":
+      return "planned";
+    case "done":
+      return "shipped";
+  }
+  return item.public_status === "in_progress" || item.public_status === "beta"
+    ? "in_progress"
+    : "planned";
+}
+
+/** The badge shown on an item: its stage, or Beta while in progress. */
+export function displayStatus(item: {
+  public_status?: string | null;
+  timeframe?: string | null;
+}): "planned" | "in_progress" | "beta" | "shipped" {
+  const stage = roadmapStage(item);
+  return stage === "in_progress" && item.public_status === "beta"
+    ? "beta"
+    : stage;
+}
+
 export type GithubLink = {
   url: string;
   kind?: "issue" | "pull_request" | "link";

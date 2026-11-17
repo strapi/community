@@ -52,6 +52,8 @@ An item is live only when all of these hold:
 - `Name` and `Public description` are filled in.
 - `Status` maps to a public status. `Paused`, or a status missing from the
   table in `lib/rules.ts`, keeps it hidden.
+- `When?` isn't `Later`. Later items stay hidden on purpose and aren't listed
+  in the digest.
 - No link is dead (404/410, or a Canny link to a post that doesn't exist).
 
 A link that can't be checked this run (rate limit, outage) won't take a new
@@ -73,6 +75,11 @@ change.
 | In Beta Release | Beta |
 | Done | Shipped |
 | Paused | not published |
+
+The public board's columns follow `When?`, like the Notion board: Now → In
+progress, Next → Planned, Done → Shipped (Later isn't published). A `Done` status always
+counts as Shipped. Items with no `When?` (or `TBD`) fall back to the status
+mapping above. See `roadmapStage` in `apps/web/src/features/roadmap/lib/types.ts`.
 
 ## Tests
 

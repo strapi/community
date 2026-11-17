@@ -46,6 +46,19 @@ const STATUS_MAP: Record<string, PublicStatus | null> = {
   paused: null,
 };
 
+/**
+ * Internal Notion squad name → public label (case-insensitive). Squads not
+ * listed here are published verbatim.
+ */
+const SQUAD_LABELS: Record<string, string> = {
+  "cms core": "Core",
+  "cms ee": "Enterprise",
+};
+
+export function mapSquad(name: string): string {
+  return SQUAD_LABELS[name.trim().toLowerCase()] ?? name;
+}
+
 const TIMEFRAMES: readonly Timeframe[] = [
   "now",
   "next",
@@ -186,7 +199,7 @@ export function mapNotionPage(page: NotionPage): RoadmapRow {
     publicStatus: mapStatus(internalStatus),
     timeframe: mapTimeframe(propText(p[NOTION_PROPS.when])),
     deliveryQuarter: propText(p[NOTION_PROPS.deliveryQuarter]),
-    squads: propNames(p[NOTION_PROPS.squad]),
+    squads: dedupe(propNames(p[NOTION_PROPS.squad]).map(mapSquad)),
     tags: propNames(p[NOTION_PROPS.tags]),
     cannyUrl: propText(p[NOTION_PROPS.cannyLink]),
     githubLinks: extractUrls(propText(githubProp)),
@@ -223,6 +236,7 @@ export type BlockingReason =
   | "missing_title"
   | "missing_description"
   | "paused"
+  | "later"
   | "unmapped_status"
   | "broken_link";
 
@@ -249,6 +263,9 @@ export function blockingReasons(
   if (!row.publicDescription) reasons.push("missing_description");
   if (!isKnownStatus(row.internalStatus)) reasons.push("unmapped_status");
   else if (row.publicStatus === null) reasons.push("paused");
+  // "Later" is too far out to commit to publicly. Deliberate, so it isn't
+  // reported in the digest.
+  if (row.timeframe === "later") reasons.push("later");
   if (linkChecks.some((c) => c.result === "broken"))
     reasons.push("broken_link");
   return reasons;

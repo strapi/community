@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
-import type { PublicStatus } from "../lib/types";
+import type { displayStatus } from "../lib/types";
 
-const STATUS: Record<PublicStatus, { label: string; className: string }> = {
-  exploring: {
-    label: "Exploring",
+type Status = ReturnType<typeof displayStatus>;
+
+const STATUS: Record<Status, { label: string; className: string }> = {
+  planned: {
+    label: "Planned",
     className: "bg-(--color-neutral150) text-(--color-neutral800)",
   },
   in_progress: {
@@ -24,7 +26,7 @@ const StatusBadge = ({
   status,
   className,
 }: {
-  status: PublicStatus | null | undefined;
+  status: Status | null | undefined;
   className?: string;
 }) => {
   const config = status ? STATUS[status] : undefined;

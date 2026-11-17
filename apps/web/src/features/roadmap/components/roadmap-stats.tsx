@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { fetchRoadmapItems } from "../lib/data";
+import { type RoadmapStage, roadmapStage } from "../lib/types";
 
 type Stat = { label: string; value: number };
 
@@ -27,12 +28,12 @@ const RoadmapStats = async () => {
   // Nothing to count (or the index is unreachable): no hero beats zeros.
   if (items.length === 0) return null;
 
-  const count = (statuses: string[]) =>
-    items.filter((i) => statuses.includes(i.public_status ?? "")).length;
+  const count = (stage: RoadmapStage) =>
+    items.filter((i) => roadmapStage(i) === stage).length;
   const stats = [
-    { label: "Planned", value: count(["exploring"]) },
-    { label: "In progress", value: count(["in_progress", "beta"]) },
-    { label: "Shipped", value: count(["shipped"]) },
+    { label: "Planned", value: count("planned") },
+    { label: "In progress", value: count("in_progress") },
+    { label: "Shipped", value: count("shipped") },
     {
       label: "Votes",
       value: items.reduce((sum, i) => sum + (i.canny_votes ?? 0), 0),
