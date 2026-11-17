@@ -62,3 +62,30 @@ export const transformMember = ({ entry }) => ({
   createdAt: entry.createdAt,
   community_star: entry.community_star,
 });
+
+// Facet key for roadmap items without a release; the web filters on it too.
+const UNSCHEDULED = "unscheduled";
+
+// "5.10.1" → 500100001, so versions sort numerically ("5.9" < "5.10").
+// Unscheduled items rank below every version.
+const versionRank = (version) => {
+  if (!version) return -1;
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((part) => Number.parseInt(part, 10) || 0);
+  return major * 100_000_000 + minor * 10_000 + patch;
+};
+
+// JSON attributes are untyped; the index only ever holds string arrays.
+const strings = (value) =>
+  Array.isArray(value) ? value.filter((v) => typeof v === "string") : [];
+
+// `release_key` is the release facet (unscheduled included) and
+// `release_rank` the numeric version sort.
+export const transformRoadmapItem = ({ entry }) => ({
+  ...entry,
+  squads: strings(entry.squads),
+  tags: strings(entry.tags),
+  release_key: entry.release || UNSCHEDULED,
+  release_rank: versionRank(entry.release),
+});

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "releases",
+  "info": {
+    "singularName": "release",
+    "pluralName": "releases",
+    "displayName": "Release",
+    "description": "Strapi releases (GitHub releases) and upcoming milestones, synced by the roadmap-sync plugin. Edits here are overwritten on the next sync."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "version": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["upcoming", "released"],
+      "required": true
+    },
+    "released_at": {
+      "type": "datetime"
+    },
+    "due_on": {
+      "type": "date"
+    },
+    "url": {
+      "type": "string"
+    },
+    "open_issues": {
+      "type": "integer"
+    },
+    "closed_issues": {
+      "type": "integer"
+    }
+  }
+}
