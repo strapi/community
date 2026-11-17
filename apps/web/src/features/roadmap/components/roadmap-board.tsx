@@ -69,6 +69,11 @@ function writeUrl(view: RoadmapView, pathname: string, item?: string | null) {
   replaceUrlInPage(url);
 }
 
+/** Cards a column shows before "Show more". */
+const COLUMN_CAP = 6;
+/** Don't collapse a column to hide just one or two cards. */
+const MIN_HIDDEN = 3;
+
 const Column = ({
   title,
   dot,
@@ -79,29 +84,50 @@ const Column = ({
   dot: string;
   items: RoadmapItem[];
   children: (item: RoadmapItem) => React.ReactNode;
-}) => (
-  <section
-    aria-label={title}
-    className="rounded-2xl border border-(--color-neutral150) bg-(--color-neutral100)"
-  >
-    <header className="flex items-center gap-2.5 border-b border-(--color-neutral150) px-5 py-4">
-      <span aria-hidden className={cn("h-2.5 w-2.5 rounded-full", dot)} />
-      <h2 className="flex-1 font-semibold text-(--color-neutral900)">
-        {title}
-      </h2>
-      <span className="rounded-full bg-white px-2.5 py-0.5 text-xs tabular-nums text-(--color-neutral600)">
-        {items.length}
-      </span>
-    </header>
-    {items.length > 0 ? (
-      <ul className="space-y-3 p-3">{items.map(children)}</ul>
-    ) : (
-      <p className="p-5 text-sm text-(--color-neutral600)">
-        Nothing here matches.
-      </p>
-    )}
-  </section>
-);
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const overflow = items.length - COLUMN_CAP;
+  const hidden = overflow >= MIN_HIDDEN ? overflow : 0;
+  const shown = expanded || hidden === 0 ? items : items.slice(0, COLUMN_CAP);
+
+  return (
+    <section
+      aria-label={title}
+      className="rounded-2xl border border-(--color-neutral150) bg-(--color-neutral100)"
+    >
+      <header className="flex items-center gap-2.5 border-b border-(--color-neutral150) px-5 py-4">
+        <span aria-hidden className={cn("h-2.5 w-2.5 rounded-full", dot)} />
+        <h2 className="flex-1 font-semibold text-(--color-neutral900)">
+          {title}
+        </h2>
+        <span className="rounded-full bg-white px-2.5 py-0.5 text-xs tabular-nums text-(--color-neutral600)">
+          {items.length}
+        </span>
+      </header>
+      {items.length > 0 ? (
+        <>
+          <ul className="space-y-3 p-3">{shown.map(children)}</ul>
+          {hidden > 0 && (
+            <div className="px-3 pb-3">
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((e) => !e)}
+                className="w-full rounded-lg border border-(--color-neutral150) bg-white py-2.5 text-sm font-medium text-(--color-primary600) transition-colors hover:border-(--color-primary400) hover:bg-(--color-primary100)"
+              >
+                {expanded ? "Show less" : `Show ${hidden} more`}
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="p-5 text-sm text-(--color-neutral600)">
+          Nothing here matches.
+        </p>
+      )}
+    </section>
+  );
+};
 
 /**
  * The roadmap, searched, filtered and sorted through its Meilisearch index.
