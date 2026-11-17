@@ -236,6 +236,7 @@ export type BlockingReason =
   | "missing_title"
   | "missing_description"
   | "paused"
+  | "later"
   | "unmapped_status"
   | "broken_link";
 
@@ -262,6 +263,9 @@ export function blockingReasons(
   if (!row.publicDescription) reasons.push("missing_description");
   if (!isKnownStatus(row.internalStatus)) reasons.push("unmapped_status");
   else if (row.publicStatus === null) reasons.push("paused");
+  // "Later" is too far out to commit to publicly. Deliberate, so it isn't
+  // reported in the digest.
+  if (row.timeframe === "later") reasons.push("later");
   if (linkChecks.some((c) => c.result === "broken"))
     reasons.push("broken_link");
   return reasons;

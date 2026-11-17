@@ -165,6 +165,17 @@ describe("blockingReasons", () => {
     assert.deepEqual(blockingReasons(unknown, []), ["unmapped_status"]);
   });
 
+  it("blocks items planned for Later", () => {
+    const later = mapNotionPage(
+      page({ "When?": { type: "select", select: { name: "Later" } } }),
+    );
+    assert.deepEqual(blockingReasons(later, []), ["later"]);
+    const next = mapNotionPage(
+      page({ "When?": { type: "select", select: { name: "Next" } } }),
+    );
+    assert.deepEqual(blockingReasons(next, []), []);
+  });
+
   it("blocks broken links but not unverified ones", () => {
     const row = mapNotionPage(page());
     assert.deepEqual(

@@ -23,6 +23,7 @@ import {
   itemPath,
   parseRoadmapState,
   type RoadmapView,
+  roadmapStage,
   UNSCHEDULED,
   withSafeLinks,
 } from "../lib/types";
@@ -268,11 +269,9 @@ const Board = ({
     return [...upcoming, ...shipped];
   }, [release.items, releases, releasesByVersion]);
 
-  const planned = visible.filter((i) => i.public_status === "exploring");
-  const inProgress = visible.filter(
-    (i) => i.public_status === "in_progress" || i.public_status === "beta",
-  );
-  const shipped = visible.filter((i) => i.public_status === "shipped");
+  const planned = visible.filter((i) => roadmapStage(i) === "planned");
+  const inProgress = visible.filter((i) => roadmapStage(i) === "in_progress");
+  const shipped = visible.filter((i) => roadmapStage(i) === "shipped");
 
   const card = (item: RoadmapItem) => (
     <RoadmapCard

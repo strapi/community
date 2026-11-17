@@ -12,11 +12,12 @@ import {
 import { type ReactNode, useState } from "react";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
+  displayStatus,
   formatDate,
   type GithubLink,
   githubLinkLabel,
   githubLinks,
-  type PublicStatus,
+  roadmapStage,
   stringList,
 } from "../lib/types";
 import { StatusBadge } from "./labels";
@@ -83,13 +84,13 @@ const ItemBody = ({
   const areas = stringList(item.squads);
   const tags = stringList(item.tags);
   const links = githubLinks(item.github_links);
-  const shipped = item.public_status === "shipped";
+  const shipped = roadmapStage(item) === "shipped";
   const updated = formatDate(item.last_synced_at ?? item.updatedAt);
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 pr-10">
-        <StatusBadge status={item.public_status as PublicStatus} />
+        <StatusBadge status={displayStatus(item)} />
         {item.release && (
           <span className="rounded-md border border-(--color-primary200) bg-(--color-primary100) px-2 py-0.5 font-mono text-xs text-(--color-primary700)">
             {item.release}

@@ -3,9 +3,11 @@
 import { ArrowUpRight, ChevronUp } from "lucide-react";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
+  displayStatus,
   formatDate,
   githubLinkLabel,
   githubLinks,
+  roadmapStage,
   stringList,
 } from "../lib/types";
 
@@ -51,7 +53,7 @@ export function scheduleChips(
   item: RoadmapItem,
   release: RoadmapRelease | undefined,
 ) {
-  const shipped = item.public_status === "shipped";
+  const shipped = roadmapStage(item) === "shipped";
   const when = shipped
     ? release?.released_at
       ? `Shipped ${formatDate(release.released_at, "month")}`
@@ -108,7 +110,7 @@ const RoadmapCard = ({
             </button>
           </h3>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-neutral600)">
-            {item.public_status === "beta" && (
+            {displayStatus(item) === "beta" && (
               <span className="rounded bg-(--color-warning100) px-1.5 py-px font-sans text-[11px] font-semibold normal-case tracking-normal text-(--color-warning700)">
                 Beta
               </span>
