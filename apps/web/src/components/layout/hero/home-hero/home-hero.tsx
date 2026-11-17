@@ -5,7 +5,6 @@ import type { Data } from "@strapi/types";
 import { Code2, LayoutTemplate, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AvatarPile } from "@/components/content/avatar-pile";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
@@ -120,9 +119,19 @@ const HomeHero = (props: Props) => {
     })),
   };
 
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("packages");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Navigate to the marketplace with the query prefilled. A full navigation
+  // (rather than router.push) is deliberate: on a client-side transition the
+  // marketplace's InstantSearch history router hydrates from the empty SSR
+  // state and writes it back to the URL, stripping the incoming query before
+  // it's applied. A real page load reads the query on mount and keeps it.
+  const submitSearch = () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    window.location.assign(`/marketplace?query=${encodeURIComponent(q)}`);
+  };
 
   const tabScrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -163,16 +172,21 @@ const HomeHero = (props: Props) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && searchQuery.trim()) {
-                    router.push(
-                      `/marketplace?query=${encodeURIComponent(searchQuery.trim())}`,
-                    );
+                  if (e.key === "Enter") {
+                    submitSearch();
                   }
                 }}
                 placeholder="Search Community"
                 className="w-full rounded-lg border border-(--color-grey700) px-4 py-3.5 pr-12 text-sm text-white placeholder:text-(--color-hero-nav-muted) focus:outline-none focus:ring-1 focus:ring-(--color-primary500) bg-hero-input"
               />
-              <Search className="absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-(--color-primary500)" />
+              <button
+                type="button"
+                onClick={submitSearch}
+                aria-label="Search"
+                className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-(--color-primary500) hover:text-white"
+              >
+                <Search className="h-4 w-4" />
+              </button>
             </div>
           </div>
 

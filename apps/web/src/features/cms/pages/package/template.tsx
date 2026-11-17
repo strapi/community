@@ -4,6 +4,7 @@ import { Download, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AvatarPile } from "@/components/content/avatar-pile";
+import { ContentCard } from "@/components/content/card";
 import { GitProviderLogo } from "@/components/content/git-provider-logo";
 import { ContentLabels } from "@/components/content/label-icons";
 import { Markdown } from "@/components/content/markdown";
@@ -13,7 +14,10 @@ import { VersionSecurityBadge } from "@/components/content/version-info";
 import { Navigation } from "@/components/layout/navigation";
 import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
-import type { PackagePageData } from "@/features/cms/pages/package";
+import type {
+  PackagePageData,
+  PackageTemplateData,
+} from "@/features/cms/pages/package/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
 import { EditContentButton } from "@/features/submissions/components/edit-content-button";
 import { gitIssuesUrl } from "@/lib/git-repository";
@@ -21,10 +25,15 @@ import type { Owner } from "@/utils/types";
 
 type Props = {
   document: PackagePageData;
+  relatedTemplates?: PackageTemplateData[];
   communityCta?: CommunityCTAData | null;
 };
 
-const PackageTemplate = ({ document, communityCta }: Props) => {
+const PackageTemplate = ({
+  document,
+  relatedTemplates = [],
+  communityCta,
+}: Props) => {
   const categories = (document.categories ?? []) as {
     documentId: string;
     name: string;
@@ -32,6 +41,7 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
   }[];
   const owner = document.owner as Owner;
   const maintainers = document.maintainers ?? [];
+  const integrations = document.integrations ?? [];
   const githubStars = document.stars;
   const npmDownloads = document.monthly_downloads;
 
@@ -101,6 +111,34 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
 
             {/* README */}
             {document.readme && <Markdown markdown={document.readme} />}
+
+            {/* Templates using this package */}
+            {relatedTemplates.length > 0 && (
+              <section>
+                <h2 className="mb-6 text-[21px] font-semibold text-(--color-neutral900)">
+                  Templates using this package
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {relatedTemplates.map((tpl) => (
+                    <ContentCard
+                      key={tpl.documentId}
+                      image={{
+                        src: tpl.preview_image
+                          ? cmsImageUrl(tpl.preview_image.url)
+                          : "/template-fallback-preview.png",
+                        alt: tpl.preview_image?.alternativeText || "",
+                        size: "L",
+                      }}
+                      link={tpl.url_alias?.[0]?.url_path ?? "#"}
+                      badge="Template"
+                      name={tpl.name!}
+                      description={tpl.description ?? ""}
+                      labels={tpl.labels!}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </section>
 
           {/* ── Sidebar ── */}
@@ -153,6 +191,23 @@ const PackageTemplate = ({ document, communityCta }: Props) => {
                         className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
                       >
                         {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                </SidebarSection>
+              )}
+
+              {/* Integrations */}
+              {integrations.length > 0 && (
+                <SidebarSection title="Integrations">
+                  <div className="flex flex-wrap gap-2">
+                    {integrations.map((integration) => (
+                      <Link
+                        key={integration.documentId}
+                        href={integration.url_alias?.[0]?.url_path ?? "#"}
+                        className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-xs text-(--color-neutral700) hover:border-(--color-neutral400) hover:text-(--color-neutral900) transition-colors"
+                      >
+                        {integration.name}
                       </Link>
                     ))}
                   </div>

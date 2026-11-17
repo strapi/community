@@ -1,15 +1,15 @@
-import { Button, Container } from "@repo/strapi-ui";
+import { Container } from "@repo/strapi-ui";
 import type { Data } from "@strapi/types";
 import {
   AppWindow,
   CalendarDays,
-  ExternalLink,
   LayoutGrid,
   MapPin,
   Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { AvatarPile } from "@/components/content/avatar-pile";
 import { ContentCard } from "@/components/content/card";
 import { Markdown } from "@/components/content/markdown";
 import { ProfileLinks } from "@/components/content/profile-links";
@@ -21,14 +21,42 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OrganizationPageData } from "@/features/cms/pages/organization/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { getPartnerBadgeColors } from "@/lib/partner-levels";
 import { toProfileLinks } from "@/lib/profile-links";
-import type { RelatedContentItems } from "@/utils/types";
+import type { Owner, RelatedContentItems } from "@/utils/types";
 
 type Props = {
   document: OrganizationPageData;
   relatedContent: RelatedContentItems;
   members: Data.ContentType<"plugin::better-auth.user">[];
   communityCta?: CommunityCTAData | null;
+};
+
+const ProfileTagList = ({
+  title,
+  items,
+}: {
+  title: string;
+  items: { name?: string | null }[];
+}) => {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <h3 className="mb-3 text-[15px] font-semibold text-(--color-neutral900)">
+        {title}
+      </h3>
+      <ul className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li
+            key={item.name}
+            className="rounded-md border border-(--color-neutral200) px-2.5 py-1 text-sm text-(--color-neutral700)"
+          >
+            {item.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 const OrganizationTemplate = ({
@@ -42,11 +70,22 @@ const OrganizationTemplate = ({
   const defaultTab =
     document.profile?.readme || noRelatedContent ? "about" : "content";
 
-  // The first website gets the prominent "Visit website" button; every
-  // other link goes in the metadata row.
+  // All links (website included) render uniformly in the metadata row.
   const links = toProfileLinks(document.profile?.links);
-  const website = links.find((link) => link.type === "website");
-  const otherLinks = links.filter((link) => link !== website);
+
+  const countries = document.profile?.countries ?? [];
+  const techStacks = document.profile?.tech_stacks ?? [];
+  const services = document.profile?.services ?? [];
+  const hasProfileDetails =
+    countries.length > 0 || techStacks.length > 0 || services.length > 0;
+
+  const partnerBadge =
+    document.partner && document.partner_level
+      ? {
+          level: document.partner_level,
+          colors: getPartnerBadgeColors(document.partner_level),
+        }
+      : null;
 
   return (
     <>
@@ -112,17 +151,28 @@ const OrganizationTemplate = ({
                     {document.profile.location}
                   </span>
                 )}
-                <ProfileLinks links={otherLinks} />
+                {partnerBadge && (
+                  <span
+                    className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-semibold ${
+                      partnerBadge.colors?.badgeColor ??
+                      "bg-(--color-primary600)"
+                    } ${partnerBadge.colors?.badgeTextColor ?? "text-white"}`}
+                  >
+                    {partnerBadge.level} Partner
+                  </span>
+                )}
+                <ProfileLinks links={links} />
               </div>
 
-              {/* Website button */}
-              {website && (
-                <Button asChild variant="secondary">
-                  <Link href={website.value} target="_blank" rel="noopener">
-                    Visit website
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </Button>
+              {/* Members */}
+              {members.length > 0 && (
+                <div className="mb-8">
+                  <AvatarPile
+                    items={members as unknown as Owner[]}
+                    clickable
+                    white
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -218,9 +268,19 @@ const OrganizationTemplate = ({
             {document.profile?.readme ? (
               <Markdown markdown={document.profile.readme} />
             ) : (
-              <p className="text-md text-(--color-neutral600)">
-                No description provided.
-              </p>
+              !hasProfileDetails && (
+                <p className="text-md text-(--color-neutral600)">
+                  No description provided.
+                </p>
+              )
+            )}
+
+            {hasProfileDetails && (
+              <div className="mt-8 flex flex-col gap-6">
+                <ProfileTagList title="Services" items={services} />
+                <ProfileTagList title="Tech stacks" items={techStacks} />
+                <ProfileTagList title="Countries" items={countries} />
+              </div>
             )}
           </TabsContent>
 
@@ -235,10 +295,17 @@ const OrganizationTemplate = ({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {members.map((member) => {
                   const avatarUrl = member?.image;
+                  const profilePath = member?.url_alias?.[0]?.url_path;
+                  const Wrapper = profilePath ? Link : "div";
                   return (
-                    <div
+                    <Wrapper
                       key={member.id}
-                      className="flex items-center gap-3 rounded-lg border border-(--color-neutral150) p-4"
+                      href={profilePath as string}
+                      className={`flex items-center gap-3 rounded-lg border border-(--color-neutral150) p-4 ${
+                        profilePath
+                          ? "transition-colors hover:border-(--color-neutral300) hover:bg-(--color-neutral100)"
+                          : ""
+                      }`}
                     >
                       {avatarUrl ? (
                         <Image
@@ -261,7 +328,7 @@ const OrganizationTemplate = ({
                           </p>
                         )}
                       </div>
-                    </div>
+                    </Wrapper>
                   );
                 })}
               </div>

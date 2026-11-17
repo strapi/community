@@ -1,0 +1,15 @@
+{
+  "name": "marketplace-analytics",
+  "version": "0.0.1",
+  "strapi": {
+    "name": "marketplace-analytics",
+    "displayName": "Marketplace Analytics",
+    "description": "Exposes marketplace analytics (submissions, partner sign-ups) as MCP tools on Strapi's native MCP server",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "../../../dist/src/plugins/marketplace-analytics/server/src/index.js"
+    }
+  }
+}

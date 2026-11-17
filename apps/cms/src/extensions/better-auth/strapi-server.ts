@@ -1,3 +1,4 @@
+import impersonationController from "./controllers/impersonation";
 import organizationController from "./controllers/organization";
 import submissionsController from "./controllers/submissions";
 import userController from "./controllers/user";
@@ -5,6 +6,7 @@ import isAuthenticated from "./policies/is-authenticated";
 import isContentOwner from "./policies/is-content-owner";
 import isOrganizationMember from "./policies/is-organization-member";
 import isOrganizationOwner from "./policies/is-organization-owner";
+import impersonationRoutes from "./routes/impersonation";
 import organizationRoutes from "./routes/organization";
 import submissionsRoutes from "./routes/submissions";
 import userRoutes from "./routes/user";
@@ -13,6 +15,7 @@ import submissionsService from "./services/submissions";
 import userService from "./services/user";
 
 export default (plugin) => {
+  plugin.controllers.impersonation = impersonationController;
   plugin.controllers.organization = organizationController;
   plugin.controllers.submissions = submissionsController;
   plugin.controllers.user = userController;
@@ -31,6 +34,7 @@ export default (plugin) => {
   plugin.routes["content-api"] = {
     type: "content-api",
     routes: [
+      ...impersonationRoutes["content-api"].routes,
       ...organizationRoutes["content-api"].routes,
       ...submissionsRoutes["content-api"].routes,
       ...userRoutes["content-api"].routes,

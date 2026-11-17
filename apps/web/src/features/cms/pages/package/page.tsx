@@ -35,6 +35,11 @@ const query = {
         url_alias: true,
       },
     },
+    integrations: {
+      populate: {
+        url_alias: true,
+      },
+    },
   },
 } satisfies GetQueryParams<typeof contentType>;
 
@@ -43,15 +48,36 @@ export type PackagePageData = Modules.Documents.Result<
   typeof query
 >;
 
+// Templates reference packages (`template.packages`), but there's no inverse
+// relation on the package, so the templates using a package are fetched
+// separately by filtering on that relation.
+const relatedTemplatesQuery = {
+  populate: {
+    url_alias: true,
+    preview_image: true,
+    labels: true,
+  },
+} satisfies GetQueryParams<"api::template.template">;
+
+export type PackageTemplateData = Modules.Documents.Result<
+  "api::template.template",
+  typeof relatedTemplatesQuery
+>;
+
 type Props = {
   documentId: string;
   path: string;
 };
 
 const PackagePage = async ({ documentId, path }: Props) => {
-  const [document, communityCta] = await Promise.all([
+  const [document, communityCta, relatedTemplates] = await Promise.all([
     cmsClient.collection(contentType).findOne(documentId, query),
     fetchCommunityCTA(),
+    cmsClient.collection("api::template.template").find({
+      ...relatedTemplatesQuery,
+      filters: { packages: { documentId } },
+      status: "published",
+    }),
   ]);
 
   /**
@@ -75,7 +101,11 @@ const PackagePage = async ({ documentId, path }: Props) => {
           owner: document.data.owner as never,
         })}
       />
-      <PackageTemplate document={document.data} communityCta={communityCta} />
+      <PackageTemplate
+        document={document.data}
+        relatedTemplates={relatedTemplates.data}
+        communityCta={communityCta}
+      />
     </>
   );
 };
