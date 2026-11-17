@@ -46,6 +46,19 @@ const STATUS_MAP: Record<string, PublicStatus | null> = {
   paused: null,
 };
 
+/**
+ * Internal Notion squad name → public label (case-insensitive). Squads not
+ * listed here are published verbatim.
+ */
+const SQUAD_LABELS: Record<string, string> = {
+  "cms core": "Core",
+  "cms ee": "Enterprise",
+};
+
+export function mapSquad(name: string): string {
+  return SQUAD_LABELS[name.trim().toLowerCase()] ?? name;
+}
+
 const TIMEFRAMES: readonly Timeframe[] = [
   "now",
   "next",
@@ -186,7 +199,7 @@ export function mapNotionPage(page: NotionPage): RoadmapRow {
     publicStatus: mapStatus(internalStatus),
     timeframe: mapTimeframe(propText(p[NOTION_PROPS.when])),
     deliveryQuarter: propText(p[NOTION_PROPS.deliveryQuarter]),
-    squads: propNames(p[NOTION_PROPS.squad]),
+    squads: dedupe(propNames(p[NOTION_PROPS.squad]).map(mapSquad)),
     tags: propNames(p[NOTION_PROPS.tags]),
     cannyUrl: propText(p[NOTION_PROPS.cannyLink]),
     githubLinks: extractUrls(propText(githubProp)),

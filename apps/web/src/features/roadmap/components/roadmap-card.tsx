@@ -12,6 +12,20 @@ import {
 const chip =
   "inline-flex items-center rounded-md border px-2 py-0.5 text-xs leading-5";
 
+/** Edition squads get a tag on the card so users see what plan it ships in. */
+const EDITION_STYLES: Record<string, string> = {
+  Core: "border-(--color-neutral200) bg-(--color-neutral100) text-(--color-neutral800)",
+  Enterprise: "border-(--color-primary600) bg-(--color-primary600) text-white",
+};
+
+const EditionTag = ({ edition }: { edition: string }) => (
+  <span
+    className={`rounded px-1.5 py-px border font-sans text-[11px] font-semibold normal-case tracking-normal ${EDITION_STYLES[edition]}`}
+  >
+    {edition}
+  </span>
+);
+
 const ExternalLink = ({
   href,
   children,
@@ -55,7 +69,9 @@ const RoadmapCard = ({
   release: RoadmapRelease | undefined;
   onOpen: (slug: string) => void;
 }) => {
-  const areas = stringList(item.squads);
+  const squads = stringList(item.squads);
+  const editions = squads.filter((s) => s in EDITION_STYLES);
+  const areas = squads.filter((s) => !(s in EDITION_STYLES));
   const [github] = githubLinks(item.github_links);
   const extraGithub = githubLinks(item.github_links).length - 1;
   const { version, when } = scheduleChips(item, release);
@@ -97,6 +113,9 @@ const RoadmapCard = ({
                 Beta
               </span>
             )}
+            {editions.map((edition) => (
+              <EditionTag key={edition} edition={edition} />
+            ))}
             {areas.join(" · ")}
           </p>
         </div>

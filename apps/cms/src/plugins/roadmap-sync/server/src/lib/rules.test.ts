@@ -7,6 +7,7 @@ import {
   isPrivateAddress,
   type LinkCheck,
   mapNotionPage,
+  mapSquad,
   mapStatus,
   mapTimeframe,
   type NotionPage,
@@ -75,6 +76,14 @@ describe("mapStatus", () => {
   });
 });
 
+describe("mapSquad", () => {
+  it("renames CMS squads to public labels and keeps others", () => {
+    assert.equal(mapSquad("CMS core"), "Core");
+    assert.equal(mapSquad("CMS EE"), "Enterprise");
+    assert.equal(mapSquad("Cloud"), "Cloud");
+  });
+});
+
 describe("mapTimeframe", () => {
   it("lowercases known values and rejects others", () => {
     assert.equal(mapTimeframe("Now"), "now");
@@ -92,7 +101,7 @@ describe("mapNotionPage", () => {
     assert.equal(row.publicStatus, "in_progress");
     assert.equal(row.timeframe, "now");
     assert.equal(row.deliveryQuarter, "Q4 2026");
-    assert.deepEqual(row.squads, ["CMS core"]);
+    assert.deepEqual(row.squads, ["Core"]);
     assert.deepEqual(row.tags, ["New Feature"]);
     assert.deepEqual(row.githubLinks, [
       "https://github.com/strapi/strapi/issues/1",
