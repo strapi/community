@@ -1,6 +1,7 @@
 "use client";
 
 import { instantMeiliSearch } from "@meilisearch/instant-meilisearch";
+import type { UiState } from "instantsearch.js";
 import { history } from "instantsearch.js/es/lib/routers";
 import { SlidersHorizontal, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
   Configure,
   InstantSearch,
+  type InstantSearchProps,
   type InstantSearchServerState,
   InstantSearchSSRProvider,
   useInstantSearch,
@@ -50,12 +52,16 @@ interface SearchIndexRootProps {
    * getSearchServerState) so it's part of the server-rendered HTML.
    */
   serverState?: InstantSearchServerState;
+  /** Replaces the default URL mapping, for UIs with their own URL scheme. */
+  // biome-ignore lint/suspicious/noExplicitAny: each UI maps its own route state
+  routing?: InstantSearchProps<UiState, any>["routing"];
   children: ReactNode;
 }
 
 const SearchIndexRoot = ({
   indexName,
   serverState,
+  routing: customRouting,
   children,
 }: SearchIndexRootProps) => {
   const pathname = usePathname();
@@ -88,7 +94,7 @@ const SearchIndexRoot = ({
 
   const search = (
     <InstantSearch
-      routing={routing}
+      routing={customRouting ?? routing}
       indexName={indexName}
       searchClient={searchClient}
     >

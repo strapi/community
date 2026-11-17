@@ -4,6 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { authClient } from "@/features/auth/lib/client";
 import { isAuthEnabled } from "@/features/auth/lib/is-enabled";
+import { consumeInPagePath } from "./in-page-url";
 import { getPageContext } from "./page-context-store";
 import { pageTypeFromPath } from "./page-type";
 import { redactUrl } from "./redact";
@@ -75,6 +76,12 @@ export const RouteTracker = () => {
           PAGE_PARAMS.map((p) => [p, params[p] ?? prev.params[p]]),
         ) as PageParams,
       };
+      return;
+    }
+
+    // A path the page rewrote in place (replaceUrlInPage) is the same page.
+    if (prev && consumeInPagePath(pathname)) {
+      last.current = { pathname, params };
       return;
     }
 

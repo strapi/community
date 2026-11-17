@@ -2,6 +2,7 @@ import type { Data, UID } from "@strapi/types";
 import { CardGridSection } from "@/features/cms/sections/card-grid";
 import { CTASection } from "@/features/cms/sections/cta";
 import { HighlightsSection } from "@/features/cms/sections/highlights";
+import { RoadmapSection } from "@/features/cms/sections/roadmap";
 import { SearchSection } from "@/features/cms/sections/search";
 
 type Props = {
@@ -22,6 +23,8 @@ const SectionsMapper = ({ section, id }: Props) => {
       return <HighlightsSection section={section} />;
     case "sections.cta":
       return <CTASection section={section} />;
+    case "sections.roadmap":
+      return <RoadmapSection section={section} />;
     default:
       return null;
   }

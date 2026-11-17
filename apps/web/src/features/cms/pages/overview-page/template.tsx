@@ -6,12 +6,17 @@ import { Navigation } from "@/components/layout/navigation";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { OverviewPageData } from "@/features/cms/pages/overview-page";
 import { SectionsMapper } from "@/features/cms/sections/mapper";
+import { RoadmapStats } from "@/features/roadmap";
 
 type Props = {
   document: OverviewPageData;
 };
 
 const OverviewPageTemplate = ({ document }: Props) => {
+  const hasRoadmap = document.sections?.some(
+    (section) => section.__component === "sections.roadmap",
+  );
+
   return (
     <div>
       <Navigation theme="dark" />
@@ -51,6 +56,7 @@ const OverviewPageTemplate = ({ document }: Props) => {
                 className="rounded-lg object-cover ml-auto md:ml-auto w-full max-w-120 md:max-w-120 md:min-w-0 md:shrink max-h-130"
               />
             )}
+            {!document.image && hasRoadmap && <RoadmapStats />}
           </div>
         </HeroSection>
       </Hero>

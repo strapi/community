@@ -49,7 +49,8 @@
         "sections.card-grid",
         "sections.search",
         "sections.highlights",
-        "sections.cta"
+        "sections.cta",
+        "sections.roadmap"
       ]
     },
     "slug": {
