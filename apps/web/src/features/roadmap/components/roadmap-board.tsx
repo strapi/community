@@ -349,41 +349,31 @@ const Board = ({
             </button>
           </div>
         ) : view === "board" ? (
-          <>
-            <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-2">
-              <Column
-                title="Planned"
-                dot="bg-(--color-primary600)"
-                items={planned}
-              >
-                {card}
-              </Column>
-              <Column
-                title="In progress"
-                dot="bg-(--color-primary400)"
-                items={inProgress}
-              >
-                {card}
-              </Column>
-            </div>
-            {shipped.length > 0 && (
-              <section aria-label="Shipped" className="mt-10">
-                <h2 className="flex items-center gap-2.5 font-semibold text-(--color-neutral900)">
-                  <span
-                    aria-hidden
-                    className="h-2.5 w-2.5 rounded-full bg-(--color-success600)"
-                  />
-                  Recently shipped
-                  <span className="text-sm font-normal text-(--color-neutral600)">
-                    {shipped.length}
-                  </span>
-                </h2>
-                <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-                  {shipped.map(card)}
-                </ul>
-              </section>
-            )}
-          </>
+          // Columns size to their own content, so a long Planned list doesn't
+          // stretch the others.
+          <div className="mt-6 grid grid-cols-1 items-start gap-5 xl:grid-cols-3">
+            <Column
+              title="Planned"
+              dot="bg-(--color-primary600)"
+              items={planned}
+            >
+              {card}
+            </Column>
+            <Column
+              title="In progress"
+              dot="bg-(--color-primary400)"
+              items={inProgress}
+            >
+              {card}
+            </Column>
+            <Column
+              title="Recently shipped"
+              dot="bg-(--color-success600)"
+              items={shipped}
+            >
+              {card}
+            </Column>
+          </div>
         ) : (
           <Timeline
             items={visible}
