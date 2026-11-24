@@ -107,8 +107,8 @@ placeholder to `STRAPI_BASE_URL`, (2) rewrites webhook paths to
 > does **not** re-link — fine for `localhost:5678` against a local Strapi.
 
 ### After deploy (manual, once per set)
-1. **Bind the 5 credentials** in the n8n UI (next section).
-2. **Activate** the 8 webhook workflows + `render-email` (+ the two schedule workflows when wanted).
+1. **Bind the 6 credentials** in the n8n UI (next section).
+2. **Activate** the 9 webhook workflows + `render-email` (+ the three schedule workflows when wanted — including `discord-tier-roles-sync`).
 
 ## n8n credentials (bound in the UI, per set)
 
@@ -117,10 +117,14 @@ There are **no n8n environment variables** — the Strapi token lives in a crede
 | Credential | Type | Value | Bound to (nodes) |
 |---|---|---|---|
 | **Strapi API** | HTTP Header Auth | `Authorization` = `Bearer <Strapi API token>` | the **9 Strapi HTTP nodes**: render-email *Fetch Template*; security-scan *PATCH Scan/AI/Summary*; scan-timeout-sweeper *Find Stale ×2 + Mark Failed*; cleanup *Fetch Stale + Strip Label* |
-| **n8n Webhook Auth** | HTTP Header Auth | `X-N8N-Auth` = `<shared secret>` | the **8 webhook trigger nodes**. Must equal Strapi `N8N_WEBHOOK_AUTH_VALUE`. |
+| **n8n Webhook Auth** | HTTP Header Auth | `X-N8N-Auth` = `<shared secret>` | the **9 webhook trigger nodes** (incl. `discord-tier-role`). Must equal Strapi `N8N_WEBHOOK_AUTH_VALUE`. |
 | **SendGrid** | SendGrid API | n8n SendGrid key (community@strapi.io account) | render-email *Send via SendGrid* |
 | **Slack** | Slack API (bot token) | bot token for `#integration-marketplace` | the **6 Slack notify nodes** |
 | **Anthropic** | Anthropic API (predefined) | Anthropic API key | security-scan *Claude Haiku Security Analysis* (node uses *Predefined Credential Type → Anthropic*) |
+| **Discord Bot** | HTTP Header Auth | `Authorization` = `Bot <bot token>` | the Discord HTTP nodes in `discord-tier-role` and `discord-tier-roles-sync` (*Get Discord Member*, *Add Tier Role*, *Remove Tier Role*) |
+
+The Discord workflows also use **n8n Webhook Auth** (`discord-tier-role` trigger) and
+**Strapi API** (`discord-tier-roles-sync` → *Fetch Role Assignments*).
 
 > The two Header Auth credentials use different header names (`Authorization` vs
 > `X-N8N-Auth`) — create them separately.
@@ -161,3 +165,30 @@ first bring-up) → paste into the **Strapi API** n8n credential. It needs read 
   webhook never fires. Reviewers set these before approving.
 - **Webhook namespace** comes from the CMS plugin config (`N8N_WEBHOOK_NAMESPACE`,
   default `strapi`) in `config/plugins.ts` + `config/env/production/plugins.ts`.
+
+## Discord tier roles
+
+Members who connect Discord on the Community Hub get the role of their contributor
+tier on the Strapi Discord server.
+
+- **`discord-tier-role`** (webhook `<namespace>/discord-tier-role`) — called by the CMS
+  (contributions plugin, `discord` service) when a user's tier changes, they leave the
+  Strapi team organization, or they connect/disconnect Discord.
+- **`discord-tier-roles-sync`** (daily 04:00 UTC, after the CMS's 03:00 tier sync) —
+  reconciles everyone via `GET /api/contributions/discord-roles`; catches members who
+  joined the server after connecting, and any missed webhook.
+
+Both get `guildId`, `discordUserId`, `roleId` (the role to have, or none) and
+`tierRoleIds` from the CMS, look up the member's current roles, and only add/remove
+what differs — other roles are never touched. Members not in the server are skipped.
+The server and role IDs live in the **CMS** env (`DISCORD_GUILD_ID`,
+`DISCORD_ROLE_BRONZE|SILVER|GOLD|PLATINUM`), so the workflows have no config of their
+own and staging/production can point at different roles.
+
+**Setup (once):** create a Discord application with a bot, invite it to the server with
+the *Manage Roles* permission, create the four tier roles **below the bot's own role**
+(Discord only lets a bot assign roles beneath its highest role), then set the CMS env
+vars, bind the **Discord Bot** credential and activate both workflows. Users connect
+Discord through the Community Hub (`BETTER_AUTH_DISCORD_*` in the CMS,
+`NEXT_PUBLIC_AUTH_DISCORD_ENABLED=true` in the web app), with the OAuth redirect URI
+`{BETTER_AUTH_URL}/api/auth/callback/discord`.

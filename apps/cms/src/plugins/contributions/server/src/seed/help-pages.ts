@@ -72,6 +72,7 @@ Code, bug reports and answers in either place count the same.
 - **A GitHub Contributions tab on your profile**, listing your issues, pull requests and discussions.
 - **A contributor tier badge** on your profile and on your card in the members directory.
 - **A spot in the members directory filters**, so others can find contributors by tier.
+- **Your tier as a role on the Strapi Discord server**, once you connect your Discord account.
 - **Your community points**, under **Community points** in your user menu: your tier, how close you are to the next one, where your points come from, what each tier unlocks, and issues you could pick up next.
 
 ## Get started
@@ -111,6 +112,10 @@ For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers add u
           3 * CONTRIBUTION_POINTS.resolvedIssue +
           4 * CONTRIBUTION_POINTS.acceptedAnswer
         } points.
+
+## Your tier on Discord
+
+Connect your Discord account under **Account → Security** and you get the role of your tier — Bronze, Silver, Gold or Platinum Contributor — on the [Strapi Discord server](https://discord.strapi.io). It follows your tier automatically: when you reach a new tier, your role moves up with you. You need to be a member of the server; if you join after connecting, your role is added within a day.
 
 ## When is my tier updated?
 

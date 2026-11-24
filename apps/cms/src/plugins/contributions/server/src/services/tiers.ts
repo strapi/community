@@ -91,6 +91,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           contribution_stats: stats,
         },
       });
+
+      if (tier !== (user.contributor_tier ?? null)) {
+        strapi.plugin("contributions").service("discord").notify(userId);
+      }
     }
 
     return { tier, score, stats };

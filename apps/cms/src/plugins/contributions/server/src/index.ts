@@ -21,6 +21,14 @@ import {
  * `tier-benefit`, and issues to pick up).
  */
 export default {
+  config: {
+    // Overridden from config/plugins.ts — see there.
+    default: {
+      discord: { guildId: "", tierRoles: {} },
+      webhooks: { discordTierRole: "strapi/discord-tier-role" },
+    },
+    validator() {},
+  },
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await seedHelpPages(strapi);
     await seedTierBenefits(strapi);
@@ -85,6 +93,41 @@ export default {
           }
         });
       },
+    });
+
+    // Connecting Discord gives the user their tier role right away;
+    // disconnecting removes it (the account row — and with it the Discord
+    // id — is gone after deletion, so it's read before).
+    const discord = strapi.plugin("contributions").service("discord");
+    const readDiscordAccounts = (event) =>
+      strapi.db.query("plugin::better-auth.account").findMany({
+        where: { ...event.params.where, providerId: "discord" },
+        select: ["accountId", "userId"],
+      });
+    const removeDiscordRoles = (event) => {
+      for (const account of event.state.discordAccounts ?? []) {
+        discord.notify(account.userId, { discordUserId: account.accountId });
+      }
+    };
+    strapi.db.lifecycles.subscribe({
+      models: ["plugin::better-auth.account"],
+      async afterCreate(event) {
+        const account = event.result as {
+          providerId?: string;
+          userId?: number;
+        };
+        if (account?.providerId === "discord" && account.userId) {
+          discord.notify(account.userId);
+        }
+      },
+      async beforeDelete(event) {
+        event.state.discordAccounts = await readDiscordAccounts(event);
+      },
+      async beforeDeleteMany(event) {
+        event.state.discordAccounts = await readDiscordAccounts(event);
+      },
+      afterDelete: removeDiscordRoles,
+      afterDeleteMany: removeDiscordRoles,
     });
 
     strapi.cron.add({

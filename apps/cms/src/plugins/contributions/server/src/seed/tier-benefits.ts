@@ -2,7 +2,8 @@ import type { Core } from "@strapi/strapi";
 
 /**
  * Seeds the benefits contributors get at each tier (shown on their
- * personal contributions dashboard) — only when there are none yet, so
+ * personal contributions dashboard — including the Discord role, see the
+ * `discord` service) — only when there are none yet, so
  * editors own the list from then on. Only seeds what the platform does
  * today; real-world perks (swag, event invites, …) are for the team to add
  * in the admin under "Contributor Tier Benefits".
@@ -36,6 +37,11 @@ const seeds = [
     description:
       "The highest badge there is, on your profile and member card — reserved for the community's most impactful contributors.",
   },
+  ...(["bronze", "silver", "gold", "platinum"] as const).map((tier) => ({
+    tier,
+    title: "Role on Discord",
+    description: `The ${tier[0].toUpperCase()}${tier.slice(1)} Contributor role on the Strapi Discord server, once you connect your Discord account.`,
+  })),
 ] as const;
 
 export async function seedTierBenefits(strapi: Core.Strapi): Promise<void> {

@@ -104,6 +104,23 @@ export default ({ env }) => ({
   contributions: {
     enabled: true,
     resolve: "./src/plugins/contributions",
+    config: {
+      // Contributor tier roles in the Strapi Discord server, for users who
+      // connected Discord — assigned by the n8n `discord-tier-role`
+      // workflows. Disabled while `guildId` is empty.
+      discord: {
+        guildId: env("DISCORD_GUILD_ID", ""),
+        tierRoles: {
+          bronze: env("DISCORD_ROLE_BRONZE", ""),
+          silver: env("DISCORD_ROLE_SILVER", ""),
+          gold: env("DISCORD_ROLE_GOLD", ""),
+          platinum: env("DISCORD_ROLE_PLATINUM", ""),
+        },
+      },
+      webhooks: {
+        discordTierRole: `${N8N_WEBHOOK_NS}/discord-tier-role`,
+      },
+    },
   },
   // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
   // key order of this file, and the first registered document middleware is the

@@ -1,0 +1,443 @@
+{
+  "name": "discord-tier-roles-sync",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Discord tier roles \u2014 nightly sync\nReconciles every connected Discord account with the tier role it should have (`GET /api/contributions/discord-roles`), after the CMS's 03:00 tier sync. Catches members who joined the server after connecting, and any missed webhook. Only changes what differs.\n\nCredentials: **Strapi API** (Fetch), **Discord Bot** (HTTP nodes).",
+        "height": 260,
+        "width": 420
+      },
+      "id": "c88a858e-cee3-5040-873b-0d57388e0407",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 4 * * *"
+            }
+          ]
+        }
+      },
+      "id": "15a18484-0907-5349-baa8-de2aec2fcc05",
+      "name": "Daily at 04:00 UTC",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://localhost:1337/api/contributions/discord-roles",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "5cfb08e2-291f-560f-90cc-214cbb6b86a1",
+      "name": "Fetch Role Assignments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "2d5a67c3-f3c9-5a9a-ad53-499cd70bf1d2",
+      "name": "Split Out Members",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "guildId",
+              "type": "string",
+              "value": "={{ $json.guildId }}"
+            },
+            {
+              "id": "d2",
+              "name": "discordUserId",
+              "type": "string",
+              "value": "={{ $json.discordUserId }}"
+            },
+            {
+              "id": "d3",
+              "name": "tier",
+              "type": "string",
+              "value": "={{ $json.tier ?? '' }}"
+            },
+            {
+              "id": "d4",
+              "name": "roleId",
+              "type": "string",
+              "value": "={{ $json.roleId ?? '' }}"
+            },
+            {
+              "id": "d5",
+              "name": "tierRoleIds",
+              "type": "array",
+              "value": "={{ $json.tierRoleIds ?? [] }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "0986ed50-15f4-5b76-a315-b1e4fd2550db",
+      "name": "Desired Roles",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://discord.com/api/v10/guilds/{{ $json.guildId }}/members/{{ $json.discordUserId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "4a37083c-4396-55e6-80e7-53ec8e1d3073",
+      "name": "Get Discord Member",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1d36881b-4b84-51aa-9395-ab3320a22d1c",
+      "name": "In Server?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "operations",
+              "type": "array",
+              "value": "={{ (() => {\n  const wanted = $('Desired Roles').item.json;\n  const has = $json.body.roles ?? [];\n  const base = { guildId: wanted.guildId, discordUserId: wanted.discordUserId };\n  const add = wanted.roleId && !has.includes(wanted.roleId)\n    ? [{ ...base, action: 'add', roleId: wanted.roleId }]\n    : [];\n  const remove = (wanted.tierRoleIds ?? [])\n    .filter((roleId) => roleId !== wanted.roleId && has.includes(roleId))\n    .map((roleId) => ({ ...base, action: 'remove', roleId }));\n  return [...add, ...remove];\n})() }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "879daedd-9475-5a20-ae4f-afc570a48d2a",
+      "name": "Plan Role Changes",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        660,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "operations",
+        "options": {}
+      },
+      "id": "931c683c-a3fa-50bf-b8c0-5b62bf643ddf",
+      "name": "Split Out Changes",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        880,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "add",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f50e382b-cbb0-5cac-b2a9-0bbf54fb148c",
+      "name": "Add Role?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://discord.com/api/v10/guilds/{{ $json.guildId }}/members/{{ $json.discordUserId }}/roles/{{ $json.roleId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Log-Reason",
+              "value": "Contributor tier (Strapi Community Hub)"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "09d58823-0e78-5e5c-9694-c7ed5b045e60",
+      "name": "Add Tier Role",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1320,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://discord.com/api/v10/guilds/{{ $json.guildId }}/members/{{ $json.discordUserId }}/roles/{{ $json.roleId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Log-Reason",
+              "value": "Contributor tier (Strapi Community Hub)"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "bbcc3f1f-26c5-5a0c-97f2-6ec082566cd6",
+      "name": "Remove Tier Role",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1320,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "Daily at 04:00 UTC": {
+      "main": [
+        [
+          {
+            "node": "Fetch Role Assignments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Role Assignments": {
+      "main": [
+        [
+          {
+            "node": "Split Out Members",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Members": {
+      "main": [
+        [
+          {
+            "node": "Desired Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Desired Roles": {
+      "main": [
+        [
+          {
+            "node": "Get Discord Member",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Discord Member": {
+      "main": [
+        [
+          {
+            "node": "In Server?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In Server?": {
+      "main": [
+        [
+          {
+            "node": "Plan Role Changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Role Changes": {
+      "main": [
+        [
+          {
+            "node": "Split Out Changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Changes": {
+      "main": [
+        [
+          {
+            "node": "Add Role?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Role?": {
+      "main": [
+        [
+          {
+            "node": "Add Tier Role",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remove Tier Role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "SYm72hu6NXus7iah"
+  },
+  "staticData": null,
+  "tags": []
+}

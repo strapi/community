@@ -40,6 +40,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
+     * GET /api/contributions/discord-roles — every connected Discord
+     * account with the tier role it should have, for n8n's nightly
+     * `discord-tier-roles-sync` (see the `discord` service).
+     */
+    async discordRoles(ctx) {
+      ctx.body = {
+        data: await strapi
+          .plugin("contributions")
+          .service("discord")
+          .listRoleAssignments(),
+      };
+    },
+
+    /**
      * GET /api/contributions/issues — issues to pick up, for the dashboard.
      * Public data, cached server-side (see `getIssuesToPickUp`).
      */

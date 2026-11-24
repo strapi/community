@@ -177,6 +177,18 @@ export const auth = betterAuth({
       clientSecret: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
       prompt: "select_account",
     },
+    // Mainly for linking: a connected Discord account gets the role of the
+    // user's contributor tier in the Strapi Discord server (see the
+    // contributions plugin's `discord` service). Optional — only enabled
+    // when configured; the web app's NEXT_PUBLIC_AUTH_DISCORD_ENABLED
+    // shows its button.
+    ...(process.env.BETTER_AUTH_DISCORD_CLIENT_ID && {
+      discord: {
+        clientId: process.env.BETTER_AUTH_DISCORD_CLIENT_ID,
+        clientSecret: process.env.BETTER_AUTH_DISCORD_CLIENT_SECRET,
+        prompt: "consent" as const,
+      },
+    }),
   },
   plugins: [
     organization({

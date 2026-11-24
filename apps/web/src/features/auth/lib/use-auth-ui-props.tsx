@@ -127,7 +127,12 @@ export function useAuthUIProviderProps(): Omit<
     },
     magicLink: true,
     social: {
-      providers: ["google", "github"],
+      // Discord is optional (the CMS only enables it when configured) —
+      // linking it gives the user their contributor tier role on Discord.
+      providers:
+        process.env.NEXT_PUBLIC_AUTH_DISCORD_ENABLED === "true"
+          ? ["google", "github", "discord"]
+          : ["google", "github"],
     },
     twoFactor: ["otp", "totp"],
     organization: {

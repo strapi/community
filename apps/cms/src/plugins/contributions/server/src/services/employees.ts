@@ -89,6 +89,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       strapi.log.info(
         `[contributions] User ${userId} left the Strapi team organization — marked as a former employee.`,
       );
+      strapi.plugin("contributions").service("discord").notify(userId);
     }
   },
 });

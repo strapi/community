@@ -33,6 +33,8 @@ export type ContributionsDashboard = {
   status: DashboardStatus;
   /** Without GitHub, only Community Hub submissions earn points. */
   githubLinked: boolean;
+  /** Tier roles on Discord: whether they're set up, and connected. */
+  discord: { enabled: boolean; linked: boolean };
   tier: string | null;
   score: number;
   stats: ContributionStats | null;

@@ -40,6 +40,13 @@ export default {
       },
       {
         method: "GET",
+        path: "/discord-roles",
+        handler: "dashboard.discordRoles",
+        // Any valid API token — n8n's "Strapi API" credential.
+        config: { auth: { scope: [] }, policies: [] },
+      },
+      {
+        method: "GET",
         path: "/issues",
         handler: "dashboard.issues",
         // Public: the same open GitHub issues for everyone, and cached in

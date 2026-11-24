@@ -68,6 +68,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!user) throw new errors.NotFoundError("User not found.");
 
     const githubLinked = Boolean(await findGithubAccountId(userId));
+    const discordService = strapi.plugin("contributions").service("discord");
+    const discordEnabled: boolean = discordService.isEnabled();
+    const discordLinked = discordEnabled
+      ? Boolean(await discordService.findDiscordAccountId(userId))
+      : false;
 
     const status: DashboardStatus =
       user.profile?.show_github_contributions === false ? "hidden" : "active";
@@ -85,6 +90,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       status,
       githubLinked,
+      /** Tier roles on Discord: whether they're set up, and connected. */
+      discord: { enabled: discordEnabled, linked: discordLinked },
       tier: user.contributor_tier ?? null,
       score: user.contribution_score ?? 0,
       stats,

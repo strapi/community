@@ -1,6 +1,14 @@
 "use client";
 
-import { EyeOff, Gift, Github, Lock, RefreshCw, Zap } from "lucide-react";
+import {
+  EyeOff,
+  Gift,
+  Github,
+  Lock,
+  MessagesSquare,
+  RefreshCw,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GITHUB_SCOPES } from "../../lib/config";
@@ -68,6 +76,10 @@ export function OverviewSection({
     <div className="flex w-full flex-col gap-4 md:gap-6">
       {!dashboard.githubLinked && (
         <ConnectGithub since={formatSince(dashboard.since)} />
+      )}
+
+      {dashboard.discord.enabled && !dashboard.discord.linked && (
+        <ConnectDiscord dashboard={dashboard} />
       )}
 
       <NextUnlock dashboard={dashboard} gainPointsHref={gainPointsHref} />
@@ -188,6 +200,40 @@ function formatSince(since: string) {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+/**
+ * Prompts to connect Discord, for the tier role on the Strapi Discord
+ * server (assigned by the CMS's `discord` service via n8n).
+ */
+function ConnectDiscord({ dashboard }: { dashboard: Dashboard }) {
+  const { current } = getTierProgress(dashboard);
+
+  return (
+    <div className="flex flex-col items-start gap-4 rounded-md border border-[#c7cbf7] bg-[#eef0fe] p-5 sm:flex-row sm:items-center">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#5865f2] text-white">
+        <MessagesSquare className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <div className="flex grow flex-col gap-1">
+        <p className="text-sm font-semibold text-(--color-neutral900)">
+          {current
+            ? `Show off your ${current.label} role on Discord`
+            : "Get your tier role on Discord"}
+        </p>
+        <p className="text-sm text-(--color-neutral700)">
+          Connect your Discord account and your contributor tier shows as a role
+          on the Strapi Discord server — it moves up with you as you earn
+          points.
+        </p>
+      </div>
+      <Link
+        href="/account/security"
+        className="inline-flex shrink-0 items-center gap-2 rounded-md bg-[#5865f2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#4752c4]"
+      >
+        Connect Discord
+      </Link>
+    </div>
+  );
 }
 
 /**

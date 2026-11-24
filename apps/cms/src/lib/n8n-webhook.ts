@@ -1,0 +1,91 @@
+/**
+ * n8n webhook helper, shared by the CMS plugins that hand work to n8n
+ * (moderation, contributions).
+ *
+ * Accepts webhook paths directly (e.g. "strapi/plugin-submission-received").
+ * Paths come from the plugin config's `webhooks` object per content type.
+ * The security-scan path is fixed per namespace (security scanning is not a
+ * configurable content-type webhook — it always applies to api::package.package),
+ * but shares the N8N_WEBHOOK_NAMESPACE prefix so duplicate workflow sets on a
+ * shared n8n instance (e.g. staging vs production) don't collide.
+ *
+ * Flipping N8N_WEBHOOK_MODE between 'production' and 'test' toggles all
+ * webhooks between n8n's always-on prod URL (/webhook/<path>) and the
+ * developer-only test URL (/webhook-test/<path>).
+ */
+
+export const N8N_WEBHOOK_NS = process.env.N8N_WEBHOOK_NAMESPACE || "strapi";
+
+function getWebhookUrl(path: string) {
+  const base = process.env.N8N_WEBHOOK_BASE_URL;
+  const mode = (process.env.N8N_WEBHOOK_MODE || "production").toLowerCase();
+
+  if (!base) {
+    throw new Error(
+      "N8N_WEBHOOK_BASE_URL is not configured; cannot call n8n webhooks.",
+    );
+  }
+  if (!path) {
+    throw new Error("Webhook path is required.");
+  }
+  if (mode !== "production" && mode !== "test") {
+    throw new Error(
+      `Invalid N8N_WEBHOOK_MODE '${mode}'. Must be 'production' or 'test'.`,
+    );
+  }
+
+  const prefix = mode === "test" ? "webhook-test" : "webhook";
+  return `${base.replace(/\/$/, "")}/${prefix}/${path}`;
+}
+
+/**
+ * POST a payload to an n8n webhook path. Returns `{ ok, url, error? }` —
+ * never throws, so callers control failure behaviour.
+ */
+async function triggerN8nWebhook(
+  path: string,
+  payload: object,
+  {
+    strapi,
+    label = "n8n",
+  }: {
+    strapi?: { log?: { warn?: (msg: string) => void } };
+    /** Prefix for log lines, e.g. the calling plugin's name. */
+    label?: string;
+  } = {},
+) {
+  let url: string;
+  try {
+    url = getWebhookUrl(path);
+  } catch (err) {
+    strapi?.log?.warn?.(`[${label}] ${(err as Error).message}`);
+    return { ok: false, error: (err as Error).message };
+  }
+
+  const authHeader = process.env.N8N_WEBHOOK_AUTH_HEADER || "X-N8N-Auth";
+  const authValue = process.env.N8N_WEBHOOK_AUTH_VALUE;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authValue ? { [authHeader]: authValue } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      const error = `n8n webhook '${path}' returned ${res.status}${body ? `: ${body.slice(0, 200)}` : ""}`;
+      strapi?.log?.warn?.(`[${label}] ${error}`);
+      return { ok: false, url, error };
+    }
+    return { ok: true, url };
+  } catch (err) {
+    const error = `n8n webhook '${path}' fetch failed: ${(err as Error).message}`;
+    strapi?.log?.warn?.(`[${label}] ${error}`);
+    return { ok: false, url: url!, error };
+  }
+}
+
+export { getWebhookUrl, triggerN8nWebhook };
