@@ -1,16 +1,25 @@
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { CONTRIBUTION_TYPES, GITHUB_REPO } from "../../lib/config";
+import { Fragment } from "react";
+import { CONTRIBUTION_TYPES, GITHUB_SCOPES } from "../../lib/config";
 import type {
   GithubContributions,
   GithubContributionType,
 } from "../../lib/types";
+import { ContributorTierProgress } from "../contributor-tier-progress";
 import { GithubContributionsFeed } from "../github-contributions-feed";
 
-/** A GitHub search for all of the user's `strapi/strapi` items of a type. */
+/**
+ * A GitHub search for all of the user's items of a type in every scope —
+ * GitHub treats several scope qualifiers as "any of".
+ */
 function searchUrl(login: string, type: GithubContributionType) {
   const { qualifier, searchType } = CONTRIBUTION_TYPES[type];
-  const query = [`author:${login}`, `repo:${GITHUB_REPO}`, qualifier]
+  const query = [
+    `author:${login}`,
+    ...GITHUB_SCOPES.map((scope) => scope.qualifier),
+    qualifier,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -22,8 +31,13 @@ function searchUrl(login: string, type: GithubContributionType) {
 
 const GithubContributionsSection = ({
   contributions,
+  tier,
+  score,
 }: {
   contributions: GithubContributions;
+  /** The user's stored `contributor_tier` / `contribution_score`. */
+  tier?: string | null;
+  score?: number | null;
 }) => {
   const { login, totals, items } = contributions;
 
@@ -43,18 +57,25 @@ const GithubContributionsSection = ({
           >
             @{login}
           </Link>{" "}
-          in the{" "}
-          <Link
-            href={`https://github.com/${GITHUB_REPO}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-(--color-primary600) hover:underline"
-          >
-            {GITHUB_REPO}
-          </Link>{" "}
-          repository.
+          in{" "}
+          {GITHUB_SCOPES.map((scope, index) => (
+            <Fragment key={scope.qualifier}>
+              {index > 0 && " and "}
+              <Link
+                href={scope.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-(--color-primary600) hover:underline"
+              >
+                {scope.label}
+              </Link>
+            </Fragment>
+          ))}{" "}
+          repositories.
         </p>
       </div>
+
+      <ContributorTierProgress tier={tier} score={score} />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {(Object.keys(CONTRIBUTION_TYPES) as GithubContributionType[]).map(

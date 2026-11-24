@@ -5,7 +5,6 @@
 import { factories, type Modules, type UID } from "@strapi/strapi";
 import {
   deleteOwnedFile,
-  fetchGithubContributions,
   findOwnedContentIds,
   uploadOwnedFile,
 } from "../utils";
@@ -77,54 +76,37 @@ export default factories.createCoreService("plugin::better-auth.user", () => ({
 
     if (!user) return null;
 
-    if (user.profile) {
-      return strapi.documents("api::profile.profile").update({
-        documentId: user.profile.documentId,
-        data,
+    const profile = user.profile
+      ? await strapi.documents("api::profile.profile").update({
+          documentId: user.profile.documentId,
+          data,
+        })
+      : await strapi.documents("api::profile.profile").create({ data });
+
+    if (!user.profile) {
+      await strapi.documents("plugin::better-auth.user").update({
+        documentId: user.documentId,
+        data: { profile: profile.documentId },
       });
     }
 
-    const profile = await strapi.documents("api::profile.profile").create({
-      data,
-    });
-
-    await strapi.documents("plugin::better-auth.user").update({
-      documentId: user.documentId,
-      data: { profile: profile.documentId },
-    });
+    // Saving the GitHub contributions setting re-syncs the contributor
+    // tier (see the contributions plugin) right away (turning it off clears the tier), rather than at the
+    // next daily sync. Not awaited: it calls GitHub, and the profile save
+    // shouldn't wait on (or fail with) that.
+    if ("show_github_contributions" in data) {
+      strapi
+        .plugin("contributions")
+        .service("tiers")
+        .syncUser({ userId })
+        .catch((error) => {
+          strapi.log.warn(
+            `[contributions] Failed to sync tier of user ${userId}: ${error}`,
+          );
+        });
+    }
 
     return profile;
-  },
-
-  /**
-   * The user's issues/PRs/discussions in the `strapi/strapi` GitHub repo,
-   * for the public profile's "GitHub Contributions" tab. `null` when the
-   * user has no linked GitHub account, has turned the tab off
-   * (`show_github_contributions` — on unless explicitly `false`, so users
-   * without a profile yet are included). Throws if GitHub can't be
-   * reached.
-   */
-  async getGithubContributions({ userId }: { userId: string | number }) {
-    const [user] = await strapi.documents("plugin::better-auth.user").findMany({
-      filters: { id: userId },
-      fields: ["documentId"],
-      populate: { profile: { fields: ["show_github_contributions"] } },
-    });
-
-    if (!user || user.profile?.show_github_contributions === false) {
-      return null;
-    }
-
-    const account = await strapi.db
-      .query("plugin::better-auth.account")
-      .findOne({
-        where: { userId, providerId: "github" },
-        select: ["accountId"],
-      });
-
-    if (!account?.accountId) return null;
-
-    return fetchGithubContributions(account.accountId);
   },
 
   async getRelatedContent<UID extends UID.ContentType>({

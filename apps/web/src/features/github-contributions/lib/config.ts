@@ -1,7 +1,22 @@
 import { CircleDot, GitPullRequest, MessagesSquare } from "lucide-react";
 import type { GithubContributions, GithubContributionType } from "./types";
 
-export const GITHUB_REPO = "strapi/strapi";
+/**
+ * Where contributions are fetched from — mirrors the CMS's `GITHUB_SCOPES`
+ * (apps/cms/src/plugins/contributions/server/src/constants.ts).
+ */
+export const GITHUB_SCOPES = [
+  {
+    qualifier: "repo:strapi/strapi",
+    label: "strapi/strapi",
+    url: "https://github.com/strapi/strapi",
+  },
+  {
+    qualifier: "org:strapi-community",
+    label: "strapi-community",
+    url: "https://github.com/strapi-community",
+  },
+] as const;
 
 export const CONTRIBUTION_TYPES = {
   issue: {

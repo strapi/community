@@ -1,0 +1,181 @@
+import type { Core } from "@strapi/strapi";
+import {
+  CONTRIBUTION_POINTS,
+  CONTRIBUTIONS_SINCE,
+  CONTRIBUTOR_TIERS,
+} from "../utils/contributor-tiers";
+
+/** Where contributions count, as Markdown links. */
+const whereLinks =
+  "the [strapi/strapi](https://github.com/strapi/strapi) repository and every repository of the [strapi-community](https://github.com/strapi-community) organization";
+
+/** e.g. "September 18, 2024" */
+const contributionsSince = new Date(CONTRIBUTIONS_SINCE).toLocaleDateString(
+  "en-US",
+  { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" },
+);
+
+/**
+ * Seeds the "Contributing" help pages, which explain contributor tiers and
+ * the GitHub contributions shown on profiles. Like the email template
+ * seeder, a page is only created when no page with its slug exists yet —
+ * editors own the content from then on, and re-running never overwrites
+ * their changes. Pages are created published.
+ */
+
+type SeedHelpPage = {
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  children?: SeedHelpPage[];
+};
+
+const tierTable = [
+  "| Tier | Points needed |",
+  "| --- | --- |",
+  ...CONTRIBUTOR_TIERS.map(
+    ({ label, minScore }) =>
+      `| **${label}** | ${minScore.toLocaleString("en-US")}+ |`,
+  ),
+].join("\n");
+
+const pointsTable = [
+  "| Contribution | Counts when | Points |",
+  "| --- | --- | --- |",
+  `| Pull request | it's merged | ${CONTRIBUTION_POINTS.mergedPullRequest} |`,
+  `| Issue | a merged pull request (or a maintainer's commit) resolved it | ${CONTRIBUTION_POINTS.resolvedIssue} |`,
+  `| Discussion answer | it's marked as the accepted answer | ${CONTRIBUTION_POINTS.acceptedAnswer} |`,
+].join("\n");
+
+const seeds: SeedHelpPage[] = [
+  {
+    slug: "contributing",
+    title: "Contributing to Strapi",
+    description:
+      "How your contributions to Strapi are recognized across the community — on your profile and in the members directory.",
+    content: `Strapi is built in the open, together with its community. Every issue you report, discussion you start and pull request that gets merged makes Strapi better — and we want that work to be visible.
+
+When you connect your GitHub account, your contributions to ${whereLinks} show up on your community profile, and the ones that made a difference — merged pull requests, fixed issues and accepted answers — earn you a **contributor tier**.
+
+## Where your contributions count
+
+- **[strapi/strapi](https://github.com/strapi/strapi)** — the Strapi core: the CMS, the admin panel and the official packages.
+- **[strapi-community](https://github.com/strapi-community)** — community-maintained plugins, providers and tools, like Better Auth, REST Cache, Redis, the Google Cloud Storage upload provider and the Dockerize tool. Every repository in the organization counts, including new ones.
+
+Code, bug reports and answers in either place count the same.
+
+## What you get
+
+- **A GitHub Contributions tab on your profile**, listing your issues, pull requests and discussions.
+- **A contributor tier badge** on your profile and on your card in the members directory.
+- **A spot in the members directory filters**, so others can find contributors by tier.
+
+## Get started
+
+1. Sign in and connect your GitHub account under **Account → Security**.
+2. Make sure **Show GitHub contributions** is checked under **Account → Profile** (it is by default).
+3. Contribute! Your tier is updated daily.
+
+New to contributing? The [contributing guide](https://github.com/strapi/strapi/blob/develop/CONTRIBUTING.md) explains how to set up Strapi locally, and issues labeled [good first issue](https://github.com/strapi/strapi/labels/good%20first%20issue) are a great place to start. Community plugins in [strapi-community](https://github.com/strapi-community) are often smaller codebases — a friendly place for a first pull request.`,
+    children: [
+      {
+        slug: "contributor-tiers",
+        title: "Contributor tiers",
+        description:
+          "How contributor tiers work, how many points each contribution is worth, and how your tier is calculated.",
+        content: `Contributor tiers recognize members who help build Strapi and its ecosystem. Your tier is based on your contributions to ${whereLinks}, and is shown on your profile and your card in the members directory.
+
+## The tiers
+
+${tierTable}
+
+## How points are earned
+
+Your contributions to strapi/strapi and strapi-community repositories earn points once they've **made a difference** — not just for being opened. Both count the same:
+
+${pointsTable}
+
+- **Pull requests** count once they're merged — that's when your code becomes part of Strapi.
+- **Issues** count once they're fixed: when a merged pull request or a commit by the maintainers resolves them. Reporting a real bug that gets fixed is a valuable contribution; issues that are closed as duplicates, invalid or not planned don't earn points.
+- **Discussion answers** count when your reply to someone's question is marked as the accepted answer.
+
+Only contributions from the **Strapi 5 era** count: pull requests merged, issues fixed and answers accepted since Strapi 5 was released on ${contributionsSince}. Tiers celebrate the people building Strapi today.
+
+For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers add up to ${
+          2 * CONTRIBUTION_POINTS.mergedPullRequest +
+          3 * CONTRIBUTION_POINTS.resolvedIssue +
+          4 * CONTRIBUTION_POINTS.acceptedAnswer
+        } points.
+
+## When is my tier updated?
+
+Tiers are recalculated **once a day**. Saving your profile settings also recalculates your tier right away.
+
+## Why don't I have a tier?
+
+- **Your GitHub account isn't connected.** Connect it under **Account → Security**.
+- **You've hidden your GitHub contributions.** Tiers are based on the same contributions shown on your profile, so hiding them also hides your tier. Turn **Show GitHub contributions** back on under **Account → Profile**.
+- **Your contributions haven't been validated yet.** Open pull requests, issues that haven't been fixed yet and unanswered questions don't count — yet. One merged pull request, fixed issue or accepted answer is enough to become a ${CONTRIBUTOR_TIERS[0].label}.
+- **It hasn't been a day yet.** New contributions are picked up by the next daily update.
+- **You work, or have worked, at Strapi.** Tiers celebrate the community's contributions, so current and former Strapi employees don't get one — their profile shows a Strapi employee tag instead.`,
+      },
+      {
+        slug: "github-contributions",
+        title: "Showing your GitHub contributions",
+        description:
+          "Connect your GitHub account to show your issues, pull requests and discussions in Strapi and strapi-community repositories on your profile.",
+        content: `Your community profile can show the work you've done in ${whereLinks} in a **GitHub Contributions** tab.
+
+## What's shown
+
+- The number of **issues**, **pull requests** and **discussions** you've authored, each linking to the full list on GitHub.
+- Your **recent activity**, newest first, with the repository and state of each item (open, closed, merged or answered).
+- Your **contributor tier**, and how far you are from the next one.
+
+Only public activity in strapi/strapi and strapi-community repositories is shown. Your profile shows all of it — your contributor tier only counts the validated contributions from the Strapi 5 era (see Contributor tiers).
+
+## Turn it on
+
+1. Sign in and go to **Account → Security**.
+2. Connect your **GitHub** account.
+3. Your contributions appear on your profile automatically — the tab only shows up once you have at least one contribution.
+
+## Turn it off
+
+Uncheck **Show GitHub contributions** under **Account → Profile**. The tab disappears from your profile and your contributor tier is removed. You can turn it back on at any time.`,
+      },
+    ],
+  },
+];
+
+async function seedPage(
+  strapi: Core.Strapi,
+  seed: SeedHelpPage,
+  parentDocumentId?: string,
+): Promise<void> {
+  const { children, ...data } = seed;
+
+  let page = await strapi
+    .documents("api::help-page.help-page")
+    .findFirst({ filters: { slug: seed.slug }, fields: ["documentId"] });
+
+  if (!page) {
+    page = await strapi.documents("api::help-page.help-page").create({
+      data: { ...data, parent: parentDocumentId },
+      status: "published",
+    });
+
+    strapi.log.info(`[seed] Created help page: ${seed.slug}`);
+  }
+
+  for (const child of children ?? []) {
+    await seedPage(strapi, child, page.documentId);
+  }
+}
+
+export async function seedHelpPages(strapi: Core.Strapi): Promise<void> {
+  for (const seed of seeds) {
+    await seedPage(strapi, seed);
+  }
+}

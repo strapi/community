@@ -1,0 +1,15 @@
+{
+  "name": "contributions",
+  "version": "0.0.0",
+  "strapi": {
+    "name": "contributions",
+    "displayName": "Contributions",
+    "description": "GitHub contributions to Strapi and the strapi-community organization: profile activity, contribution scores and contributor tiers",
+    "kind": "plugin"
+  },
+  "exports": {
+    "./strapi-server": {
+      "require": "../../../dist/src/plugins/contributions/server/src/index.js"
+    }
+  }
+}

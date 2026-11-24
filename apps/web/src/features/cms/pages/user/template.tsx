@@ -21,12 +21,14 @@ import type { CommunityCTAData } from "@/features/cms/lib/community-cta";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
 import type { UserPageData } from "@/features/cms/pages/user/page";
 import { CTASection } from "@/features/cms/sections/cta/cta";
+import { ContributorTierBadge } from "@/features/github-contributions/components/contributor-tier-badge";
 import { GithubContributionsSection } from "@/features/github-contributions/components/github-contributions-section";
 import {
   type GithubContributions,
   hasGithubContributions,
 } from "@/features/github-contributions/lib/types";
 import type { RelatedContentItems } from "@/utils/types";
+import { EmployeeTag } from "./employee-tag";
 
 type Props = {
   document: UserPageData;
@@ -81,6 +83,20 @@ const UserTemplate = ({
                     {document.profile.subtitle}
                   </p>
                 )}
+                <div className="mt-3 flex flex-wrap items-center gap-2 empty:hidden">
+                  <EmployeeTag
+                    strapiEmployee={document.strapi_employee}
+                    formerStrapiEmployee={document.former_strapi_employee}
+                  />
+                  {/* Cleared by the CMS when GitHub contributions are hidden;
+                      checked here too so that applies before the next sync. */}
+                  {document.profile?.show_github_contributions !== false && (
+                    <ContributorTierBadge
+                      tier={document.contributor_tier}
+                      linkToHelp
+                    />
+                  )}
+                </div>
               </div>
             </div>
             <div>
@@ -174,7 +190,11 @@ const UserTemplate = ({
 
           {hasGithubContributions(githubContributions) && (
             <TabsContent value="github">
-              <GithubContributionsSection contributions={githubContributions} />
+              <GithubContributionsSection
+                contributions={githubContributions}
+                tier={document.contributor_tier}
+                score={document.contribution_score}
+              />
             </TabsContent>
           )}
 

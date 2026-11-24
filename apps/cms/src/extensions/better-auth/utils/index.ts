@@ -16,11 +16,6 @@ export {
   type OwnerType,
 } from "./cascade-delete";
 export { extractContentTypeName } from "./content-type-name";
-export {
-  fetchGithubContributions,
-  type GithubContribution,
-  type GithubContributions,
-} from "./github-contributions";
 export { validateProfileData } from "./profile-validation";
 export { sanitizeIfSvg } from "./sanitize-svg";
 
@@ -117,7 +112,7 @@ export const organizationProfileFields = [
  * (a public contact address), unlike `organizationProfileFields` — an
  * organization has no equivalent distinct-from-account address. Also
  * includes `show_github_contributions`, the user-only toggle for the
- * "GitHub Contributions" tab (see `getGithubContributions`).
+ * "GitHub Contributions" tab (see the contributions plugin).
  */
 export const userProfileFields = [
   "bio",

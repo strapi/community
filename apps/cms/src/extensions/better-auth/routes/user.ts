@@ -28,12 +28,6 @@ export default {
       },
       {
         method: "GET",
-        path: "/users/:id/github-contributions",
-        handler: "user.githubContributions",
-        config: { policies: [], middlewares: [], prefix: "" },
-      },
-      {
-        method: "GET",
         path: "/users/me/profile",
         handler: "user.getProfile",
         config: {

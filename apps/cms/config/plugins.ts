@@ -101,6 +101,10 @@ export default ({ env }) => ({
     enabled: true,
     resolve: "./src/plugins/package-info",
   },
+  contributions: {
+    enabled: true,
+    resolve: "./src/plugins/contributions",
+  },
   // NOTE: meilisearch must be declared BEFORE webtools. Plugins register in the
   // key order of this file, and the first registered document middleware is the
   // outermost. Meilisearch has to wrap webtools so it indexes entries only after
@@ -230,6 +234,8 @@ export default ({ env }) => ({
             "name",
             "image",
             "community_star",
+            "contributor_tier",
+            "contribution_score",
             "createdAt",
             "publishedAt",
           ],
@@ -240,8 +246,12 @@ export default ({ env }) => ({
         },
         transformEntry: transformMember,
         settings: {
-          sortableAttributes: ["createdAt", "community_star"],
-          filterableAttributes: ["community_star"],
+          sortableAttributes: [
+            "createdAt",
+            "community_star",
+            "contribution_score",
+          ],
+          filterableAttributes: ["community_star", "contributor_tier"],
         },
       },
       organization: {

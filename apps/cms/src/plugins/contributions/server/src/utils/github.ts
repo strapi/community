@@ -1,7 +1,8 @@
 /**
- * Fetches a GitHub user's issues, pull requests and discussions in the
- * `GITHUB_REPOS` repositories — rendered as the "GitHub Contributions" tab
- * on a user's public profile page.
+ * Fetches a GitHub user's issues, pull requests and discussions in
+ * `strapi/strapi` and the `strapi-community` organization
+ * (`GITHUB_SEARCH_SCOPE`) — rendered as the "GitHub Contributions" tab on
+ * a user's public profile page, and counted for their contributor tier.
  *
  * Uses the server-side `GITHUB_ACCESS_TOKEN` (the same one the
  * package-info plugin uses), not the user's own OAuth token: GitHub's
@@ -15,7 +16,11 @@
  * apps/web/src/features/cms/pages/user/page.tsx).
  */
 
-const GITHUB_REPOS = ["strapi/strapi"];
+import { GITHUB_SEARCH_SCOPE } from "../constants";
+import {
+  CONTRIBUTIONS_SINCE,
+  type ContributionCounts,
+} from "./contributor-tiers";
 
 /** GitHub's maximum page size for a single `search`. */
 const MAX_ITEMS_PER_TYPE = 100;
@@ -171,8 +176,7 @@ async function searchContributions(
   login: string,
   token: string,
 ): Promise<GithubContributions | null> {
-  const repos = GITHUB_REPOS.map((repo) => `repo:${repo}`).join(" ");
-  const base = `author:${login} ${repos}`;
+  const base = `author:${login} ${GITHUB_SEARCH_SCOPE}`;
 
   const res = await fetch("https://api.github.com/graphql", {
     method: "POST",
@@ -251,4 +255,213 @@ export async function fetchGithubContributions(
   if (!login) return null;
 
   return searchContributions(login, token);
+}
+
+/** One page of a GitHub GraphQL `search`. */
+type SearchPage<Node> = {
+  issueCount?: number;
+  discussionCount?: number;
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+  nodes: Node[];
+};
+
+/**
+ * Runs a GraphQL `search` and returns every node, following the cursor
+ * (GitHub caps a search at 1,000 results). `nodeFields` selects the
+ * fields of each node.
+ */
+async function searchAll<Node>({
+  token,
+  query,
+  type,
+  nodeFields,
+}: {
+  token: string;
+  query: string;
+  type: "ISSUE" | "DISCUSSION";
+  nodeFields: string;
+}): Promise<Node[]> {
+  const nodes: Node[] = [];
+  let after: string | null = null;
+
+  do {
+    const page = await searchPage<Node>({
+      token,
+      query,
+      type,
+      first: MAX_ITEMS_PER_TYPE,
+      after,
+      nodeFields,
+    });
+    nodes.push(...page.nodes);
+    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
+  } while (after);
+
+  return nodes;
+}
+
+/** The total number of results of an issue/PR `search`, in one request. */
+async function searchCount(token: string, query: string): Promise<number> {
+  const page = await searchPage({
+    token,
+    query,
+    type: "ISSUE",
+    first: 1,
+    after: null,
+    nodeFields: "__typename",
+  });
+  return page.issueCount ?? 0;
+}
+
+async function searchPage<Node>({
+  token,
+  query,
+  type,
+  first,
+  after,
+  nodeFields,
+}: {
+  token: string;
+  query: string;
+  type: "ISSUE" | "DISCUSSION";
+  first: number;
+  after: string | null;
+  nodeFields: string;
+}): Promise<SearchPage<Node>> {
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { ...githubHeaders(token), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+          query ($query: String!, $after: String) {
+            search(query: $query, type: ${type}, first: ${first}, after: $after) {
+              issueCount
+              discussionCount
+              pageInfo { hasNextPage endCursor }
+              nodes { ${nodeFields} }
+            }
+          }
+        `,
+      variables: { query, after },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`GitHub search "${query}" failed: ${res.status}`);
+  }
+
+  const { data, errors } = (await res.json()) as {
+    data?: { search: SearchPage<Node> };
+    errors?: { message: string }[];
+  };
+  if (!data) {
+    throw new Error(
+      `GitHub search "${query}" failed: ${errors?.map((e) => e.message).join("; ")}`,
+    );
+  }
+
+  return data.search;
+}
+
+type ClosedIssueNode = {
+  closedByPullRequestsReferences?: { nodes: { merged: boolean }[] };
+  timelineItems?: {
+    nodes: {
+      closer?: { __typename: string; merged?: boolean } | null;
+    }[];
+  };
+};
+
+/**
+ * Resolved by a merged pull request (one that references the issue with a
+ * closing keyword, or the one that closed it) or by a commit — both
+ * require someone with write access, so the author can't do it alone.
+ */
+function isResolvedIssue(node: ClosedIssueNode): boolean {
+  if (node.closedByPullRequestsReferences?.nodes.some((pr) => pr.merged)) {
+    return true;
+  }
+  const closer = node.timelineItems?.nodes[0]?.closer;
+  return (
+    closer?.__typename === "Commit" ||
+    (closer?.__typename === "PullRequest" && closer.merged === true)
+  );
+}
+
+type AnsweredDiscussionNode = {
+  answerChosenAt?: string | null;
+  answer?: { author?: { login: string } | null } | null;
+};
+
+/**
+ * The validated contribution counts contributor tiers are based on (see
+ * `contributor-tiers.ts`), for the daily `syncContributorTiers` job — all
+ * since `CONTRIBUTIONS_SINCE`:
+ *
+ * - pull requests merged since then — just the total;
+ * - the user's issues closed since then, checked one by one for a merged
+ *   PR or commit that resolved them;
+ * - answered discussions the user commented in, checked for whether the
+ *   accepted answer is theirs and was accepted since then (search can't
+ *   filter on either; `updated:` narrows it, as accepting an answer
+ *   updates the discussion).
+ *
+ * `null` when there's nothing to count (no token configured, deleted
+ * GitHub account). Throws if GitHub can't be reached or errors.
+ */
+export async function fetchGithubContributionCounts(
+  githubUserId: string,
+): Promise<ContributionCounts | null> {
+  const token = process.env.GITHUB_ACCESS_TOKEN;
+  if (!token) return null;
+
+  const login = await fetchGithubLogin(githubUserId, token);
+  if (!login) return null;
+
+  const [mergedPullRequests, closedIssues, answeredDiscussions] =
+    await Promise.all([
+      searchCount(
+        token,
+        `author:${login} ${GITHUB_SEARCH_SCOPE} is:pr is:merged merged:>=${CONTRIBUTIONS_SINCE}`,
+      ),
+      searchAll<ClosedIssueNode>({
+        token,
+        query: `author:${login} ${GITHUB_SEARCH_SCOPE} is:issue is:closed closed:>=${CONTRIBUTIONS_SINCE}`,
+        type: "ISSUE",
+        nodeFields: `
+          ... on Issue {
+            closedByPullRequestsReferences(first: 10, includeClosedPrs: true) {
+              nodes { merged }
+            }
+            timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+              nodes {
+                ... on ClosedEvent {
+                  closer {
+                    __typename
+                    ... on PullRequest { merged }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      }),
+      searchAll<AnsweredDiscussionNode>({
+        token,
+        query: `commenter:${login} ${GITHUB_SEARCH_SCOPE} is:answered updated:>=${CONTRIBUTIONS_SINCE}`,
+        type: "DISCUSSION",
+        nodeFields:
+          "... on Discussion { answerChosenAt answer { author { login } } }",
+      }),
+    ]);
+
+  return {
+    mergedPullRequests,
+    resolvedIssues: closedIssues.filter(isResolvedIssue).length,
+    acceptedAnswers: answeredDiscussions.filter(
+      (node) =>
+        node.answer?.author?.login.toLowerCase() === login.toLowerCase() &&
+        (node.answerChosenAt ?? "") >= CONTRIBUTIONS_SINCE,
+    ).length,
+  };
 }

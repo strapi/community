@@ -1,6 +1,7 @@
 import type { Modules } from "@strapi/types";
 import { UserCard } from "@/components/content/card";
 import { cmsImageUrl } from "@/features/cms/lib/image-url";
+import { ContributorTierBadge } from "@/features/github-contributions/components/contributor-tier-badge";
 
 type Props = {
   hit: Modules.Documents.Result<"plugin::better-auth.user", { populate: "*" }>;
@@ -14,6 +15,11 @@ const Hit = ({ hit }: Props) => {
       bio={hit.profile?.bio!}
       avatarUrl={hit.image ? cmsImageUrl(hit.image) : undefined}
       communityStar={hit.community_star === true}
+      badge={
+        hit.contributor_tier ? (
+          <ContributorTierBadge tier={hit.contributor_tier} size="sm" />
+        ) : undefined
+      }
     />
   );
 };

@@ -54,11 +54,14 @@ export const withOwner = ({ fields, populate }) => {
 // `parent` is only populated for filterEntry (top-level pages only).
 export const transformHelpPage = ({ entry: { parent, ...entry } }) => entry;
 
-// Sort/filter attributes (createdAt, community_star) must stay on the document.
+// Sort/filter attributes (createdAt, community_star, contributor_tier,
+// contribution_score) must stay on the document.
 export const transformMember = ({ entry }) => ({
   id: entry.id,
   ...pickPublicProfile(entry),
   profile: entry.profile ? { bio: entry.profile.bio } : null,
   createdAt: entry.createdAt,
   community_star: entry.community_star,
+  contributor_tier: entry.contributor_tier ?? null,
+  contribution_score: entry.contribution_score ?? 0,
 });

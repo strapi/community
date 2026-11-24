@@ -1,6 +1,7 @@
 import { Button } from "@repo/strapi-ui";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 type Props = {
   name: string;
@@ -9,6 +10,8 @@ type Props = {
   avatarUrl?: string;
   profileUrl: string;
   communityStar?: boolean;
+  /** Rendered under the name, e.g. a contributor tier badge. */
+  badge?: ReactNode;
 };
 
 const UserCard = ({
@@ -18,6 +21,7 @@ const UserCard = ({
   avatarUrl,
   profileUrl,
   communityStar,
+  badge,
 }: Props) => (
   <Link href={profileUrl} className="block h-full no-underline">
     <article className="h-full flex flex-col items-center text-center rounded-md border border-(--color-neutral150) bg-white p-6 shadow-sm">
@@ -56,6 +60,7 @@ const UserCard = ({
       {/* Info */}
       <div className="mt-4 flex-1">
         <p className="font-bold text-(--color-neutral900)">{name}</p>
+        {badge && <div className="mt-2 flex justify-center">{badge}</div>}
         {subtitle && (
           <p className="mt-1 text-sm text-(--color-neutral600)">{subtitle}</p>
         )}

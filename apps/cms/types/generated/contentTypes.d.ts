@@ -1922,6 +1922,17 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
   };
   attributes: {
     community_star: Schema.Attribute.Boolean;
+    contribution_score: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>;
+    contributor_tier: Schema.Attribute.Enumeration<
+      ['bronze', 'silver', 'gold', 'platinum']
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1941,6 +1952,8 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }> &
+      Schema.Attribute.DefaultTo<false>;
+    former_strapi_employee: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     image: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
@@ -1973,6 +1986,8 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
+    strapi_employee: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     twoFactorEnabled: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {

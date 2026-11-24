@@ -19,7 +19,7 @@ export async function fetchGithubContributions(
 ): Promise<GithubContributions | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/${userId}/github-contributions`,
+      `${process.env.NEXT_PUBLIC_CMS_URL}/api/contributions/users/${userId}`,
       {
         headers: { Authorization: `Bearer ${process.env.CMS_BEARER_TOKEN}` },
         next: { revalidate: GITHUB_CONTRIBUTIONS_REVALIDATE },

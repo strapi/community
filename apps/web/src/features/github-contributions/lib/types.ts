@@ -1,7 +1,7 @@
 /**
  * Mirrors the CMS's `GithubContributions`
- * (apps/cms/src/extensions/better-auth/utils/github-contributions.ts),
- * returned by `GET /users/:id/github-contributions`.
+ * (apps/cms/src/plugins/contributions/server/src/utils/github.ts),
+ * returned by `GET /api/contributions/users/:id`.
  */
 export type GithubContributionType = "issue" | "pull_request" | "discussion";
 
