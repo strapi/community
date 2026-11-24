@@ -45,12 +45,10 @@ export function OverviewSection({
   dashboard,
   refreshing,
   onRefresh,
-  gainPointsHref,
 }: {
   dashboard: Dashboard;
   refreshing: boolean;
   onRefresh: () => void;
-  gainPointsHref: string;
 }) {
   if (dashboard.status === "hidden") {
     return (
@@ -82,7 +80,7 @@ export function OverviewSection({
         <ConnectDiscord dashboard={dashboard} />
       )}
 
-      <NextUnlock dashboard={dashboard} gainPointsHref={gainPointsHref} />
+      <NextUnlock dashboard={dashboard} />
 
       <DashboardCard
         title="Where your points come from"
@@ -123,13 +121,7 @@ export function OverviewSection({
  * The next tier's benefits, still locked — the "what's in it for me" next
  * to the level card's progress bar. At the top tier: what's unlocked.
  */
-function NextUnlock({
-  dashboard,
-  gainPointsHref,
-}: {
-  dashboard: Dashboard;
-  gainPointsHref: string;
-}) {
+function NextUnlock({ dashboard }: { dashboard: Dashboard }) {
   const { next, current, remaining } = getTierProgress(dashboard);
   const tier = next ?? current;
   if (!tier || tier.benefits.length === 0) return null;
@@ -141,17 +133,6 @@ function NextUnlock({
         next
           ? `${remaining.toLocaleString("en-US")} ${remaining === 1 ? "point" : "points"} to go — here's what's waiting for you.`
           : "You've earned every benefit there is. Thank you!"
-      }
-      action={
-        next && (
-          <Link
-            href={gainPointsHref}
-            className="inline-flex items-center gap-2 rounded-md bg-(--color-primary600) px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-(--color-primary700)"
-          >
-            <Zap className="h-4 w-4" aria-hidden="true" />
-            Gain points
-          </Link>
-        )
       }
     >
       <ul className="grid gap-3 sm:grid-cols-2">

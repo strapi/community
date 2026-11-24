@@ -19,6 +19,8 @@ export const CONTRIBUTOR_TIERS = [
     shortLabel: "Bronze",
     minScore: 1,
     className: "border-[#d4a07c] bg-[#f7ebe2] text-[#7c4a2d]",
+    /** Solid colour, for milestones on the tier track. */
+    accentClassName: "bg-[#a8683f]",
   },
   {
     key: "silver",
@@ -26,6 +28,8 @@ export const CONTRIBUTOR_TIERS = [
     shortLabel: "Silver",
     minScore: 20,
     className: "border-slate-300 bg-slate-100 text-slate-700",
+    /** Solid colour, for milestones on the tier track. */
+    accentClassName: "bg-slate-400",
   },
   {
     key: "gold",
@@ -33,6 +37,8 @@ export const CONTRIBUTOR_TIERS = [
     shortLabel: "Gold",
     minScore: 50,
     className: "border-yellow-400 bg-yellow-50 text-yellow-800",
+    /** Solid colour, for milestones on the tier track. */
+    accentClassName: "bg-yellow-500",
   },
   {
     key: "platinum",
@@ -41,6 +47,8 @@ export const CONTRIBUTOR_TIERS = [
     minScore: 100,
     className:
       "border-(--color-primary300) bg-(--color-primary100) text-(--color-primary700)",
+    /** Solid colour, for milestones on the tier track. */
+    accentClassName: "bg-(--color-primary600)",
   },
 ] as const;
 

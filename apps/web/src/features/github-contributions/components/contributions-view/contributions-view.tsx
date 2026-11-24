@@ -283,7 +283,6 @@ export function ContributionsView({ pathname }: { pathname: string }) {
               dashboard={dashboard}
               refreshing={refreshing}
               onRefresh={onRefresh}
-              gainPointsHref={viewHref("GAIN")}
             />
           )}
         </div>

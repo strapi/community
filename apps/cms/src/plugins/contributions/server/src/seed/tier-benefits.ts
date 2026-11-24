@@ -37,6 +37,12 @@ const seeds = [
     description:
       "The highest badge there is, on your profile and member card — reserved for the community's most impactful contributors.",
   },
+  {
+    tier: "platinum",
+    title: "Strapi shop gift card",
+    description:
+      "A gift card for shop.strapi.io — pick out some Strapi swag, on us.",
+  },
   ...(["bronze", "silver", "gold", "platinum"] as const).map((tier) => ({
     tier,
     title: "Role on Discord",

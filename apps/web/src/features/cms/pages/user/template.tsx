@@ -197,13 +197,7 @@ const UserTemplate = ({
 
           {hasGithubContributions(githubContributions) && (
             <TabsContent value="github">
-              <GithubContributionsSection
-                contributions={githubContributions}
-                {...(showTier && {
-                  tier: document.contributor_tier,
-                  score: document.contribution_score,
-                })}
-              />
+              <GithubContributionsSection contributions={githubContributions} />
             </TabsContent>
           )}
 
