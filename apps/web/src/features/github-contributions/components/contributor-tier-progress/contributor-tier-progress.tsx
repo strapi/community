@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   CONTRIBUTOR_TIERS_HELP_URL,
   getContributorTierConfig,
@@ -9,6 +10,7 @@ import { ContributorTierBadge } from "../contributor-tier-badge";
 type Props = {
   tier: string | null | undefined;
   score: number | null | undefined;
+  className?: string;
 };
 
 /**
@@ -17,7 +19,7 @@ type Props = {
  * stored (daily-synced) score, so it always agrees with the badge in the
  * profile header and the members directory.
  */
-export function ContributorTierProgress({ tier, score }: Props) {
+export function ContributorTierProgress({ tier, score, className }: Props) {
   const points = score ?? 0;
   const current = getContributorTierConfig(tier);
   const next = getNextContributorTier(current?.key);
@@ -31,7 +33,12 @@ export function ContributorTierProgress({ tier, score }: Props) {
     : 100;
 
   return (
-    <div className="mb-8 flex flex-col gap-4 rounded-md border border-(--color-neutral150) bg-white p-5 sm:flex-row sm:items-center sm:gap-8">
+    <div
+      className={cn(
+        "mb-8 flex flex-col gap-4 rounded-md border border-(--color-neutral150) bg-white p-5 sm:flex-row sm:items-center sm:gap-8",
+        className,
+      )}
+    >
       <div className="flex shrink-0 flex-col gap-2">
         {current ? (
           <ContributorTierBadge tier={current.key} linkToHelp />
@@ -41,7 +48,7 @@ export function ContributorTierProgress({ tier, score }: Props) {
           </span>
         )}
         <span className="text-sm text-(--color-neutral600)">
-          {points.toLocaleString("en-US")} contribution points
+          {points.toLocaleString("en-US")} community points
         </span>
       </div>
 

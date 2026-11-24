@@ -1,6 +1,6 @@
 /**
  * Fetches a GitHub user's issues, pull requests and discussions in
- * `strapi/strapi` and the `strapi-community` organization
+ * the `strapi` and `strapi-community` organizations
  * (`GITHUB_SEARCH_SCOPE`) — rendered as the "GitHub Contributions" tab on
  * a user's public profile page, and counted for their contributor tier.
  *
@@ -19,7 +19,7 @@
 import { GITHUB_SEARCH_SCOPE } from "../constants";
 import {
   CONTRIBUTIONS_SINCE,
-  type ContributionCounts,
+  type GithubContributionCounts,
 } from "./contributor-tiers";
 
 /** GitHub's maximum page size for a single `search`. */
@@ -411,7 +411,7 @@ type AnsweredDiscussionNode = {
  */
 export async function fetchGithubContributionCounts(
   githubUserId: string,
-): Promise<ContributionCounts | null> {
+): Promise<GithubContributionCounts | null> {
   const token = process.env.GITHUB_ACCESS_TOKEN;
   if (!token) return null;
 
@@ -464,4 +464,63 @@ export async function fetchGithubContributionCounts(
         (node.answerChosenAt ?? "") >= CONTRIBUTIONS_SINCE,
     ).length,
   };
+}
+
+export type OpenIssue = {
+  title: string;
+  url: string;
+  number: number;
+  repository: string;
+  labels: string[];
+  comments: number;
+  updatedAt: string;
+};
+
+type OpenIssueNode = {
+  title?: string;
+  url: string;
+  number: number;
+  updatedAt: string;
+  repository?: RepositoryNode;
+  labels: { nodes: { name: string }[] };
+  comments: { totalCount: number };
+};
+
+/**
+ * Up to `limit` issues matching an issue `search` query (which carries its
+ * own scope, state and sort qualifiers) — for the contributions
+ * dashboard's "issues to pick up". `[]` when no token is configured.
+ */
+export async function fetchOpenIssues(
+  query: string,
+  limit: number,
+): Promise<OpenIssue[]> {
+  const token = process.env.GITHUB_ACCESS_TOKEN;
+  if (!token) return [];
+
+  const page = await searchPage<OpenIssueNode>({
+    token,
+    query,
+    type: "ISSUE",
+    first: limit,
+    after: null,
+    nodeFields: `
+      ... on Issue {
+        title url number updatedAt
+        repository { nameWithOwner }
+        labels(first: 10) { nodes { name } }
+        comments { totalCount }
+      }
+    `,
+  });
+
+  return page.nodes.filter(hasRepository).map((node) => ({
+    title: node.title ?? "",
+    url: node.url,
+    number: node.number,
+    repository: node.repository?.nameWithOwner ?? "",
+    labels: node.labels.nodes.map((label) => label.name),
+    comments: node.comments.totalCount,
+    updatedAt: node.updatedAt,
+  }));
 }

@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contributions_tier_benefits",
+  "info": {
+    "singularName": "tier-benefit",
+    "pluralName": "tier-benefits",
+    "displayName": "Contributor Tier Benefits",
+    "description": "What contributors get at each tier — shown on their personal contributions dashboard."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "tier": {
+      "type": "enumeration",
+      "enum": ["bronze", "silver", "gold", "platinum"],
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "sort": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

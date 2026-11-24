@@ -2,10 +2,11 @@
 
 import { SignedIn, SignedOut, UserButton } from "@daveyplate/better-auth-ui";
 import { Button } from "@repo/strapi-ui";
-import { UserIcon } from "lucide-react";
+import { AwardIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { authClient } from "@/features/auth/lib/client";
+import { useContributionsEligibility } from "@/features/github-contributions/lib/use-contributions-eligibility";
 
 type Props = {
   theme: "light" | "dark";
@@ -30,13 +31,16 @@ export function AuthNavigation({
   const { data: session } = authClient.useSession();
   const slug = (session?.user as { slug?: string } | undefined)?.slug;
 
+  // The user's own "Community points" section — not for Strapi employees.
+  const { eligible: hasContributions } = useContributionsEligibility();
+
   const userButton = (
     <UserButton
       size={compact ? "icon" : "default"}
       className={compact ? "size-9" : undefined}
       classNames={{ trigger: { base: "cursor-pointer" } }}
-      additionalLinks={
-        slug
+      additionalLinks={[
+        ...(slug
           ? [
               {
                 href: `/${slug}`,
@@ -45,8 +49,18 @@ export function AuthNavigation({
                 signedIn: true,
               },
             ]
-          : []
-      }
+          : []),
+        ...(hasContributions
+          ? [
+              {
+                href: "/community-points",
+                icon: <AwardIcon />,
+                label: "Community points",
+                signedIn: true,
+              },
+            ]
+          : []),
+      ]}
     />
   );
 

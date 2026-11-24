@@ -8,9 +8,9 @@ type Props = {
 
 /**
  * The "Strapi employee" / "Former Strapi employee" tag on a user's profile.
- * `strapi_employee` follows membership of the Strapi team's organization;
+ * `strapi_employee` is membership of the Strapi team's organization;
  * `former_strapi_employee` is set when someone leaves it, or by an admin
- * (see the CMS's `syncStrapiEmployees`). Current employment wins when both
+ * (see the CMS contributions plugin's `employees` service). Current employment wins when both
  * are set (e.g. someone who came back).
  */
 export function EmployeeTag({

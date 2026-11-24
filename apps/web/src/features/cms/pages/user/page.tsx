@@ -15,7 +15,13 @@ const query = {
 export type UserPageData = Modules.Documents.Result<
   typeof contentType,
   typeof query
->;
+> & {
+  /**
+   * Not a stored field — added by the CMS's `findOne` from membership of
+   * the Strapi team's organization.
+   */
+  strapi_employee?: boolean;
+};
 
 type Props = {
   documentId: string;

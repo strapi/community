@@ -47,6 +47,15 @@ const UserTemplate = ({
   const noRelatedContent = templates.length === 0 && packages.length === 0;
   const defaultTab =
     document.profile?.readme || noRelatedContent ? "about" : "content";
+  // Strapi employees, current or former, don't take part in contributor
+  // tiers — so nothing about tiers is shown for them.
+  const isEmployee = Boolean(
+    document.strapi_employee || document.former_strapi_employee,
+  );
+  // Cleared by the CMS when GitHub contributions are hidden; checked here
+  // too so that applies before the next sync.
+  const showTier =
+    !isEmployee && document.profile?.show_github_contributions !== false;
 
   return (
     <>
@@ -88,9 +97,7 @@ const UserTemplate = ({
                     strapiEmployee={document.strapi_employee}
                     formerStrapiEmployee={document.former_strapi_employee}
                   />
-                  {/* Cleared by the CMS when GitHub contributions are hidden;
-                      checked here too so that applies before the next sync. */}
-                  {document.profile?.show_github_contributions !== false && (
+                  {showTier && (
                     <ContributorTierBadge
                       tier={document.contributor_tier}
                       linkToHelp
@@ -192,8 +199,10 @@ const UserTemplate = ({
             <TabsContent value="github">
               <GithubContributionsSection
                 contributions={githubContributions}
-                tier={document.contributor_tier}
-                score={document.contribution_score}
+                {...(showTier && {
+                  tier: document.contributor_tier,
+                  score: document.contribution_score,
+                })}
               />
             </TabsContent>
           )}

@@ -14,7 +14,27 @@ const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
 export default factories.createCoreController(
   "plugin::better-auth.user",
-  () => ({
+  ({ strapi }) => ({
+    /**
+     * The core `findOne`, plus `strapi_employee` — not a stored field but
+     * membership of the Strapi team's organization (see the contributions
+     * plugin's `employees` service), for the profile's employee tag.
+     */
+    async findOne(ctx) {
+      const response = await super.findOne(ctx);
+      if (!response?.data?.id) return response;
+
+      const strapiEmployee = await strapi
+        .plugin("contributions")
+        .service("employees")
+        .isCurrent(response.data.id);
+
+      return {
+        ...response,
+        data: { ...response.data, strapi_employee: strapiEmployee },
+      };
+    },
+
     async relatedContent(ctx) {
       const { id } = ctx.params;
 

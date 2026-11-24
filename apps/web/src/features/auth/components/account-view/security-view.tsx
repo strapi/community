@@ -67,8 +67,8 @@ export function SecurityView() {
           {!accountsPending && (
             <AuthNotice icon={Github}>
               {githubLinked
-                ? "Your issues, pull requests and discussions in the strapi/strapi GitHub repository are shown on your public profile. "
-                : "Connect your GitHub account to showcase your issues, pull requests and discussions in the strapi/strapi GitHub repository on your public profile. "}
+                ? "Your issues, pull requests and discussions in strapi and strapi-community GitHub repositories are shown on your public profile, and earn you a contributor tier. "
+                : "Connect your GitHub account to showcase your issues, pull requests and discussions in strapi and strapi-community GitHub repositories on your public profile, and earn a contributor tier. "}
               You can turn this off in your{" "}
               <Link
                 href="/account/profile"

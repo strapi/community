@@ -4,7 +4,7 @@ import { findGithubAccountId } from "../utils/github-account";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
-   * The user's issues/PRs/discussions in `strapi/strapi` and the
+   * The user's issues/PRs/discussions in the `strapi` and
    * `strapi-community` organization, for the public profile's "GitHub
    * Contributions" tab. `null` when the user has no linked GitHub account,
    * or has turned the tab off (`show_github_contributions` — on unless

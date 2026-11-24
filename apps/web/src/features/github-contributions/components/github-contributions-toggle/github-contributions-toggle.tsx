@@ -46,7 +46,7 @@ export function GithubContributionsToggle({
           Show GitHub contributions
         </label>
         <p className="text-sm text-(--color-neutral600)">
-          Show your issues, pull requests and discussions in strapi/strapi and
+          Show your issues, pull requests and discussions in strapi and
           strapi-community GitHub repositories on your profile.
         </p>
         {!isPending && !githubLinked && (

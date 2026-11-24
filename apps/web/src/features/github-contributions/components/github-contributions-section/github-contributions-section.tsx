@@ -35,7 +35,10 @@ const GithubContributionsSection = ({
   score,
 }: {
   contributions: GithubContributions;
-  /** The user's stored `contributor_tier` / `contribution_score`. */
+  /**
+   * The user's stored `contributor_tier` / `contribution_score`; leave
+   * both out to show no tier at all (e.g. for Strapi employees).
+   */
   tier?: string | null;
   score?: number | null;
 }) => {
@@ -75,7 +78,9 @@ const GithubContributionsSection = ({
         </p>
       </div>
 
-      <ContributorTierProgress tier={tier} score={score} />
+      {score !== undefined && (
+        <ContributorTierProgress tier={tier} score={score} />
+      )}
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {(Object.keys(CONTRIBUTION_TYPES) as GithubContributionType[]).map(

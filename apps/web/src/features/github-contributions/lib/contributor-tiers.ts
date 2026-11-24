@@ -18,7 +18,7 @@ export const CONTRIBUTOR_TIERS = [
     label: "Bronze Contributor",
     shortLabel: "Bronze",
     minScore: 1,
-    className: "border-orange-300 bg-orange-50 text-orange-800",
+    className: "border-[#d4a07c] bg-[#f7ebe2] text-[#7c4a2d]",
   },
   {
     key: "silver",
@@ -32,7 +32,7 @@ export const CONTRIBUTOR_TIERS = [
     label: "Gold Contributor",
     shortLabel: "Gold",
     minScore: 50,
-    className: "border-amber-300 bg-amber-50 text-amber-800",
+    className: "border-yellow-400 bg-yellow-50 text-yellow-800",
   },
   {
     key: "platinum",

@@ -7,9 +7,9 @@ import type { GithubContributions, GithubContributionType } from "./types";
  */
 export const GITHUB_SCOPES = [
   {
-    qualifier: "repo:strapi/strapi",
-    label: "strapi/strapi",
-    url: "https://github.com/strapi/strapi",
+    qualifier: "org:strapi",
+    label: "strapi",
+    url: "https://github.com/strapi",
   },
   {
     qualifier: "org:strapi-community",

@@ -7,7 +7,7 @@ import {
 
 /** Where contributions count, as Markdown links. */
 const whereLinks =
-  "the [strapi/strapi](https://github.com/strapi/strapi) repository and every repository of the [strapi-community](https://github.com/strapi-community) organization";
+  "every repository of the [strapi](https://github.com/strapi) and [strapi-community](https://github.com/strapi-community) organizations";
 
 /** e.g. "September 18, 2024" */
 const contributionsSince = new Date(CONTRIBUTIONS_SINCE).toLocaleDateString(
@@ -46,6 +46,8 @@ const pointsTable = [
   `| Pull request | it's merged | ${CONTRIBUTION_POINTS.mergedPullRequest} |`,
   `| Issue | a merged pull request (or a maintainer's commit) resolved it | ${CONTRIBUTION_POINTS.resolvedIssue} |`,
   `| Discussion answer | it's marked as the accepted answer | ${CONTRIBUTION_POINTS.acceptedAnswer} |`,
+  `| Plugin on the Community Hub | it's approved and published | ${CONTRIBUTION_POINTS.publishedPlugin} |`,
+  `| Template on the Community Hub | it's approved and published | ${CONTRIBUTION_POINTS.publishedTemplate} |`,
 ].join("\n");
 
 const seeds: SeedHelpPage[] = [
@@ -60,7 +62,7 @@ When you connect your GitHub account, your contributions to ${whereLinks} show u
 
 ## Where your contributions count
 
-- **[strapi/strapi](https://github.com/strapi/strapi)** — the Strapi core: the CMS, the admin panel and the official packages.
+- **[strapi](https://github.com/strapi)** — the Strapi core ([strapi/strapi](https://github.com/strapi/strapi)), and everything around it: the documentation, the design system, the SDKs, the Blocks React renderer, the official templates and more. Every repository in the organization counts, including new ones.
 - **[strapi-community](https://github.com/strapi-community)** — community-maintained plugins, providers and tools, like Better Auth, REST Cache, Redis, the Google Cloud Storage upload provider and the Dockerize tool. Every repository in the organization counts, including new ones.
 
 Code, bug reports and answers in either place count the same.
@@ -70,6 +72,7 @@ Code, bug reports and answers in either place count the same.
 - **A GitHub Contributions tab on your profile**, listing your issues, pull requests and discussions.
 - **A contributor tier badge** on your profile and on your card in the members directory.
 - **A spot in the members directory filters**, so others can find contributors by tier.
+- **Your community points**, under **Community points** in your user menu: your tier, how close you are to the next one, where your points come from, what each tier unlocks, and issues you could pick up next.
 
 ## Get started
 
@@ -83,24 +86,25 @@ New to contributing? The [contributing guide](https://github.com/strapi/strapi/b
         slug: "contributor-tiers",
         title: "Contributor tiers",
         description:
-          "How contributor tiers work, how many points each contribution is worth, and how your tier is calculated.",
+          "How contributor tiers work, how many community points each contribution is worth, and how your tier is calculated.",
         content: `Contributor tiers recognize members who help build Strapi and its ecosystem. Your tier is based on your contributions to ${whereLinks}, and is shown on your profile and your card in the members directory.
 
 ## The tiers
 
 ${tierTable}
 
-## How points are earned
+## How community points are earned
 
-Your contributions to strapi/strapi and strapi-community repositories earn points once they've **made a difference** — not just for being opened. Both count the same:
+Your contributions to strapi and strapi-community repositories, and the plugins and templates you publish on the Community Hub, earn community points once they've **made a difference** — not just for being opened or submitted:
 
 ${pointsTable}
 
 - **Pull requests** count once they're merged — that's when your code becomes part of Strapi.
 - **Issues** count once they're fixed: when a merged pull request or a commit by the maintainers resolves them. Reporting a real bug that gets fixed is a valuable contribution; issues that are closed as duplicates, invalid or not planned don't earn points.
 - **Discussion answers** count when your reply to someone's question is marked as the accepted answer.
+- **Plugins and templates** count once they're approved and published on the Community Hub. They count for you when you own them personally — not when they're owned by an organization, or when you're one of their maintainers. You don't need a GitHub account for these.
 
-Only contributions from the **Strapi 5 era** count: pull requests merged, issues fixed and answers accepted since Strapi 5 was released on ${contributionsSince}. Tiers celebrate the people building Strapi today.
+Only contributions from the **Strapi 5 era** count: pull requests merged, issues fixed, answers accepted and plugins or templates submitted since Strapi 5 was released on ${contributionsSince}. Tiers celebrate the people building Strapi today.
 
 For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers add up to ${
           2 * CONTRIBUTION_POINTS.mergedPullRequest +
@@ -110,7 +114,7 @@ For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers add u
 
 ## When is my tier updated?
 
-Tiers are recalculated **once a day**. Saving your profile settings also recalculates your tier right away.
+Tiers are recalculated **once a day**. To see your progress sooner, open **Community points** from your user menu and click **Refresh** (once every 15 minutes). Saving your profile settings also recalculates your tier right away.
 
 ## Why don't I have a tier?
 
@@ -118,7 +122,7 @@ Tiers are recalculated **once a day**. Saving your profile settings also recalcu
 - **You've hidden your GitHub contributions.** Tiers are based on the same contributions shown on your profile, so hiding them also hides your tier. Turn **Show GitHub contributions** back on under **Account → Profile**.
 - **Your contributions haven't been validated yet.** Open pull requests, issues that haven't been fixed yet and unanswered questions don't count — yet. One merged pull request, fixed issue or accepted answer is enough to become a ${CONTRIBUTOR_TIERS[0].label}.
 - **It hasn't been a day yet.** New contributions are picked up by the next daily update.
-- **You work, or have worked, at Strapi.** Tiers celebrate the community's contributions, so current and former Strapi employees don't get one — their profile shows a Strapi employee tag instead.`,
+- **You work at Strapi.** Tiers celebrate the community's contributions, so Strapi employees don't get one — their profile shows a Strapi employee tag instead.`,
       },
       {
         slug: "github-contributions",
@@ -133,7 +137,7 @@ Tiers are recalculated **once a day**. Saving your profile settings also recalcu
 - Your **recent activity**, newest first, with the repository and state of each item (open, closed, merged or answered).
 - Your **contributor tier**, and how far you are from the next one.
 
-Only public activity in strapi/strapi and strapi-community repositories is shown. Your profile shows all of it — your contributor tier only counts the validated contributions from the Strapi 5 era (see Contributor tiers).
+Only public activity in strapi and strapi-community repositories is shown. Your profile shows all of it — your contributor tier only counts the validated contributions from the Strapi 5 era (see Contributor tiers).
 
 ## Turn it on
 

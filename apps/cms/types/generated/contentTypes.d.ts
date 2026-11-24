@@ -1930,6 +1930,7 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
         number
       > &
       Schema.Attribute.DefaultTo<0>;
+    contribution_stats: Schema.Attribute.JSON & Schema.Attribute.Private;
     contributor_tier: Schema.Attribute.Enumeration<
       ['bronze', 'silver', 'gold', 'platinum']
     >;
@@ -1986,8 +1987,6 @@ export interface PluginBetterAuthUser extends Struct.CollectionTypeSchema {
           managed: true;
         };
       }>;
-    strapi_employee: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
     twoFactorEnabled: Schema.Attribute.Boolean &
       Schema.Attribute.SetPluginOptions<{
         'better-auth': {
@@ -2151,6 +2150,50 @@ export interface PluginContentReleasesReleaseAction
     >;
     type: Schema.Attribute.Enumeration<['publish', 'unpublish']> &
       Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginContributionsTierBenefit
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'contributions_tier_benefits';
+  info: {
+    description: 'What contributors get at each tier \u2014 shown on their personal contributions dashboard.';
+    displayName: 'Contributor Tier Benefits';
+    pluralName: 'tier-benefits';
+    singularName: 'tier-benefit';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: true;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::contributions.tier-benefit'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    sort: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    tier: Schema.Attribute.Enumeration<
+      ['bronze', 'silver', 'gold', 'platinum']
+    > &
+      Schema.Attribute.Required;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2666,6 +2709,7 @@ declare module '@strapi/strapi' {
       'plugin::better-auth.verification': PluginBetterAuthVerification;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
+      'plugin::contributions.tier-benefit': PluginContributionsTierBenefit;
       'plugin::i18n.locale': PluginI18NLocale;
       'plugin::moderation.business-review': PluginModerationBusinessReview;
       'plugin::moderation.security-review': PluginModerationSecurityReview;

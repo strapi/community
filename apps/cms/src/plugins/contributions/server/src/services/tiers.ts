@@ -1,23 +1,30 @@
 import type { Core } from "@strapi/strapi";
 import {
+  type ContributionStats,
   computeContributionScore,
   getContributorTier,
 } from "../utils/contributor-tiers";
 import { fetchGithubContributionCounts } from "../utils/github";
 import { findGithubAccountId } from "../utils/github-account";
+import {
+  countPublishedSubmissions,
+  findSubmissionOwnerIds,
+} from "../utils/submissions";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Recomputes one user's `contribution_score` and `contributor_tier` (see
-   * utils/contributor-tiers.ts) from their GitHub contribution counts.
-   * Both are cleared when the user has no linked GitHub account, has
+   * utils/contributor-tiers.ts) from their GitHub contribution counts (when
+   * GitHub is linked) and their published Community Hub submissions.
+   * Both are cleared when the user has nothing that counts, has
    * turned off `show_github_contributions` (a tier would otherwise
    * advertise contributions the user chose to hide), or is a current or
-   * former Strapi employee (see `syncStrapiEmployees` — tiers recognize
+   * former Strapi employee (see the `employees` service — tiers recognize
    * community contributors, and work done as an employee would crowd them
-   * out). Only writes when something changed, since every write reindexes
-   * the user in Meilisearch. Throws if GitHub can't be reached, leaving the
-   * stored tier untouched.
+   * out). Also stores the breakdown behind the score, with when it was
+   * checked, as `contribution_stats` (`null` when nothing is counted) —
+   * for the personal contributions dashboard. Throws if GitHub can't be
+   * reached, leaving everything stored untouched.
    */
   async syncUser({ userId }: { userId: string | number }) {
     const [user] = await strapi.documents("plugin::better-auth.user").findMany({
@@ -26,8 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         "documentId",
         "contributor_tier",
         "contribution_score",
-        "strapi_employee",
-        "former_strapi_employee",
+        "contribution_stats",
       ],
       populate: { profile: { fields: ["show_github_contributions"] } },
     });
@@ -35,102 +41,66 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!user) return null;
 
     let score = 0;
+    let stats: ContributionStats | null = null;
 
-    if (
-      user.profile?.show_github_contributions !== false &&
-      !user.strapi_employee &&
-      !user.former_strapi_employee
-    ) {
+    const employee = await strapi
+      .plugin("contributions")
+      .service("employees")
+      .getStatus(userId);
+
+    if (user.profile?.show_github_contributions !== false && !employee) {
+      // GitHub only when linked; published Community Hub submissions
+      // count either way.
       const githubUserId = await findGithubAccountId(userId);
-      const counts = githubUserId
-        ? await fetchGithubContributionCounts(githubUserId)
-        : null;
+      const [github, hub] = await Promise.all([
+        githubUserId ? fetchGithubContributionCounts(githubUserId) : null,
+        countPublishedSubmissions(strapi, userId),
+      ]);
 
-      if (counts) score = computeContributionScore(counts);
+      const counts = {
+        mergedPullRequests: github?.mergedPullRequests ?? 0,
+        resolvedIssues: github?.resolvedIssues ?? 0,
+        acceptedAnswers: github?.acceptedAnswers ?? 0,
+        ...hub,
+      };
+
+      // Nothing to show without GitHub or a counted submission.
+      if (github || hub.publishedPlugins || hub.publishedTemplates) {
+        score = computeContributionScore(counts);
+        stats = { ...counts, syncedAt: new Date().toISOString() };
+      }
     }
 
     const tier = getContributorTier(score);
 
+    // Written even when only `syncedAt` moved, so the dashboard's "last
+    // updated" is truthful. Skipped when there's nothing at all to store,
+    // so the nightly job doesn't rewrite (and reindex) unchanged users
+    // without a score.
     if (
+      stats ||
+      user.contribution_stats ||
       tier !== (user.contributor_tier ?? null) ||
       score !== (user.contribution_score ?? 0)
     ) {
       await strapi.documents("plugin::better-auth.user").update({
         documentId: user.documentId,
-        data: { contributor_tier: tier, contribution_score: score },
+        data: {
+          contributor_tier: tier,
+          contribution_score: score,
+          contribution_stats: stats,
+        },
       });
     }
 
-    return { tier, score };
-  },
-
-  /**
-   * Keeps the `strapi_employee` flag in line with membership (any role) of
-   * the Strapi team's own organization, `IMPERSONATION_ORGANIZATION_ID`
-   * (its numeric `id`), and marks anyone who's no longer a member as
-   * `former_strapi_employee` — so leaving Strapi never turns years of work
-   * as an employee into a contributor tier. `former_strapi_employee` is
-   * never unset here: admins set it by hand (in the better-auth dashboard)
-   * for people who left before this existed. Database-only, so it runs at
-   * bootstrap and before every tier sync. A no-op when the env var is
-   * unset — an unconfigured environment shouldn't demote everyone.
-   */
-  async syncStrapiEmployees() {
-    const organizationId = Number(process.env.IMPERSONATION_ORGANIZATION_ID);
-    if (!Number.isInteger(organizationId) || organizationId <= 0) {
-      return { joined: 0, left: 0 };
-    }
-
-    const [members, flagged] = await Promise.all([
-      strapi.db.query("plugin::better-auth.member").findMany({
-        where: { organizationId },
-        select: ["userId"],
-        limit: 10000,
-      }),
-      strapi.db.query("plugin::better-auth.user").findMany({
-        where: { strapi_employee: true },
-        select: ["id"],
-        limit: 10000,
-      }),
-    ]);
-
-    const memberIds = new Set(members.map((member) => String(member.userId)));
-    const flaggedIds = new Set(flagged.map((user) => String(user.id)));
-
-    const joined = [...memberIds].filter((id) => !flaggedIds.has(id));
-    const left = [...flaggedIds].filter((id) => !memberIds.has(id));
-
-    const update = async (
-      id: string,
-      data: { strapi_employee: boolean; former_strapi_employee?: boolean },
-    ) => {
-      const [user] = await strapi
-        .documents("plugin::better-auth.user")
-        .findMany({ filters: { id }, fields: ["documentId"] });
-      if (!user) return;
-      // Clear any tier in the same write; the tier sync would otherwise
-      // only catch up at its next run.
-      await strapi.documents("plugin::better-auth.user").update({
-        documentId: user.documentId,
-        data: { ...data, contributor_tier: null, contribution_score: 0 },
-      });
-    };
-
-    for (const id of joined) await update(id, { strapi_employee: true });
-    for (const id of left) {
-      await update(id, {
-        strapi_employee: false,
-        former_strapi_employee: true,
-      });
-    }
-
-    return { joined: joined.length, left: left.length };
+    return { tier, score, stats };
   },
 
   /**
    * The daily contributor tier job (registered in the plugin's
-   * `bootstrap`): syncs every user with a linked GitHub account, plus
-   * anyone still holding a tier (so unlinking GitHub clears it).
+   * `bootstrap`): syncs every user with a linked GitHub account or a
+   * counted Community Hub submission, plus anyone still holding a tier
+   * (so unlinking GitHub, or an unpublished submission, clears it).
    * Sequential, with a pause between users, to stay clear of GitHub's
    * secondary rate limits on search.
    */
@@ -142,9 +112,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return { synced: 0, failed: 0 };
     }
 
-    await this.syncStrapiEmployees();
-
-    const [accounts, tieredUsers] = await Promise.all([
+    const [accounts, tieredUsers, submissionOwners] = await Promise.all([
       strapi.db.query("plugin::better-auth.account").findMany({
         where: { providerId: "github" },
         select: ["userId"],
@@ -153,11 +121,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         where: { contributor_tier: { $notNull: true } },
         select: ["id"],
       }),
+      findSubmissionOwnerIds(strapi),
     ]);
 
     const userIds = new Set<string>([
       ...accounts.map((account) => String(account.userId)),
       ...tieredUsers.map((user) => String(user.id)),
+      ...submissionOwners,
     ]);
 
     let synced = 0;

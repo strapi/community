@@ -82,10 +82,6 @@
     "community_star": {
       "type": "boolean"
     },
-    "strapi_employee": {
-      "type": "boolean",
-      "default": false
-    },
     "former_strapi_employee": {
       "type": "boolean",
       "default": false
@@ -93,6 +89,10 @@
     "contributor_tier": {
       "type": "enumeration",
       "enum": ["bronze", "silver", "gold", "platinum"]
+    },
+    "contribution_stats": {
+      "type": "json",
+      "private": true
     },
     "contribution_score": {
       "type": "integer",
