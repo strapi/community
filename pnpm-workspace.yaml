@@ -4,8 +4,10 @@ packages:
 
 catalogs:
   better-auth:
-    '@better-auth/core': 1.6.9
-    better-auth: 1.6.9
+    '@better-auth/api-key': 1.7.28
+    '@better-auth/core': 1.7.28
+    '@better-auth/passkey': 1.7.28
+    better-auth: 1.7.28
   strapi:
     '@strapi/admin': 5.60.0
     '@strapi/plugin-cloud': 5.60.0

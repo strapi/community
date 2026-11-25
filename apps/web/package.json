@@ -15,7 +15,9 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/api-key": "catalog:better-auth",
     "@better-auth/core": "catalog:better-auth",
+    "@better-auth/passkey": "catalog:better-auth",
     "@daveyplate/better-auth-ui": "^3.4.0",
     "@hookform/resolvers": "^5.2.2",
     "@meilisearch/instant-meilisearch": "^0.29.0",
