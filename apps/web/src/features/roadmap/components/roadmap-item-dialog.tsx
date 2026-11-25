@@ -10,6 +10,8 @@ import {
   X,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { track } from "@/features/analytics";
+import { roadmapItemParams } from "../lib/analytics";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
   displayStatus,
@@ -150,6 +152,16 @@ const ItemBody = ({
             </p>
             <a
               href={item.canny_url}
+              onClick={() => {
+                const { roadmap_item_id, roadmap_status } =
+                  roadmapItemParams(item);
+                track("roadmap_vote_click", {
+                  roadmap_item_id,
+                  roadmap_status,
+                  canny_votes: item.canny_votes ?? 0,
+                  click_location: "dialog",
+                });
+              }}
               target="_blank"
               rel="noreferrer"
               className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-(--color-primary600) hover:underline"
