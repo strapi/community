@@ -40,14 +40,19 @@ const tierTable = [
   ),
 ].join("\n");
 
-const pointsTable = [
+const githubPointsTable = [
+  "| Contribution | Counts when | In strapi | In strapi-community |",
+  "| --- | --- | --- | --- |",
+  `| Pull request | it's merged | ${CONTRIBUTION_POINTS.mergedPullRequest} | ${CONTRIBUTION_POINTS.communityMergedPullRequest} |`,
+  `| Issue | a merged pull request (or a maintainer's commit) resolved it | ${CONTRIBUTION_POINTS.resolvedIssue} | ${CONTRIBUTION_POINTS.communityResolvedIssue} |`,
+  `| Discussion answer | it's marked as the accepted answer | ${CONTRIBUTION_POINTS.acceptedAnswer} | ${CONTRIBUTION_POINTS.communityAcceptedAnswer} |`,
+].join("\n");
+
+const hubPointsTable = [
   "| Contribution | Counts when | Points |",
   "| --- | --- | --- |",
-  `| Pull request | it's merged | ${CONTRIBUTION_POINTS.mergedPullRequest} |`,
-  `| Issue | a merged pull request (or a maintainer's commit) resolved it | ${CONTRIBUTION_POINTS.resolvedIssue} |`,
-  `| Discussion answer | it's marked as the accepted answer | ${CONTRIBUTION_POINTS.acceptedAnswer} |`,
-  `| Plugin on the Community Hub | it's approved and published | ${CONTRIBUTION_POINTS.publishedPlugin} |`,
-  `| Template on the Community Hub | it's approved and published | ${CONTRIBUTION_POINTS.publishedTemplate} |`,
+  `| Plugin | it's approved and published | ${CONTRIBUTION_POINTS.publishedPlugin} |`,
+  `| Template | it's approved and published | ${CONTRIBUTION_POINTS.publishedTemplate} |`,
 ].join("\n");
 
 const seeds: SeedHelpPage[] = [
@@ -65,7 +70,7 @@ When you connect your GitHub account, your contributions to ${whereLinks} show u
 - **[strapi](https://github.com/strapi)** — the Strapi core ([strapi/strapi](https://github.com/strapi/strapi)), and everything around it: the documentation, the design system, the SDKs, the Blocks React renderer, the official templates and more. Every repository in the organization counts, including new ones.
 - **[strapi-community](https://github.com/strapi-community)** — community-maintained plugins, providers and tools, like Better Auth, REST Cache, Redis, the Google Cloud Storage upload provider and the Dockerize tool. Every repository in the organization counts, including new ones.
 
-Code, bug reports and answers in either place count the same.
+Both count, but work on Strapi itself counts most: a contribution to a strapi repository earns more community points than the same contribution to a strapi-community one.
 
 ## What you get
 
@@ -96,9 +101,17 @@ ${tierTable}
 
 ## How community points are earned
 
-Your contributions to strapi and strapi-community repositories, and the plugins and templates you publish on the Community Hub, earn community points once they've **made a difference** — not just for being opened or submitted:
+Your contributions to strapi and strapi-community repositories, and the plugins and templates you publish on the Community Hub, earn community points once they've **made a difference** — not just for being opened or submitted.
 
-${pointsTable}
+### On GitHub
+
+Work on Strapi itself — any repository of the [strapi](https://github.com/strapi) organization — earns the most. Contributions to community-maintained [strapi-community](https://github.com/strapi-community) repositories count too, for fewer points.
+
+${githubPointsTable}
+
+### On the Community Hub
+
+${hubPointsTable}
 
 - **Pull requests** count once they're merged — that's when your code becomes part of Strapi.
 - **Issues** count once they're fixed: when a merged pull request or a commit by the maintainers resolves them. Reporting a real bug that gets fixed is a valuable contribution; issues that are closed as duplicates, invalid or not planned don't earn points.
@@ -107,7 +120,7 @@ ${pointsTable}
 
 Only contributions from the **Strapi 5 era** count: pull requests merged, issues fixed, answers accepted and plugins or templates submitted since Strapi 5 was released on ${contributionsSince}. Tiers celebrate the people building Strapi today.
 
-For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers add up to ${
+For example, 2 merged pull requests, 3 fixed issues and 4 accepted answers in strapi repositories add up to ${
           2 * CONTRIBUTION_POINTS.mergedPullRequest +
           3 * CONTRIBUTION_POINTS.resolvedIssue +
           4 * CONTRIBUTION_POINTS.acceptedAnswer

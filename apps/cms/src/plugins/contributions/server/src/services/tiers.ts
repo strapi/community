@@ -3,6 +3,7 @@ import {
   type ContributionStats,
   computeContributionScore,
   getContributorTier,
+  NO_GITHUB_CONTRIBUTIONS,
 } from "../utils/contributor-tiers";
 import { fetchGithubContributionCounts } from "../utils/github";
 import { findGithubAccountId } from "../utils/github-account";
@@ -57,12 +58,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         countPublishedSubmissions(strapi, userId),
       ]);
 
-      const counts = {
-        mergedPullRequests: github?.mergedPullRequests ?? 0,
-        resolvedIssues: github?.resolvedIssues ?? 0,
-        acceptedAnswers: github?.acceptedAnswers ?? 0,
-        ...hub,
-      };
+      const counts = { ...NO_GITHUB_CONTRIBUTIONS, ...github, ...hub };
 
       // Nothing to show without GitHub or a counted submission.
       if (github || hub.publishedPlugins || hub.publishedTemplates) {

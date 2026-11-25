@@ -15,24 +15,44 @@ export function PointsBreakdown({
 }) {
   const { stats, points, score } = dashboard;
 
+  // strapi and strapi-community earn different points, so each GitHub
+  // contribution type has a row per organization.
   const rows = [
     {
       icon: GitPullRequest,
-      label: "Merged pull requests",
+      label: "Merged pull requests in strapi",
       count: stats?.mergedPullRequests ?? 0,
       each: points.mergedPullRequest,
     },
     {
+      icon: GitPullRequest,
+      label: "Merged pull requests in strapi-community",
+      count: stats?.communityMergedPullRequests ?? 0,
+      each: points.communityMergedPullRequest,
+    },
+    {
       icon: CircleDot,
-      label: "Fixed issues you reported",
+      label: "Fixed issues you reported in strapi",
       count: stats?.resolvedIssues ?? 0,
       each: points.resolvedIssue,
     },
     {
+      icon: CircleDot,
+      label: "Fixed issues you reported in strapi-community",
+      count: stats?.communityResolvedIssues ?? 0,
+      each: points.communityResolvedIssue,
+    },
+    {
       icon: MessageSquareCheck,
-      label: "Accepted discussion answers",
+      label: "Accepted answers in strapi",
       count: stats?.acceptedAnswers ?? 0,
       each: points.acceptedAnswer,
+    },
+    {
+      icon: MessageSquareCheck,
+      label: "Accepted answers in strapi-community",
+      count: stats?.communityAcceptedAnswers ?? 0,
+      each: points.communityAcceptedAnswer,
     },
     {
       icon: Puzzle,

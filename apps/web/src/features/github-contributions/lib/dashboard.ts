@@ -17,6 +17,10 @@ export type ContributionStats = {
   mergedPullRequests: number;
   resolvedIssues: number;
   acceptedAnswers: number;
+  /** In strapi-community repositories, which earn fewer points. */
+  communityMergedPullRequests?: number;
+  communityResolvedIssues?: number;
+  communityAcceptedAnswers?: number;
   publishedPlugins: number;
   publishedTemplates: number;
   syncedAt: string;
@@ -44,6 +48,9 @@ export type ContributionsDashboard = {
     mergedPullRequest: number;
     resolvedIssue: number;
     acceptedAnswer: number;
+    communityMergedPullRequest: number;
+    communityResolvedIssue: number;
+    communityAcceptedAnswer: number;
     publishedPlugin: number;
     publishedTemplate: number;
   };

@@ -16,7 +16,11 @@
  * apps/web/src/features/cms/pages/user/page.tsx).
  */
 
-import { GITHUB_SEARCH_SCOPE } from "../constants";
+import {
+  COMMUNITY_SCOPE,
+  GITHUB_SEARCH_SCOPE,
+  STRAPI_SCOPE,
+} from "../constants";
 import {
   CONTRIBUTIONS_SINCE,
   type GithubContributionCounts,
@@ -363,7 +367,14 @@ async function searchPage<Node>({
   return data.search;
 }
 
-type ClosedIssueNode = {
+/** The repository owner of a counted search node. */
+type OwnedNode = { repository?: { owner: { login: string } } };
+
+/** `strapi-community` contributions earn fewer points — see `CONTRIBUTION_POINTS`. */
+const isCommunity = (node: OwnedNode) =>
+  node.repository?.owner.login.toLowerCase() === COMMUNITY_SCOPE.organization;
+
+type ClosedIssueNode = OwnedNode & {
   closedByPullRequestsReferences?: { nodes: { merged: boolean }[] };
   timelineItems?: {
     nodes: {
@@ -388,17 +399,25 @@ function isResolvedIssue(node: ClosedIssueNode): boolean {
   );
 }
 
-type AnsweredDiscussionNode = {
+type AnsweredDiscussionNode = OwnedNode & {
   answerChosenAt?: string | null;
   answer?: { author?: { login: string } | null } | null;
 };
 
+/** Splits counted nodes into `strapi` and `strapi-community` ones. */
+function countByOrganization<Node extends OwnedNode>(nodes: Node[]) {
+  const community = nodes.filter(isCommunity).length;
+  return { strapi: nodes.length - community, community };
+}
+
 /**
  * The validated contribution counts contributor tiers are based on (see
  * `contributor-tiers.ts`), for the daily `syncContributorTiers` job — all
- * since `CONTRIBUTIONS_SINCE`:
+ * since `CONTRIBUTIONS_SINCE`, and each split into the `strapi` and the
+ * `strapi-community` organization (which earn different points):
  *
- * - pull requests merged since then — just the total;
+ * - pull requests merged since then — just the totals, one search per
+ *   organization;
  * - the user's issues closed since then, checked one by one for a merged
  *   PR or commit that resolved them;
  * - answered discussions the user commented in, checked for whether the
@@ -418,51 +437,70 @@ export async function fetchGithubContributionCounts(
   const login = await fetchGithubLogin(githubUserId, token);
   if (!login) return null;
 
-  const [mergedPullRequests, closedIssues, answeredDiscussions] =
-    await Promise.all([
-      searchCount(
-        token,
-        `author:${login} ${GITHUB_SEARCH_SCOPE} is:pr is:merged merged:>=${CONTRIBUTIONS_SINCE}`,
-      ),
-      searchAll<ClosedIssueNode>({
-        token,
-        query: `author:${login} ${GITHUB_SEARCH_SCOPE} is:issue is:closed closed:>=${CONTRIBUTIONS_SINCE}`,
-        type: "ISSUE",
-        nodeFields: `
-          ... on Issue {
-            closedByPullRequestsReferences(first: 10, includeClosedPrs: true) {
-              nodes { merged }
-            }
-            timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
-              nodes {
-                ... on ClosedEvent {
-                  closer {
-                    __typename
-                    ... on PullRequest { merged }
-                  }
+  const mergedPullRequestsIn = (scope: string) =>
+    searchCount(
+      token,
+      `author:${login} ${scope} is:pr is:merged merged:>=${CONTRIBUTIONS_SINCE}`,
+    );
+  const owner = "repository { owner { login } }";
+
+  const [
+    mergedPullRequests,
+    communityMergedPullRequests,
+    closedIssues,
+    answeredDiscussions,
+  ] = await Promise.all([
+    mergedPullRequestsIn(STRAPI_SCOPE.qualifier),
+    mergedPullRequestsIn(COMMUNITY_SCOPE.qualifier),
+    searchAll<ClosedIssueNode>({
+      token,
+      query: `author:${login} ${GITHUB_SEARCH_SCOPE} is:issue is:closed closed:>=${CONTRIBUTIONS_SINCE}`,
+      type: "ISSUE",
+      nodeFields: `
+        ... on Issue {
+          ${owner}
+          closedByPullRequestsReferences(first: 10, includeClosedPrs: true) {
+            nodes { merged }
+          }
+          timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+            nodes {
+              ... on ClosedEvent {
+                closer {
+                  __typename
+                  ... on PullRequest { merged }
                 }
               }
             }
           }
-        `,
-      }),
-      searchAll<AnsweredDiscussionNode>({
-        token,
-        query: `commenter:${login} ${GITHUB_SEARCH_SCOPE} is:answered updated:>=${CONTRIBUTIONS_SINCE}`,
-        type: "DISCUSSION",
-        nodeFields:
-          "... on Discussion { answerChosenAt answer { author { login } } }",
-      }),
-    ]);
+        }
+      `,
+    }),
+    searchAll<AnsweredDiscussionNode>({
+      token,
+      query: `commenter:${login} ${GITHUB_SEARCH_SCOPE} is:answered updated:>=${CONTRIBUTIONS_SINCE}`,
+      type: "DISCUSSION",
+      nodeFields: `... on Discussion { ${owner} answerChosenAt answer { author { login } } }`,
+    }),
+  ]);
 
-  return {
-    mergedPullRequests,
-    resolvedIssues: closedIssues.filter(isResolvedIssue).length,
-    acceptedAnswers: answeredDiscussions.filter(
+  const resolvedIssues = countByOrganization(
+    closedIssues.filter(isResolvedIssue),
+  );
+  const acceptedAnswers = countByOrganization(
+    answeredDiscussions.filter(
       (node) =>
         node.answer?.author?.login.toLowerCase() === login.toLowerCase() &&
         (node.answerChosenAt ?? "") >= CONTRIBUTIONS_SINCE,
-    ).length,
+    ),
+  );
+
+  return {
+    mergedPullRequests,
+    resolvedIssues: resolvedIssues.strapi,
+    acceptedAnswers: acceptedAnswers.strapi,
+    communityMergedPullRequests,
+    communityResolvedIssues: resolvedIssues.community,
+    communityAcceptedAnswers: acceptedAnswers.community,
   };
 }
 

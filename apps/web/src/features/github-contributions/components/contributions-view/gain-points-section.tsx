@@ -28,6 +28,8 @@ export function GainPointsSection({
   const ways: {
     icon: LucideIcon;
     points: number;
+    /** Fewer points for the same in a strapi-community repository. */
+    communityPoints?: number;
     title: string;
     description: string;
     action: { label: string; href: string };
@@ -36,14 +38,16 @@ export function GainPointsSection({
     {
       icon: GitPullRequest,
       points: points.mergedPullRequest,
+      communityPoints: points.communityMergedPullRequest,
       title: "Get a pull request merged",
       description:
-        "Fix a bug, improve the docs or build a feature in any strapi or strapi-community repository — the core, the docs, the design system, plugins and more.",
+        "Fix a bug, improve the docs or build a feature in any strapi repository — the core, the docs, the design system and more. Community plugins in strapi-community count too.",
       action: { label: "Pick an issue below", href: "#issues" },
     },
     {
       icon: CircleDot,
       points: points.resolvedIssue,
+      communityPoints: points.communityResolvedIssue,
       title: "Report a bug that gets fixed",
       description:
         "Found a bug? Report it with clear steps to reproduce — you earn points once a fix is merged.",
@@ -55,6 +59,7 @@ export function GainPointsSection({
     {
       icon: MessageSquareCheck,
       points: points.acceptedAnswer,
+      communityPoints: points.communityAcceptedAnswer,
       title: "Answer a question",
       description:
         "Help someone out in GitHub Discussions — you earn points when your answer is accepted.",
@@ -103,6 +108,12 @@ export function GainPointsSection({
                   <span className="text-sm text-(--color-neutral600)">
                     {way.description}
                   </span>
+                  {way.communityPoints !== undefined && (
+                    <span className="text-xs text-(--color-neutral600)">
+                      +{way.points} in strapi, +{way.communityPoints} in
+                      strapi-community
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
                   <Link

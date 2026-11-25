@@ -7,18 +7,22 @@
  *
  * Mirrored for display in apps/web/src/features/github-contributions/lib/config.ts.
  */
-export const GITHUB_SCOPES = [
-  {
-    qualifier: "org:strapi",
-    label: "strapi",
-    url: "https://github.com/strapi",
-  },
-  {
-    qualifier: "org:strapi-community",
-    label: "strapi-community",
-    url: "https://github.com/strapi-community",
-  },
-] as const;
+export const STRAPI_SCOPE = {
+  organization: "strapi",
+  qualifier: "org:strapi",
+  label: "strapi",
+  url: "https://github.com/strapi",
+} as const;
+
+/** Earns fewer points than `strapi` — see `CONTRIBUTION_POINTS`. */
+export const COMMUNITY_SCOPE = {
+  organization: "strapi-community",
+  qualifier: "org:strapi-community",
+  label: "strapi-community",
+  url: "https://github.com/strapi-community",
+} as const;
+
+export const GITHUB_SCOPES = [STRAPI_SCOPE, COMMUNITY_SCOPE] as const;
 
 /** The scope part of every GitHub search query. */
 export const GITHUB_SEARCH_SCOPE = GITHUB_SCOPES.map(

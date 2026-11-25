@@ -33,10 +33,18 @@
  */
 export const CONTRIBUTIONS_SINCE = "2024-09-18";
 
+/**
+ * Contributions to the `strapi` organization — Strapi itself — earn more
+ * than those to community-maintained `strapi-community` repositories
+ * (the `community*` points).
+ */
 export const CONTRIBUTION_POINTS = {
   mergedPullRequest: 10,
   resolvedIssue: 3,
   acceptedAnswer: 2,
+  communityMergedPullRequest: 5,
+  communityResolvedIssue: 2,
+  communityAcceptedAnswer: 1,
   publishedPlugin: 10,
   publishedTemplate: 10,
 } as const;
@@ -51,11 +59,26 @@ export const CONTRIBUTOR_TIERS = [
 
 export type ContributorTier = (typeof CONTRIBUTOR_TIERS)[number]["key"];
 
-/** Counted on GitHub (see `fetchGithubContributionCounts`). */
+/**
+ * Counted on GitHub (see `fetchGithubContributionCounts`): in the `strapi`
+ * organization, and (`community*`) in `strapi-community`.
+ */
 export type GithubContributionCounts = {
   mergedPullRequests: number;
   resolvedIssues: number;
   acceptedAnswers: number;
+  communityMergedPullRequests: number;
+  communityResolvedIssues: number;
+  communityAcceptedAnswers: number;
+};
+
+export const NO_GITHUB_CONTRIBUTIONS: GithubContributionCounts = {
+  mergedPullRequests: 0,
+  resolvedIssues: 0,
+  acceptedAnswers: 0,
+  communityMergedPullRequests: 0,
+  communityResolvedIssues: 0,
+  communityAcceptedAnswers: 0,
 };
 
 /** Counted on the Community Hub (see `countPublishedSubmissions`). */
@@ -78,6 +101,12 @@ export function computeContributionScore(counts: ContributionCounts): number {
     counts.mergedPullRequests * CONTRIBUTION_POINTS.mergedPullRequest +
     counts.resolvedIssues * CONTRIBUTION_POINTS.resolvedIssue +
     counts.acceptedAnswers * CONTRIBUTION_POINTS.acceptedAnswer +
+    counts.communityMergedPullRequests *
+      CONTRIBUTION_POINTS.communityMergedPullRequest +
+    counts.communityResolvedIssues *
+      CONTRIBUTION_POINTS.communityResolvedIssue +
+    counts.communityAcceptedAnswers *
+      CONTRIBUTION_POINTS.communityAcceptedAnswer +
     counts.publishedPlugins * CONTRIBUTION_POINTS.publishedPlugin +
     counts.publishedTemplates * CONTRIBUTION_POINTS.publishedTemplate
   );
