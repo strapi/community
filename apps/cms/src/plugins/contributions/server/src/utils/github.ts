@@ -19,6 +19,7 @@
 import {
   COMMUNITY_SCOPE,
   GITHUB_SEARCH_SCOPE,
+  pointsSearchScope,
   STRAPI_SCOPE,
 } from "../constants";
 import {
@@ -413,7 +414,8 @@ function countByOrganization<Node extends OwnedNode>(nodes: Node[]) {
 /**
  * The validated contribution counts contributor tiers are based on (see
  * `contributor-tiers.ts`), for the daily `syncContributorTiers` job — all
- * since `CONTRIBUTIONS_SINCE`, and each split into the `strapi` and the
+ * since `CONTRIBUTIONS_SINCE`, in public repositories other than
+ * `EXCLUDED_FROM_POINTS`, and each split into the `strapi` and the
  * `strapi-community` organization (which earn different points):
  *
  * - pull requests merged since then — just the totals, one search per
@@ -450,11 +452,11 @@ export async function fetchGithubContributionCounts(
     closedIssues,
     answeredDiscussions,
   ] = await Promise.all([
-    mergedPullRequestsIn(STRAPI_SCOPE.qualifier),
-    mergedPullRequestsIn(COMMUNITY_SCOPE.qualifier),
+    mergedPullRequestsIn(pointsSearchScope([STRAPI_SCOPE])),
+    mergedPullRequestsIn(pointsSearchScope([COMMUNITY_SCOPE])),
     searchAll<ClosedIssueNode>({
       token,
-      query: `author:${login} ${GITHUB_SEARCH_SCOPE} is:issue is:closed closed:>=${CONTRIBUTIONS_SINCE}`,
+      query: `author:${login} ${pointsSearchScope()} is:issue is:closed closed:>=${CONTRIBUTIONS_SINCE}`,
       type: "ISSUE",
       nodeFields: `
         ... on Issue {
@@ -477,7 +479,7 @@ export async function fetchGithubContributionCounts(
     }),
     searchAll<AnsweredDiscussionNode>({
       token,
-      query: `commenter:${login} ${GITHUB_SEARCH_SCOPE} is:answered updated:>=${CONTRIBUTIONS_SINCE}`,
+      query: `commenter:${login} ${pointsSearchScope()} is:answered updated:>=${CONTRIBUTIONS_SINCE}`,
       type: "DISCUSSION",
       nodeFields: `... on Discussion { ${owner} answerChosenAt answer { author { login } } }`,
     }),

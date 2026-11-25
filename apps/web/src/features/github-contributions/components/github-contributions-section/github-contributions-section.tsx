@@ -17,6 +17,8 @@ function searchUrl(login: string, type: GithubContributionType) {
   const query = [
     `author:${login}`,
     ...GITHUB_SCOPES.map((scope) => scope.qualifier),
+    // Matches the profile's counts, which only include public repositories.
+    "is:public",
     qualifier,
   ]
     .filter(Boolean)

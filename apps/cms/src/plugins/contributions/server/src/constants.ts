@@ -24,10 +24,34 @@ export const COMMUNITY_SCOPE = {
 
 export const GITHUB_SCOPES = [STRAPI_SCOPE, COMMUNITY_SCOPE] as const;
 
-/** The scope part of every GitHub search query. */
-export const GITHUB_SEARCH_SCOPE = GITHUB_SCOPES.map(
-  ({ qualifier }) => qualifier,
+/**
+ * The scope part of every GitHub search query. Public repositories only:
+ * the server's token may be able to see private ones, and neither the
+ * profile nor community points may reveal or reward work in them.
+ */
+export const GITHUB_SEARCH_SCOPE = `${GITHUB_SCOPES.map(({ qualifier }) => qualifier).join(" ")} is:public`;
+
+/**
+ * Public repositories of the scope organizations whose contributions don't
+ * earn community points — Strapi's own projects rather than open-source
+ * work: the strapi.io website, and the community program's own repository.
+ * They still show on the profile's GitHub Contributions tab.
+ */
+export const EXCLUDED_FROM_POINTS = ["strapi/website", "strapi/community"];
+
+const pointsExclusions = EXCLUDED_FROM_POINTS.map(
+  (repository) => `-repo:${repository}`,
 ).join(" ");
+
+/**
+ * The scope of the searches that count contributions for community points
+ * — `scopes` (default: both organizations), public repositories only,
+ * without `EXCLUDED_FROM_POINTS`.
+ */
+export const pointsSearchScope = (
+  scopes: readonly { qualifier: string }[] = GITHUB_SCOPES,
+) =>
+  `${scopes.map(({ qualifier }) => qualifier).join(" ")} is:public ${pointsExclusions}`;
 
 /**
  * Open, unassigned issues in strapi/strapi (only — not strapi-community)

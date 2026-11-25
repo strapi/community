@@ -107,6 +107,8 @@ Your contributions to strapi and strapi-community repositories, and the plugins 
 
 Work on Strapi itself — any repository of the [strapi](https://github.com/strapi) organization — earns the most. Contributions to community-maintained [strapi-community](https://github.com/strapi-community) repositories count too, for fewer points.
 
+Only public repositories count. The Strapi website ([strapi/website](https://github.com/strapi/website)) and [strapi/community](https://github.com/strapi/community) don't earn points either — they show on your profile, but they're Strapi's own projects rather than open-source contributions.
+
 ${githubPointsTable}
 
 ### On the Community Hub
