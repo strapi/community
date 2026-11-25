@@ -51,7 +51,8 @@ export type SearchIndex =
   | "members"
   | "partners"
   | "help_pages"
-  | "recipes";
+  | "recipes"
+  | "roadmap";
 
 export type OwnerType = "user" | "organization";
 export type AuthMethod =

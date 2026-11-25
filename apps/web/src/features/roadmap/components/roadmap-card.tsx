@@ -1,12 +1,16 @@
 "use client";
 
 import { ArrowUpRight, ChevronUp } from "lucide-react";
+import { track } from "@/features/analytics";
+import { roadmapItemParams } from "../lib/analytics";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
 import {
   displayStatus,
+  type Edition,
   formatDate,
   githubLinkLabel,
   githubLinks,
+  isEdition,
   roadmapStage,
   stringList,
 } from "../lib/types";
@@ -15,12 +19,12 @@ const chip =
   "inline-flex items-center rounded-md border px-2 py-0.5 text-xs leading-5";
 
 /** Edition squads get a tag on the card so users see what plan it ships in. */
-const EDITION_STYLES: Record<string, string> = {
+const EDITION_STYLES: Record<Edition, string> = {
   Core: "border-(--color-neutral200) bg-(--color-neutral100) text-(--color-neutral800)",
   Enterprise: "border-(--color-primary600) bg-(--color-primary600) text-white",
 };
 
-const EditionTag = ({ edition }: { edition: string }) => (
+const EditionTag = ({ edition }: { edition: Edition }) => (
   <span
     className={`rounded px-1.5 py-px border font-sans text-[11px] font-semibold normal-case tracking-normal ${EDITION_STYLES[edition]}`}
   >
@@ -32,13 +36,16 @@ const ExternalLink = ({
   href,
   children,
   className,
+  onClick,
 }: {
   href: string;
   children: React.ReactNode;
   className: string;
+  onClick?: () => void;
 }) => (
   <a
     href={href}
+    onClick={onClick}
     target="_blank"
     rel="noreferrer"
     className={`relative z-10 inline-flex items-center gap-1 text-sm hover:underline ${className}`}
@@ -72,12 +79,22 @@ const RoadmapCard = ({
   onOpen: (slug: string) => void;
 }) => {
   const squads = stringList(item.squads);
-  const editions = squads.filter((s) => s in EDITION_STYLES);
-  const areas = squads.filter((s) => !(s in EDITION_STYLES));
+  const editions = squads.filter(isEdition);
+  const areas = squads.filter((s) => !isEdition(s));
   const [github] = githubLinks(item.github_links);
   const extraGithub = githubLinks(item.github_links).length - 1;
   const { version, when } = scheduleChips(item, release);
   const votes = item.canny_votes ?? 0;
+  // Fires alongside the link's own navigation (it opens in a new tab).
+  const trackVote = (click_location: "card_vote" | "card_footer") => () => {
+    const { roadmap_item_id, roadmap_status } = roadmapItemParams(item);
+    track("roadmap_vote_click", {
+      roadmap_item_id,
+      roadmap_status,
+      canny_votes: votes,
+      click_location,
+    });
+  };
 
   return (
     <li className="group relative rounded-xl border border-(--color-neutral150) bg-white p-4 shadow-[0_1px_2px_rgba(33,33,52,0.04)] transition-colors focus-within:border-(--color-primary600) hover:border-(--color-primary400) sm:p-5">
@@ -85,6 +102,7 @@ const RoadmapCard = ({
         {item.canny_url && (
           <a
             href={item.canny_url}
+            onClick={trackVote("card_vote")}
             target="_blank"
             rel="noreferrer"
             aria-label={`Upvote on the feedback board (${votes} ${votes === 1 ? "vote" : "votes"})`}
@@ -165,6 +183,7 @@ const RoadmapCard = ({
           {item.canny_url && (
             <ExternalLink
               href={item.canny_url}
+              onClick={trackVote("card_footer")}
               className="text-(--color-neutral700)"
             >
               Feedback thread

@@ -11,12 +11,13 @@ import {
   useSearchBox,
   useSortBy,
 } from "react-instantsearch";
-import { replaceUrlInPage } from "@/features/analytics";
+import { replaceUrlInPage, track } from "@/features/analytics";
 import { SearchIndex } from "@/features/search/components/search-index";
 import { SEARCH_INDEXES } from "@/features/search/lib/indexes";
 import { cn } from "@/lib/utils";
+import { roadmapItemParams } from "../lib/analytics";
 import type { RoadmapItem, RoadmapRelease } from "../lib/data";
-import { ROADMAP_SORT_INDEXES, roadmapRouting } from "../lib/search";
+import { ROADMAP_SORT_INDEXES, roadmapRouting, sortKey } from "../lib/search";
 import {
   compareVersions,
   formatDate,
@@ -38,6 +39,9 @@ const SORTS = [
   { value: ROADMAP_SORT_INDEXES.release, label: "Release" },
   { value: ROADMAP_SORT_INDEXES.title, label: "A–Z" },
 ];
+
+/** Quiet time after the last keystroke before a search counts as one. */
+const SEARCH_DEBOUNCE_MS = 1000;
 
 // High enough that no release or area is ever cut off.
 const FACET_LIMIT = 100;
@@ -190,8 +194,44 @@ const Board = ({
   const { refine: clearAll } = useClearRefinements({
     includedAttributes: ["release_key", "squads", "query"],
   });
-  const { items: hits } = useHits<RoadmapItem>();
+  const { items: hits, results } = useHits<RoadmapItem>();
   const visible = useMemo(() => hits.map(withSafeLinks), [hits]);
+
+  // ── Search tracking: one `search` event per settled query, not per key ──
+  const resultsCount = useRef(0);
+  useEffect(() => {
+    resultsCount.current = results?.nbHits ?? hits.length;
+  }, [results, hits]);
+  const pendingTerm = useRef("");
+  const lastTrackedTerm = useRef("");
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelSearchTimer = useCallback(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = null;
+  }, []);
+  const flushSearch = useCallback(() => {
+    if (!searchTimer.current) return;
+    cancelSearchTimer();
+    const term = pendingTerm.current.trim();
+    if (!term || term === lastTrackedTerm.current) return;
+    lastTrackedTerm.current = term;
+    track("search", {
+      search_term: term,
+      search_index: "roadmap",
+      results_count: resultsCount.current,
+    });
+  }, [cancelSearchTimer]);
+  useEffect(() => cancelSearchTimer, [cancelSearchTimer]);
+
+  const onSearchChange = (value: string) => {
+    search(value);
+    pendingTerm.current = value;
+    // Clearing the box resets the dedupe, so searching the same term again
+    // counts as a new search.
+    if (!value.trim()) lastTrackedTerm.current = "";
+    cancelSearchTimer();
+    searchTimer.current = setTimeout(flushSearch, SEARCH_DEBOUNCE_MS);
+  };
 
   /** Write the view and open item (or none) to the address bar. */
   const sync = useCallback(
@@ -233,8 +273,10 @@ const Board = ({
   }, [visible, route.item, sync]);
 
   const changeView = (next: RoadmapView) => {
+    if (next === view) return;
     setView(next);
     sync(next, openItem);
+    track("roadmap_view_change", { roadmap_view: next });
   };
 
   const open = useCallback(
@@ -242,6 +284,7 @@ const Board = ({
       const item = visible.find((i) => i.slug === slug) ?? null;
       setOpenItem(item);
       sync(view, item);
+      if (item) track("roadmap_item_open", roadmapItemParams(item));
     },
     [visible, view, sync],
   );
@@ -268,6 +311,48 @@ const Board = ({
   }));
   const refined = (items: { value: string; isRefined: boolean }[]) =>
     items.filter((o) => o.isRefined).map((o) => o.value);
+
+  // ── Filter and sort tracking ──────────────────────────────────────────
+  const toggleFilter =
+    (filter_name: "release" | "area", facet: typeof release) =>
+    (value: string) => {
+      const wasRefined = facet.items.some(
+        (o) => o.value === value && o.isRefined,
+      );
+      facet.refine(value);
+      track("filter_apply", {
+        search_index: "roadmap",
+        filter_name,
+        filter_value: value,
+        filter_action: wasRefined ? "remove" : "add",
+      });
+    };
+  const activeFilters =
+    refined(release.items).length + refined(area.items).length;
+  const trackClear = (filters_cleared: number) => {
+    if (filters_cleared > 0) {
+      track("filter_clear", { search_index: "roadmap", filters_cleared });
+    }
+  };
+  const onClearFilters = () => {
+    clearFilters();
+    trackClear(activeFilters);
+  };
+  const onClearAll = () => {
+    clearAll();
+    // The query goes too: drop any search still waiting to be counted.
+    cancelSearchTimer();
+    lastTrackedTerm.current = "";
+    trackClear(activeFilters + (query ? 1 : 0));
+  };
+  const onSortChange = (value: string) => {
+    if (value === sort.currentRefinement) return;
+    sort.refine(value);
+    track("sort_apply", {
+      search_index: "roadmap",
+      sort_value: sortKey(value),
+    });
+  };
 
   // Upcoming first (soonest version first), then the latest three shipped.
   // Versions that only exist in Notion so far show as planned, unlinked.
@@ -317,9 +402,9 @@ const Board = ({
         areaOptions={areaOptions}
         selectedReleases={refined(release.items)}
         selectedAreas={refined(area.items)}
-        onToggleRelease={release.refine}
-        onToggleArea={area.refine}
-        onClear={clearFilters}
+        onToggleRelease={toggleFilter("release", release)}
+        onToggleArea={toggleFilter("area", area)}
+        onClear={onClearFilters}
         schedule={schedule}
       />
 
@@ -334,7 +419,8 @@ const Board = ({
             <input
               type="search"
               value={query}
-              onChange={(e) => search(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onBlur={flushSearch}
               placeholder="Search the roadmap"
               className="w-full rounded-lg border border-(--color-neutral300) bg-white py-3 pr-4 pl-11 text-sm text-(--color-neutral900) placeholder:text-(--color-neutral600) focus:border-(--color-primary600) focus:outline-none"
             />
@@ -343,7 +429,7 @@ const Board = ({
             <span className="text-(--color-neutral600)">Sort:</span>
             <select
               value={sort.currentRefinement}
-              onChange={(e) => sort.refine(e.target.value)}
+              onChange={(e) => onSortChange(e.target.value)}
               className="h-11 cursor-pointer bg-transparent pr-1 font-medium focus:outline-none"
             >
               {SORTS.map((s) => (
@@ -368,7 +454,7 @@ const Board = ({
             <p>Nothing matches.</p>
             <button
               type="button"
-              onClick={clearAll}
+              onClick={onClearAll}
               className="mt-2 font-medium text-(--color-primary600) hover:underline"
             >
               Clear search and filters

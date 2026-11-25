@@ -20,7 +20,8 @@ export const ROADMAP_SORT_INDEXES: Record<RoadmapSort, string> = {
   title: `${index}:public_title:asc`,
 };
 
-const sortKey = (sortBy?: string): RoadmapSort =>
+/** The sort key (`votes`, `newest`, …) for a sort index name. */
+export const sortKey = (sortBy?: string): RoadmapSort =>
   (Object.keys(ROADMAP_SORT_INDEXES) as RoadmapSort[]).find(
     (key) => ROADMAP_SORT_INDEXES[key] === sortBy,
   ) ?? "votes";

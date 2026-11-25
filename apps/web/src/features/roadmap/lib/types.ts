@@ -82,6 +82,15 @@ export function parseRoadmapState(params: URLSearchParams): RoadmapState {
   };
 }
 
+/**
+ * Squads that are really editions (the plan a feature ships in) rather than
+ * product areas. Core is the open-source edition.
+ */
+export const EDITIONS = ["Core", "Enterprise"] as const;
+export type Edition = (typeof EDITIONS)[number];
+export const isEdition = (squad: string): squad is Edition =>
+  (EDITIONS as readonly string[]).includes(squad);
+
 /** Filter key for items with no release. */
 export const UNSCHEDULED = "unscheduled";
 
